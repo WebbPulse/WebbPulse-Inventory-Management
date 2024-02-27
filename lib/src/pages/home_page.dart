@@ -5,9 +5,9 @@ import 'package:firebase_auth/firebase_auth.dart' // new
 import 'package:flutter/material.dart'; // new
 import 'package:provider/provider.dart'; // new
 
-import 'app_state.dart'; // new
-import 'authentication.dart'; // new
-import 'widgets.dart';
+import '../app_state.dart'; // new
+import 'login/authentication.dart'; // new
+import '../widgets.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
