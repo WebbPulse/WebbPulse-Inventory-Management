@@ -7,8 +7,8 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
-import 'app_state.dart';
-import 'home_page.dart';
+import 'src/app_state.dart';
+import 'src/pages/home_page.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();

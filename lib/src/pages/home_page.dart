@@ -6,8 +6,8 @@ import 'package:flutter/material.dart'; // new
 import 'package:provider/provider.dart'; // new
 
 import 'app_state.dart'; // new
-import 'src/authentication.dart'; // new
-import 'src/widgets.dart';
+import 'authentication.dart'; // new
+import 'widgets.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
