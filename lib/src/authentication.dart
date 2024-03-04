@@ -3,9 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:webbpulse_checkout/src/pages/profile_page.dart';
+import 'package:webbpulse_checkout/src/pages/sign_in_page.dart';
 
-import '../../widgets.dart';
+import 'widgets.dart';
 
 class AuthFunc extends StatelessWidget {
   const AuthFunc({
@@ -25,7 +26,9 @@ class AuthFunc extends StatelessWidget {
           padding: const EdgeInsets.only(left: 24, bottom: 8),
           child: StyledButton(
               onPressed: () {
-                !loggedIn ? context.push('/sign-in') : signOut();
+                !loggedIn
+                    ? Navigator.pushNamed(context, SignInPage.routeName)
+                    : signOut();
               },
               child: !loggedIn ? const Text('RSVP') : const Text('Logout')),
         ),
@@ -35,7 +38,7 @@ class AuthFunc extends StatelessWidget {
             padding: const EdgeInsets.only(left: 24, bottom: 8),
             child: StyledButton(
                 onPressed: () {
-                  context.push('/profile');
+                  Navigator.pushNamed(context, ProfilePage.routeName);
                 },
                 child: const Text('Profile')),
           ),

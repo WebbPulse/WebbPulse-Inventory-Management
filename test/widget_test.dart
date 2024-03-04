@@ -3,12 +3,16 @@
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:webbpulse_checkout/main.dart';
+import 'package:webbpulse_checkout/src/app.dart';
+import 'package:webbpulse_checkout/src/settings/settings_controller.dart';
+import 'package:webbpulse_checkout/src/settings/settings_service.dart';
 
-void main() {
+void main() async {
   testWidgets('Basic rendering', (tester) async {
+    final settingsController = SettingsController(SettingsService());
+    await settingsController.loadSettings();
     // Build our app and trigger a frame.
-    await tester.pumpWidget(const App());
+    await tester.pumpWidget(App(settingsController: settingsController));
 
     // Verify that our counter starts at 0.
     expect(find.text('Firebase Meetup'), findsOneWidget);
