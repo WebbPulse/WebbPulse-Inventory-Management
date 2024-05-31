@@ -7,6 +7,11 @@ import 'pages/sign_in_page.dart';
 import 'pages/forgot_password_page.dart';
 import 'pages/profile_page.dart';
 
+///import unfinished pages with blank scaffolds
+import 'pages/devices_page.dart';
+import 'pages/checkout_page.dart';
+import 'pages/users_page.dart';
+
 class App extends StatelessWidget {
   const App({
     super.key,
@@ -52,7 +57,18 @@ class App extends StatelessWidget {
                 return MaterialPageRoute<void>(
                   builder: (context) => const ProfilePage(),
                 );
-
+              case DevicesPage.routeName:
+                return MaterialPageRoute<void>(
+                  builder: (context) => const DevicesPage(),
+                );
+              case CheckoutPage.routeName:
+                return MaterialPageRoute<void>(
+                  builder: (context) => const CheckoutPage(),
+                );
+              case UsersPage.routeName:
+                return MaterialPageRoute<void>(
+                  builder: (context) => const UsersPage(),
+                );
               ///Default to the home page
               default:
                 return MaterialPageRoute<void>(
