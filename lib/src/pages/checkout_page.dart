@@ -11,9 +11,9 @@ class CheckoutPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // The email is now directly available to use
-     return DrawerAndScaffold(
+     return const DrawerAndScaffold(
       title: 'Checkout',
-      body: const Center(
+      body: Center(
         child: Text('Checkout Page'),
       ),
     );

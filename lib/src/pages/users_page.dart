@@ -10,9 +10,9 @@ class UsersPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DrawerAndScaffold(
+    return const DrawerAndScaffold(
       title: 'Users',
-      body: const Center(
+      body: Center(
         child: Text('Users Page'),
       ),
     );

@@ -13,7 +13,7 @@ class DrawerAndScaffold extends StatelessWidget {
   final String title;
   final Widget body;
 
-  DrawerAndScaffold({required this.title, required this.body});
+  const DrawerAndScaffold({super.key, required this.title, required this.body});
 
   @override
   Widget build(BuildContext context) {
@@ -26,48 +26,48 @@ class DrawerAndScaffold extends StatelessWidget {
           padding: EdgeInsets.zero,
           children: <Widget>[
             DrawerHeader(
-              child: Text('Menu'),
               decoration: BoxDecoration(
                 color: Theme.of(context).primaryColor,
               ),
+              child: const Text('Menu'),
             ),
             ListTile(
-              title: Text('Home'),
+              title: const Text('Home'),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, HomePage.routeName);
               },
             ),
             ListTile(
-              title: Text('Checkout'),
+              title: const Text('Checkout'),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, CheckoutPage.routeName);
               },
             ),
             ListTile(
-              title: Text('Devices'),
+              title: const Text('Devices'),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, DevicesPage.routeName);
               },
             ),
             ListTile(
-              title: Text('Users'),
+              title: const Text('Users'),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, UsersPage.routeName);
               },
             ),
             ListTile(
-              title: Text('Profile'),
+              title: const Text('Profile'),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, ProfilePage.routeName);
               },
             ),
             ListTile(
-              title: Text('Settings'),
+              title: const Text('Settings'),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, SettingsPage.routeName);
