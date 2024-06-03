@@ -1,13 +1,14 @@
-import 'package:firebase_auth/firebase_auth.dart' // new
+import 'package:firebase_auth/firebase_auth.dart'
     hide
         EmailAuthProvider,
-        PhoneAuthProvider; // new
-import 'package:flutter/material.dart'; // new
-import 'package:provider/provider.dart'; // new
+        PhoneAuthProvider; 
+import 'package:flutter/material.dart'; 
+import 'package:provider/provider.dart';
 
-import '../app_state.dart'; // new
-import '../authentication.dart'; // new
+import '../app_state.dart'; 
+import '../authentication.dart'; 
 import '../widgets.dart';
+import '../drawerandscaffold.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -16,13 +17,11 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Firebase Meetup'),
-      ),
+     return DrawerAndScaffold(
+      title: 'Home',
       body: ListView(
         children: <Widget>[
-          Image.asset('assets/codelab.png'),
+          Image.asset('assets/saber.gif'),
           const SizedBox(height: 8),
           const IconAndDetail(Icons.calendar_today, 'October 30'),
           const IconAndDetail(Icons.location_city, 'San Francisco'),

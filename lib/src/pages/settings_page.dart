@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../settings/settings_controller.dart';
-
+import '../drawerandscaffold.dart';
 /// Displays the various settings that can be customized by the user.
 ///
 /// When a user changes a setting, the SettingsController is updated and
@@ -15,10 +15,8 @@ class SettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Settings'),
-      ),
+     return DrawerAndScaffold(
+      title: 'Settings',
       body: Padding(
         padding: const EdgeInsets.all(16),
         // Glue the SettingsController to the theme selection DropdownButton.

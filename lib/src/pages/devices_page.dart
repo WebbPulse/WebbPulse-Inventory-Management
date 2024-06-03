@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../drawerandscaffold.dart';
 
 class DevicesPage extends StatelessWidget {
   const DevicesPage({super.key});
@@ -10,10 +11,8 @@ class DevicesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // The email is now directly available to use
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Devices'),
-      ),
+     return DrawerAndScaffold(
+      title: 'Devices',
       body: const Center(
         child: Text('Devices Page'),
       ),

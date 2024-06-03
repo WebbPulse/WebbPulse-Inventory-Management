@@ -27,7 +27,7 @@ class App extends StatelessWidget {
       builder: (BuildContext context, Widget? child) {
         return MaterialApp(
           restorationScopeId: 'app',
-          title: 'Firebase Meetup',
+          title: 'WebbPulse Checkout',
           theme: ThemeData(),
           darkTheme: ThemeData.dark(),
           themeMode: settingsController.themeMode,
