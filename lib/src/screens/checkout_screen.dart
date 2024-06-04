@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../drawerandscaffold.dart';
+import '../makemylifefaster/scaffoldwithdrawer.dart';
 
-class CheckoutPage extends StatelessWidget {
-  const CheckoutPage({super.key});
+class CheckoutScreen extends StatelessWidget {
+  const CheckoutScreen({super.key});
 
 
   static const routeName = '/checkout';
@@ -11,7 +11,7 @@ class CheckoutPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // The email is now directly available to use
-     return const DrawerAndScaffold(
+     return const ScaffoldWithDrawer(
       title: 'Checkout',
       body: Center(
         child: Text('Checkout Page'),

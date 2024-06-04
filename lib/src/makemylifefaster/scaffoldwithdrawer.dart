@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 
-import 'pages/home_page.dart';
-import 'pages/profile_page.dart';
-import 'pages/settings_page.dart';
-import 'pages/checkout_page.dart';
-import 'pages/devices_page.dart';
-import 'pages/users_page.dart';
+import '../screens/home_screen.dart';
+import '../screens/profile_screen.dart';
+import '../screens/settings_screen.dart';
+import '../screens/checkout_screen.dart';
+import '../screens/devices_screen.dart';
+import '../screens/users_screen.dart';
 
 
 
-class DrawerAndScaffold extends StatelessWidget {
+class ScaffoldWithDrawer extends StatelessWidget {
   final String title;
   final Widget body;
 
-  const DrawerAndScaffold({super.key, required this.title, required this.body});
+  const ScaffoldWithDrawer({super.key, required this.title, required this.body});
 
   @override
   Widget build(BuildContext context) {
@@ -35,28 +35,35 @@ class DrawerAndScaffold extends StatelessWidget {
               title: const Text('Home'),
               onTap: () {
                 Navigator.pop(context);
-                Navigator.pushNamed(context, HomePage.routeName);
+                Navigator.pushNamed(context, HomeScreen.routeName);
               },
             ),
             ListTile(
               title: const Text('Checkout'),
               onTap: () {
                 Navigator.pop(context);
-                Navigator.pushNamed(context, CheckoutPage.routeName);
+                Navigator.pushNamed(context, CheckoutScreen.routeName);
               },
             ),
             ListTile(
               title: const Text('Devices'),
               onTap: () {
                 Navigator.pop(context);
-                Navigator.pushNamed(context, DevicesPage.routeName);
+                Navigator.pushNamed(context, DevicesScreen.routeName);
               },
             ),
             ListTile(
               title: const Text('Users'),
               onTap: () {
                 Navigator.pop(context);
-                Navigator.pushNamed(context, UsersPage.routeName);
+                Navigator.pushNamed(context, UsersScreen.routeName);
+              },
+            ),
+            ListTile(
+              title: const Text('Settings'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, SettingsScreen.routeName);
               },
             ),
             ListTile(
@@ -64,13 +71,6 @@ class DrawerAndScaffold extends StatelessWidget {
               onTap: () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, ProfilePage.routeName);
-              },
-            ),
-            ListTile(
-              title: const Text('Settings'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.pushNamed(context, SettingsPage.routeName);
               },
             ),
           ],

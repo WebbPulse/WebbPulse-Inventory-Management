@@ -1,83 +1,111 @@
 import 'package:flutter/material.dart';
-import 'pages/home_page.dart';
-import 'settings/settings_controller.dart';
+import 'package:provider/provider.dart';
 
-import 'pages/settings_page.dart';
-import 'pages/sign_in_page.dart';
-import 'pages/forgot_password_page.dart';
-import 'pages/profile_page.dart';
+import 'providers/authentication_state.dart';
+import 'providers/settings_controller.dart';
 
-///import unfinished pages with blank scaffolds
-import 'pages/devices_page.dart';
-import 'pages/checkout_page.dart';
-import 'pages/users_page.dart';
+import 'screens/home_screen.dart';
+import 'screens/settings_screen.dart';
+import 'screens/sign_in/sign_in_screen.dart';
+import 'screens/sign_in/forgot_password_screen.dart';
+import 'screens/profile_screen.dart';
+import 'screens/devices_screen.dart';
+import 'screens/checkout_screen.dart';
+import 'screens/users_screen.dart';
+import 'screens/sign_in/register_screen.dart';
+import 'screens/sign_in/landing_screen.dart';
 
 class App extends StatelessWidget {
   const App({
-    super.key,
+    Key? key,
     required this.settingsController,
-  });
+  }) : super(key: key);
 
   final SettingsController settingsController;
 
   @override
   Widget build(BuildContext context) {
-    return ListenableBuilder(
-      listenable: settingsController,
-      builder: (BuildContext context, Widget? child) {
-        return MaterialApp(
-          restorationScopeId: 'app',
-          title: 'WebbPulse Checkout',
-          theme: ThemeData(),
-          darkTheme: ThemeData.dark(),
-          themeMode: settingsController.themeMode,
-          // Define a function to handle named routes in order to support
-          // Flutter web url navigation and deep linking.
-          onGenerateRoute: (RouteSettings routeSettings) {
-            switch (routeSettings.name) {
-              case HomePage.routeName:
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider<AuthenticationState>(
+          create: (_) => AuthenticationState(), 
+        ),
+        ChangeNotifierProvider<SettingsController>.value(
+          value: settingsController,
+        ),
+      ],
+      child: Consumer2<AuthenticationState, SettingsController>(
+        builder: (context, appState, settingsController, child) {
+          return MaterialApp(
+            restorationScopeId: 'app',
+            title: 'WebbPulse Checkout',
+            theme: ThemeData(),
+            darkTheme: ThemeData.dark(),
+            themeMode: settingsController.themeMode,
+            // Define a function to handle named routes in order to support
+            // Flutter web url navigation and deep linking.
+            onGenerateRoute: (RouteSettings routeSettings) {
+              // Check if the user is signed in
+              if (!appState.loggedIn &&
+                routeSettings.name != LandingScreen.routeName &&
+                routeSettings.name != SignInScreen.routeName &&
+                routeSettings.name != ForgotPasswordPage.routeName &&
+                routeSettings.name != RegisterScreen.routeName) {
+                // Redirect to SignInPage if not authenticated
                 return MaterialPageRoute<void>(
-                  builder: (context) => const HomePage(),
+                  builder: (context) => LandingScreen(),
                 );
-              case SettingsPage.routeName:
-                return MaterialPageRoute<void>(
-                  builder: (context) =>
-                      SettingsPage(controller: settingsController),
-                );
-              case SignInPage.routeName:
-                return MaterialPageRoute<void>(
-                  builder: (context) => const SignInPage(),
-                );
-              case ForgotPasswordPage.routeName:
-                final String? email = routeSettings.arguments as String?;
-                return MaterialPageRoute<void>(
-                  builder: (context) => ForgotPasswordPage(email: email ?? ''),
-                );
-              case ProfilePage.routeName:
-                return MaterialPageRoute<void>(
-                  builder: (context) => const ProfilePage(),
-                );
-              case DevicesPage.routeName:
-                return MaterialPageRoute<void>(
-                  builder: (context) => const DevicesPage(),
-                );
-              case CheckoutPage.routeName:
-                return MaterialPageRoute<void>(
-                  builder: (context) => const CheckoutPage(),
-                );
-              case UsersPage.routeName:
-                return MaterialPageRoute<void>(
-                  builder: (context) => const UsersPage(),
-                );
-              ///Default to the home page
-              default:
-                return MaterialPageRoute<void>(
-                  builder: (context) => const HomePage(),
-                );
-            }
-          },
-        );
-      },
+              }
+
+              // Handle other routes based on routeSettings.name
+              switch (routeSettings.name) {
+                case HomeScreen.routeName:
+                  return MaterialPageRoute<void>(
+                    builder: (context) => const HomeScreen(),
+                  );
+                case SettingsScreen.routeName:
+                  return MaterialPageRoute<void>(
+                    builder: (context) => SettingsScreen(controller: settingsController),
+                  );
+                case SignInScreen.routeName:
+                  return MaterialPageRoute<void>(
+                    builder: (context) => SignInScreen(),
+                  );
+                case ForgotPasswordPage.routeName:
+                  final String? email = routeSettings.arguments as String?;
+                  return MaterialPageRoute<void>(
+                    builder: (context) => ForgotPasswordPage(email: email ?? ''),
+                  );
+                case ProfilePage.routeName:
+                  return MaterialPageRoute<void>(
+                    builder: (context) => const ProfilePage(),
+                  );
+                case DevicesScreen.routeName:
+                  return MaterialPageRoute<void>(
+                    builder: (context) => const DevicesScreen(),
+                  );
+                case CheckoutScreen.routeName:
+                  return MaterialPageRoute<void>(
+                    builder: (context) => const CheckoutScreen(),
+                  );
+                case UsersScreen.routeName:
+                  return MaterialPageRoute<void>(
+                    builder: (context) => const UsersScreen(),
+                  );
+                case RegisterScreen.routeName:
+                  return MaterialPageRoute<void>(
+                    builder: (context) => RegisterScreen(),
+                  );
+                default:
+                  // Default to Home Page if route not found
+                  return MaterialPageRoute<void>(
+                    builder: (context) => const HomeScreen(),
+                  );
+              }
+            },
+          );
+        },
+      ),
     );
   }
 }

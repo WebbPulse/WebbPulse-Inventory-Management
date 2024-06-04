@@ -4,8 +4,8 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:webbpulse_checkout/src/app.dart';
-import 'package:webbpulse_checkout/src/settings/settings_controller.dart';
-import 'package:webbpulse_checkout/src/settings/settings_service.dart';
+import 'package:webbpulse_checkout/src/providers/settings_controller.dart';
+import 'package:webbpulse_checkout/src/services/settings_service.dart';
 
 void main() async {
   testWidgets('Basic rendering', (tester) async {

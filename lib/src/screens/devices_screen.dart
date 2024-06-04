@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../drawerandscaffold.dart';
+import '../makemylifefaster/scaffoldwithdrawer.dart';
 
-class DevicesPage extends StatelessWidget {
-  const DevicesPage({super.key});
+class DevicesScreen extends StatelessWidget {
+  const DevicesScreen({super.key});
 
 
   static const routeName = '/devices';
@@ -11,7 +11,7 @@ class DevicesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // The email is now directly available to use
-     return const DrawerAndScaffold(
+     return const ScaffoldWithDrawer(
       title: 'Devices',
       body: Center(
         child: Text('Devices Page'),

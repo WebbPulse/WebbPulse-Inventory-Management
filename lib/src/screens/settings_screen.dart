@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
-import '../settings/settings_controller.dart';
-import '../drawerandscaffold.dart';
+import '../providers/settings_controller.dart';
+import '../makemylifefaster/scaffoldwithdrawer.dart';
 /// Displays the various settings that can be customized by the user.
 ///
 /// When a user changes a setting, the SettingsController is updated and
 /// Widgets that listen to the SettingsController are rebuilt.
-class SettingsPage extends StatelessWidget {
-  const SettingsPage({super.key, required this.controller});
+class SettingsScreen extends StatelessWidget {
+  const SettingsScreen({super.key, required this.controller});
 
   static const routeName = '/settings';
 
@@ -15,7 +15,7 @@ class SettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-     return DrawerAndScaffold(
+     return ScaffoldWithDrawer(
       title: 'Settings',
       body: Padding(
         padding: const EdgeInsets.all(16),

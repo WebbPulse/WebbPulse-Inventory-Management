@@ -3,10 +3,10 @@
 // found in the LICENSE file.
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'src/app_state.dart';
+import 'src/providers/authentication_state.dart';
 import 'src/app.dart';
-import 'src/settings/settings_controller.dart';
-import 'src/settings/settings_service.dart';
+import 'src/providers/settings_controller.dart';
+import 'src/services/settings_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,7 +14,7 @@ void main() async {
   await settingsController.loadSettings();
 
   runApp(ChangeNotifierProvider(
-    create: (context) => ApplicationState(),
+    create: (context) => AuthenticationState(),
     builder: ((context, child) => App(settingsController: settingsController)),
   ));
 }
