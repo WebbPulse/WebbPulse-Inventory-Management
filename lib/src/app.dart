@@ -6,14 +6,14 @@ import 'providers/settings_controller.dart';
 
 import 'screens/home_screen.dart';
 import 'screens/settings_screen.dart';
-import 'screens/sign_in/sign_in_screen.dart';
+import 'screens/sign_in/signin_screen_temp.dart';
 import 'screens/sign_in/forgot_password_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/devices_screen.dart';
 import 'screens/checkout_screen.dart';
 import 'screens/users_screen.dart';
-import 'screens/sign_in/register_screen.dart';
 import 'screens/sign_in/landing_screen.dart';
+import 'screens/sign_in/register_screen.dart';
 
 class App extends StatelessWidget {
   const App({
@@ -48,7 +48,7 @@ class App extends StatelessWidget {
               // Check if the user is signed in
               if (!appState.loggedIn &&
                 routeSettings.name != LandingScreen.routeName &&
-                routeSettings.name != SignInScreen.routeName &&
+                routeSettings.name != SignInPage.routeName &&
                 routeSettings.name != ForgotPasswordPage.routeName &&
                 routeSettings.name != RegisterScreen.routeName) {
                 // Redirect to SignInPage if not authenticated
@@ -67,9 +67,9 @@ class App extends StatelessWidget {
                   return MaterialPageRoute<void>(
                     builder: (context) => SettingsScreen(controller: settingsController),
                   );
-                case SignInScreen.routeName:
+                case SignInPage.routeName:
                   return MaterialPageRoute<void>(
-                    builder: (context) => SignInScreen(),
+                    builder: (context) => SignInPage(),
                   );
                 case ForgotPasswordPage.routeName:
                   final String? email = routeSettings.arguments as String?;
@@ -94,7 +94,7 @@ class App extends StatelessWidget {
                   );
                 case RegisterScreen.routeName:
                   return MaterialPageRoute<void>(
-                    builder: (context) => RegisterScreen(),
+                    builder: (context) => const RegisterScreen(),
                   );
                 default:
                   // Default to Home Page if route not found

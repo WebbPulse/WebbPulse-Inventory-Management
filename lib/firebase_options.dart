@@ -25,15 +25,9 @@ class DefaultFirebaseOptions {
       case TargetPlatform.iOS:
         return ios;
       case TargetPlatform.macOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for macos - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return macos;
       case TargetPlatform.windows:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for windows - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return windows;
       case TargetPlatform.linux:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for linux - '
@@ -74,4 +68,26 @@ class DefaultFirebaseOptions {
     iosClientId: '1006892799648-0h2f27fk2eod4qkav0ri61184h56fldi.apps.googleusercontent.com',
     iosBundleId: 'com.example.webbpulseCheckout',
   );
+
+  static const FirebaseOptions macos = FirebaseOptions(
+    apiKey: 'AIzaSyCTRRCFfStJAs1uXf9vofVcn7lYphrvOdo',
+    appId: '1:1006892799648:ios:1618865b1a1e4ba3505bc5',
+    messagingSenderId: '1006892799648',
+    projectId: 'webbpulse-checkout',
+    storageBucket: 'webbpulse-checkout.appspot.com',
+    androidClientId: '1006892799648-c7tvdgurqn8j562sl05b87t0nicgg9db.apps.googleusercontent.com',
+    iosClientId: '1006892799648-0h2f27fk2eod4qkav0ri61184h56fldi.apps.googleusercontent.com',
+    iosBundleId: 'com.example.webbpulseCheckout',
+  );
+
+  static const FirebaseOptions windows = FirebaseOptions(
+    apiKey: 'AIzaSyAwixRxUPRS-4wf6HHn86jEVlJXY19ff-Q',
+    appId: '1:1006892799648:web:032c0623afc66f2b505bc5',
+    messagingSenderId: '1006892799648',
+    projectId: 'webbpulse-checkout',
+    authDomain: 'webbpulse-checkout.firebaseapp.com',
+    storageBucket: 'webbpulse-checkout.appspot.com',
+    measurementId: 'G-PSRTYEZ8X8',
+  );
+
 }
