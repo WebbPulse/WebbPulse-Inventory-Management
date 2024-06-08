@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../services/firestore_service.dart';
+import '../../providers/authentication_state.dart';
 
 class RegisterScreen extends StatelessWidget {
   const RegisterScreen({super.key});
@@ -10,9 +12,17 @@ class RegisterScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Register'),
       ),
-      body: const Center(
-        child: Text('Register'),
-      ),
+      body: ElevatedButton(
+          onPressed: () {
+            if (authState.loggedIn) {
+              FirestoreService.createOrganization('My Organization', authState.uid!);
+            }   
+            else {
+            // Handle not logged in state
+            }
+          },
+          child: const Text('Register'),
+        )
     );
   }
 }
