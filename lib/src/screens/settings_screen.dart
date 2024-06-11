@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../providers/settings_controller.dart';
+import '../services/providers/settings_controller.dart';
 import '../makemylifefaster/scaffoldwithdrawer.dart';
 /// Displays the various settings that can be customized by the user.
 ///

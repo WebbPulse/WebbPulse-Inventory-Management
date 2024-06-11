@@ -1,8 +1,11 @@
+import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:webbpulse_checkout/src/screens/sign_in/register_screen.dart';
 
-import 'providers/authentication_state.dart';
-import 'providers/settings_controller.dart';
+import 'services/providers/authentication_service.dart';
+import 'services/providers/settings_controller.dart';
+import 'services/providers/firestore_service.dart';
 
 import 'screens/home_screen.dart';
 import 'screens/settings_screen.dart';
@@ -13,7 +16,8 @@ import 'screens/devices_screen.dart';
 import 'screens/checkout_screen.dart';
 import 'screens/users_screen.dart';
 import 'screens/sign_in/landing_screen.dart';
-import 'screens/sign_in/register_screen.dart';
+import 'screens/sign_in/create_organization_screen.dart';
+
 
 class App extends StatelessWidget {
   const App({
@@ -30,12 +34,21 @@ class App extends StatelessWidget {
         ChangeNotifierProvider<AuthenticationState>(
           create: (_) => AuthenticationState(), 
         ),
+        ChangeNotifierProxyProvider<AuthenticationState, FirestoreService>(
+          create: (_) => FirestoreService(),
+          update: (_, authState, firestoreService)  {
+            if (authState.authUid != firestoreService?.uid) {
+              firestoreService?.handleAuthStateChange(authState.authUid);
+            }
+            return firestoreService!;
+          },
+        ),
         ChangeNotifierProvider<SettingsController>.value(
           value: settingsController,
         ),
       ],
-      child: Consumer2<AuthenticationState, SettingsController>(
-        builder: (context, appState, settingsController, child) {
+      child: Consumer3<AuthenticationState, SettingsController, FirestoreService>(
+        builder: (context, authState, settingsController, firestoreService, child) {
           return MaterialApp(
             restorationScopeId: 'app',
             title: 'WebbPulse Checkout',
@@ -46,18 +59,25 @@ class App extends StatelessWidget {
             // Flutter web url navigation and deep linking.
             onGenerateRoute: (RouteSettings routeSettings) {
               // Check if the user is signed in
-              if (!appState.loggedIn &&
+              if (!authState.loggedIn &&
                 routeSettings.name != LandingScreen.routeName &&
                 routeSettings.name != SignInPage.routeName &&
                 routeSettings.name != ForgotPasswordPage.routeName &&
-                routeSettings.name != RegisterScreen.routeName) {
-                // Redirect to SignInPage if not authenticated
+                routeSettings.name != CreateOrganizationScreen.routeName &&
+                routeSettings.name != RegisterPage.routeName) {
+                // Redirect to LandingPage if not authenticated
                 return MaterialPageRoute<void>(
                   builder: (context) => LandingScreen(),
                 );
               }
 
-              // Handle other routes based on routeSettings.name
+              if (authState.loggedIn && firestoreService.organizationUids.isEmpty && routeSettings.name != CreateOrganizationScreen.routeName) {
+                // Redirect to CreateOrganizationScreen if user has no organizations
+                return MaterialPageRoute<void>(
+                  builder: (context) => ProfileScreen(),
+                );
+              }
+
               switch (routeSettings.name) {
                 case HomeScreen.routeName:
                   return MaterialPageRoute<void>(
@@ -92,9 +112,17 @@ class App extends StatelessWidget {
                   return MaterialPageRoute<void>(
                     builder: (context) => const UsersScreen(),
                   );
-                case RegisterScreen.routeName:
+                case LandingScreen.routeName:
                   return MaterialPageRoute<void>(
-                    builder: (context) => const RegisterScreen(),
+                    builder: (context) => LandingScreen(),
+                  );
+                case RegisterPage.routeName:
+                  return MaterialPageRoute<void>(
+                    builder: (context) => RegisterPage(),
+                  );
+                case CreateOrganizationScreen.routeName:
+                  return MaterialPageRoute<void>(
+                    builder: (context) => CreateOrganizationScreen(),
                   );
                 default:
                   // Default to Home Page if route not found

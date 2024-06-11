@@ -1,28 +1,16 @@
 import 'package:flutter/material.dart';
-import '../../services/firestore_service.dart';
-import '../../providers/authentication_state.dart';
+import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 
-class RegisterScreen extends StatelessWidget {
-  const RegisterScreen({super.key});
+class RegisterPage extends StatelessWidget {
+  const RegisterPage({super.key});
+
   static const routeName = '/register';
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Register'),
-      ),
-      body: ElevatedButton(
-          onPressed: () {
-            if (authState.loggedIn) {
-              FirestoreService.createOrganization('My Organization', authState.uid!);
-            }   
-            else {
-            // Handle not logged in state
-            }
-          },
-          child: const Text('Register'),
-        )
+    // The email is now directly available to use
+    return RegisterScreen(
+      headerMaxExtent: 200,
     );
   }
 }

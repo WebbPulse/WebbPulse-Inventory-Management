@@ -42,17 +42,17 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions web = FirebaseOptions(
     apiKey: 'AIzaSyAwixRxUPRS-4wf6HHn86jEVlJXY19ff-Q',
-    appId: '1:1006892799648:web:fbc7a4eee88d8b24505bc5',
+    appId: '1:1006892799648:web:3d9a179258d07ae9505bc5',
     messagingSenderId: '1006892799648',
     projectId: 'webbpulse-checkout',
     authDomain: 'webbpulse-checkout.firebaseapp.com',
     storageBucket: 'webbpulse-checkout.appspot.com',
-    measurementId: 'G-FE06S4S2WX',
+    measurementId: 'G-YZY3Y3T1KK',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyBa1MyglYmLW-1aH56gf0ebUGT9CiWOqk0',
-    appId: '1:1006892799648:android:c20fd277d6568ec1505bc5',
+    appId: '1:1006892799648:android:26e28d24321f483a505bc5',
     messagingSenderId: '1006892799648',
     projectId: 'webbpulse-checkout',
     storageBucket: 'webbpulse-checkout.appspot.com',
@@ -60,7 +60,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyCTRRCFfStJAs1uXf9vofVcn7lYphrvOdo',
-    appId: '1:1006892799648:ios:1618865b1a1e4ba3505bc5',
+    appId: '1:1006892799648:ios:7b160d496eb919f7505bc5',
     messagingSenderId: '1006892799648',
     projectId: 'webbpulse-checkout',
     storageBucket: 'webbpulse-checkout.appspot.com',

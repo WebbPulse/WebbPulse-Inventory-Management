@@ -4,7 +4,7 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:webbpulse_checkout/src/app.dart';
-import 'package:webbpulse_checkout/src/providers/settings_controller.dart';
+import 'package:webbpulse_checkout/src/services/providers/settings_controller.dart';
 import 'package:webbpulse_checkout/src/services/settings_service.dart';
 
 void main() async {
