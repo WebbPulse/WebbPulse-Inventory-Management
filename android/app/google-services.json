@@ -1,43 +1,26 @@
 {
   "project_info": {
-    "project_number": "1006892799648",
-    "project_id": "webbpulse-checkout",
-    "storage_bucket": "webbpulse-checkout.appspot.com"
+    "project_number": "511369160204",
+    "project_id": "webbcheck",
+    "storage_bucket": "webbcheck.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1006892799648:android:26e28d24321f483a505bc5",
+        "mobilesdk_app_id": "1:511369160204:android:b5650e3c5edf9892a73029",
         "android_client_info": {
           "package_name": "com.example.webbpulse_checkout"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "1006892799648-76jqeak8oacf1lbn285qa0n4ucp9p5rb.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
+      "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBa1MyglYmLW-1aH56gf0ebUGT9CiWOqk0"
+          "current_key": "AIzaSyDV8sHYVYw2LIVqyov8d9HGCL7Qw_7FtT8"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "1006892799648-76jqeak8oacf1lbn285qa0n4ucp9p5rb.apps.googleusercontent.com",
-              "client_type": 3
-            },
-            {
-              "client_id": "1006892799648-0h2f27fk2eod4qkav0ri61184h56fldi.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "com.example.webbpulseCheckout"
-              }
-            }
-          ]
+          "other_platform_oauth_client": []
         }
       }
     }
