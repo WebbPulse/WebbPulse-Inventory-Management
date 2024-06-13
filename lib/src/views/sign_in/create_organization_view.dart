@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:webbcheck/src/providers/firestoreProvider.dart';
+import '../../providers/firestoreProvider.dart';
 
 class CreateOrganizationScreen extends StatelessWidget {
   CreateOrganizationScreen({super.key, required this.uid});
