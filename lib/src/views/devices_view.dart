@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../makemylifefaster/scaffoldwithdrawer.dart';
+import '../widgets.dart';
 
 class DevicesScreen extends StatelessWidget {
   const DevicesScreen({super.key});

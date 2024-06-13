@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../makemylifefaster/scaffoldwithdrawer.dart';
+import '../widgets.dart';
 
 class CheckoutScreen extends StatelessWidget {
   const CheckoutScreen({super.key});

@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:511369160204:android:b5650e3c5edf9892a73029",
+        "mobilesdk_app_id": "1:511369160204:android:bd59fb4b7d64934ea73029",
         "android_client_info": {
-          "package_name": "com.example.webbpulse_checkout"
+          "package_name": "com.webbpulse.checkout"
         }
       },
       "oauth_client": [],

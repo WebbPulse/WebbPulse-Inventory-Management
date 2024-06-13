@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
-import '../makemylifefaster/scaffoldwithdrawer.dart';
+import '../widgets.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});

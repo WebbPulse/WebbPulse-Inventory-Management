@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
-import 'package:webbpulse_checkout/src/screens/home_screen.dart';
+import '../home_view.dart';
 
-class SignInPage extends StatelessWidget {
-  const SignInPage({super.key});
+class SignInView extends StatelessWidget {
+  const SignInView({super.key});
 
   static const routeName = '/signin';
 

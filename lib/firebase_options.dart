@@ -48,7 +48,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions web = FirebaseOptions(
     apiKey: 'AIzaSyArykTTCGzvOaRDOmd2LWLjSYSkSfDyvCU',
-    appId: '1:511369160204:web:939440552e8a52eca73029',
+    appId: '1:511369160204:web:342f3109e8032f1ba73029',
     messagingSenderId: '511369160204',
     projectId: 'webbcheck',
     authDomain: 'webbcheck.firebaseapp.com',
@@ -57,7 +57,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyDV8sHYVYw2LIVqyov8d9HGCL7Qw_7FtT8',
-    appId: '1:511369160204:android:b5650e3c5edf9892a73029',
+    appId: '1:511369160204:android:bd59fb4b7d64934ea73029',
     messagingSenderId: '511369160204',
     projectId: 'webbcheck',
     storageBucket: 'webbcheck.appspot.com',
@@ -65,7 +65,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyDZooaskVDJslRmi0cvqzRWfEWqzuPSZsI',
-    appId: '1:511369160204:ios:0e16363d1ef050e8a73029',
+    appId: '1:511369160204:ios:b21146c5ce992a42a73029',
     messagingSenderId: '511369160204',
     projectId: 'webbcheck',
     storageBucket: 'webbcheck.appspot.com',
