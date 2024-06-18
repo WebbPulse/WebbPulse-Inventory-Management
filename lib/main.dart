@@ -10,9 +10,9 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final settingsProvider = SettingsProvider(SettingsService());
   await settingsProvider.loadSettings();
-  await Firebase.initializeApp(
-        options: DefaultFirebaseOptions.currentPlatform);
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  runApp(App(settingsProvider: settingsProvider,));
+  runApp(App(
+    settingsProvider: settingsProvider,
+  ));
 }
-

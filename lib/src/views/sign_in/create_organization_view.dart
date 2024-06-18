@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../../providers/firestoreProvider.dart';
+
+import '../home_view.dart';
+import '../../services/firestoreService.dart';
 
 class CreateOrganizationScreen extends StatelessWidget {
-  CreateOrganizationScreen({super.key, required this.uid});
+  CreateOrganizationScreen(
+      {super.key, required this.firestoreService, required this.uid});
 
   static const routeName = '/create-organization';
 
   final TextEditingController _controller = TextEditingController();
-  final String? uid; 
+  final FirestoreService firestoreService;
+  final String? uid;
 
   @override
   Widget build(BuildContext context) {
@@ -33,11 +36,13 @@ class CreateOrganizationScreen extends StatelessWidget {
 
                 if (organizationCreationName.isNotEmpty) {
                   try {
-                    // Get the instance of FirestoreService
-                    await context.read<FirestoreProvider>().createOrganizationInFirestore(organizationCreationName, uid);
+                    await firestoreService.createOrganizationInFirestore(
+                        organizationCreationName, uid);
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                       content: Text('Organization created successfully!'),
                     ));
+                    Navigator.pop(context);
+                    Navigator.pushNamed(context, HomeScreen.routeName);
                   } catch (e) {
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                       content: Text('Failed to create organization: $e'),
