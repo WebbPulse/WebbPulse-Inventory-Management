@@ -1,35 +1,62 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 
-class FirestoreService {
+class FirestoreService extends ChangeNotifier {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
-  FirebaseFirestore get db => _db;
+  List<String> organizationUids = [];
+  bool _isLoading = false;
+  bool get isLoading => _isLoading;
+  Object? _error;
+  Object? get error => _error;
 
-  Stream<List<String>> userOrganizationsStream(String uid) {
-    return _db.collection('users').doc(uid).snapshots().map((snapshot) {
-      if (snapshot.exists) {
-        final data = snapshot.data();
-        if (data != null) {
-          final organizations =
-              List<String>.from(data['organizationUids'] ?? []);
-          print('User organizations fetched: $organizations');
-          return organizations;
-        }
-      }
-      print('User document not found.');
-      return [];
-    });
+  Future<void> fetchOrganizations(String? uid) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    if (uid == null) {
+      _isLoading = false;
+      organizationUids = [];
+      notifyListeners();
+      return;
+    }
+
+    try {
+      organizationUids = await getUserOrganizations(uid);
+    } catch (e) {
+      print('Error fetching organizations: $e');
+      _error = e;
+      organizationUids = [];
+    }
+
+    _isLoading = false;
+    notifyListeners();
   }
 
-  Future<bool> checkUserExistsInFirestore(String? uid) async {
-    if (uid == null) {
-      throw ('uid is null');
-    }
+  Future<List<String>> getUserOrganizations(String? uid) async {
     try {
       final userDoc = await _db.collection('users').doc(uid).get();
       if (!userDoc.exists) {
-        return false;
+        return [];
       }
-      return true;
+
+      final data = userDoc.data() as Map<String, dynamic>?;
+      if (data == null || !data.containsKey('organizationUids')) {
+        return [];
+      }
+
+      final organizationUids = data['organizationUids'] as List<dynamic>?;
+      return organizationUids?.map((e) => e.toString()).toList() ?? [];
+    } catch (e) {
+      print('Error fetching user organizations: $e');
+      throw e;
+    }
+  }
+
+  Future<bool> checkUserExistsInFirestore(String? uid) async {
+    try {
+      final userDoc = await _db.collection('users').doc(uid).get();
+      return userDoc.exists;
     } catch (e) {
       print('Error checking user exists: $e');
       return false;
@@ -37,9 +64,6 @@ class FirestoreService {
   }
 
   Future<void> createUserInFirestore(String? uid, String? email) async {
-    if (uid == null) {
-      throw ('uid is null');
-    }
     try {
       await _db.collection('users').doc(uid).set({
         'email': email,
@@ -52,22 +76,15 @@ class FirestoreService {
   }
 
   Future<void> createOrganizationInFirestore(
-      String organizationCreationName, String? uid) async {
-    if (uid == null) {
-      throw ('uid is null');
-    }
+      String? organizationCreationName, String? uid) async {
     try {
-      // Add the organization and capture the document reference
       DocumentReference organizationRef =
           await _db.collection('organizations').add({
         'name': organizationCreationName,
         'members': [uid],
       });
 
-      // Get the organization ID
       String organizationId = organizationRef.id;
-
-      // Update the user's document with the new organization ID
       await updateUserOrganizationsInFirestore(uid, organizationId);
     } catch (e) {
       print('Error creating organization: $e');
@@ -76,19 +93,12 @@ class FirestoreService {
 
   Future<void> updateUserOrganizationsInFirestore(
       String? uid, String? organizationId) async {
-    if (uid == null) {
-      throw ('uid is null');
-    }
-    if (organizationId == null) {
-      throw ('organizationId is null');
-    }
     try {
-      // Update the user's document with the new organization ID using arrayUnion
       await _db.collection('users').doc(uid).update({
         'organizationUids': FieldValue.arrayUnion([organizationId]),
       });
     } catch (e) {
-      print('Error updating user organizations in Firestore: $e');
+      print('Error updating user organizations: $e');
     }
   }
 }

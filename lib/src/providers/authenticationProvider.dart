@@ -18,9 +18,6 @@ class AuthenticationProvider extends ChangeNotifier {
   String? _email;
   String? get email => _email;
 
-  final _uidController = StreamController<String?>.broadcast();
-  Stream<String?> get uidStream => _uidController.stream;
-
   Future<void> init() async {
     FirebaseUIAuth.configureProviders([
       EmailAuthProvider(),
@@ -37,14 +34,7 @@ class AuthenticationProvider extends ChangeNotifier {
         _email = null;
       }
       print('Auth state changed: loggedIn=$_loggedIn, uid=$_uid');
-      _uidController.add(_uid);
       notifyListeners();
     });
-  }
-
-  @override
-  void dispose() {
-    _uidController.close();
-    super.dispose();
   }
 }
