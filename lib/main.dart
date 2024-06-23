@@ -6,7 +6,8 @@ import 'src/providers/authenticationProvider.dart';
 import 'src/providers/settingsProvider.dart';
 import 'src/providers/organizationsProvider.dart'; // Ensure this import is added
 
-import 'src/app.dart';
+import 'src/authedApp.dart';
+import 'src/nonAuthedApp.dart';
 
 import 'src/services/firestoreService.dart';
 import 'src/services/settingsService.dart';
@@ -27,33 +28,31 @@ void main() async {
       ChangeNotifierProvider<SettingsProvider>.value(
         value: settingsProvider,
       ),
-      ChangeNotifierProxyProvider<AuthenticationProvider,
-          OrganizationsProvider>(
+      ChangeNotifierProvider<OrganizationsProvider>(
         create: (_) => OrganizationsProvider(),
-        update: (context, authProvider, orgProvider) {
-          if (orgProvider == null) {
-            orgProvider = OrganizationsProvider();
-          }
-
-          final OrganizationsProvider localOrgProvider = orgProvider;
-          firestoreService.getOrganizations(authProvider.uid).then((orgUids) {
-            localOrgProvider.setOrganizations(orgUids);
-          });
-
-          return orgProvider;
-        },
       ),
     ],
-    child: Consumer3<AuthenticationProvider, SettingsProvider,
-        OrganizationsProvider>(
+    child: Consumer3<AuthenticationProvider, SettingsProvider, OrganizationsProvider>(
       builder: (context, authProvider, settingsProvider, orgProvider, child) {
-        return App(
+        if (authProvider.loggedIn) {
+          return AuthedApp(
+            firestoreService: firestoreService,
+            settingsProvider: settingsProvider,
+            authProvider: authProvider,
+            orgProvider: orgProvider,
+          );
+        }
+        else if (authProvider.loggedIn == false){
+          orgProvider.setOrganizations([]);
+          return NonAuthedApp(
           firestoreService: firestoreService,
           settingsProvider: settingsProvider,
-          authProvider: authProvider,
-          orgProvider: orgProvider,
         );
+        }
+        return const CircularProgressIndicator();
       },
     ),
   ));
 }
+        
+      
