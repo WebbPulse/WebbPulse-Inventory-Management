@@ -4,6 +4,10 @@ class FirestoreService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
   Future<List<String>> getOrganizations(String? uid) async {
+    if (uid == null) {
+      return [];
+    }
+
     try {
       final userDoc = await _db.collection('users').doc(uid).get();
       return List<String>.from(userDoc.data()?['organizationUids'] ?? []);

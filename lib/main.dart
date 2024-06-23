@@ -35,15 +35,10 @@ void main() async {
             orgProvider = OrganizationsProvider();
           }
 
-          if (authProvider.loggedIn) {
-            // Use a local reference to orgProvider
-            final OrganizationsProvider localOrgProvider = orgProvider;
-            firestoreService.getOrganizations(authProvider.uid).then((orgUids) {
-              localOrgProvider.setOrganizations(orgUids);
-            });
-          } else {
-            orgProvider.setOrganizations([]);
-          }
+          final OrganizationsProvider localOrgProvider = orgProvider;
+          firestoreService.getOrganizations(authProvider.uid).then((orgUids) {
+            localOrgProvider.setOrganizations(orgUids);
+          });
 
           return orgProvider;
         },
