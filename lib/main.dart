@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 
 import 'src/providers/authenticationProvider.dart';
 import 'src/providers/settingsProvider.dart';
-import 'src/providers/organizationsProvider.dart'; // Ensure this import is added
 
 import 'src/authedApp.dart';
 import 'src/nonAuthedApp.dart';
@@ -28,31 +27,23 @@ void main() async {
       ChangeNotifierProvider<SettingsProvider>.value(
         value: settingsProvider,
       ),
-      ChangeNotifierProvider<OrganizationsProvider>(
-        create: (_) => OrganizationsProvider(),
-      ),
     ],
-    child: Consumer3<AuthenticationProvider, SettingsProvider, OrganizationsProvider>(
-      builder: (context, authProvider, settingsProvider, orgProvider, child) {
+    child: Consumer2<AuthenticationProvider, SettingsProvider>(
+      builder: (context, authProvider, settingsProvider, child) {
         if (authProvider.loggedIn) {
           return AuthedApp(
             firestoreService: firestoreService,
             settingsProvider: settingsProvider,
             authProvider: authProvider,
-            orgProvider: orgProvider,
           );
-        }
-        else if (authProvider.loggedIn == false){
-          orgProvider.setOrganizations([]);
+        } else if (authProvider.loggedIn == false) {
           return NonAuthedApp(
-          firestoreService: firestoreService,
-          settingsProvider: settingsProvider,
-        );
+            firestoreService: firestoreService,
+            settingsProvider: settingsProvider,
+          );
         }
         return const CircularProgressIndicator();
       },
     ),
   ));
 }
-        
-      

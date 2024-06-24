@@ -1,6 +1,5 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import 'providers/settingsProvider.dart';
 import 'providers/authenticationProvider.dart';
@@ -22,93 +21,93 @@ class AuthedApp extends StatelessWidget {
   final AuthenticationProvider authProvider;
   final SettingsProvider settingsProvider;
   final FirestoreService firestoreService;
-  final OrganizationsProvider orgProvider;
-  
 
-  AuthedApp(
-      {Key? key,
-      required this.settingsProvider,
-      required this.authProvider,
-      required this.firestoreService,
-      required this.orgProvider,
-      })
-      : super(key: key);
+  AuthedApp({
+    Key? key,
+    required this.settingsProvider,
+    required this.authProvider,
+    required this.firestoreService,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<String>>(
-        future: 
-          firestoreService.getOrganizations(authProvider.uid),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const CircularProgressIndicator();
-          }
-          else if (snapshot.hasError) {
-            return const Text('Error loading organizations');
-          }
-          orgProvider.setOrganizations(snapshot.data!);
-          return MaterialApp(
-            restorationScopeId: 'app',
-            title: 'WebbPulse Checkout',
-            theme: ThemeData(),
-            darkTheme: ThemeData.dark(),
-            themeMode: settingsProvider.themeMode,
-            onGenerateRoute: (RouteSettings routeSettings) {
-              print('orgs: ${orgProvider.organizationUids}');
+    return ChangeNotifierProvider(
+      create: (_) => OrganizationsProvider(),
+      child: Consumer<OrganizationsProvider>(
+        builder: (context, orgProvider, child) => FutureBuilder<List<String>>(
+          future: firestoreService.getOrganizations(authProvider.uid),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const CircularProgressIndicator();
+            } else if (snapshot.hasError) {
+              return const Text('Error loading organizations');
+            }
+            orgProvider.setOrganizations(snapshot.data!);
+            return MaterialApp(
+              restorationScopeId: 'app',
+              title: 'WebbPulse Checkout',
+              theme: ThemeData(),
+              darkTheme: ThemeData.dark(),
+              themeMode: settingsProvider.themeMode,
+              onGenerateRoute: (RouteSettings routeSettings) {
+                print('orgs: ${orgProvider.organizationUids}');
 
-              if (orgProvider.organizationUids.isEmpty &&
-                  routeSettings.name != CreateOrganizationScreen.routeName) {
-                return MaterialPageRoute<void>(
-                  builder: (context) => CreateOrganizationScreen(
-                    firestoreService: firestoreService,
-                    uid: authProvider.uid,
-                  ),
-                );
-              }
-
-              switch (routeSettings.name) {
-                case HomeScreen.routeName:
+                if (orgProvider.organizationUids.isEmpty &&
+                    routeSettings.name != CreateOrganizationScreen.routeName) {
                   return MaterialPageRoute<void>(
-                    builder: (context) => const HomeScreen(),
-                  );
-                case SettingsScreen.routeName:
-                  return MaterialPageRoute<void>(
-                    builder: (context) =>
-                        SettingsScreen(settingsProvider: settingsProvider),
-                  );
-                case ProfilePage.routeName:
-                  return MaterialPageRoute<void>(
-                    builder: (context) => const ProfilePage(),
-                  );
-                case DevicesScreen.routeName:
-                  return MaterialPageRoute<void>(
-                    builder: (context) => const DevicesScreen(),
-                  );
-                case CheckoutScreen.routeName:
-                  return MaterialPageRoute<void>(
-                    builder: (context) => const CheckoutScreen(),
-                  );
-                case UsersScreen.routeName:
-                  return MaterialPageRoute<void>(
-                    builder: (context) => const UsersScreen(),
-                  );
-                case RegisterPage.routeName:
-                  return MaterialPageRoute<void>(
-                    builder: (context) => RegisterPage(),
-                  );
-                case SignInView.routeName:
-                  return MaterialPageRoute<void>(
-                    builder: (context) => SignInView(
+                    builder: (context) => CreateOrganizationScreen(
                       firestoreService: firestoreService,
+                      uid: authProvider.uid,
                     ),
                   );
-                default:
-                  return MaterialPageRoute<void>(
-                    builder: (context) => const HomeScreen(),
-                  );
-              }
-            },
-          );
-        });
+                }
+
+                switch (routeSettings.name) {
+                  case HomeScreen.routeName:
+                    return MaterialPageRoute<void>(
+                      builder: (context) => const HomeScreen(),
+                    );
+                  case SettingsScreen.routeName:
+                    return MaterialPageRoute<void>(
+                      builder: (context) =>
+                          SettingsScreen(settingsProvider: settingsProvider),
+                    );
+                  case ProfilePage.routeName:
+                    return MaterialPageRoute<void>(
+                      builder: (context) => const ProfilePage(),
+                    );
+                  case DevicesScreen.routeName:
+                    return MaterialPageRoute<void>(
+                      builder: (context) => const DevicesScreen(),
+                    );
+                  case CheckoutScreen.routeName:
+                    return MaterialPageRoute<void>(
+                      builder: (context) => const CheckoutScreen(),
+                    );
+                  case UsersScreen.routeName:
+                    return MaterialPageRoute<void>(
+                      builder: (context) => const UsersScreen(),
+                    );
+                  case RegisterPage.routeName:
+                    return MaterialPageRoute<void>(
+                      builder: (context) => RegisterPage(),
+                    );
+                  case SignInView.routeName:
+                    return MaterialPageRoute<void>(
+                      builder: (context) => SignInView(
+                        firestoreService: firestoreService,
+                      ),
+                    );
+                  default:
+                    return MaterialPageRoute<void>(
+                      builder: (context) => const HomeScreen(),
+                    );
+                }
+              },
+            );
+          },
+        ),
+      ),
+    );
   }
 }
