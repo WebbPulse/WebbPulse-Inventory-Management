@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
 
-class LandingScreen extends StatelessWidget {
-  const LandingScreen({super.key});
-
+class LandingView extends StatelessWidget {
+  const LandingView({super.key});
 
   static const routeName = '/landing';
 
   @override
   Widget build(BuildContext context) {
     // The email is now directly available to use
-     return Scaffold(
+    return Scaffold(
       appBar: AppBar(title: Text('Landing Page')),
       body: Center(
-        child:ListView(
+        child: ListView(
           children: <Widget>[
             ListTile(
               title: Text('Register'),

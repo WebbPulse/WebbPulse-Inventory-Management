@@ -4,9 +4,9 @@ import 'package:provider/provider.dart';
 
 import 'src/providers/authenticationProvider.dart';
 import 'src/providers/settingsProvider.dart';
-import 'src/providers/organizationsProvider.dart'; // Ensure this import is added
 
-import 'src/app.dart';
+import 'src/authedApp.dart';
+import 'src/nonAuthedApp.dart';
 
 import 'src/services/firestoreService.dart';
 import 'src/services/settingsService.dart';
@@ -19,41 +19,42 @@ void main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   final FirestoreService firestoreService = FirestoreService();
 
-  runApp(MultiProvider(
-    providers: [
-      ChangeNotifierProvider<AuthenticationProvider>(
-        create: (_) => AuthenticationProvider(),
-      ),
-      ChangeNotifierProvider<SettingsProvider>.value(
-        value: settingsProvider,
-      ),
-      ChangeNotifierProxyProvider<AuthenticationProvider,
-          OrganizationsProvider>(
-        create: (_) => OrganizationsProvider(),
-        update: (context, authProvider, orgProvider) {
-          if (orgProvider == null) {
-            orgProvider = OrganizationsProvider();
+  runApp(MyApp(
+    firestoreService: firestoreService,
+    settingsProvider: settingsProvider,
+  ));
+}
+
+class MyApp extends StatelessWidget {
+  final FirestoreService firestoreService;
+  final SettingsProvider settingsProvider;
+
+  MyApp({required this.firestoreService, required this.settingsProvider});
+
+  @override
+  Widget build(BuildContext context) {
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider<AuthenticationProvider>(
+          create: (_) => AuthenticationProvider(),
+        ),
+        ChangeNotifierProvider<SettingsProvider>.value(
+          value: settingsProvider,
+        ),
+      ],
+      child: Consumer2<AuthenticationProvider, SettingsProvider>(
+        builder: (context, authProvider, settingsProvider, child) {
+          if (authProvider.loggedIn) {
+            return AuthedApp(
+              firestoreService: firestoreService,
+            );
+          } else {
+            return NonAuthedApp(
+              firestoreService: firestoreService,
+            );
           }
-
-          final OrganizationsProvider localOrgProvider = orgProvider;
-          firestoreService.getOrganizations(authProvider.uid).then((orgUids) {
-            localOrgProvider.setOrganizations(orgUids);
-          });
-
-          return orgProvider;
         },
       ),
-    ],
-    child: Consumer3<AuthenticationProvider, SettingsProvider,
-        OrganizationsProvider>(
-      builder: (context, authProvider, settingsProvider, orgProvider, child) {
-        return App(
-          firestoreService: firestoreService,
-          settingsProvider: settingsProvider,
-          authProvider: authProvider,
-          orgProvider: orgProvider,
-        );
-      },
-    ),
-  ));
+    );
+  }
 }

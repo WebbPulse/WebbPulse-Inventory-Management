@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart'; 
+import 'package:flutter/material.dart';
 import '../widgets.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -8,7 +8,7 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-     return ScaffoldWithDrawer(
+    return ScaffoldWithDrawer(
       title: 'Home',
       body: ListView(
         children: <Widget>[
@@ -18,7 +18,7 @@ class HomeScreen extends StatelessWidget {
           const IconAndDetail(Icons.location_city, 'San Francisco'),
 
           ///application state connection
-        
+
           const Header("What we'll be doing"),
           const Paragraph(
             'Join us for a day full of Firebase Workshops and Pizza!',

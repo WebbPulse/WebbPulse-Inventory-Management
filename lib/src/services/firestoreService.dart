@@ -20,7 +20,11 @@ class FirestoreService {
   Future<bool> checkUserExistsInFirestore(String? uid) async {
     try {
       final userDoc = await _db.collection('users').doc(uid).get();
-      return userDoc.exists;
+      if (userDoc.exists) {
+        return true;
+      } else {
+        return false;
+      }
     } catch (e) {
       print('Error checking user exists: $e');
       return false;
