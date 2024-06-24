@@ -28,7 +28,18 @@ void main() async {
         value: settingsProvider,
       ),
     ],
-    child: Consumer2<AuthenticationProvider, SettingsProvider>(
+    child: ParentApp(firestoreService: firestoreService),
+  ));
+}
+
+class ParentApp extends StatelessWidget {
+  final FirestoreService firestoreService;
+
+  ParentApp({required this.firestoreService});
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer2<AuthenticationProvider, SettingsProvider>(
       builder: (context, authProvider, settingsProvider, child) {
         if (authProvider.loggedIn) {
           return AuthedApp(
@@ -44,6 +55,6 @@ void main() async {
         }
         return const CircularProgressIndicator();
       },
-    ),
-  ));
+    );
+  }
 }
