@@ -14,7 +14,8 @@ class ScaffoldWithDrawer extends StatelessWidget {
   final String title;
   final Widget body;
 
-  const ScaffoldWithDrawer({super.key, required this.title, required this.body});
+  const ScaffoldWithDrawer(
+      {super.key, required this.title, required this.body});
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +23,7 @@ class ScaffoldWithDrawer extends StatelessWidget {
       appBar: AppBar(
         title: Text(title),
       ),
-       drawer: Drawer(
+      drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
           children: <Widget>[

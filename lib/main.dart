@@ -19,42 +19,42 @@ void main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   final FirestoreService firestoreService = FirestoreService();
 
-  runApp(MultiProvider(
-    providers: [
-      ChangeNotifierProvider<AuthenticationProvider>(
-        create: (_) => AuthenticationProvider(),
-      ),
-      ChangeNotifierProvider<SettingsProvider>.value(
-        value: settingsProvider,
-      ),
-    ],
-    child: ParentApp(firestoreService: firestoreService),
+  runApp(MyApp(
+    firestoreService: firestoreService,
+    settingsProvider: settingsProvider,
   ));
 }
 
-class ParentApp extends StatelessWidget {
+class MyApp extends StatelessWidget {
   final FirestoreService firestoreService;
+  final SettingsProvider settingsProvider;
 
-  ParentApp({required this.firestoreService});
+  MyApp({required this.firestoreService, required this.settingsProvider});
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<AuthenticationProvider, SettingsProvider>(
-      builder: (context, authProvider, settingsProvider, child) {
-        if (authProvider.loggedIn) {
-          return AuthedApp(
-            firestoreService: firestoreService,
-            settingsProvider: settingsProvider,
-            authProvider: authProvider,
-          );
-        } else if (authProvider.loggedIn == false) {
-          return NonAuthedApp(
-            firestoreService: firestoreService,
-            settingsProvider: settingsProvider,
-          );
-        }
-        return const CircularProgressIndicator();
-      },
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider<AuthenticationProvider>(
+          create: (_) => AuthenticationProvider(),
+        ),
+        ChangeNotifierProvider<SettingsProvider>.value(
+          value: settingsProvider,
+        ),
+      ],
+      child: Consumer2<AuthenticationProvider, SettingsProvider>(
+        builder: (context, authProvider, settingsProvider, child) {
+          if (authProvider.loggedIn) {
+            return AuthedApp(
+              firestoreService: firestoreService,
+            );
+          } else {
+            return NonAuthedApp(
+              firestoreService: firestoreService,
+            );
+          }
+        },
+      ),
     );
   }
 }
