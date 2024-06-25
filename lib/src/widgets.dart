@@ -3,12 +3,12 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'views/home_view.dart';
-import 'views/profile_view.dart';
-import 'views/settings_view.dart';
-import 'views/checkout_view.dart';
-import 'views/devices_view.dart';
-import 'views/users_view.dart';
+import 'views/authed/home_view.dart';
+import 'views/authed/profile_view.dart';
+import 'views/authed/settings_view.dart';
+import 'views/authed/checkout_view.dart';
+import 'views/authed/devices_view.dart';
+import 'views/authed/users_view.dart';
 
 class ScaffoldWithDrawer extends StatelessWidget {
   final String title;

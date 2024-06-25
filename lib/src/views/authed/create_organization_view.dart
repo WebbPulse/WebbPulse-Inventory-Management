@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../home_view.dart';
+import 'home_view.dart';
 import '../../services/firestoreService.dart';
 
 class CreateOrganizationScreen extends StatelessWidget {

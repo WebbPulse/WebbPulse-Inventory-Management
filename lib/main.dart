@@ -19,21 +19,7 @@ void main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   final FirestoreService firestoreService = FirestoreService();
 
-  runApp(MyApp(
-    firestoreService: firestoreService,
-    settingsProvider: settingsProvider,
-  ));
-}
-
-class MyApp extends StatelessWidget {
-  final FirestoreService firestoreService;
-  final SettingsProvider settingsProvider;
-
-  MyApp({required this.firestoreService, required this.settingsProvider});
-
-  @override
-  Widget build(BuildContext context) {
-    return MultiProvider(
+  runApp(MultiProvider(
       providers: [
         ChangeNotifierProvider<AuthenticationProvider>(
           create: (_) => AuthenticationProvider(),
@@ -42,8 +28,8 @@ class MyApp extends StatelessWidget {
           value: settingsProvider,
         ),
       ],
-      child: Consumer2<AuthenticationProvider, SettingsProvider>(
-        builder: (context, authProvider, settingsProvider, child) {
+      child: Consumer<AuthenticationProvider>(
+        builder: (context, authProvider, child) {
           if (authProvider.loggedIn) {
             return AuthedApp(
               firestoreService: firestoreService,
@@ -54,7 +40,5 @@ class MyApp extends StatelessWidget {
             );
           }
         },
-      ),
-    );
-  }
+      )));
 }

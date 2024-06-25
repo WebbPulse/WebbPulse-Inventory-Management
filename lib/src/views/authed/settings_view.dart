@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../providers/settingsProvider.dart';
-import '../widgets.dart';
+import '../../providers/settingsProvider.dart';
+import '../../widgets.dart';
+
 /// Displays the various settings that can be customized by the user.
 ///
 /// When a user changes a setting, the SettingsController is updated and
@@ -15,7 +16,7 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-     return ScaffoldWithDrawer(
+    return ScaffoldWithDrawer(
       title: 'Settings',
       body: Padding(
         padding: const EdgeInsets.all(16),
