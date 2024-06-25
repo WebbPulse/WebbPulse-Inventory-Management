@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'home_view.dart';
 import '../../services/firestoreService.dart';
 
-class CreateOrganizationScreen extends StatelessWidget {
-  CreateOrganizationScreen(
+class CreateOrganizationView extends StatelessWidget {
+  CreateOrganizationView(
       {super.key, required this.firestoreService, required this.uid});
 
   static const routeName = '/create-organization';
@@ -42,7 +42,7 @@ class CreateOrganizationScreen extends StatelessWidget {
                       content: Text('Organization created successfully!'),
                     ));
                     Navigator.pop(context);
-                    Navigator.pushNamed(context, HomeScreen.routeName);
+                    Navigator.pushNamed(context, HomeView.routeName);
                   } catch (e) {
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                       content: Text('Failed to create organization: $e'),

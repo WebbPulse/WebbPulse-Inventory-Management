@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../widgets.dart';
 
-class CheckoutScreen extends StatelessWidget {
-  const CheckoutScreen({super.key});
+class CheckoutView extends StatelessWidget {
+  const CheckoutView({super.key});
 
   static const routeName = '/checkout';
 

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 
 import 'providers/settingsProvider.dart';
 import 'providers/authenticationProvider.dart';
@@ -59,9 +58,9 @@ class AuthedApp extends StatelessWidget {
 
                       if (organizationUids.isEmpty &&
                           routeSettings.name !=
-                              CreateOrganizationScreen.routeName) {
+                              CreateOrganizationView.routeName) {
                         return MaterialPageRoute<void>(
-                          builder: (context) => CreateOrganizationScreen(
+                          builder: (context) => CreateOrganizationView(
                             firestoreService: firestoreService,
                             uid: authProvider.uid,
                           ),
@@ -69,34 +68,34 @@ class AuthedApp extends StatelessWidget {
                       }
 
                       switch (routeSettings.name) {
-                        case HomeScreen.routeName:
+                        case HomeView.routeName:
                           return MaterialPageRoute<void>(
-                            builder: (context) => const HomeScreen(),
+                            builder: (context) => const HomeView(),
                           );
-                        case SettingsScreen.routeName:
+                        case SettingsView.routeName:
                           return MaterialPageRoute<void>(
-                            builder: (context) => SettingsScreen(
+                            builder: (context) => SettingsView(
                                 settingsProvider: settingsProvider),
                           );
-                        case ProfilePage.routeName:
+                        case ProfileView.routeName:
                           return MaterialPageRoute<void>(
-                            builder: (context) => ProfilePage(),
+                            builder: (context) => const ProfileView(),
                           );
-                        case DevicesScreen.routeName:
+                        case DevicesView.routeName:
                           return MaterialPageRoute<void>(
-                            builder: (context) => const DevicesScreen(),
+                            builder: (context) => const DevicesView(),
                           );
-                        case CheckoutScreen.routeName:
+                        case CheckoutView.routeName:
                           return MaterialPageRoute<void>(
-                            builder: (context) => const CheckoutScreen(),
+                            builder: (context) => const CheckoutView(),
                           );
-                        case UsersScreen.routeName:
+                        case UsersView.routeName:
                           return MaterialPageRoute<void>(
-                            builder: (context) => const UsersScreen(),
+                            builder: (context) => const UsersView(),
                           );
                         default:
                           return MaterialPageRoute<void>(
-                            builder: (context) => const HomeScreen(),
+                            builder: (context) => const HomeView(),
                           );
                       }
                     },

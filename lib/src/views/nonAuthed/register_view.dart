@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 
-class RegisterPage extends StatelessWidget {
-  const RegisterPage({super.key});
+class RegisterView extends StatelessWidget {
+  const RegisterView({super.key});
 
   static const routeName = '/register';
 

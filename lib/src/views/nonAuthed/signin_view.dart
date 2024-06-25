@@ -22,7 +22,8 @@ class SignInView extends StatelessWidget {
         ],
         actions: [
           AuthStateChangeAction<SignedIn>((context, state) {
-            Navigator.pushNamed(context, HomeScreen.routeName);
+            Navigator.pop(context);
+            Navigator.pushNamed(context, HomeView.routeName);
           }),
         ],
       ),

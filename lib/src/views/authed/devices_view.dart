@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../widgets.dart';
 
-class DevicesScreen extends StatelessWidget {
-  const DevicesScreen({super.key});
+class DevicesView extends StatelessWidget {
+  const DevicesView({super.key});
 
   static const routeName = '/devices';
 

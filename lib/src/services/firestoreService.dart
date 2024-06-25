@@ -48,6 +48,7 @@ class FirestoreService {
           await _db.collection('organizations').add({
         'name': organizationCreationName,
         'members': [uid],
+        'createdAt': FieldValue.serverTimestamp(),
       });
 
       String organizationId = organizationRef.id;

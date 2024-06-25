@@ -29,9 +29,9 @@ class NonAuthedApp extends StatelessWidget {
           themeMode: settingsProvider.themeMode,
           onGenerateRoute: (RouteSettings routeSettings) {
             switch (routeSettings.name) {
-              case RegisterPage.routeName:
+              case RegisterView.routeName:
                 return MaterialPageRoute<void>(
-                  builder: (context) => RegisterPage(),
+                  builder: (context) => RegisterView(),
                 );
               case SignInView.routeName:
                 return MaterialPageRoute<void>(
@@ -39,9 +39,9 @@ class NonAuthedApp extends StatelessWidget {
                     firestoreService: firestoreService,
                   ),
                 );
-              case ForgotPasswordPage.routeName:
+              case ForgotPasswordView.routeName:
                 return MaterialPageRoute<void>(
-                  builder: (context) => ForgotPasswordPage(),
+                  builder: (context) => ForgotPasswordView(),
                 );
               default:
                 return MaterialPageRoute<void>(

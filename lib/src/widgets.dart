@@ -37,42 +37,42 @@ class ScaffoldWithDrawer extends StatelessWidget {
               title: const Text('Home'),
               onTap: () {
                 Navigator.pop(context);
-                Navigator.pushNamed(context, HomeScreen.routeName);
+                Navigator.pushNamed(context, HomeView.routeName);
               },
             ),
             ListTile(
               title: const Text('Checkout'),
               onTap: () {
                 Navigator.pop(context);
-                Navigator.pushNamed(context, CheckoutScreen.routeName);
+                Navigator.pushNamed(context, CheckoutView.routeName);
               },
             ),
             ListTile(
               title: const Text('Devices'),
               onTap: () {
                 Navigator.pop(context);
-                Navigator.pushNamed(context, DevicesScreen.routeName);
+                Navigator.pushNamed(context, DevicesView.routeName);
               },
             ),
             ListTile(
               title: const Text('Users'),
               onTap: () {
                 Navigator.pop(context);
-                Navigator.pushNamed(context, UsersScreen.routeName);
+                Navigator.pushNamed(context, UsersView.routeName);
               },
             ),
             ListTile(
               title: const Text('Settings'),
               onTap: () {
                 Navigator.pop(context);
-                Navigator.pushNamed(context, SettingsScreen.routeName);
+                Navigator.pushNamed(context, SettingsView.routeName);
               },
             ),
             ListTile(
               title: const Text('Profile'),
               onTap: () {
                 Navigator.pop(context);
-                Navigator.pushNamed(context, ProfilePage.routeName);
+                Navigator.pushNamed(context, ProfileView.routeName);
               },
             ),
           ],

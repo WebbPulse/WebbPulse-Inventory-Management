@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'register_view.dart';
+import 'signin_view.dart';
 
 class LandingView extends StatelessWidget {
   const LandingView({super.key});
@@ -16,13 +18,15 @@ class LandingView extends StatelessWidget {
             ListTile(
               title: Text('Register'),
               onTap: () {
-                Navigator.pushNamed(context, '/register');
+                Navigator.pop(context);
+                Navigator.pushNamed(context, RegisterView.routeName);
               },
             ),
             ListTile(
               title: Text('Sign In'),
               onTap: () {
-                Navigator.pushNamed(context, '/signin');
+                Navigator.pop(context);
+                Navigator.pushNamed(context, SignInView.routeName);
               },
             ),
           ],
