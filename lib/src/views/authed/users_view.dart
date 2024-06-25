@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../widgets.dart';
+import '../../widgets.dart';
 
 class UsersScreen extends StatelessWidget {
   const UsersScreen({super.key});
-
 
   static const routeName = '/users';
 

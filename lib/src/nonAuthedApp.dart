@@ -5,10 +5,10 @@ import 'providers/settingsProvider.dart';
 
 import 'services/firestoreService.dart';
 
-import 'views/sign_in/signin_view.dart';
-import 'views/sign_in/forgot_password_view.dart';
-import 'views/sign_in/landing_view.dart';
-import 'views/sign_in/register_view.dart';
+import 'views/nonAuthed/signin_view.dart';
+import 'views/nonAuthed/forgot_password_view.dart';
+import 'views/nonAuthed/landing_view.dart';
+import 'views/nonAuthed/register_view.dart';
 
 class NonAuthedApp extends StatelessWidget {
   final FirestoreService firestoreService;
