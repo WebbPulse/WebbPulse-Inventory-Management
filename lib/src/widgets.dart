@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+
+import 'views/authed/org_selection_view.dart';
 import 'views/authed/home_view.dart';
 import 'views/authed/profile_view.dart';
 import 'views/authed/settings_view.dart';
@@ -73,6 +75,13 @@ class ScaffoldWithDrawer extends StatelessWidget {
               onTap: () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, ProfileView.routeName);
+              },
+            ),
+            ListTile(
+              title: const Text('Organizations'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, OrgSelectionView.routeName);
               },
             ),
           ],

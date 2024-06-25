@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'providers/settingsProvider.dart';
+import '../providers/settingsProvider.dart';
 
-import 'services/firestoreService.dart';
+import '../services/firestoreService.dart';
 
-import 'views/nonAuthed/signin_view.dart';
-import 'views/nonAuthed/forgot_password_view.dart';
-import 'views/nonAuthed/landing_view.dart';
-import 'views/nonAuthed/register_view.dart';
+import '../views/nonAuthed/signin_view.dart';
+import '../views/nonAuthed/forgot_password_view.dart';
+import '../views/nonAuthed/landing_view.dart';
+import '../views/nonAuthed/register_view.dart';
 
 class NonAuthedApp extends StatelessWidget {
   final FirestoreService firestoreService;

@@ -5,8 +5,8 @@ import 'package:provider/provider.dart';
 import 'src/providers/authenticationProvider.dart';
 import 'src/providers/settingsProvider.dart';
 
-import 'src/authedApp.dart';
-import 'src/nonAuthedApp.dart';
+import 'src/apps/authed/authedApp.dart';
+import 'src/apps/nonAuthedApp.dart';
 
 import 'src/services/firestoreService.dart';
 import 'src/services/settingsService.dart';

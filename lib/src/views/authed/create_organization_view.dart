@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:webbcheck/src/views/authed/org_selection_view.dart';
 
-import 'home_view.dart';
 import '../../services/firestoreService.dart';
 
 class CreateOrganizationView extends StatelessWidget {
@@ -42,7 +42,7 @@ class CreateOrganizationView extends StatelessWidget {
                       content: Text('Organization created successfully!'),
                     ));
                     Navigator.pop(context);
-                    Navigator.pushNamed(context, HomeView.routeName);
+                    Navigator.pushNamed(context, OrgSelectionView.routeName);
                   } catch (e) {
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                       content: Text('Failed to create organization: $e'),
