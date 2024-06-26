@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class FirestoreService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  Stream<List<String>> organizationsStream(String? uid) {
+  Stream<List<String>> orgsUidsStream(String? uid) {
     if (uid == null) {
       return Stream.value([]);
     }
@@ -11,22 +11,17 @@ class FirestoreService {
       return List<String>.from(snapshot.data()?['organizationUids'] ?? []);
     }).handleError((error) {
       print('Error getting organizations: $error');
-      return [];
+      return Stream.value([]);
     });
   }
 
-  Future<bool> checkUserExistsInFirestore(String? uid) async {
-    try {
-      final userDoc = await _db.collection('users').doc(uid).get();
-      if (userDoc.exists) {
-        return true;
-      } else {
-        return false;
-      }
-    } catch (e) {
+  Stream<bool> checkUserExistsInFirestoreStream(String? uid) {
+    return _db.collection('users').doc(uid).snapshots().map((snapshot) {
+      return snapshot.exists;
+    }).handleError((e) {
       print('Error checking user exists: $e');
       return false;
-    }
+    });
   }
 
   Future<void> createUserInFirestore(String? uid, String? email) async {
@@ -67,5 +62,36 @@ class FirestoreService {
     } catch (e) {
       print('Error updating user organizations: $e');
     }
+  }
+
+  Stream<String> getOrgNameStream(String orgUid) {
+    return _db
+        .collection('organizations')
+        .doc(orgUid)
+        .snapshots()
+        .map((snapshot) {
+      return (snapshot.data()?['name'] ?? '') as String;
+    }).handleError((e) {
+      print('Error checking organization name: $e');
+      return '';
+    });
+  }
+
+  Stream<List<String>> getDevicesUidsStream(String? orgUid) {
+    if (orgUid == null) {
+      return Stream.value([]);
+    }
+    return FirebaseFirestore.instance
+        .collection('organizations')
+        .doc(orgUid)
+        .collection('devices')
+        .snapshots()
+        .map((querySnapshot) {
+      final documentUIDs = querySnapshot.docs.map((doc) => doc.id).toList();
+      return documentUIDs;
+    }).handleError((e) {
+      print('Error retrieving document UIDs: $e');
+      return <String>[]; // Return an empty list in case of error
+    });
   }
 }
