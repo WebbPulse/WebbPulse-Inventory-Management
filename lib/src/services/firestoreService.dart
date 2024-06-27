@@ -42,12 +42,12 @@ class FirestoreService {
       DocumentReference organizationRef =
           await _db.collection('organizations').add({
         'name': organizationCreationName,
-        'members': [uid],
         'createdAt': FieldValue.serverTimestamp(),
       });
 
       String organizationId = organizationRef.id;
       await updateUserOrganizationsInFirestore(uid, organizationId);
+      await addUserToOrganization(uid, organizationId);
     } catch (e) {
       print('Error creating organization: $e');
     }
@@ -61,6 +61,25 @@ class FirestoreService {
       });
     } catch (e) {
       print('Error updating user organizations: $e');
+    }
+  }
+
+  Future<void> addUserToOrganization(
+      String? uid, String? organizationId) async {
+    try {
+      await _db
+          .collection('organizations')
+          .doc(organizationId)
+          .collection('members');
+      await _db
+          .collection('organizations')
+          .doc(organizationId)
+          .collection('members')
+          .doc(uid)
+          .set({'createdAt': FieldValue.serverTimestamp()});
+      print('User added to organization');
+    } catch (e) {
+      print('Error adding user to organization: $e');
     }
   }
 
