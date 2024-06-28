@@ -57,7 +57,6 @@ class AuthedUserExistsApp extends StatelessWidget {
                       return MaterialPageRoute<void>(
                         builder: (context) => CreateOrganizationView(
                           firestoreService: firestoreService,
-                          uid: authProvider.uid,
                         ),
                       );
                     }
@@ -93,7 +92,7 @@ class AuthedUserExistsApp extends StatelessWidget {
                         );
                       case CheckoutView.routeName:
                         return MaterialPageRoute<void>(
-                          builder: (context) => const CheckoutView(),
+                          builder: (context) => CheckoutView(firestoreService: firestoreService),
                         );
                       case UsersView.routeName:
                         return MaterialPageRoute<void>(

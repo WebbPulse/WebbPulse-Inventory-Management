@@ -23,12 +23,37 @@ class DevicesView extends StatelessWidget {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const CircularProgressIndicator();
               } else if (snapshot.hasError) {
-                return const Text('Error loading organizations');
+                return const Text('Error loading devices');
               }
               final devicesUids = snapshot.data ?? [];
-              print('devicesUids: $devicesUids');
-              return const ScaffoldWithDrawer(
-                  title: 'Devices', body: Center(child: Text('Devices Page')));
+              return ScaffoldWithDrawer(
+                  title: 'Devices', 
+                  body: Column(
+                    children: [
+                    Center(child: Text('Devices Page')),
+                    for (final deviceId in devicesUids) 
+                      StreamBuilder(
+                    stream: firestoreService.getDeviceSerialStream(deviceId, orgSelectorProvider.selectedOrgUid),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const CircularProgressIndicator();
+                      } else if (snapshot.hasError) {
+                        return const Text('Error loading devices');
+                      }
+                      final deviceSerial = snapshot.data ?? '';
+                      print ('deviceSerial: $deviceSerial');
+                      return ListTile(
+                        title: Text(deviceSerial),
+                        onTap: () {
+                        /// implement device page routing  
+                        },
+                      );
+                    },
+                    ),
+                    if (devicesUids.isEmpty) Text('No devices found'),
+                    ],
+                  )
+              );
             });
       },
     );

@@ -35,7 +35,7 @@ class OrgSelectionView extends StatelessWidget {
                   } else if (snapshot.hasError) {
                     return const Text('Error loading organizations');
                   }
-                  final orgName = snapshot.data ?? '';
+                  final String orgName = snapshot.data ?? '';
 
                   return ListTile(
                     title: Text(orgName),

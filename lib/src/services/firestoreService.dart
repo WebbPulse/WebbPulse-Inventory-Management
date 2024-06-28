@@ -3,26 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class FirestoreService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  Stream<List<String>> orgsUidsStream(String? uid) {
-    if (uid == null) {
-      return Stream.value([]);
-    }
-    return _db.collection('users').doc(uid).snapshots().map((snapshot) {
-      return List<String>.from(snapshot.data()?['organizationUids'] ?? []);
-    }).handleError((error) {
-      print('Error getting organizations: $error');
-      return Stream.value([]);
-    });
-  }
-
-  Stream<bool> checkUserExistsInFirestoreStream(String? uid) {
-    return _db.collection('users').doc(uid).snapshots().map((snapshot) {
-      return snapshot.exists;
-    }).handleError((e) {
-      print('Error checking user exists: $e');
-      return false;
-    });
-  }
 
   Future<void> createUserInFirestore(String? uid, String? email) async {
     try {
@@ -83,6 +63,22 @@ class FirestoreService {
     }
   }
 
+  Future<void> createDeviceInFirestore(
+      String? serial, String? orgId) async {
+    try {
+      await _db
+          .collection('organizations')
+          .doc(orgId)
+          .collection('devices')
+          .add({
+        'serial': serial,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      print('Error creating device: $e');
+    }
+  }
+
   Stream<String> getOrgNameStream(String orgUid) {
     return _db
         .collection('organizations')
@@ -111,6 +107,45 @@ class FirestoreService {
     }).handleError((e) {
       print('Error retrieving document UIDs: $e');
       return <String>[]; // Return an empty list in case of error
+    });
+  }
+  Stream<List<String>> orgsUidsStream(String? uid) {
+    if (uid == null) {
+      return Stream.value([]);
+    }
+    
+    return _db.collection('users').doc(uid).snapshots().map((snapshot) {
+      return List<String>.from(snapshot.data()?['organizationUids'] ?? []);
+    }).handleError((error) {
+      print('Error getting organizations: $error');
+      return Stream.value([]);
+    });
+  }
+
+  Stream<bool> checkUserExistsInFirestoreStream(String? uid) {
+    return _db.collection('users').doc(uid).snapshots().map((snapshot) {
+      return snapshot.exists;
+    }).handleError((e) {
+      print('Error checking user exists: $e');
+      return false;
+    });
+  }
+  
+  Stream<String> getDeviceSerialStream(String? deviceId, String? orgId) {
+    if (deviceId == null || orgId == null) {
+      return Stream.value('');
+    }
+    return _db
+        .collection('organizations')
+        .doc(orgId)
+        .collection('devices')
+        .doc(deviceId)
+        .snapshots()
+        .map((snapshot) {
+      return (snapshot.data()?['serial'] ?? '') as String;
+    }).handleError((e) {
+      print('Error checking device serial: $e');
+      return '';
     });
   }
 }
