@@ -6,7 +6,7 @@ import '../../providers/orgSelectorProvider.dart';
 import '../../widgets.dart';
 
 class DevicesView extends StatelessWidget {
-  DevicesView({Key? key, required this.firestoreService}) : super(key: key);
+  const DevicesView({super.key, required this.firestoreService});
 
   final FirestoreService firestoreService;
   static const routeName = '/devices';
@@ -30,7 +30,7 @@ class DevicesView extends StatelessWidget {
                   title: 'Devices', 
                   body: Column(
                     children: [
-                    Center(child: Text('Devices Page')),
+                    const Center(child: Text('Devices Page')),
                     for (final deviceId in devicesUids) 
                       StreamBuilder(
                     stream: firestoreService.getDeviceSerialStream(deviceId, orgSelectorProvider.selectedOrgUid),
@@ -50,7 +50,7 @@ class DevicesView extends StatelessWidget {
                       );
                     },
                     ),
-                    if (devicesUids.isEmpty) Text('No devices found'),
+                    if (devicesUids.isEmpty) const Text('No devices found'),
                     ],
                   )
               );

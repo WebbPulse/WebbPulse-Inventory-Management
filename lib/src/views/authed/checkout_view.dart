@@ -35,36 +35,66 @@ class CheckoutView extends StatelessWidget {
                   final deviceSerialNumber = _controller.text;
       
                   if (deviceSerialNumber.isNotEmpty) {
-                    try {
-                      await firestoreService.createDeviceInFirestore(deviceSerialNumber, orgSelectorProvider.selectedOrgUid);
-                      
-                      while (context.mounted == false) {
-                        await Future.delayed(const Duration(milliseconds: 100));
+                    try { 
+                      if (await firestoreService.doesDeviceExistInFirestore(deviceSerialNumber, orgSelectorProvider.selectedOrgUid) == false) {
+                        await firestoreService.createDeviceInFirestore(deviceSerialNumber, orgSelectorProvider.selectedOrgUid);
+                        await firestoreService.updateDeviceCheckoutStatusInFirestore(deviceSerialNumber, orgSelectorProvider.selectedOrgUid, true);
+
+                        while (context.mounted == false) {
+                          await Future.delayed(const Duration(milliseconds: 100));
+                        }
+
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                            content: Text('Device added to organization and checked out!'),
+                          ));
+                          Navigator.pop(context);
+                          Navigator.pushNamed(context, HomeView.routeName);
+                        } 
                       }
+                      else {
+                        if (await firestoreService.isDeviceCheckedOutInFirestore(deviceSerialNumber, orgSelectorProvider.selectedOrgUid) == true){
+                          await firestoreService.updateDeviceCheckoutStatusInFirestore(deviceSerialNumber, orgSelectorProvider.selectedOrgUid, false);
+                          while (context.mounted == false) {
+                            await Future.delayed(const Duration(milliseconds: 100));
+                          }
 
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                          content: Text('Device Checkout Successful!'),
-                        ));
-                        Navigator.pop(context);
-                        Navigator.pushNamed(context, HomeView.routeName);
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                        content: Text('Device Checkout Successful!'),
-                      ));
-                      } 
-                      
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                              content: Text('Device checked in!'),
+                            ));
+                            Navigator.pop(context);
+                            Navigator.pushNamed(context, HomeView.routeName);
+                          }
+                        }
+                        else {
+                          await firestoreService.updateDeviceCheckoutStatusInFirestore(deviceSerialNumber, orgSelectorProvider.selectedOrgUid, true);
+                          while (context.mounted == false) {
+                            await Future.delayed(const Duration(milliseconds: 100));
+                          }
 
-                      
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                              content: Text('Device checked out!'),
+                            ));
+                            Navigator.pop(context);
+                            Navigator.pushNamed(context, HomeView.routeName);
+                          }
+                        }
+                      }
                     } catch (e) {
+                      
                       while (context.mounted == false) {
                         await Future.delayed(const Duration(milliseconds: 100));
                       }
+
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                          content: Text('Failed to check in/out device: $e'),
-                        ));
-                      } 
+                        content: Text('Failed to check in/out device: $e'),
+                      ));
+                      }
                     }
+                    
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                       content: Text('Please enter a serial number'),

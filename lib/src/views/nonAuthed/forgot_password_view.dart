@@ -9,7 +9,7 @@ class ForgotPasswordView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // The email is now directly available to use
-    return ForgotPasswordScreen(
+    return const ForgotPasswordScreen(
       headerMaxExtent: 200,
     );
   }

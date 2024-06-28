@@ -6,7 +6,7 @@ import '../../providers/orgSelectorProvider.dart';
 import 'home_view.dart';
 
 class OrgSelectionView extends StatelessWidget {
-  OrgSelectionView({
+  const OrgSelectionView({
     super.key,
     required this.organizationUids,
     required this.firestoreService,
@@ -22,10 +22,10 @@ class OrgSelectionView extends StatelessWidget {
     // The email is now directly available to use
     return Consumer<OrgSelectorProvider>(
       builder: (context, orgSelectorProvider, child) => Scaffold(
-        appBar: AppBar(title: Text('Org Selection Page')),
+        appBar: AppBar(title: const Text('Org Selection Page')),
         body: Column(
           children: [
-            Center(child: Text('Org Selection Page')),
+            const Center(child: Text('Org Selection Page')),
             for (final orgUid in organizationUids)
               StreamBuilder(
                 stream: firestoreService.getOrgNameStream(orgUid),
@@ -47,14 +47,14 @@ class OrgSelectionView extends StatelessWidget {
                   );
                 },
               ),
-            if (organizationUids.isEmpty) Text('No organizations found'),
+            if (organizationUids.isEmpty) const Text('No organizations found'),
             ElevatedButton(
                 onPressed: () {
                   Navigator.pop(context);
                   Navigator.pushNamed(
                       context, CreateOrganizationView.routeName);
                 },
-                child: Text('Create New Organization'))
+                child: const Text('Create New Organization'))
           ],
         ),
       ),

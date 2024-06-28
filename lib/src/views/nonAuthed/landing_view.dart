@@ -11,19 +11,19 @@ class LandingView extends StatelessWidget {
   Widget build(BuildContext context) {
     // The email is now directly available to use
     return Scaffold(
-      appBar: AppBar(title: Text('Landing Page')),
+      appBar: AppBar(title: const Text('Landing Page')),
       body: Center(
         child: ListView(
           children: <Widget>[
             ListTile(
-              title: Text('Register'),
+              title: const Text('Register'),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, RegisterView.routeName);
               },
             ),
             ListTile(
-              title: Text('Sign In'),
+              title: const Text('Sign In'),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, SignInView.routeName);

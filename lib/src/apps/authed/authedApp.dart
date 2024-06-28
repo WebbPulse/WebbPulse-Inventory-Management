@@ -9,10 +9,10 @@ import 'authedUserExistsApp.dart';
 class AuthedApp extends StatelessWidget {
   final FirestoreService firestoreService;
 
-  AuthedApp({
-    Key? key,
+  const AuthedApp({
+    super.key,
     required this.firestoreService,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -47,7 +47,7 @@ class FirestoreService {
   Future<void> addUserToOrganization(
       String? uid, String? organizationId) async {
     try {
-      await _db
+      _db
           .collection('organizations')
           .doc(organizationId)
           .collection('members');
@@ -73,11 +73,74 @@ class FirestoreService {
           .add({
         'serial': serial,
         'createdAt': FieldValue.serverTimestamp(),
+        'isCheckedOut': false,
       });
     } catch (e) {
       print('Error creating device: $e');
     }
   }
+
+  Future<bool> doesDeviceExistInFirestore(String? serial, String? orgId) async {
+    try {
+      final querySnapshot = await _db
+          .collection('organizations')
+          .doc(orgId)
+          .collection('devices')
+          .where('serial', isEqualTo: serial)
+          .get();
+      return querySnapshot.docs.isNotEmpty;
+    } catch (e) {
+      print('Error checking device exists: $e');
+      return false;
+    }
+  }
+
+  Future<bool> isDeviceCheckedOutInFirestore(
+      String? serial, String? orgId) async {
+    try {
+      final querySnapshot = await _db
+          .collection('organizations')
+          .doc(orgId)
+          .collection('devices')
+          .where('serial', isEqualTo: serial)
+          .get();
+      return querySnapshot.docs.first.data()['isCheckedOut'];
+    } catch (e) {
+      print('Error checking device checkout status: $e');
+      return false;
+    }
+  }
+
+  Future<void> updateDeviceCheckoutStatusInFirestore(
+    String? serial, String? orgId, bool isCheckedOut) async {
+  try {
+    final querySnapshot = await _db
+        .collection('organizations')
+        .doc(orgId)
+        .collection('devices')
+        .where('serial', isEqualTo: serial)
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      final docId = querySnapshot.docs.first.id;
+      await _db
+          .collection('organizations')
+          .doc(orgId)
+          .collection('devices')
+          .doc(docId)
+          .update({
+        'isCheckedOut': isCheckedOut,
+      });
+    } else {
+      print('Device not found');
+    }
+  } catch (e) {
+    print('Error updating checkout status: $e');
+  }
+  }
+
+
+  
 
   Stream<String> getOrgNameStream(String orgUid) {
     return _db
@@ -149,3 +212,4 @@ class FirestoreService {
     });
   }
 }
+

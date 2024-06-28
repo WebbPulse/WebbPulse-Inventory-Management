@@ -20,19 +20,19 @@ class CreateOrganizationView extends StatelessWidget {
       builder: (context, authProvider, child){ 
        return Scaffold(
         appBar: AppBar(
-          title: Text('Create Organization'),
+          title: const Text('Create Organization'),
         ),
         body: Padding(
-          padding: EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
               TextField(
                 controller: _controller,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Organization Name',
                 ),
               ),
-              SizedBox(height: 16.0),
+              const SizedBox(height: 16.0),
               ElevatedButton(
                 onPressed: () async {
                   final organizationCreationName = _controller.text;
@@ -70,7 +70,7 @@ class CreateOrganizationView extends StatelessWidget {
                     ));
                   }
                 },
-                child: Text('Create Organization'),
+                child: const Text('Create Organization'),
               ),
             ],
           ),

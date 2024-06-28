@@ -19,10 +19,10 @@ import '../../views/authed/create_organization_view.dart';
 class AuthedUserExistsApp extends StatelessWidget {
   final FirestoreService firestoreService;
 
-  AuthedUserExistsApp({
-    Key? key,
+  const AuthedUserExistsApp({
+    super.key,
     required this.firestoreService,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
