@@ -20,6 +20,9 @@ class AuthenticationProvider extends ChangeNotifier {
   bool _verified = false;
   bool get verified => _verified;
 
+  String? _displayName;
+  String? get displayName => _displayName;
+
   Future<void> init() async {
     FirebaseUIAuth.configureProviders([
       EmailAuthProvider(),
@@ -31,11 +34,13 @@ class AuthenticationProvider extends ChangeNotifier {
         _uid = user.uid;
         _email = user.email;
         _verified = user.emailVerified;
+        _displayName = user.displayName;
       } else {
         _loggedIn = false;
         _uid = null;
         _email = null;
         _verified = false;
+        _displayName = null;
       }
       print('Auth state changed: loggedIn=$_loggedIn, uid=$_uid');
       notifyListeners();

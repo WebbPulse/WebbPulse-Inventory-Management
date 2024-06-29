@@ -27,33 +27,33 @@ class DevicesView extends StatelessWidget {
               }
               final devicesUids = snapshot.data ?? [];
               return ScaffoldWithDrawer(
-                  title: 'Devices', 
+                  title: 'Devices',
                   body: Column(
                     children: [
-                    const Center(child: Text('Devices Page')),
-                    for (final deviceId in devicesUids) 
-                      StreamBuilder(
-                    stream: firestoreService.getDeviceSerialStream(deviceId, orgSelectorProvider.selectedOrgUid),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const CircularProgressIndicator();
-                      } else if (snapshot.hasError) {
-                        return const Text('Error loading devices');
-                      }
-                      final deviceSerial = snapshot.data ?? '';
-                      print ('deviceSerial: $deviceSerial');
-                      return ListTile(
-                        title: Text(deviceSerial),
-                        onTap: () {
-                        /// implement device page routing  
-                        },
-                      );
-                    },
-                    ),
-                    if (devicesUids.isEmpty) const Text('No devices found'),
+                      const Center(child: Text('Devices Page')),
+                      for (final deviceId in devicesUids)
+                        StreamBuilder(
+                          stream: firestoreService.getDeviceSerialStream(
+                              deviceId, orgSelectorProvider.selectedOrgUid),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const CircularProgressIndicator();
+                            } else if (snapshot.hasError) {
+                              return const Text('Error loading devices');
+                            }
+                            final deviceSerial = snapshot.data ?? '';
+                            return ListTile(
+                              title: Text(deviceSerial),
+                              onTap: () {
+                                /// implement device page routing
+                              },
+                            );
+                          },
+                        ),
+                      if (devicesUids.isEmpty) const Text('No devices found'),
                     ],
-                  )
-              );
+                  ));
             });
       },
     );

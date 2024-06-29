@@ -28,8 +28,8 @@ class AuthedApp extends StatelessWidget {
                 return const Text('Error checking user exists');
               } else if (snapshot.data == false) {
                 return FutureBuilder<void>(
-                    future: firestoreService.createUserInFirestore(
-                        authProvider.uid, authProvider.email),
+                    future: firestoreService.createUser(authProvider.uid,
+                        authProvider.email, authProvider.displayName),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const CircularProgressIndicator();

@@ -6,8 +6,7 @@ import 'package:webbcheck/src/providers/authenticationProvider.dart';
 import '../../services/firestoreService.dart';
 
 class CreateOrganizationView extends StatelessWidget {
-  CreateOrganizationView(
-      {super.key, required this.firestoreService});
+  CreateOrganizationView({super.key, required this.firestoreService});
 
   static const routeName = '/create-organization';
 
@@ -17,8 +16,8 @@ class CreateOrganizationView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer<AuthenticationProvider>(
-      builder: (context, authProvider, child){ 
-       return Scaffold(
+        builder: (context, authProvider, child) {
+      return Scaffold(
         appBar: AppBar(
           title: const Text('Create Organization'),
         ),
@@ -36,32 +35,35 @@ class CreateOrganizationView extends StatelessWidget {
               ElevatedButton(
                 onPressed: () async {
                   final organizationCreationName = _controller.text;
-      
+
                   if (organizationCreationName.isNotEmpty) {
                     try {
-                      await firestoreService.createOrganizationInFirestore(
-                          organizationCreationName, authProvider.uid);
+                      await firestoreService.createOrganization(
+                          organizationCreationName,
+                          authProvider.uid,
+                          authProvider.displayName,
+                          authProvider.email);
                       while (context.mounted == false) {
                         await Future.delayed(const Duration(milliseconds: 100));
                       }
-                      
+
                       if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                        content: Text('Organization created successfully!'),
-                      ));
-                      Navigator.pop(context);
-                      Navigator.pushNamed(context, OrgSelectionView.routeName);
+                        ScaffoldMessenger.of(context)
+                            .showSnackBar(const SnackBar(
+                          content: Text('Organization created successfully!'),
+                        ));
+                        Navigator.pop(context);
+                        Navigator.pushNamed(
+                            context, OrgSelectionView.routeName);
                       }
-                      
-                      
                     } catch (e) {
                       while (context.mounted == false) {
                         await Future.delayed(const Duration(milliseconds: 100));
                       }
                       if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        content: Text('Failed to create organization: $e'),
-                      ));
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          content: Text('Failed to create organization: $e'),
+                        ));
                       }
                     }
                   } else {
