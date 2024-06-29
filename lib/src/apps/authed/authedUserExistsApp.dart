@@ -6,6 +6,7 @@ import '../../providers/settingsProvider.dart';
 import '../../providers/orgSelectorProvider.dart';
 
 import '../../services/firestoreService.dart';
+import '../../services/deviceCheckoutService.dart';
 
 import '../../views/authed/org_selection_view.dart';
 import '../../views/authed/home_view.dart';
@@ -17,12 +18,13 @@ import '../../views/authed/users_view.dart';
 import '../../views/authed/create_organization_view.dart';
 
 class AuthedUserExistsApp extends StatelessWidget {
-  final FirestoreService firestoreService;
-
   AuthedUserExistsApp({
-    Key? key,
+    super.key,
     required this.firestoreService,
-  }) : super(key: key);
+  });
+  final FirestoreService firestoreService;
+  late final DeviceCheckoutService deviceCheckoutService =
+      DeviceCheckoutService(firestoreService: firestoreService);
 
   @override
   Widget build(BuildContext context) {
@@ -49,15 +51,11 @@ class AuthedUserExistsApp extends StatelessWidget {
                   darkTheme: ThemeData.dark(),
                   themeMode: settingsProvider.themeMode,
                   onGenerateRoute: (RouteSettings routeSettings) {
-                    print(
-                        'selected org: ${orgSelectorProvider.selectedOrgUid}');
-
                     if (routeSettings.name ==
                         CreateOrganizationView.routeName) {
                       return MaterialPageRoute<void>(
                         builder: (context) => CreateOrganizationView(
                           firestoreService: firestoreService,
-                          uid: authProvider.uid,
                         ),
                       );
                     }
@@ -93,11 +91,15 @@ class AuthedUserExistsApp extends StatelessWidget {
                         );
                       case CheckoutView.routeName:
                         return MaterialPageRoute<void>(
-                          builder: (context) => const CheckoutView(),
+                          builder: (context) => CheckoutView(
+                              firestoreService: firestoreService,
+                              deviceCheckoutService: deviceCheckoutService),
                         );
                       case UsersView.routeName:
                         return MaterialPageRoute<void>(
-                          builder: (context) => const UsersView(),
+                          builder: (context) => UsersView(
+                            firestoreService: firestoreService,
+                          ),
                         );
                       case OrgSelectionView.routeName:
                         return MaterialPageRoute<void>(

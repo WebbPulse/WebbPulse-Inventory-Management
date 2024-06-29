@@ -13,10 +13,10 @@ import '../views/nonAuthed/register_view.dart';
 class NonAuthedApp extends StatelessWidget {
   final FirestoreService firestoreService;
 
-  NonAuthedApp({
-    Key? key,
+  const NonAuthedApp({
+    super.key,
     required this.firestoreService,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +31,7 @@ class NonAuthedApp extends StatelessWidget {
             switch (routeSettings.name) {
               case RegisterView.routeName:
                 return MaterialPageRoute<void>(
-                  builder: (context) => RegisterView(),
+                  builder: (context) => const RegisterView(),
                 );
               case SignInView.routeName:
                 return MaterialPageRoute<void>(
@@ -41,11 +41,11 @@ class NonAuthedApp extends StatelessWidget {
                 );
               case ForgotPasswordView.routeName:
                 return MaterialPageRoute<void>(
-                  builder: (context) => ForgotPasswordView(),
+                  builder: (context) => const ForgotPasswordView(),
                 );
               default:
                 return MaterialPageRoute<void>(
-                  builder: (context) => LandingView(),
+                  builder: (context) => const LandingView(),
                 );
             }
           }),

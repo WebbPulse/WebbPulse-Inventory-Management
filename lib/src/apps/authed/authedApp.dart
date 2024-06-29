@@ -9,10 +9,10 @@ import 'authedUserExistsApp.dart';
 class AuthedApp extends StatelessWidget {
   final FirestoreService firestoreService;
 
-  AuthedApp({
-    Key? key,
+  const AuthedApp({
+    super.key,
     required this.firestoreService,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -28,8 +28,8 @@ class AuthedApp extends StatelessWidget {
                 return const Text('Error checking user exists');
               } else if (snapshot.data == false) {
                 return FutureBuilder<void>(
-                    future: firestoreService.createUserInFirestore(
-                        authProvider.uid, authProvider.email),
+                    future: firestoreService.createUser(authProvider.uid,
+                        authProvider.email, authProvider.displayName),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const CircularProgressIndicator();

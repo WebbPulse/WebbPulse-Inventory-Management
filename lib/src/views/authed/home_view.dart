@@ -16,8 +16,8 @@ class HomeView extends StatelessWidget {
           const SizedBox(height: 8),
           const Column(
             children: [
-              const Header("I am a god!"),
-              const Paragraph(
+              Header("I am a god!"),
+              Paragraph(
                 'I am the one who will destroy the world!',
               ),
             ],

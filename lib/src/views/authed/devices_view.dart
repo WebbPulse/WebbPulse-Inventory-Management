@@ -6,7 +6,7 @@ import '../../providers/orgSelectorProvider.dart';
 import '../../widgets.dart';
 
 class DevicesView extends StatelessWidget {
-  DevicesView({Key? key, required this.firestoreService}) : super(key: key);
+  const DevicesView({super.key, required this.firestoreService});
 
   final FirestoreService firestoreService;
   static const routeName = '/devices';
@@ -23,12 +23,37 @@ class DevicesView extends StatelessWidget {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const CircularProgressIndicator();
               } else if (snapshot.hasError) {
-                return const Text('Error loading organizations');
+                return const Text('Error loading devices');
               }
               final devicesUids = snapshot.data ?? [];
-              print('devicesUids: $devicesUids');
-              return const ScaffoldWithDrawer(
-                  title: 'Devices', body: Center(child: Text('Devices Page')));
+              return ScaffoldWithDrawer(
+                  title: 'Devices',
+                  body: Column(
+                    children: [
+                      const Center(child: Text('Devices Page')),
+                      for (final deviceId in devicesUids)
+                        StreamBuilder(
+                          stream: firestoreService.getDeviceSerialStream(
+                              deviceId, orgSelectorProvider.selectedOrgUid),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const CircularProgressIndicator();
+                            } else if (snapshot.hasError) {
+                              return const Text('Error loading devices');
+                            }
+                            final deviceSerial = snapshot.data ?? '';
+                            return ListTile(
+                              title: Text(deviceSerial),
+                              onTap: () {
+                                /// implement device page routing
+                              },
+                            );
+                          },
+                        ),
+                      if (devicesUids.isEmpty) const Text('No devices found'),
+                    ],
+                  ));
             });
       },
     );

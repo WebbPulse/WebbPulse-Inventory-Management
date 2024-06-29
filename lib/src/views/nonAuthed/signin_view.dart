@@ -7,7 +7,7 @@ import '../../services/firestoreService.dart';
 import '../authed/home_view.dart';
 
 class SignInView extends StatelessWidget {
-  SignInView({super.key, required this.firestoreService});
+  const SignInView({super.key, required this.firestoreService});
 
   static const routeName = '/signin';
 
