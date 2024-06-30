@@ -17,3 +17,5 @@ jobs:
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_WEBBCHECK }}
           channelId: live
           projectId: webbcheck
+        env: 
+          FIREBASE_CLI_EXPERIMENTS: webframeworks
