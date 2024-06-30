@@ -23,9 +23,6 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Build Web
-        run: flutter build web
-
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
