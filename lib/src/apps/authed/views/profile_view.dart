@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
-import '../../widgets.dart';
+import '../../../shared/widgets.dart';
 
 class ProfileView extends StatelessWidget {
   const ProfileView({super.key});
@@ -8,8 +8,11 @@ class ProfileView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ScaffoldWithDrawer(
-      title: 'Profile',
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Profile'),
+      ),
+      drawer: const AuthedDrawer(),
       body: ProfileScreen(
         providers: [
           EmailAuthProvider(),

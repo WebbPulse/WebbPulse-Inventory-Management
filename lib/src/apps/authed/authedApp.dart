@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../providers/authenticationProvider.dart';
+import '../../shared/providers/authenticationProvider.dart';
 
-import '../../services/firestoreService.dart';
+import '../../shared/services/firestoreService.dart';
 import 'authedUserExistsApp.dart';
 
 class AuthedApp extends StatelessWidget {

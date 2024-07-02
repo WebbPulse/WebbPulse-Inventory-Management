@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:webbcheck/src/views/authed/org_selection_view.dart';
-import 'package:webbcheck/src/providers/authenticationProvider.dart';
+import 'package:webbcheck/src/apps/authed/views/org_selection_view.dart';
+import 'package:webbcheck/src/shared/providers/authenticationProvider.dart';
 
-import '../../services/firestoreService.dart';
+import '../../../shared/services/firestoreService.dart';
 
 class CreateOrganizationView extends StatelessWidget {
   CreateOrganizationView({super.key, required this.firestoreService});
@@ -52,7 +52,6 @@ class CreateOrganizationView extends StatelessWidget {
                             .showSnackBar(const SnackBar(
                           content: Text('Organization created successfully!'),
                         ));
-                        Navigator.pop(context);
                         Navigator.pushNamed(
                             context, OrgSelectionView.routeName);
                       }

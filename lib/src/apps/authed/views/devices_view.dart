@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../services/firestoreService.dart';
-import '../../providers/orgSelectorProvider.dart';
-import '../../widgets.dart';
+import '../../../shared/services/firestoreService.dart';
+import '../../../shared/providers/orgSelectorProvider.dart';
+import '../../../shared/widgets.dart';
 
 class DevicesView extends StatelessWidget {
   const DevicesView({super.key, required this.firestoreService});
@@ -26,8 +26,11 @@ class DevicesView extends StatelessWidget {
                 return const Text('Error loading devices');
               }
               final devicesUids = snapshot.data ?? [];
-              return ScaffoldWithDrawer(
-                  title: 'Devices',
+              return Scaffold(
+                  appBar: AppBar(
+                    title: const Text('Devices Page'),
+                  ),
+                  drawer: const AuthedDrawer(),
                   body: Column(
                     children: [
                       const Center(child: Text('Devices Page')),

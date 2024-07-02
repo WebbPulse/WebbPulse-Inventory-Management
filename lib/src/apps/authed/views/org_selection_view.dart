@@ -1,8 +1,8 @@
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
-import 'package:webbcheck/src/services/firestoreService.dart';
-import 'package:webbcheck/src/views/authed/create_organization_view.dart';
-import '../../providers/orgSelectorProvider.dart';
+import 'package:webbcheck/src/shared/services/firestoreService.dart';
+import 'package:webbcheck/src/apps/authed/views/create_organization_view.dart';
+import '../../../shared/providers/orgSelectorProvider.dart';
 import 'home_view.dart';
 
 class OrgSelectionView extends StatelessWidget {

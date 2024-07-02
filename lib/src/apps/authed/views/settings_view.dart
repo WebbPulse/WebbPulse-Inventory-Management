@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../providers/settingsProvider.dart';
-import '../../widgets.dart';
+import '../../../shared/providers/settingsProvider.dart';
+import '../../../shared/widgets.dart';
 
 /// Displays the various settings that can be customized by the user.
 ///
@@ -16,8 +16,11 @@ class SettingsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ScaffoldWithDrawer(
-      title: 'Settings',
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Settings'),
+      ),
+      drawer: const AuthedDrawer(),
       body: Padding(
         padding: const EdgeInsets.all(16),
         // Glue the SettingsController to the theme selection DropdownButton.

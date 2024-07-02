@@ -4,13 +4,18 @@ import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 class ForgotPasswordView extends StatelessWidget {
   const ForgotPasswordView({super.key});
 
-  static const routeName = '/sign-in/forgot-password';
+  static const routeName = '/forgot-password';
 
   @override
   Widget build(BuildContext context) {
     // The email is now directly available to use
-    return const ForgotPasswordScreen(
-      headerMaxExtent: 200,
+    return Scaffold(
+      appBar: AppBar(title: const Text('Forgot Password')),
+      body: const Center(
+        child: ForgotPasswordScreen(
+          headerMaxExtent: 200,
+        ),
+      ),
     );
   }
 }

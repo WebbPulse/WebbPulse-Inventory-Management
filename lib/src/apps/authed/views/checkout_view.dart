@@ -2,11 +2,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:webbcheck/src/providers/orgSelectorProvider.dart';
-import 'package:webbcheck/src/services/firestoreService.dart';
+import 'package:webbcheck/src/shared/providers/orgSelectorProvider.dart';
+import 'package:webbcheck/src/shared/services/firestoreService.dart';
 
-import '../../widgets.dart';
-import '../../services/deviceCheckoutService.dart';
+import '../../../shared/widgets.dart';
+import '../../../shared/services/deviceCheckoutService.dart';
 
 class CheckoutView extends StatelessWidget {
   CheckoutView(
@@ -23,8 +23,11 @@ class CheckoutView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<OrgSelectorProvider>(
       builder: (context, orgSelectorProvider, child) {
-        return ScaffoldWithDrawer(
-          title: 'Checkout Page',
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('Checkout Page'),
+          ),
+          drawer: const AuthedDrawer(),
           body: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(

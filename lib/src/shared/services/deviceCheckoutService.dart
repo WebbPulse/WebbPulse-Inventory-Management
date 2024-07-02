@@ -1,8 +1,8 @@
 // device_checkout_service.dart
 
 import 'package:flutter/material.dart';
-import 'package:webbcheck/src/services/firestoreService.dart';
-import 'package:webbcheck/src/views/authed/home_view.dart';
+import 'package:webbcheck/src/shared/services/firestoreService.dart';
+import 'package:webbcheck/src/apps/authed/views/home_view.dart';
 
 class DeviceCheckoutService {
   final FirestoreService firestoreService;

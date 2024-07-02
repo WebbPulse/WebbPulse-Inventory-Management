@@ -5,7 +5,7 @@ import 'signin_view.dart';
 class LandingView extends StatelessWidget {
   const LandingView({super.key});
 
-  static const routeName = '/landing';
+  static const routeName = '/';
 
   @override
   Widget build(BuildContext context) {
@@ -18,14 +18,12 @@ class LandingView extends StatelessWidget {
             ListTile(
               title: const Text('Register'),
               onTap: () {
-                Navigator.pop(context);
                 Navigator.pushNamed(context, RegisterView.routeName);
               },
             ),
             ListTile(
               title: const Text('Sign In'),
               onTap: () {
-                Navigator.pop(context);
                 Navigator.pushNamed(context, SignInView.routeName);
               },
             ),
