@@ -24,7 +24,7 @@ class UsersView extends StatelessWidget {
                 .getOrgMembersUidsStream(orgSelectorProvider.selectedOrgUid),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return const CircularProgressIndicator();
+                return const Center(child: CircularProgressIndicator());
               } else if (snapshot.hasError) {
                 return const Text('Error loading users');
               }
@@ -94,7 +94,8 @@ class UsersView extends StatelessWidget {
                           builder: (context, snapshot) {
                             if (snapshot.connectionState ==
                                 ConnectionState.waiting) {
-                              return const CircularProgressIndicator();
+                              return const Center(
+                                  child: CircularProgressIndicator());
                             } else if (snapshot.hasError) {
                               return const Text('Error loading users');
                             }
