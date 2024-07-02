@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 
-import 'src/providers/authenticationProvider.dart';
-import 'src/providers/settingsProvider.dart';
+import 'src/shared/providers/authenticationProvider.dart';
+import 'src/shared/providers/settingsProvider.dart';
 
 import 'src/apps/authed/authedApp.dart';
-import 'src/apps/nonAuthedApp.dart';
+import 'src/apps/nonAuthed/nonAuthedApp.dart';
 
-import 'src/services/firestoreService.dart';
-import 'src/services/settingsService.dart';
+import 'src/shared/services/firestoreService.dart';
+import 'src/shared/services/settingsService.dart';
 import 'firebase_options.dart';
 
 void main() async {

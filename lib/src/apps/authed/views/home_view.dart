@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../widgets.dart';
+import '../../../shared/widgets.dart';
 
 class HomeView extends StatelessWidget {
   const HomeView({super.key});
@@ -8,8 +8,11 @@ class HomeView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ScaffoldWithDrawer(
-      title: 'Home',
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Home'),
+      ),
+      drawer: AuthedDrawer(),
       body: ListView(
         children: <Widget>[
           Image.asset('assets/saber.gif'),

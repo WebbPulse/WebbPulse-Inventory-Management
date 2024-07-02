@@ -9,8 +9,13 @@ class RegisterView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // The email is now directly available to use
-    return const RegisterScreen(
-      headerMaxExtent: 200,
+    return Scaffold(
+      appBar: AppBar(title: const Text('Register')),
+      body: const Center(
+        child: RegisterScreen(
+          headerMaxExtent: 200,
+        ),
+      ),
     );
   }
 }

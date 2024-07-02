@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:webbcheck/src/apps/authed/views/finishSignUp.dart';
 
-import '../../providers/authenticationProvider.dart';
-import '../../providers/settingsProvider.dart';
-import '../../providers/orgSelectorProvider.dart';
+import '../../shared/providers/authenticationProvider.dart';
+import '../../shared/providers/settingsProvider.dart';
+import '../../shared/providers/orgSelectorProvider.dart';
 
-import '../../services/firestoreService.dart';
-import '../../services/deviceCheckoutService.dart';
+import '../../shared/services/firestoreService.dart';
+import '../../shared/services/deviceCheckoutService.dart';
 
-import '../../views/authed/org_selection_view.dart';
-import '../../views/authed/home_view.dart';
-import '../../views/authed/settings_view.dart';
-import '../../views/authed/profile_view.dart';
-import '../../views/authed/devices_view.dart';
-import '../../views/authed/checkout_view.dart';
-import '../../views/authed/users_view.dart';
-import '../../views/authed/create_organization_view.dart';
+import 'views/org_selection_view.dart';
+import 'views/home_view.dart';
+import 'views/settings_view.dart';
+import 'views/profile_view.dart';
+import 'views/devices_view.dart';
+import 'views/checkout_view.dart';
+import 'views/users_view.dart';
+import 'views/create_organization_view.dart';
 
 class AuthedUserExistsApp extends StatelessWidget {
   AuthedUserExistsApp({
@@ -45,7 +46,7 @@ class AuthedUserExistsApp extends StatelessWidget {
                 final organizationUids = snapshot.data ?? [];
 
                 return MaterialApp(
-                  restorationScopeId: 'app',
+                  restorationScopeId: 'authedapp',
                   title: 'WebbPulse Checkout',
                   theme: ThemeData(),
                   darkTheme: ThemeData.dark(),
@@ -107,6 +108,10 @@ class AuthedUserExistsApp extends StatelessWidget {
                             organizationUids: organizationUids,
                             firestoreService: firestoreService,
                           ),
+                        );
+                      case SignUpCompleteView.routeName:
+                        return MaterialPageRoute<void>(
+                          builder: (context) => const SignUpCompleteView(),
                         );
                       default:
                         return MaterialPageRoute<void>(
