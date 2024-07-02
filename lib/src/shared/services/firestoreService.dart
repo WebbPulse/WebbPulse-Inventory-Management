@@ -153,22 +153,22 @@ class FirestoreService {
     });
   }
 
-  Stream<List<String>> getDevicesUidsStream(String? orgUid) {
+  Future<List<String>> getDevicesUids(String? orgUid) async {
     if (orgUid == null) {
-      return Stream.value([]);
+      return [];
     }
-    return FirebaseFirestore.instance
-        .collection('organizations')
-        .doc(orgUid)
-        .collection('devices')
-        .snapshots()
-        .map((querySnapshot) {
+    try {
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('organizations')
+          .doc(orgUid)
+          .collection('devices')
+          .get();
       final documentUIDs = querySnapshot.docs.map((doc) => doc.id).toList();
       return documentUIDs;
-    }).handleError((e) {
+    } catch (e) {
       print('Error retrieving device UIDs: $e');
       return <String>[]; // Return an empty list in case of error
-    });
+    }
   }
 
   Stream<List<String>> orgsUidsStream(String? uid) {
@@ -193,9 +193,10 @@ class FirestoreService {
     });
   }
 
-  Stream<String> getDeviceSerialStream(String? deviceId, String? orgId) {
+  Stream<Map<String, dynamic>> getDeviceDataStream(
+      String? deviceId, String? orgId) {
     if (deviceId == null || orgId == null) {
-      return Stream.value('');
+      return Stream.value({});
     }
     return _db
         .collection('organizations')
@@ -204,10 +205,10 @@ class FirestoreService {
         .doc(deviceId)
         .snapshots()
         .map((snapshot) {
-      return (snapshot.data()?['serial'] ?? '') as String;
+      return snapshot.data() ?? {};
     }).handleError((e) {
-      print('Error checking device serial: $e');
-      return '';
+      print('Error checking device data: $e');
+      return {};
     });
   }
 

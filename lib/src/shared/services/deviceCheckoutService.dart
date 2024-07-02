@@ -2,7 +2,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:webbcheck/src/shared/services/firestoreService.dart';
-import 'package:webbcheck/src/apps/authed/views/home_view.dart';
 
 class DeviceCheckoutService {
   final FirestoreService firestoreService;
@@ -45,15 +44,6 @@ class DeviceCheckoutService {
             _showSnackBar(context,
                 isCheckedOut ? 'Device checked in!' : 'Device checked out!');
           }
-        }
-
-        ///ensure context is mounted before navigating
-        while (context.mounted == false) {
-          await Future.delayed(const Duration(milliseconds: 100));
-        }
-        if (context.mounted) {
-          Navigator.pop(context);
-          Navigator.pushNamed(context, HomeView.routeName);
         }
       } catch (e) {
         ///ensure context is mounted before showing snackbar

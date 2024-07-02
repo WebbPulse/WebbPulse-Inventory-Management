@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 
 import '../apps/authed/views/org_selection_view.dart';
-import '../apps/authed/views/home_view.dart';
+
 import '../apps/authed/views/profile_view.dart';
 import '../apps/authed/views/settings_view.dart';
 import '../apps/authed/views/checkout_view.dart';
@@ -26,12 +26,6 @@ class AuthedDrawer extends StatelessWidget {
               color: Theme.of(context).primaryColor,
             ),
             child: const Text('Menu'),
-          ),
-          ListTile(
-            title: const Text('Home'),
-            onTap: () {
-              Navigator.pushNamed(context, HomeView.routeName);
-            },
           ),
           ListTile(
             title: const Text('Checkout'),
