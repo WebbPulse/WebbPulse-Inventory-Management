@@ -2,6 +2,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:webbcheck/src/shared/services/firestoreService.dart';
 import 'package:webbcheck/src/apps/authed/views/create_organization_view.dart';
+import 'package:webbcheck/src/shared/widgets.dart';
 import '../../../shared/providers/orgSelectorProvider.dart';
 import '../../../shared/providers/authenticationProvider.dart';
 import 'checkout_view.dart';
@@ -19,7 +20,7 @@ class OrgSelectionView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // The email is now directly available to use
-    final theme = Theme.of(context);
+
     return Consumer<AuthenticationProvider>(
       builder: (context, authProvider, child) => StreamBuilder<List<String>>(
         stream: firestoreService.orgsUidsStream(authProvider.uid),
@@ -37,9 +38,8 @@ class OrgSelectionView extends StatelessWidget {
                 const Center(child: Text('Select an Organization')),
                 Expanded(
                   child: organizationUids.isNotEmpty
-                      ? SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.5,
-                          child: ListView.builder(
+                      ? CustomLayoutBuilder(
+                          childWidget: ListView.builder(
                             physics: const BouncingScrollPhysics(),
                             itemCount: organizationUids.length + 1,
                             itemBuilder: (context, index) {
@@ -61,7 +61,6 @@ class OrgSelectionView extends StatelessWidget {
                               return OrgCard(
                                 orgUid: orgUid,
                                 firestoreService: firestoreService,
-                                theme: theme,
                               );
                             },
                           ),
@@ -93,15 +92,14 @@ class OrgCard extends StatelessWidget {
     super.key,
     required this.orgUid,
     required this.firestoreService,
-    required this.theme,
   });
 
   final String orgUid;
   final FirestoreService firestoreService;
-  final ThemeData theme;
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Consumer<OrgSelectorProvider>(
       builder: (context, orgSelectorProvider, child) {
         return StreamBuilder(
@@ -114,23 +112,16 @@ class OrgCard extends StatelessWidget {
             }
             final String orgName = snapshot.data ?? '';
 
-            return Card(
-              margin: const EdgeInsets.symmetric(vertical: 8.0),
-              child: ListTile(
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                tileColor: theme.colorScheme.secondary.withOpacity(0.1),
-                leading: Icon(Icons.home, color: theme.colorScheme.secondary),
-                title: Text(
-                  orgName,
-                  style: theme.textTheme.bodyMedium
-                      ?.copyWith(color: theme.colorScheme.secondary),
-                ),
-                onTap: () {
-                  orgSelectorProvider.selectOrg(orgUid);
-                  Navigator.pushNamed(context, CheckoutView.routeName);
-                },
-              ),
+            return CustomCard(
+              theme: theme,
+              customCardLeading:
+                  Icon(Icons.home, color: theme.colorScheme.secondary),
+              titleText: orgName,
+              customCardTrailing: null,
+              onTapAction: () {
+                orgSelectorProvider.selectOrg(orgUid);
+                Navigator.pushNamed(context, CheckoutView.routeName);
+              },
             );
           },
         );
