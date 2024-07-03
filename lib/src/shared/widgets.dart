@@ -117,16 +117,64 @@ class IconAndDetail extends StatelessWidget {
       );
 }
 
-class StyledButton extends StatelessWidget {
-  const StyledButton({required this.child, required this.onPressed, super.key});
-  final Widget child;
-  final void Function() onPressed;
+class CustomCard extends StatelessWidget {
+  const CustomCard(
+      {super.key,
+      required this.theme,
+      required this.customCardLeading,
+      required this.titleText,
+      required this.customCardTrailing,
+      required this.onTapAction});
+  final ThemeData theme;
+  final dynamic customCardLeading;
+  final String titleText;
+  final dynamic customCardTrailing;
+  final dynamic onTapAction;
 
   @override
-  Widget build(BuildContext context) => OutlinedButton(
-        style: OutlinedButton.styleFrom(
-            side: const BorderSide(color: Colors.deepPurple)),
-        onPressed: onPressed,
-        child: child,
+  Widget build(BuildContext context) => Card(
+        margin: const EdgeInsets.symmetric(vertical: 8.0),
+        child: ListTile(
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          tileColor: theme.colorScheme.secondary.withOpacity(0),
+          leading: customCardLeading,
+          title: Text(
+            titleText,
+            style: theme.textTheme.bodyMedium
+                ?.copyWith(color: theme.colorScheme.secondary),
+          ),
+          trailing: customCardTrailing,
+          onTap: onTapAction,
+        ),
+      );
+}
+
+class CustomLayoutBuilder extends StatelessWidget {
+  const CustomLayoutBuilder({super.key, required this.childWidget});
+  final Widget childWidget;
+
+  @override
+  Widget build(BuildContext context) => ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height,
+        ),
+        child: Center(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              double widthFactor;
+              if (constraints.maxWidth < 600) {
+                widthFactor = 0.9; // 90% of the width for narrow screens
+              } else if (constraints.maxWidth < 1200) {
+                widthFactor = 0.5; // 70% of the width for medium screens
+              } else {
+                widthFactor = 0.2; // 50% of the width for large screens
+              }
+              return SizedBox(
+                  width: constraints.maxWidth * widthFactor,
+                  child: childWidget);
+            },
+          ),
+        ),
       );
 }

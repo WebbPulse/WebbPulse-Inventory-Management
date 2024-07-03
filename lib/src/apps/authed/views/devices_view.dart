@@ -100,30 +100,19 @@ class DeviceCard extends StatelessWidget {
         String deviceSerial = deviceData['serial'] ?? '';
         bool deviceIsCheckedOut = deviceData['isCheckedOut'] ?? false;
 
-        return Card(
-          margin: const EdgeInsets.symmetric(vertical: 8.0),
-          child: ListTile(
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-            tileColor: theme.colorScheme.secondary.withOpacity(0.1),
-            leading: Icon(Icons.devices, color: theme.colorScheme.secondary),
-            title: Text(
-              deviceSerial,
-              style: theme.textTheme.bodyMedium
-                  ?.copyWith(color: theme.colorScheme.secondary),
-            ),
-            trailing: ElevatedButton(
+        return CustomCard(
+            theme: theme,
+            customCardLeading:
+                Icon(Icons.devices, color: theme.colorScheme.secondary),
+            titleText: deviceSerial,
+            customCardTrailing: ElevatedButton(
               child: Text(deviceIsCheckedOut ? 'Check In' : 'Check Out'),
               onPressed: () {
                 deviceCheckoutService.handleDeviceCheckout(
                     context, deviceSerial, orgUid);
               },
             ),
-            onTap: () {
-              // implement device page routing
-            },
-          ),
-        );
+            onTapAction: () {});
       },
     );
   }
