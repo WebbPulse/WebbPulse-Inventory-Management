@@ -7,17 +7,27 @@ on:
 
 jobs:
   deploy:
-    name: Deploy
+    name: Buld and Deploy
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
         uses: actions/checkout@master
+      
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.22.2'
+      
+      - name: Install dependencies
+        run: flutter pub get
+      
+
+      
       - name: Deploy to Firebase
         uses: w9jds/firebase-action@master
         with:
-          args: |
-            experiments:enable webframeworks  
-            deploy --only hosting
+          args: deploy --only hosting
         env:
           GCP_SA_KEY: ${{ secrets.FIREBASE_CREDENTIALS }}
+          FIREBASE_CLI_EXPERIMENTS: webframeworks
 
