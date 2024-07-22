@@ -26,15 +26,12 @@ jobs:
         with:
           python-version: '3.12'
       
-      - name: Set up virtual environment
-        run: python3.12 -m venv venv
-      
       - name: Activate virtual environment and install dependencies
         run: |
-          ls ./
-          source venv/bin/activate
-          ls ./venv
-          pip install -r venv/requirements.txt
+          ls ./functions
+          source ./functions/venv/Scripts/activate
+          ls ./functions/venv
+          pip install -r ./functions/venv/requirements.txt
       
       - name: Deploy functions to production
         env:
