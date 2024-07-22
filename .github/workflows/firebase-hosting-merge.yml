@@ -31,7 +31,9 @@ jobs:
       
       - name: Activate virtual environment and install dependencies
         run: |
+          ls ./
           source venv/bin/activate
+          ls ./venv
           pip install -r venv/requirements.txt
       
       - name: Deploy functions to production
