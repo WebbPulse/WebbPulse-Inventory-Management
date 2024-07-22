@@ -20,7 +20,8 @@ jobs:
       
       - name: Activate virtual environment and install dependencies
         run: |
-          source functions/venv/bin/activate
+          pwd
+          source ./functions/venv/bin/activate
           pip install -r requirements.txt
       
       - name: deploy to production
