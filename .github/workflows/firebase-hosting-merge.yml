@@ -28,16 +28,13 @@ jobs:
       
       - name: Activate virtual environment and install dependencies
         run: |
-          ls ./functions
           source ./functions/venv/Scripts/activate
-          ls ./functions/venv
           pip install -r ./functions/requirements.txt
       
       - name: Deploy functions to production
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.FIREBASE_CREDENTIALS }}
-        run: |
-          source venv/bin/activate
+        run:
           firebase deploy --only functions
         
 
