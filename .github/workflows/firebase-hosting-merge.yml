@@ -18,8 +18,8 @@ jobs:
         with:
           python-version: '3.10.6'
 
-      - name: ls functions
-        run: ls functions
+      - name: ls functions/venv/bin
+        run: ls functions/venv/bin
       
       - name: Activate virtual environment and install dependencies
         run: |
