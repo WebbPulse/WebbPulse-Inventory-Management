@@ -3,7 +3,7 @@ name: Deploy Firebase Functions
 on:
   push:
     branches:
-      - main  # Trigger on push to the main branch
+      - main  # Trigger on push to the main branc
 
 jobs:
   deploy:
@@ -37,6 +37,7 @@ jobs:
           projectId: webbcheck
         env: 
           FIREBASE_CLI_EXPERIMENTS: webframeworks
+
 
       
 
