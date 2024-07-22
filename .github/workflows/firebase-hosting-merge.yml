@@ -7,25 +7,39 @@ on:
 
 jobs:
   deploy:
-    name: Buld and Deploy
+    name: Build and Deploy
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@main
-      
+        uses: actions/checkout@v2
       
       - name: Set up Node.js
-        uses: actions/setup-node@main
+        uses: actions/setup-node@v2
         with:
           node-version: '18.18.2'
       
-      - name: install firebase cli
+      - name: Install Firebase CLI
         run: npm install -g firebase-tools
+      
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.12'
+      
+      - name: Set up virtual environment
+        run: python3.12 -m venv venv
+      
+      - name: Activate virtual environment and install dependencies
+        run: |
+          source venv/bin/activate
+          pip install -r requirements.txt
       
       - name: Deploy functions to production
         env:
-          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
-        run: firebase deploy --only functions
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.FIREBASE_CREDENTIALS }}
+        run: |
+          source venv/bin/activate
+          firebase deploy --only functions
         
 
       
