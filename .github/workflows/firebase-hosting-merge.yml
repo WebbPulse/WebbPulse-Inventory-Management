@@ -18,8 +18,8 @@ jobs:
         with:
           python-version: '3.10.6'
 
-      - name: print working directory
-        run: pwd
+      - name: ls
+        run: ls
       
       - name: Activate virtual environment and install dependencies
         run: |
