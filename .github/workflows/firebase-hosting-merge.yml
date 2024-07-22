@@ -11,24 +11,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@master
+        uses: actions/checkout@main
       
-      - name: setup python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.10.6'
-
-      - name: Activate virtual environment and install dependencies
-        run: |
-          source functions/venv/Scripts/activate
-          pip install -r functions/requirements.txt
       
-      - name: deploy to production
-        uses: w9jds/firebase-action@master
+      - name: Set up Node.js
+        uses: actions/setup-node@main
         with:
-          args: deploy --only functions
+          node-version: '18.18.2'
+      
+      - name: install firebase cli
+        run: npm install -g firebase-tools
+      
+      - name: Deploy functions to production
         env:
-          GCP_SA_KEY: ${{ secrets.FIREBASE_CREDENTIALS }}
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+        run: firebase deploy --only functions
+        
 
       
       - name: Set up Flutter
