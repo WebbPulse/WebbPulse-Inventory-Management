@@ -13,16 +13,12 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@master
       
-      - name: install dependencies
-        run: cd functions/ && npm install
       - name: deploy to production
         uses: docker://w9jds/firebase-action:master
         with:
           args: deploy --only functions
         env:
           GCP_SA_KEY: ${{ secrets.FIREBASE_CREDENTIALS }}
-      - name: change directory
-        run: cd ..
       
       - name: Set up Flutter
         uses: subosito/flutter-action@main
