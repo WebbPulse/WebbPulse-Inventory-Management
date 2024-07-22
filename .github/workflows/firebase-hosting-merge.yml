@@ -3,7 +3,7 @@ name: Deploy Firebase Functions
 on:
   push:
     branches:
-      - main  # Trigger on push to the main branc
+      - main  # Trigger on push to the main branch
 
 jobs:
   deploy:
