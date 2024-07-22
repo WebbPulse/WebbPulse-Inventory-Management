@@ -6,11 +6,13 @@ on:
   push:
     branches:
       - main
+
 jobs:
-  build_and_deploy:
+  deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout Repository
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Set up Flutter
@@ -21,12 +23,27 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
       
-      - name: Deploy to Firebase Hosting
-        uses: FirebaseExtended/action-hosting-deploy@v0
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
         with:
-          repoToken: ${{ secrets.GITHUB_TOKEN }}
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_WEBBCHECK }}
-          channelId: live
-          projectId: webbcheck
-        env: 
+          node-version: '14'  # Specify the Node.js version
+
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools
+
+      - name: Authenticate to Firebase
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          echo $FIREBASE_SERVICE_ACCOUNT > ${HOME}/firebase-key.json
+          firebase auth:login --account ${HOME}/firebase-key.json
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: functions  # Adjust if your functions are in a different directory
+
+      - name: Deploy to Firebase
+        run: firebase deploy --only hosting,functions
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           FIREBASE_CLI_EXPERIMENTS: webframeworks
