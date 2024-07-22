@@ -32,10 +32,15 @@ jobs:
           source ./functions/venv/bin/activate
           pip install -r ./functions/requirements.txt
       
+      - name: Verify virtual environment and dependencies
+        run: |
+          source ./functions/venv/bin/activate
+          python -m pip freeze
+      
       - name: Deploy functions to production
-        uses: w9jds/firebase-action@master
-        with:
-          args: deploy --only functions
+        run: |
+          source ./functions/venv/bin/activate
+          firebase deploy --only functions
         env:
           GCP_SA_KEY: ${{ secrets.FIREBASE_CREDENTIALS }}
 
