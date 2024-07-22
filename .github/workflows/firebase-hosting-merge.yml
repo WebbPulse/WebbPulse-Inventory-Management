@@ -26,14 +26,14 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '14'  # Specify the Node.js version
+          node-version: '18.18.2'  # Specify the Node.js version
 
       - name: Install Firebase CLI
         run: npm install -g firebase-tools
 
       - name: Authenticate to Firebase
         env:
-          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_WEBBCHECK }}
         run: |
           echo $FIREBASE_SERVICE_ACCOUNT > ${HOME}/firebase-key.json
           firebase auth:login --account ${HOME}/firebase-key.json
@@ -45,5 +45,5 @@ jobs:
       - name: Deploy to Firebase
         run: firebase deploy --only hosting,functions
         env:
-          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_WEBBCHECK }}
           FIREBASE_CLI_EXPERIMENTS: webframeworks
