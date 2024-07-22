@@ -26,9 +26,10 @@ jobs:
         with:
           python-version: '3.12'
       
-      - name: Activate virtual environment and install dependencies
+      - name: Create and activate virtual environment and install dependencies
         run: |
-          source ./functions/venv/Scripts/activate
+          python3 -m venv ./functions/venv
+          source ./functions/venv/bin/activate
           pip install -r ./functions/requirements.txt
       
       - name: Deploy functions to production
@@ -55,7 +56,3 @@ jobs:
           projectId: webbcheck
         env: 
           FIREBASE_CLI_EXPERIMENTS: webframeworks
-
-
-      
-
