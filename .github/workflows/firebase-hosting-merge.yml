@@ -21,7 +21,7 @@ jobs:
       - name: Activate virtual environment and install dependencies
         run: |
           source functions/venv/Scripts/activate
-          pip install -r requirements.txt
+          pip install -r functions/venv/requirements.txt
       
       - name: deploy to production
         uses: w9jds/firebase-action@master
