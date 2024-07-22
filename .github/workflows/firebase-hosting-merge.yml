@@ -25,7 +25,7 @@ jobs:
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.FIREBASE_CREDENTIALS }}
         run: |
-          firebase login:ci --token {FIREBASE_CREDENTIALS}
+          firebase login --token {FIREBASE_CREDENTIALS}
           firebase functions:config:set --project ${{ secrets.FIREBASE_PROJECT_ID }}
 
       - name: Deploy to Firebase
