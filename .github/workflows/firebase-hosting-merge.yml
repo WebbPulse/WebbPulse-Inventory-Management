@@ -21,16 +21,6 @@ jobs:
       - name: Install Firebase CLI
         run: npm install -g firebase-tools
       
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.12'
-      
-      - name: Create and activate virtual environment and install dependencies
-        run: |
-          ./functions/venv/Scripts/activate
-          pip install -r ./functions/requirements.txt
-      
       - name: Deploy functions to production
         uses: w9jds/firebase-action@master
         with:
