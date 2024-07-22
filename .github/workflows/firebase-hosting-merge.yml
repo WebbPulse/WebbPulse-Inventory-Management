@@ -24,7 +24,9 @@ jobs:
       - name: Authenticate to Firebase
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.FIREBASE_CREDENTIALS }}
-        run: firebase functions:config:set --project ${{ secrets.FIREBASE_PROJECT_ID }}
+        run: 
+          firebase login
+          firebase functions:config:set --project ${{ secrets.FIREBASE_PROJECT_ID }}
 
       - name: Deploy to Firebase
         env:
