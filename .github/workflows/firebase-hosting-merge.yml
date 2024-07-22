@@ -16,11 +16,13 @@ jobs:
       - name: setup python
         uses: actions/setup-python@v2
         with:
-          python-version: '3.10'
-        
-      - name: cd into functions directory
-        run: cd functions
-
+          python-version: '3.10.6'
+      
+      - name: Activate virtual environment and install dependencies
+        run: |
+          source functions/venv/bin/activate
+          pip install -r requirements.txt
+      
       - name: deploy to production
         uses: w9jds/firebase-action@master
         with:
@@ -28,8 +30,6 @@ jobs:
         env:
           GCP_SA_KEY: ${{ secrets.FIREBASE_CREDENTIALS }}
 
-      - name: cd back to root
-        run: cd ..
       
       - name: Set up Flutter
         uses: subosito/flutter-action@main
