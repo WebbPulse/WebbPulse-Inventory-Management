@@ -16,7 +16,7 @@ jobs:
         uses: w9jds/firebase-action@master
         with:
           args: |
-            firebase experiments:enable webframeworks  
+            experiments:enable webframeworks  
             deploy --only hosting
         env:
           GCP_SA_KEY: ${{ secrets.FIREBASE_CREDENTIALS }}
