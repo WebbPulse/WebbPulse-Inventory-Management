@@ -21,13 +21,21 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
       
+      - name: Deploy to Firebase Hosting
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_CREDENTIALS }}
+          channelId: live
+          projectId: webbcheck
+        env: 
+          FIREBASE_CLI_EXPERIMENTS: webframeworks
 
       
-      - name: Deploy to Firebase
+      - name: Deploy functions to Firebase
         uses: w9jds/firebase-action@master
         with:
-          args: deploy --only hosting
+          args: deploy --only functions
         env:
           GCP_SA_KEY: ${{ secrets.FIREBASE_CREDENTIALS }}
-          FIREBASE_CLI_EXPERIMENTS: webframeworks
 
