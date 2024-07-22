@@ -32,13 +32,12 @@ jobs:
           pip install -r ./functions/requirements.txt
       
       - name: Deploy functions to production
+        uses: w9jds/firebase-action@master
+        with:
+          args: deploy --only functions
         env:
-          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.FIREBASE_CREDENTIALS }}
-        run:
-          firebase deploy --only functions
-        
+          GCP_SA_KEY: ${{ secrets.FIREBASE_CREDENTIALS }}
 
-      
       - name: Set up Flutter
         uses: subosito/flutter-action@main
         with:
