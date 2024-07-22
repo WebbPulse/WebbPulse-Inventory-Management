@@ -20,13 +20,6 @@ jobs:
       
       - name: Install Firebase CLI
         run: npm install -g firebase-tools
-      
-      - name: Deploy functions to production
-        uses: w9jds/firebase-action@master
-        with:
-          args: deploy --only functions
-        env:
-          GCP_SA_KEY: ${{ secrets.FIREBASE_CREDENTIALS }}
 
       - name: Set up Flutter
         uses: subosito/flutter-action@main
@@ -35,6 +28,9 @@ jobs:
       
       - name: Install dependencies
         run: flutter pub get
+
+      - name: Deploy functions
+        run: firebase deploy --only functions --token ${{ secrets.FIREBASE_TOKEN }}
       
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@main
