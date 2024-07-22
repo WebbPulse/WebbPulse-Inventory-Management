@@ -8,7 +8,7 @@ on:
 jobs:
   deploy:
     name: Build and Deploy
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v2
@@ -29,18 +29,13 @@ jobs:
       - name: Create and activate virtual environment and install dependencies
         run: |
           python3 -m venv ./functions/venv
-          source ./functions/venv/bin/activate
+          source ./functions/venv/Scripts/activate
           pip install -r ./functions/requirements.txt
       
-      - name: Verify virtual environment and dependencies
-        run: |
-          source ./functions/venv/bin/activate
-          python -m pip freeze
-      
       - name: Deploy functions to production
-        run: |
-          source ./functions/venv/bin/activate
-          firebase deploy --only functions
+        uses: w9jds/firebase-action@master
+        with:
+          args: deploy --only functions
         env:
           GCP_SA_KEY: ${{ secrets.FIREBASE_CREDENTIALS }}
 
