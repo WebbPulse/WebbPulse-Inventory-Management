@@ -3,20 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class FirestoreService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  Future<void> createUser(
-      String? uid, String? email, String? displayName) async {
-    try {
-      await _db.collection('users').doc(uid).set({
-        'email': email,
-        'username': displayName,
-        'organizationUids': [],
-        'createdAt': FieldValue.serverTimestamp(),
-      });
-    } catch (e) {
-      print('Error creating user: $e ');
-    }
-  }
-
   Future<void> createOrganization(String? organizationCreationName, String? uid,
       String? displayName, String? email) async {
     try {
@@ -181,15 +167,6 @@ class FirestoreService {
     }).handleError((error) {
       print('Error getting organizations: $error');
       return Stream.value([]);
-    });
-  }
-
-  Stream<bool> checkUserExistsInFirestoreStream(String? uid) {
-    return _db.collection('users').doc(uid).snapshots().map((snapshot) {
-      return snapshot.exists;
-    }).handleError((e) {
-      print('Error checking user exists: $e');
-      return false;
     });
   }
 
