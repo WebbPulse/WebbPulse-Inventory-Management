@@ -27,7 +27,7 @@ jobs:
           python-version: '3.12'
           
       - name: activate virtualenv and install dependencies
-        run: '. "/github/workspace/functions/venv/bin/activate" && python3.12 -m pip install -r requirements.txt'
+        run: '. "./functions/venv/bin/activate" && python3.12 -m pip install -r requirements.txt'
       
       - name: Deploy functions to Firebase
         uses: w9jds/firebase-action@master
