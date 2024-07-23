@@ -20,6 +20,14 @@ jobs:
       
       - name: Install Firebase CLI
         run: npm install -g firebase-tools
+
+      - name: setup python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.12'
+          
+      - name: activate virtualenv and install dependencies
+        run: '. "/github/workspace/functions/venv/bin/activate" && python3.12 -m pip install -r requirements.txt'
       
       - name: Deploy functions to Firebase
         uses: w9jds/firebase-action@master
@@ -27,7 +35,7 @@ jobs:
           args: deploy --only functions
         env:
           GCP_SA_KEY: ${{ secrets.FIREBASE_CREDENTIALS }}
-
+      
       - name: Set up Flutter
         uses: subosito/flutter-action@main
         with:
