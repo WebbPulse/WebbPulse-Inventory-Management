@@ -13,21 +13,6 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v2
       
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '18.18.2'
-      
-      - name: Install Firebase CLI
-        run: npm install -g firebase-tools
-      
-      - name: install python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.10.6'
-
-      - name: Deploy functions
-        run: firebase deploy --only functions --token ${{ secrets.FIREBASE_TOKEN }}
 
       - name: Set up Flutter
         uses: subosito/flutter-action@main
@@ -36,8 +21,6 @@ jobs:
       
       - name: Install dependencies
         run: flutter pub get
-
-
       
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@main
