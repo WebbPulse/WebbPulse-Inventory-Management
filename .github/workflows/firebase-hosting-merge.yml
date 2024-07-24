@@ -30,7 +30,7 @@ jobs:
         with:
           args: deploy --only functions
         env: 
-          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.FIREBASE_CREDENTIALS }}
+          GCP_SA_KEY: ${{ secrets.FIREBASE_CREDENTIALS }}
     
 
 
