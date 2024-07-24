@@ -22,10 +22,10 @@ jobs:
       
       - name: 
         run: |
-          python3 -m venv ./functions/venv 
+          python -m venv ./functions/venv 
           source ./functions/venv/bin/activate
           pip install -r ./functions/requirements.txt
-          python3 --version
+          python --version
       
       - name: GitHub Action for Firebase
         uses: w9jds/firebase-action@v13.14.0
