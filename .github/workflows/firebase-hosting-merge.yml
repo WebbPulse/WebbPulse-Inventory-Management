@@ -13,21 +13,6 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v2
 
-      - name: setup python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.12'
-          
-      - name: activate virtualenv and install dependencies
-        run: '. "./functions/venv/bin/activate" && python3.12 -m pip install -r ./functions/requirements.txt'
-      
-      - name: Deploy functions to Firebase
-        uses: w9jds/firebase-action@master
-        with:
-          args: deploy --only functions
-        env:
-          GCP_SA_KEY: ${{ secrets.FIREBASE_CREDENTIALS }}
-      
       - name: Set up Flutter
         uses: subosito/flutter-action@main
         with:

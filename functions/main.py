@@ -28,6 +28,16 @@ app = initialize_app(cred)
 
 db = firestore.client()
 
+def create_user_profile(user) -> None:
+    user_data = {
+        'created_at': firestore.SERVER_TIMESTAMP,
+        'email': user.email,
+        'organizationUids': [],
+        'uid': user.uid,
+        'username': user.display_name,
+    }
+    db.collection('users').document(user.uid).set(user_data)
+
 @identity_fn.before_user_created()
 def create_user_ui(event: identity_fn.AuthBlockingEvent) -> identity_fn.BeforeCreateResponse | None:
     user = event.data
@@ -46,15 +56,6 @@ def create_user_ui(event: identity_fn.AuthBlockingEvent) -> identity_fn.BeforeCr
             )
         )
 
-def create_user_profile(user) -> None:
-    user_data = {
-        'created_at': firestore.SERVER_TIMESTAMP,
-        'email': user.email,
-        'organizationUids': [],
-        'uid': user.uid,
-        'username': user.display_name,
-    }
-    db.collection('users').document(user.uid).set(user_data)
 
 @https_fn.on_request()
 def create_user_https(req: https_fn.Request) -> https_fn.Response:

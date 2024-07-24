@@ -3,6 +3,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class FirestoreService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
+  
+  ///I think that the code wrapped by these comment tags should be moved server side
+  
   Future<void> createOrganization(String? organizationCreationName, String? uid,
       String? displayName, String? email) async {
     try {
@@ -50,6 +53,8 @@ class FirestoreService {
       print('Error adding user to organization: $e');
     }
   }
+
+  ///
 
   Future<void> createDeviceInFirestore(String? serial, String? orgId) async {
     try {
