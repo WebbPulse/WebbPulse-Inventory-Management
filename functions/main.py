@@ -1,28 +1,18 @@
 # The Cloud Functions for Firebase SDK to create Cloud Functions and set up triggers.
 from firebase_functions import firestore_fn, https_fn, identity_fn
+from firebase_functions.params import SecretParam
 
 # The Firebase Admin SDK to access Cloud Firestore.
 from firebase_admin import initialize_app, firestore, credentials, auth
 import google.cloud.firestore as gcf
 
+import os
 
 ###NEED TO OBFUSCATE THE SERVICE ACCOUNT KEY
-serviceAccountKey = {
-    "type": "service_account",
-    "project_id": "webbcheck",
-    "private_key_id": "dc72e5778c392d030d6d994e56bc0c44691d6820",
-    "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCw1fKrrXwIHp6U\nvJMymvKRtW2Sj1UbaalsYsr1nTQIV1dwMK0fseSWqRD0QqcfmkJs6zwY0krp61N6\n0/+kvdJtMSY9BuN3V4UVcqqUgwo7fJ3f+wHtKnvVNxW0ZfPgay2yW6Dm0bZwfuQU\nX4+IVE0SGkpD2fO0ZCpq0ydPDu1dvjfL+x20CrX2kybZ7lz+j+xXqPj9AYfXd0b0\n2pOdepe3KbAmmgv0B3UEV4+3Ff2ZY/Lb8mwHXVEd999B0FTqo9eXZV6Pfz2N9tQN\ngf1gqgEaI57qq9cksH6aJZ0bLYAvFxLl2/FwmKXBxhvVd+UsIgD13Qc5GmcGaHcL\nJlREcfFNAgMBAAECggEAHZVBMmLEtegHcAsHFgdxbppbMRJM8tfPmdwCJ6pLptyT\numdOQxfjzaeNeEuBQWpxU97bkCx4D1+IuOrn4NPHtPAsvTdejNvFnhOvgUZVyyNb\nFvobNaWujzoWpbYLoT7U53poNc0eF/5GYjklXjF6Lj3bMDQxTruWFAZslE+DOrP8\n4YD00Ujuswu1tKBv9uW2kNcTTd6xO3QLZjBJCrAywuVRr8r8Oesraglc9XVIKeX1\nJ9Fo9IhlwOpyz1TtcPNUu9Rdr3Eb8mR+FvsqYxsFsbLWKZK5i5Qp6geaeDuMRz0R\nyE2aSewklAR+wUQi0nVKAMF3sjyPMGGYLwaPbp4tgQKBgQDupXtDIUA9PzIfCBR0\ntK5uCahqrMCYlN/3BuId4xz/wgLOXUI5pKw8VVRuUozaHFYGmnYf0ZTF+3RnIYCj\nJqAxCgS2md3Kr/Vvq/8cqrcJ3a7ddrdUNZiTJkc5X38/NapM2KAofPSpbC4+0ND4\ncVnp1fikZ3UbD1M+M/n1H+zrzQKBgQC9sdSrejEob0/3vdBX81q+RpXZsX/RmMep\nQo5n9sb7x/foBio5mXn6EpAcLCKAldTWZmBh8zGLz3u0v0I4meoOF7daY/lu0OVg\n9fZnQ0Nwc2om/ziXK8k5xMxbmX8QWQchy6idm7mMkT/7ATXkiZrGfcOsmt+A3YCn\nAd/KonKbgQKBgDt7dai6zfc2HDkN24NnUZ7Nu3OzUWH2oYhB5/RJGn5JDkf/iLUz\nbVawchX5b3Ah5fNJZq3xoCJk1ZOrDxQbWYw/kgMtgNG3X/aQqUqs5miIH8DFiVZs\n8XWj8dbEDcRkjOkQiYLt+lGMTE6N37g9EIsvMQVRYCf5fucfL2tApN31AoGAUn4H\nEhstTXw6tm3hMJ4vlBd2CxlZkHh0O3MqIqP6nHu1nz0vF6VamhmAef/ncSu3RxV2\nTKJJpZcxIMUbsymb000U+0YGrt5BIg1UfkuOBFTskNDkdzkfZPPkOuFhlGZi55t9\nVCzoX+y6ehloql385NzEP0eKcqvgyr/R5nkGhgECgYBPClxkmPBDZwTa+heyFn6p\nOr2wp3yF59yG6d/xUPF6DyJ4UcV+IRLh+QolljfWUWyjiO0usLnPyNal42pDax0P\nhAThuONOqJeXORdL2YR8vMV/tv3b+jlJ3VSigLQjDsQp9EN8xu2f8B0PmLZy/hca\n2unGiXWwAjfzyT+Xnr3O7w==\n-----END PRIVATE KEY-----\n",
-    "client_email": "firebase-adminsdk-bday4@webbcheck.iam.gserviceaccount.com",
-    "client_id": "110054405663411805604",
-    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-    "token_uri": "https://oauth2.googleapis.com/token",
-    "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-    "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-bday4%40webbcheck.iam.gserviceaccount.com",
-    "universe_domain": "googleapis.com"
-  }
 
 allowed_domains = ["gmail.com"]
 
+serviceAccountKey = os.getenv('FIREBASE_CREDENTIALS')
 cred = credentials.Certificate(serviceAccountKey)
 app = initialize_app(cred)
 
