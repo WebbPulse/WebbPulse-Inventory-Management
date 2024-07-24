@@ -22,7 +22,7 @@ jobs:
       
       
       - name: spin up virtual environment
-        run: cd ./functions && python -m venv venv && cd ..
+        run: python --version # cd ./functions && python -m venv venv && cd ..
         
       - name: activate virtual environment
         run: source ./functions/venv/bin/activate 
