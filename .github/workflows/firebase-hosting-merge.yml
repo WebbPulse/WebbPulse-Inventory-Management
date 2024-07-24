@@ -40,7 +40,7 @@ jobs:
         run: |
           source ./functions/venv/bin/activate
           pip install -r ./functions/requirements.txt
-          firebase deploy --only functions
+          firebase deploy --only functions --non-interactive
 
 
 
