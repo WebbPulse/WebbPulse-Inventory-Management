@@ -25,7 +25,7 @@ jobs:
           python3.12 -m venv ./functions/venv 
           source ./functions/venv/bin/activate
           pip install -r ./functions/requirements.txt
-          ls ./functions/venv/lib/python3.12/site-packages
+          python3.12 --version
       
       - name: GitHub Action for Firebase
         uses: w9jds/firebase-action@v13.14.0
