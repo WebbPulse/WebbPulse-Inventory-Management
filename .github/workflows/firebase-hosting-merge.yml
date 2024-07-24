@@ -21,7 +21,7 @@ jobs:
           # Error: Failed to find location of Firebase Functions SDK. Did you forget to run '"C:\Users\tyler\Documents\GitHub\webbpulse_checkout\functions\venv\Scripts\activate.bat"  && python.exe -m pip install -r requirements.txt'?
       
       - name: spin up virtual environment and install dependencies
-        run: python3.12 -m venv ./functions/venv && source ./functions/venv/bin/activate && python -m pip install -r ./functions/requirements.txt
+        run: python -m venv ./functions/venv && source ./functions/venv/bin/activate && python -m pip install -r ./functions/requirements.txt
 
       - name: deploy functions
         uses: w9jds/firebase-action@v13.14.0
