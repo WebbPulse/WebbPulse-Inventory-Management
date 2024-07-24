@@ -38,7 +38,7 @@ jobs:
         run: |
           source ./functions/venv/bin/activate
           pip install -r ./functions/requirements.txt
-          firebase login
+          firebase login:ci
           firebase deploy --only functions
         env:
          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.FIREBASE_CREDENTIALS }}
