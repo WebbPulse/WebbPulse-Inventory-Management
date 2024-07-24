@@ -21,7 +21,7 @@ jobs:
           # Error: Failed to find location of Firebase Functions SDK. Did you forget to run '"C:\Users\tyler\Documents\GitHub\webbpulse_checkout\functions\venv\Scripts\activate.bat"  && python.exe -m pip install -r requirements.txt'?
       
       - name: spin up virtual environment
-        run: python -m venv ./functions/venv
+        run: python3 -m venv ./functions/venv
         
       - name: activate virtual environment
         run: source ./functions/venv/bin/activate 
