@@ -16,7 +16,7 @@ jobs:
       - name: Set up python
         uses: actions/setup-python@v2
         with:
-          python-version: '3.11' 
+          python-version: '3.12' 
           # this error will happen if python is not set up or if the pip package relevent to the deploy is not found
           # Error: Failed to find location of Firebase Functions SDK. Did you forget to run '"C:\Users\tyler\Documents\GitHub\webbpulse_checkout\functions\venv\Scripts\activate.bat"  && python.exe -m pip install -r requirements.txt'?
       
@@ -24,19 +24,24 @@ jobs:
         run: python -m pip install -r ./functions/requirements.txt
 
       - name: spin up virtual environment
-        run: python3.11 -m venv ./functions/venv
+        run: python3.12 -m venv ./functions/venv
+      
+      - name: install node
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18'
+
+      - name: install firebase tools
+        run: npm install -g firebase-tools
 
       - name: activate virtual environment and install requirements
-        run: | 
+        run: |
           source ./functions/venv/bin/activate
-          python3.11 -m pip install -r ./functions/requirements.txt
-
-      - name: deploy functions
-        uses: w9jds/firebase-action@v13.14.0
-        with:
-          args: deploy --only functions
+          pip install -r ./functions/requirements.txt
+          firebase deploy --only functions
         env:
-         GCP_SA_KEY: ${{ secrets.FIREBASE_CREDENTIALS }}
+         GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.FIREBASE_CREDENTIALS }}
+
 
 
       - name: Set up Flutter
