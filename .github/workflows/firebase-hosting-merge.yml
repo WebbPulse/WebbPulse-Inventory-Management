@@ -35,13 +35,12 @@ jobs:
         run: npm install -g firebase-tools
 
       - name: activate virtual environment and install requirements
+        env:
+         GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.FIREBASE_CREDENTIALS }}
         run: |
           source ./functions/venv/bin/activate
           pip install -r ./functions/requirements.txt
-          firebase login:ci
           firebase deploy --only functions
-        env:
-         GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.FIREBASE_CREDENTIALS }}
 
 
 
