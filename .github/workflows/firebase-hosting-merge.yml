@@ -16,19 +16,18 @@ jobs:
       - name: Set up python
         uses: actions/setup-python@v2
         with:
-          python-version: '3.11' 
+          python-version: '3.12' 
           # this error will happen if python is not set up or if the pip package relevent to the deploy is not found
           # Error: Failed to find location of Firebase Functions SDK. Did you forget to run '"C:\Users\tyler\Documents\GitHub\webbpulse_checkout\functions\venv\Scripts\activate.bat"  && python.exe -m pip install -r requirements.txt'?
       
-      - name: 
+      - name: install python dependencies
         run: |
           python -m venv ./functions/venv 
           source ./functions/venv/bin/activate
           pip install -r ./functions/requirements.txt
-          python --version
       
       - name: GitHub Action for Firebase
-        uses: w9jds/firebase-action@v13.14.0
+        uses: Eligrim/firebase-action-with-python@master
         with:
           args: deploy --only functions --debug
         env: 
