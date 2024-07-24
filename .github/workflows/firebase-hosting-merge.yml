@@ -13,12 +13,18 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v2
 
+      - name: Set up python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.12' # prob required based off local testing
+      
       - name: deploy functions
         uses: w9jds/firebase-action@v13.14.0
         with:
           args: deploy --only functions
         env:
          GCP_SA_KEY: ${{ secrets.FIREBASE_CREDENTIALS }}
+
 
       - name: Set up Flutter
         uses: subosito/flutter-action@main
