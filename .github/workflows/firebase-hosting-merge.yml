@@ -26,11 +26,10 @@ jobs:
       - name: spin up virtual environment
         run: python3.11 -m venv ./functions/venv
 
-      - name: activate virtual environment
-        run: source ./functions/venv/bin/activate
-
-      - name: install requirements
-        run: python3.11 -m pip install -r ./functions/requirements.txt
+      - name: activate virtual environment and install requirements
+        run: | 
+          source ./functions/venv/bin/activate
+          python3.11 -m pip install -r ./functions/requirements.txt
 
       - name: deploy functions
         uses: w9jds/firebase-action@v13.14.0
