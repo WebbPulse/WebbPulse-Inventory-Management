@@ -36,11 +36,10 @@ jobs:
 
       - name: activate virtual environment and install requirements
         run: |
+          source ./functions/venv/bin/activate
+          pip install -r ./functions/requirements.txt  
           echo "${{ secrets.FIREBASE_CREDENTIALS }}" > /opt/gcp_key.json
           export GOOGLE_APPLICATION_CREDENTIALS=/opt/gcp_key.json
-          cat /opt/gcp_key.json
-          source ./functions/venv/bin/activate
-          pip install -r ./functions/requirements.txt
           firebase deploy --only functions
 
 
