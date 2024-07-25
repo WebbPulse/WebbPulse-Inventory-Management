@@ -12,7 +12,7 @@ import os
 
 allowed_domains = ["gmail.com"]
 
-serviceAccountKey = os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
+serviceAccountKey = os.getenv('GCP_SA_KEY')
 cred = credentials.Certificate(serviceAccountKey)
 app = initialize_app(cred)
 
