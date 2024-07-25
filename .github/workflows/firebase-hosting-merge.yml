@@ -32,7 +32,7 @@ jobs:
           pip install -r ./functions/requirements.txt
           deactivate
           echo "$GCP_SA_KEY" > ./gcp_key.json
-          export GOOGLE_APPLICATION_CREDENTIALS=./gcp_key.json
+          export GOOGLE_APPLICATION_CREDENTIALS=./functions/gcp_key.json
           firebase deploy --only functions --debug
           
 
