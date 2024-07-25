@@ -6,11 +6,8 @@ from firebase_functions.params import SecretParam
 from firebase_admin import initialize_app, firestore, credentials, auth
 import google.cloud.firestore as gcf
 
-import os
-import json
-###NEED TO OBFUSCATE THE SERVICE ACCOUNT KEY
 
-allowed_domains = ["gmail.com"]
+allowed_domains = ["verkada.com", "gmail.com"]
 
 # Read the service account key from the file
 
@@ -60,13 +57,36 @@ def create_user_https(req: https_fn.Request) -> https_fn.Response:
     if email.split("@")[1] not in allowed_domains:
         return https_fn.Response("Unauthorized email", status=403)
     try:
+        #create the user in firebase auth
         user = auth.create_user(
             email=email,
             email_verified=False,
             display_name=display_name,
             disabled=False
         )
+        #create the user profile in firestore
         create_user_profile(user)
+
         return https_fn.Response(f"User {user.uid} created", status=200)
     except Exception as e:
         return https_fn.Response(f"Error creating user: {str(e)}", status=500)
+
+def create_organization_https(req: https_fn.Request) -> https_fn.Response:
+    organizationCreationName = req.args.get("organizationCreationName")
+    uid = req.args.get("uid")
+
+    if not organizationCreationName or not uid:
+        return https_fn.Response("Not all parameters provided", status=400)
+    
+    #create the organization in firestore
+    try:
+        org_data = {
+            'created_at': firestore.SERVER_TIMESTAMP,
+            'name': organizationCreationName,
+        }
+        db.collection('organizations').add(org_data)
+
+    
+    
+    except Exception as e:
+        return https_fn.Response(f"Error creating organization: {str(e)}", status=500)
