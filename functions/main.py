@@ -13,15 +13,10 @@ import json
 allowed_domains = ["gmail.com"]
 
 # Read the service account key from the file
-service_account_path = os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
-if service_account_path:
-    with open(service_account_path, 'r') as file:
-        service_account_info = json.load(file)
-    cred = credentials.Certificate(service_account_info)
-    app = initialize_app(cred)
-    db = firestore.client()
-else:
-    raise ValueError("Service account key not found.")
+
+cred = credentials.Certificate('./gcp_key.json')
+app = initialize_app(cred)
+db = firestore.client()
 
 db = firestore.client()
 
