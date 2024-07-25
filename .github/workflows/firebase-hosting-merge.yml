@@ -20,6 +20,9 @@ jobs:
           # this error will happen if python is not set up or if the pip package relevent to the deploy is not found
           # Error: Failed to find location of Firebase Functions SDK. Did you forget to run '"C:\Users\tyler\Documents\GitHub\webbpulse_checkout\functions\venv\Scripts\activate.bat"  && python.exe -m pip install -r requirements.txt'?
       
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools
+
       - name: install python dependencies
         env:
           GCP_SA_KEY: ${{ secrets.FIREBASE_CREDENTIALS }}
