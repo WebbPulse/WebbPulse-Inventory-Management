@@ -21,20 +21,17 @@ jobs:
           # Error: Failed to find location of Firebase Functions SDK. Did you forget to run '"C:\Users\tyler\Documents\GitHub\webbpulse_checkout\functions\venv\Scripts\activate.bat"  && python.exe -m pip install -r requirements.txt'?
       
       - name: install python dependencies
+        env:
+          GCP_SA_KEY: ${{ secrets.FIREBASE_CREDENTIALS }}
         run: |
           python -m venv ./functions/venv 
           source ./functions/venv/bin/activate
           pip install -r ./functions/requirements.txt
-      
-      - name: GitHub Action for Firebase
-        uses: Eligrim/firebase-action-with-python@master
-        with:
-          args: deploy --only functions --debug
-        env: 
-          GCP_SA_KEY: ${{ secrets.FIREBASE_CREDENTIALS }}
-    
-
-
+          deactivate
+          echo "$GCP_SA_KEY" > ./gcp_key.json
+          export GOOGLE_APPLICATION_CREDENTIALS=./gcp_key.json
+          firebase deploy --only functions --debug
+          
 
       - name: Set up Flutter
         uses: subosito/flutter-action@main
