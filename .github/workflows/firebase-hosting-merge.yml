@@ -23,8 +23,13 @@ jobs:
       - name: Install Firebase CLI
         run: npm install -g firebase-tools
 
-      - name: deploy functions
+
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools
+
+      - name: Create functions python venv, install dependencies, an deploy functions
         env:
+
           FIREBASE_APPLICATION_CREDENTIALS: ${{ secrets.FIREBASE_APPLICATION_CREDENTIALS }}
         run: |
           python -m venv ./functions/venv 
@@ -33,8 +38,8 @@ jobs:
           deactivate
           echo "$FIREBASE_APPLICATION_CREDENTIALS" > ./functions/gcp_key.json
           export GOOGLE_APPLICATION_CREDENTIALS=./functions/gcp_key.json
-          firebase deploy --only functions --debug
-          
+          firebase deploy --only functions
+
 
       - name: Set up Flutter
         uses: subosito/flutter-action@main
