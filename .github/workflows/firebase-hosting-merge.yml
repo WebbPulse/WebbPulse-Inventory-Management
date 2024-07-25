@@ -36,6 +36,24 @@ jobs:
         env:
          GCP_SA_KEY: ${{ secrets.FIREBASE_CREDENTIALS }}
 
+=======
+
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools
+
+      - name: Create functions python venv, install dependencies, an deploy functions
+        env:
+          FIREBASE_APPLICATION_CREDENTIALS: ${{ secrets.FIREBASE_APPLICATION_CREDENTIALS }}
+        run: |
+          python -m venv ./functions/venv 
+          source ./functions/venv/bin/activate
+          pip install -r ./functions/requirements.txt
+          deactivate
+          echo "$FIREBASE_APPLICATION_CREDENTIALS" > ./functions/gcp_key.json
+          export GOOGLE_APPLICATION_CREDENTIALS=./functions/gcp_key.json
+          firebase deploy --only functions
+          
+>>>>>>> Stashed changes
 
       - name: Set up Flutter
         uses: subosito/flutter-action@main
