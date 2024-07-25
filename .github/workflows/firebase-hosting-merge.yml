@@ -25,13 +25,13 @@ jobs:
 
       - name: deploy functions
         env:
-          GCP_SA_KEY: ${{ secrets.FIREBASE_CREDENTIALS }}
+          FIREBASE_APPLICATION_CREDENTIALS: ${{ secrets.FIREBASE_APPLICATION_CREDENTIALS }}
         run: |
           python -m venv ./functions/venv 
           source ./functions/venv/bin/activate
           pip install -r ./functions/requirements.txt
           deactivate
-          echo "$GCP_SA_KEY" > ./functions/gcp_key.json
+          echo "$FIREBASE_APPLICATION_CREDENTIALS" > ./functions/gcp_key.json
           export GOOGLE_APPLICATION_CREDENTIALS=./functions/gcp_key.json
           firebase deploy --only functions --debug
           
@@ -48,7 +48,7 @@ jobs:
         uses: FirebaseExtended/action-hosting-deploy@main
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
-          firebaseServiceAccount: ${{ secrets.FIREBASE_CREDENTIALS }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_APPLICATION_CREDENTIALS }}
           channelId: live
           projectId: webbcheck
         env: 
