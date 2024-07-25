@@ -7,14 +7,16 @@ from firebase_admin import initialize_app, firestore, credentials, auth
 import google.cloud.firestore as gcf
 
 import os
-
+import json
 ###NEED TO OBFUSCATE THE SERVICE ACCOUNT KEY
 
 allowed_domains = ["gmail.com"]
 
-serviceAccountKey = os.getenv('GCP_SA_KEY')
-cred = credentials.Certificate(serviceAccountKey)
+# Read the service account key from the file
+
+cred = credentials.Certificate('./gcp_key.json')
 app = initialize_app(cred)
+db = firestore.client()
 
 db = firestore.client()
 
