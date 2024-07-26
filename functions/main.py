@@ -89,12 +89,6 @@ def create_organization_https(req: https_fn.Request) -> https_fn.Response:
         }
         return https_fn.Response('Preflight response', headers=headers, status=204)
     
-    # Set CORS headers for the main request
-    headers = {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST',
-        'Access-Control-Allow-Headers': 'Content-Type',
-    }
     
     try:
         # Read JSON data from request body
