@@ -71,22 +71,50 @@ def create_user_https(req: https_fn.Request) -> https_fn.Response:
     except Exception as e:
         return https_fn.Response(f"Error creating user: {str(e)}", status=500)
 
+@https_fn.on_request()
 def create_organization_https(req: https_fn.Request) -> https_fn.Response:
-    organizationCreationName = req.args.get("organizationCreationName")
+    organization_creation_name = req.args.get("organizationCreationName")
     uid = req.args.get("uid")
+    display_name = req.args.get("displayName")
+    email = req.args.get("email")
 
-    if not organizationCreationName or not uid:
+    if not organization_creation_name or not uid:
         return https_fn.Response("Not all parameters provided", status=400)
     
     #create the organization in firestore
     try:
         org_data = {
             'created_at': firestore.SERVER_TIMESTAMP,
-            'name': organizationCreationName,
+            'name': organization_creation_name,
         }
         db.collection('organizations').add(org_data)
+        organization_uid = db.collection('organizations').where('name', '==', organization_creation_name).get()[0].id
+        update_user_organizations(uid, organization_uid)
+        add_user_to_organization(uid, organization_uid, display_name, email)
 
-    
+        return https_fn.Response(f"Organization {organization_creation_name} created", status=200)
     
     except Exception as e:
         return https_fn.Response(f"Error creating organization: {str(e)}", status=500)
+    
+
+
+def update_user_organizations(uid, organization_uid):
+    
+    try:
+        user_ref = db.collection('users').document(uid)
+        user_ref.update({
+            'organizationUids': gcf.ArrayUnion([organization_uid])
+        })
+    except Exception as e:
+        print(f"Error updating user: {str(e)}")
+
+def add_user_to_organization(uid, organization_uid, display_name, email):
+    try:
+        db.collection('organizations').document(organization_uid).collection('members').document(uid).set({
+            'createdAt': firestore.SERVER_TIMESTAMP,
+            'username': display_name,
+            'email': email,
+        })
+    except Exception as e:
+        print(f"Error updating organization: {str(e)}")
