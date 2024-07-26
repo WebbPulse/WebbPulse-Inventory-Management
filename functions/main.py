@@ -85,7 +85,7 @@ def create_user_https(req: https_fn.Request) -> https_fn.Response:
 
 
 
-@https_fn.on_request(cors=True)
+@https_fn.on_request(cors=POSTcorsrules)
 def create_organization_https(req: https_fn.Request) -> https_fn.Response:
     #create the organization in firestore
     # Set CORS headers for the preflight request
