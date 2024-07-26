@@ -12,7 +12,7 @@ allowed_domains = ["verkada.com", "gmail.com"]
 
 POSTcorsrules=options.CorsOptions(
         cors_origins=[r'webbpulse\.com$', r'localhost(:\d{1,5})?$'],
-        cors_methods=['POST'],
+        cors_methods=['post'],
     )
 
 # Read the service account key from the file
