@@ -12,7 +12,7 @@ allowed_domains = ["verkada.com", "gmail.com"]
 
 POSTcorsrules=options.CorsOptions(
         cors_origins=[r'webbpulse\.com$', r'localhost(:\d{1,5})?$'],
-        cors_methods=['POST'],
+        cors_methods=['post'],
     )
 
 # Read the service account key from the file
@@ -85,7 +85,7 @@ def create_user_https(req: https_fn.Request) -> https_fn.Response:
 
 
 
-@https_fn.on_request(cors=False)
+@https_fn.on_request(cors=POSTcorsrules)
 def create_organization_https(req: https_fn.Request) -> https_fn.Response:
     #create the organization in firestore
     # Set CORS headers for the preflight request
