@@ -1,5 +1,5 @@
 # The Cloud Functions for Firebase SDK to create Cloud Functions and set up triggers.
-from firebase_functions import firestore_fn, https_fn, identity_fn
+from firebase_functions import firestore_fn, https_fn, identity_fn, options
 from firebase_functions.params import SecretParam
 
 # The Firebase Admin SDK to access Cloud Firestore.
@@ -8,6 +8,12 @@ import google.cloud.firestore as gcf
 
 
 allowed_domains = ["verkada.com", "gmail.com"]
+
+
+POSTcorsrules=options.CorsOptions(
+        cors_origins=[r'webbpulse\.com$', r'localhost(:\d{1,5})?$'],
+        cors_methods=['POST'],
+    )
 
 # Read the service account key from the file
 
@@ -46,7 +52,7 @@ def create_user_ui(event: identity_fn.AuthBlockingEvent) -> identity_fn.BeforeCr
         )
 
 
-@https_fn.on_request()
+@https_fn.on_request(cors=POSTcorsrules)
 def create_user_https(req: https_fn.Request) -> https_fn.Response:
     #create the user in firebase auth
     try:
@@ -77,47 +83,39 @@ def create_user_https(req: https_fn.Request) -> https_fn.Response:
     except Exception as e:
         return https_fn.Response(f"Error creating user: {str(e)}", status=500)
 
-@https_fn.on_request()
+
+
+@https_fn.on_request(cors=POSTcorsrules)
 def create_organization_https(req: https_fn.Request) -> https_fn.Response:
     #create the organization in firestore
     # Set CORS headers for the preflight request
-    if req.method == 'OPTIONS':
-        headers = {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'POST',
-            'Access-Control-Allow-Headers': 'Content-Type',
-        }
-        return https_fn.Response('Preflight response', headers=headers, status=204)
+    try:
+        # Read JSON data from request body
+        data = req.get_json()
+        
+        # Extract parameters from JSON data
+        organization_creation_name = data.get("organizationCreationName")
+        uid = data.get("uid")
+        display_name = data.get("displayName")
+        email = data.get("email")
+
+        if not organization_creation_name or not uid or not display_name or not email:
+            return https_fn.Response("Not all parameters provided", status=400)
     
-    if req.method == 'POST':
-        try:
-            # Read JSON data from request body
-            data = req.get_json()
-            
-            # Extract parameters from JSON data
-            organization_creation_name = data.get("organizationCreationName")
-            uid = data.get("uid")
-            display_name = data.get("displayName")
-            email = data.get("email")
+        org_data = {
+            'created_at': firestore.SERVER_TIMESTAMP,
+            'name': organization_creation_name,
+        }
+        db.collection('organizations').add(org_data)
+        organization_uid = db.collection('organizations').where('name', '==', organization_creation_name).get()[0].id
+        update_user_organizations(uid, organization_uid)
+        add_user_to_organization(uid, organization_uid, display_name, email)
 
-            if not organization_creation_name or not uid or not display_name or not email:
-                return https_fn.Response("Not all parameters provided", status=400)
-        
-            org_data = {
-                'created_at': firestore.SERVER_TIMESTAMP,
-                'name': organization_creation_name,
-            }
-            db.collection('organizations').add(org_data)
-            organization_uid = db.collection('organizations').where('name', '==', organization_creation_name).get()[0].id
-            update_user_organizations(uid, organization_uid)
-            add_user_to_organization(uid, organization_uid, display_name, email)
+        return https_fn.Response(f"Organization {organization_creation_name} created", status=200)
+    
+    except Exception as e:
+        return https_fn.Response(f"Error creating organization: {str(e)}", status=500)
 
-            return https_fn.Response(f"Organization {organization_creation_name} created", status=200)
-        
-        except Exception as e:
-            return https_fn.Response(f"Error creating organization: {str(e)}", status=500)
-    else:
-        return https_fn.Response("Method not allowed", status=405)  
     
 
 
