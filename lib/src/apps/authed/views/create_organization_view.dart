@@ -46,7 +46,9 @@ class CreateOrganizationView extends StatelessWidget {
                           "uid": authProvider.uid,
                           "displayName": authProvider.displayName,
                           "email": authProvider.email,
-                      });
+                      }
+                          // Ensure the method is set to POST
+                      );
                       while (context.mounted == false) {
                         await Future.delayed(const Duration(milliseconds: 100));
                       }
