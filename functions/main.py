@@ -48,15 +48,21 @@ def create_user_ui(event: identity_fn.AuthBlockingEvent) -> identity_fn.BeforeCr
 
 @https_fn.on_request()
 def create_user_https(req: https_fn.Request) -> https_fn.Response:
-    email = req.args.get("email")
-    display_name = req.args.get("display_name")
-
-    if not email or not display_name:
-        return https_fn.Response("Not all parameters provided", status=400)
-
-    if email.split("@")[1] not in allowed_domains:
-        return https_fn.Response("Unauthorized email", status=403)
+    #create the user in firebase auth
     try:
+        # Read JSON data from request body
+        data = req.get_json()
+        
+        # Extract parameters from JSON data
+        display_name = data.get("displayName")
+        email = data.get("email")
+
+        if not email or not display_name:
+            return https_fn.Response("Not all parameters provided", status=400)
+
+        if email.split("@")[1] not in allowed_domains:
+            return https_fn.Response("Unauthorized email", status=403)
+
         #create the user in firebase auth
         user = auth.create_user(
             email=email,
@@ -73,16 +79,20 @@ def create_user_https(req: https_fn.Request) -> https_fn.Response:
 
 @https_fn.on_request()
 def create_organization_https(req: https_fn.Request) -> https_fn.Response:
-    organization_creation_name = req.args.get("organizationCreationName")
-    uid = req.args.get("uid")
-    display_name = req.args.get("displayName")
-    email = req.args.get("email")
-
-    if not organization_creation_name or not uid:
-        return https_fn.Response("Not all parameters provided", status=400)
-    
     #create the organization in firestore
     try:
+        # Read JSON data from request body
+        data = req.get_json()
+        
+        # Extract parameters from JSON data
+        organization_creation_name = data.get("organizationCreationName")
+        uid = data.get("uid")
+        display_name = data.get("displayName")
+        email = data.get("email")
+
+        if not organization_creation_name or not uid or not display_name or not email:
+            return https_fn.Response("Not all parameters provided", status=400)
+    
         org_data = {
             'created_at': firestore.SERVER_TIMESTAMP,
             'name': organization_creation_name,

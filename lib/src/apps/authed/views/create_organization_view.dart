@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:webbcheck/src/apps/authed/views/org_selection_view.dart';
 import 'package:webbcheck/src/shared/providers/authenticationProvider.dart';
 
@@ -12,6 +13,7 @@ class CreateOrganizationView extends StatelessWidget {
 
   final TextEditingController _controller = TextEditingController();
   final FirestoreService firestoreService;
+  final FirebaseFunctions firebaseFunctions = FirebaseFunctions.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -38,11 +40,13 @@ class CreateOrganizationView extends StatelessWidget {
 
                   if (organizationCreationName.isNotEmpty) {
                     try {
-                      await firestoreService.createOrganization(
-                          organizationCreationName,
-                          authProvider.uid,
-                          authProvider.displayName,
-                          authProvider.email);
+                      await firebaseFunctions.httpsCallable('create_organization_https').call(
+                        {
+                          "organizationCreationName": organizationCreationName,
+                          "uid": authProvider.uid,
+                          "displayName": authProvider.displayName,
+                          "email": authProvider.email,
+                      });
                       while (context.mounted == false) {
                         await Future.delayed(const Duration(milliseconds: 100));
                       }
