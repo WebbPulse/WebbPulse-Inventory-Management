@@ -89,33 +89,35 @@ def create_organization_https(req: https_fn.Request) -> https_fn.Response:
         }
         return https_fn.Response('Preflight response', headers=headers, status=204)
     
-    
-    try:
-        # Read JSON data from request body
-        data = req.get_json()
+    if req.method == 'POST':
+        try:
+            # Read JSON data from request body
+            data = req.get_json()
+            
+            # Extract parameters from JSON data
+            organization_creation_name = data.get("organizationCreationName")
+            uid = data.get("uid")
+            display_name = data.get("displayName")
+            email = data.get("email")
+
+            if not organization_creation_name or not uid or not display_name or not email:
+                return https_fn.Response("Not all parameters provided", status=400)
         
-        # Extract parameters from JSON data
-        organization_creation_name = data.get("organizationCreationName")
-        uid = data.get("uid")
-        display_name = data.get("displayName")
-        email = data.get("email")
+            org_data = {
+                'created_at': firestore.SERVER_TIMESTAMP,
+                'name': organization_creation_name,
+            }
+            db.collection('organizations').add(org_data)
+            organization_uid = db.collection('organizations').where('name', '==', organization_creation_name).get()[0].id
+            update_user_organizations(uid, organization_uid)
+            add_user_to_organization(uid, organization_uid, display_name, email)
 
-        if not organization_creation_name or not uid or not display_name or not email:
-            return https_fn.Response("Not all parameters provided", status=400)
-    
-        org_data = {
-            'created_at': firestore.SERVER_TIMESTAMP,
-            'name': organization_creation_name,
-        }
-        db.collection('organizations').add(org_data)
-        organization_uid = db.collection('organizations').where('name', '==', organization_creation_name).get()[0].id
-        update_user_organizations(uid, organization_uid)
-        add_user_to_organization(uid, organization_uid, display_name, email)
-
-        return https_fn.Response(f"Organization {organization_creation_name} created", status=200)
-    
-    except Exception as e:
-        return https_fn.Response(f"Error creating organization: {str(e)}", status=500)
+            return https_fn.Response(f"Organization {organization_creation_name} created", status=200)
+        
+        except Exception as e:
+            return https_fn.Response(f"Error creating organization: {str(e)}", status=500)
+    else:
+        return https_fn.Response("Method not allowed", status=405)  
     
 
 
