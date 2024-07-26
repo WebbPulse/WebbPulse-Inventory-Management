@@ -6,11 +6,8 @@ from firebase_functions.params import SecretParam
 from firebase_admin import initialize_app, firestore, credentials, auth
 import google.cloud.firestore as gcf
 
-import os
-import json
-###NEED TO OBFUSCATE THE SERVICE ACCOUNT KEY
 
-allowed_domains = ["gmail.com"]
+allowed_domains = ["verkada.com", "gmail.com"]
 
 # Read the service account key from the file
 
@@ -60,13 +57,64 @@ def create_user_https(req: https_fn.Request) -> https_fn.Response:
     if email.split("@")[1] not in allowed_domains:
         return https_fn.Response("Unauthorized email", status=403)
     try:
+        #create the user in firebase auth
         user = auth.create_user(
             email=email,
             email_verified=False,
             display_name=display_name,
             disabled=False
         )
+        #create the user profile in firestore
         create_user_profile(user)
+
         return https_fn.Response(f"User {user.uid} created", status=200)
     except Exception as e:
         return https_fn.Response(f"Error creating user: {str(e)}", status=500)
+
+@https_fn.on_request()
+def create_organization_https(req: https_fn.Request) -> https_fn.Response:
+    organization_creation_name = req.args.get("organizationCreationName")
+    uid = req.args.get("uid")
+    display_name = req.args.get("displayName")
+    email = req.args.get("email")
+
+    if not organization_creation_name or not uid:
+        return https_fn.Response("Not all parameters provided", status=400)
+    
+    #create the organization in firestore
+    try:
+        org_data = {
+            'created_at': firestore.SERVER_TIMESTAMP,
+            'name': organization_creation_name,
+        }
+        db.collection('organizations').add(org_data)
+        organization_uid = db.collection('organizations').where('name', '==', organization_creation_name).get()[0].id
+        update_user_organizations(uid, organization_uid)
+        add_user_to_organization(uid, organization_uid, display_name, email)
+
+        return https_fn.Response(f"Organization {organization_creation_name} created", status=200)
+    
+    except Exception as e:
+        return https_fn.Response(f"Error creating organization: {str(e)}", status=500)
+    
+
+
+def update_user_organizations(uid, organization_uid):
+    
+    try:
+        user_ref = db.collection('users').document(uid)
+        user_ref.update({
+            'organizationUids': gcf.ArrayUnion([organization_uid])
+        })
+    except Exception as e:
+        print(f"Error updating user: {str(e)}")
+
+def add_user_to_organization(uid, organization_uid, display_name, email):
+    try:
+        db.collection('organizations').document(organization_uid).collection('members').document(uid).set({
+            'createdAt': firestore.SERVER_TIMESTAMP,
+            'username': display_name,
+            'email': email,
+        })
+    except Exception as e:
+        print(f"Error updating organization: {str(e)}")

@@ -36,7 +36,6 @@ class FirestoreService {
   Future<void> addUserToOrganization(String? uid, String? organizationId,
       String? displayName, String? email) async {
     try {
-      _db.collection('organizations').doc(organizationId).collection('members');
       await _db
           .collection('organizations')
           .doc(organizationId)
