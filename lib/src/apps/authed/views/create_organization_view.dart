@@ -43,7 +43,7 @@ class CreateOrganizationView extends StatelessWidget {
                       await firebaseFunctions
                           .httpsCallable('create_organization_https')
                           .call({
-                        "organizationCreationName": organizationCreationName,
+                        "organizationCreationName": null,
                       });
 
                       while (context.mounted == false) {
