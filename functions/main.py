@@ -4,6 +4,7 @@ from firebase_functions import firestore_fn, https_fn, identity_fn, options
 # The Firebase Admin SDK to access Cloud Firestore.
 from firebase_admin import initialize_app, firestore, credentials, auth
 import google.cloud.firestore as gcf
+from typing import Any
 
 
 allowed_domains = ["verkada.com", "gmail.com"]
@@ -82,7 +83,7 @@ def create_user_https(req: https_fn.Request) -> https_fn.Response:
 
 
 @https_fn.on_call(cors=POSTcorsrules)
-def create_organization_https(req: https_fn.CallableRequest) -> https_fn.Response:
+def create_organization_https(req: https_fn.CallableRequest) -> Any:
     #create the organization in firestore
     try:
         # Read JSON data from request body
