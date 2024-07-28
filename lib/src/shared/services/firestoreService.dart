@@ -20,39 +20,6 @@ class FirestoreService {
     }
   }
 
-  ///
-
-  Future<bool> doesDeviceExistInFirestore(String? serial, String? orgId) async {
-    try {
-      final querySnapshot = await _db
-          .collection('organizations')
-          .doc(orgId)
-          .collection('devices')
-          .where('serial', isEqualTo: serial)
-          .get();
-      return querySnapshot.docs.isNotEmpty;
-    } catch (e) {
-      print('Error checking device exists: $e');
-      return false;
-    }
-  }
-
-  Future<bool> isDeviceCheckedOutInFirestore(
-      String? serial, String? orgId) async {
-    try {
-      final querySnapshot = await _db
-          .collection('organizations')
-          .doc(orgId)
-          .collection('devices')
-          .where('serial', isEqualTo: serial)
-          .get();
-      return querySnapshot.docs.first.data()['isCheckedOut'];
-    } catch (e) {
-      print('Error checking device checkout status: $e');
-      return false;
-    }
-  }
-
   Future<void> updateDeviceCheckoutStatusInFirestore(
       String? serial, String? orgId, bool isCheckedOut) async {
     try {
@@ -78,6 +45,23 @@ class FirestoreService {
       }
     } catch (e) {
       print('Error updating checkout status: $e');
+    }
+  }
+
+  ///
+
+  Future<bool> doesDeviceExistInFirestore(String? serial, String? orgId) async {
+    try {
+      final querySnapshot = await _db
+          .collection('organizations')
+          .doc(orgId)
+          .collection('devices')
+          .where('serial', isEqualTo: serial)
+          .get();
+      return querySnapshot.docs.isNotEmpty;
+    } catch (e) {
+      print('Error checking device exists: $e');
+      return false;
     }
   }
 
@@ -179,5 +163,21 @@ class FirestoreService {
       print('Error checking username: $e');
       return '';
     });
+  }
+
+  Future<bool> isDeviceCheckedOutInFirestore(
+      String? serial, String? orgId) async {
+    try {
+      final querySnapshot = await _db
+          .collection('organizations')
+          .doc(orgId)
+          .collection('devices')
+          .where('serial', isEqualTo: serial)
+          .get();
+      return querySnapshot.docs.first.data()['isCheckedOut'];
+    } catch (e) {
+      print('Error checking device checkout status: $e');
+      return false;
+    }
   }
 }
