@@ -3,57 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class FirestoreService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  ///I think that the code wrapped by these comment tags should be moved server side
-
-  Future<void> createOrganization(String? organizationCreationName, String? uid,
-      String? displayName, String? email) async {
-    try {
-      DocumentReference organizationRef =
-          await _db.collection('organizations').add({
-        'name': organizationCreationName,
-        'createdAt': FieldValue.serverTimestamp(),
-      });
-
-      String organizationId = organizationRef.id;
-      await updateUserOrganizations(uid, organizationId);
-      await addUserToOrganization(uid, organizationId, displayName, email);
-    } catch (e) {
-      print('Error creating organization: $e');
-    }
-  }
-
-  Future<void> updateUserOrganizations(
-      String? uid, String? organizationId) async {
-    try {
-      await _db.collection('users').doc(uid).update({
-        'organizationUids': FieldValue.arrayUnion([organizationId]),
-      });
-    } catch (e) {
-      print('Error updating user organizations: $e');
-    }
-  }
-
-  Future<void> addUserToOrganization(String? uid, String? organizationId,
-      String? displayName, String? email) async {
-    try {
-      await _db
-          .collection('organizations')
-          .doc(organizationId)
-          .collection('members')
-          .doc(uid)
-          .set({
-        'createdAt': FieldValue.serverTimestamp(),
-        'username': displayName,
-        'email': email,
-      });
-      print('User added to organization');
-    } catch (e) {
-      print('Error adding user to organization: $e');
-    }
-  }
-
-  ///
-
+  ///should be moved server side
   Future<void> createDeviceInFirestore(String? serial, String? orgId) async {
     try {
       await _db
@@ -69,6 +19,8 @@ class FirestoreService {
       print('Error creating device: $e');
     }
   }
+
+  ///
 
   Future<bool> doesDeviceExistInFirestore(String? serial, String? orgId) async {
     try {
