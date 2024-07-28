@@ -66,13 +66,13 @@ def create_user_callable(req: https_fn.CallableRequest) -> Any:
         new_user_email = req.data["newUserEmail"]
 
         # Checking attribute.
-        if new_user_dispay_name == None or new_user_email == None or len(new_user_dispay_name) < 1 or len(new_user_email) < 1:
+        if not new_user_dispay_name or not new_user_email:
             # Throwing an HttpsError so that the client gets the error details.
             raise https_fn.HttpsError(code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
                                 message='The function must be called with two arguments, "new_user_dispay_name" and "new_user_email"')
 
         if new_user_dispay_name.split("@")[1] not in allowed_domains:
-            return https_fn.HttpsError(code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
+            raise https_fn.HttpsError(code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
                                 message='Unauthorized email for new user')
 
         #create the user in firebase auth
@@ -86,8 +86,15 @@ def create_user_callable(req: https_fn.CallableRequest) -> Any:
         create_user_profile(user)
 
         return {"response": f"User {new_user_email} created"}
+    except https_fn.HttpsError as e:
+        # Re-raise known HttpsErrors
+        raise e
     except Exception as e:
-       raise https_fn.HttpsError(code=https_fn.FunctionsErrorCode.UNKNOWN, message=f"Unknown Error creating organization: {str(e)}")
+        # Handle any other exceptions
+        raise https_fn.HttpsError(
+            code=https_fn.FunctionsErrorCode.UNKNOWN,
+            message=f"Error creating user: {str(e)}"
+        )
 
 
 
@@ -102,7 +109,7 @@ def create_organization_callable(req: https_fn.CallableRequest) -> Any:
             )
 
         # Extract parameters
-        organization_creation_name = req.data("organizationCreationName", "")
+        organization_creation_name = req.data["organizationCreationName"]
         uid = req.auth.uid
         display_name = req.auth.token.get("name", "")
         email = req.auth.token.get("email", "")
@@ -135,7 +142,7 @@ def create_organization_callable(req: https_fn.CallableRequest) -> Any:
         # Handle any other exceptions
         raise https_fn.HttpsError(
             code=https_fn.FunctionsErrorCode.UNKNOWN,
-            message=f"Unknown Error creating organization: {str(e)}"
+            message=f"Error creating organization: {str(e)}"
         )
 
 
