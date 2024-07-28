@@ -87,7 +87,7 @@ def create_organization_https(req: https_fn.Request) -> https_fn.Response:
     # Set CORS headers for the preflight request
     try:
         # Read JSON data from request body
-        data = req.get_json()
+        data = req.get_json().get("data", {})
         
         # Extract parameters from JSON data
         organization_creation_name = data.get("organizationCreationName")
@@ -96,7 +96,7 @@ def create_organization_https(req: https_fn.Request) -> https_fn.Response:
         email = data.get("email")
 
         if not organization_creation_name or not uid or not display_name or not email:
-            return https_fn.Response("Not all parameters provided", status=400)
+            return https_fn.Response(f"Not all parameters provided", status=400)
     
         org_data = {
             'created_at': firestore.SERVER_TIMESTAMP,
