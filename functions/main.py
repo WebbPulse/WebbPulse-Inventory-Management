@@ -84,7 +84,7 @@ def create_user_https(req: https_fn.Request) -> https_fn.Response:
 @https_fn.on_request(cors=POSTcorsrules)
 def create_organization_https(req: https_fn.Request) -> https_fn.Response:
     #create the organization in firestore
-    # Set CORS headers for the preflight request
+
     try:
         # Read JSON data from request body
         data = req.get_json().get("data", {})
@@ -107,7 +107,7 @@ def create_organization_https(req: https_fn.Request) -> https_fn.Response:
         update_user_organizations(uid, organization_uid)
         add_user_to_organization(uid, organization_uid, display_name, email)
 
-        return https_fn.Response(response=f"Organization {organization_creation_name} created")
+        return https_fn.Response(f"Organization {organization_creation_name} created")
     
     except Exception as e:
         return https_fn.Response(response=f"Error creating organization: {str(e)}", status=500)
