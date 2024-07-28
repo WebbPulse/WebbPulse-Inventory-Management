@@ -16,18 +16,20 @@ cred = credentials.Certificate('./gcp_key.json')
 app = initialize_app(cred)
 db = firestore.client()
 
-db = firestore.client()
+POSTcorsrules=options.CorsOptions(cors_origins="*", cors_methods=["get", "post"])
 
-def create_user_profile(user) -> None:
-    user_data = {
-        'created_at': firestore.SERVER_TIMESTAMP,
-        'email': user.email,
-        'organizationUids': [],
-        'uid': user.uid,
-        'username': user.display_name,
-    }
-    db.collection('users').document(user.uid).set(user_data)
-
+def create_user_profile(user):
+    try:
+        user_data = {
+            'created_at': firestore.SERVER_TIMESTAMP,
+            'email': user.email,
+            'organizationUids': [],
+            'uid': user.uid,
+            'username': user.display_name,
+        }
+        db.collection('users').document(user.uid).set(user_data)
+    except Exception as e:
+        raise https_fn.HttpsError(code=https_fn.FunctionsErrorCode.UNKNOWN, message=f"Unknown Error creating user profile: {str(e)}")
 @identity_fn.before_user_created()
 def create_user_ui(event: identity_fn.AuthBlockingEvent) -> identity_fn.BeforeCreateResponse | None:
     user = event.data
@@ -47,38 +49,45 @@ def create_user_ui(event: identity_fn.AuthBlockingEvent) -> identity_fn.BeforeCr
         )
 
 
-POSTcorsrules=options.CorsOptions(cors_origins="*", cors_methods=["get", "post"])
+
 
 @https_fn.on_call(cors=POSTcorsrules)
-def create_user_callable(req: https_fn.Request) -> https_fn.Response:
+def create_user_callable(req: https_fn.CallableRequest) -> Any:
     #create the user in firebase auth
     try:
-        # Read JSON data from request body
-        data = req.get_json()
+        # Checking that the user is authenticated.
+        if req.auth is None:
+        # Throwing an HttpsError so that the client gets the error details.
+            raise https_fn.HttpsError(code=https_fn.FunctionsErrorCode.FAILED_PRECONDITION,
+                                message="The function must be called while authenticated.")
         
-        # Extract parameters from JSON data
-        display_name = data.get("displayName")
-        email = data.get("email")
+        # Extract parameters 
+        new_user_dispay_name = req.data["newUserDisplayName"]
+        new_user_email = req.data["newUserEmail"]
 
-        if not email or not display_name:
-            return https_fn.Response("Not all parameters provided", status=400)
+        # Checking attribute.
+        if not isinstance(new_user_dispay_name, str) or len(new_user_dispay_name) < 1 or not isinstance(new_user_email, str) or len(new_user_email) < 1: 
+            # Throwing an HttpsError so that the client gets the error details.
+            raise https_fn.HttpsError(code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
+                                message='The function must be called with two arguments, "new_user_dispay_name" and "new_user_email"')
 
-        if email.split("@")[1] not in allowed_domains:
-            return https_fn.Response("Unauthorized email", status=403)
+        if new_user_dispay_name.split("@")[1] not in allowed_domains:
+            return https_fn.HttpsError(code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
+                                message='Unauthorized email for new user')
 
         #create the user in firebase auth
         user = auth.create_user(
-            email=email,
+            email=new_user_email,
             email_verified=False,
-            display_name=display_name,
+            display_name=new_user_dispay_name,
             disabled=False
         )
         #create the user profile in firestore
         create_user_profile(user)
 
-        return https_fn.Response(f"User {user.uid} created")
+        return {"response": f"User {new_user_email} created"}
     except Exception as e:
-        return https_fn.Response(f"Error creating user: {str(e)}", status=500)
+       raise https_fn.HttpsError(code=https_fn.FunctionsErrorCode.UNKNOWN, message=f"Unknown Error creating organization: {str(e)}")
 
 
 
@@ -123,14 +132,13 @@ def create_organization_callable(req: https_fn.CallableRequest) -> Any:
 
 
 def update_user_organizations(uid, organization_uid):
-    
     try:
         user_ref = db.collection('users').document(uid)
         user_ref.update({
             'organizationUids': gcf.ArrayUnion([organization_uid])
         })
     except Exception as e:
-        return
+        raise https_fn.HttpsError(code=https_fn.FunctionsErrorCode.UNKNOWN, message=f"Unknown Error updating user organizations: {str(e)}")
 
 def add_user_to_organization(uid, organization_uid, display_name, email):
     try:
@@ -140,4 +148,4 @@ def add_user_to_organization(uid, organization_uid, display_name, email):
             'email': email,
         })
     except Exception as e:
-        return
+        raise https_fn.HttpsError(code=https_fn.FunctionsErrorCode.UNKNOWN, message=f"Unknown Error adding user to organization: {str(e)}")
