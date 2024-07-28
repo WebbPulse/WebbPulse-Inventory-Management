@@ -23,10 +23,6 @@ jobs:
       - name: Install Firebase CLI
         run: npm install -g firebase-tools
 
-
-      - name: Install Firebase CLI
-        run: npm install -g firebase-tools
-
       - name: Set up Flutter
         uses: subosito/flutter-action@main
         with:
