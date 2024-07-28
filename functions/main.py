@@ -10,11 +10,6 @@ import google.cloud.firestore as gcf
 allowed_domains = ["verkada.com", "gmail.com"]
 
 
-POSTcorsrules=options.CorsOptions(
-        cors_origins=[r"webbpulse\.com$"],
-        cors_methods=["post"],
-    )
-
 # Read the service account key from the file
 
 cred = credentials.Certificate('./gcp_key.json')
@@ -51,6 +46,11 @@ def create_user_ui(event: identity_fn.AuthBlockingEvent) -> identity_fn.BeforeCr
             )
         )
 
+
+POSTcorsrules=options.CorsOptions(
+        cors_origins=["*"],
+        cors_methods=["*"],
+    )
 
 @https_fn.on_request(cors=POSTcorsrules)
 def create_user_https(req: https_fn.Request) -> https_fn.Response:
