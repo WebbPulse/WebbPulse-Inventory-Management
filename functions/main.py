@@ -1,6 +1,5 @@
 # The Cloud Functions for Firebase SDK to create Cloud Functions and set up triggers.
 from firebase_functions import firestore_fn, https_fn, identity_fn, options
-from firebase_functions.params import SecretParam
 
 # The Firebase Admin SDK to access Cloud Firestore.
 from firebase_admin import initialize_app, firestore, credentials, auth
@@ -47,10 +46,7 @@ def create_user_ui(event: identity_fn.AuthBlockingEvent) -> identity_fn.BeforeCr
         )
 
 
-POSTcorsrules=options.CorsOptions(
-        cors_origins=["*"],
-        cors_methods=["*"],
-    )
+POSTcorsrules=options.CorsOptions(cors_origins="*", cors_methods=["get", "post"])
 
 @https_fn.on_request(cors=POSTcorsrules)
 def create_user_https(req: https_fn.Request) -> https_fn.Response:
