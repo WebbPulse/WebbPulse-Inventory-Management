@@ -50,7 +50,7 @@ def create_user_ui(event: identity_fn.AuthBlockingEvent) -> identity_fn.BeforeCr
 POSTcorsrules=options.CorsOptions(cors_origins="*", cors_methods=["get", "post"])
 
 @https_fn.on_call(cors=POSTcorsrules)
-def create_user_https(req: https_fn.Request) -> https_fn.Response:
+def create_user_callable(req: https_fn.Request) -> https_fn.Response:
     #create the user in firebase auth
     try:
         # Read JSON data from request body
@@ -83,31 +83,41 @@ def create_user_https(req: https_fn.Request) -> https_fn.Response:
 
 
 @https_fn.on_call(cors=POSTcorsrules)
-def create_organization_https(req: https_fn.CallableRequest) -> Any:
+def create_organization_callable(req: https_fn.CallableRequest) -> Any:
     #create the organization in firestore
-    try:    
-        # Extract parameters from JSON data
+    try:
+        # Checking that the user is authenticated.
+        if req.auth is None:
+        # Throwing an HttpsError so that the client gets the error details.
+            raise https_fn.HttpsError(code=https_fn.FunctionsErrorCode.FAILED_PRECONDITION,
+                                message="The function must be called while authenticated.")
+        
+        # Extract parameters 
         organization_creation_name = req.data["organizationCreationName"]
         uid = req.auth.uid
         display_name = req.auth.token.get("name", "")
         email = req.auth.token.get("email", "")
 
-        if not organization_creation_name or not uid or not display_name or not email:
-            return https_fn.Response("Not all parameters provided", status=400)
-    
-        org_data = {
+        # Checking attribute.
+        if not isinstance(organization_creation_name, str) or len(organization_creation_name) < 1:
+            # Throwing an HttpsError so that the client gets the error details.
+            raise https_fn.HttpsError(code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
+                                message='The function must be called with one argument, "organization_creation_name"')
+
+        db.collection('organizations').add({
             'created_at': firestore.SERVER_TIMESTAMP,
             'name': organization_creation_name,
-        }
-        db.collection('organizations').add(org_data)
+        })
+
         organization_uid = db.collection('organizations').where('name', '==', organization_creation_name).get()[0].id
+        
         update_user_organizations(uid, organization_uid)
         add_user_to_organization(uid, organization_uid, display_name, email)
 
         return {"response": f"Organization {organization_uid} created"}
-    
     except Exception as e:
-        return https_fn.Response(f"Error creating organization: {str(e)}", status=500)
+        raise https_fn.HttpsError(code=https_fn.FunctionsErrorCode.UNKNOWN, message=f"Unknown Error creating organization: {str(e)}")
+
 
     
 
