@@ -60,10 +60,10 @@ def create_user_https(req: https_fn.Request) -> https_fn.Response:
         email = data.get("email")
 
         if not email or not display_name:
-            return https_fn.Response(response="Not all parameters provided", status=400)
+            return https_fn.Response("Not all parameters provided", status=400)
 
         if email.split("@")[1] not in allowed_domains:
-            return https_fn.Response(response="Unauthorized email", status=403)
+            return https_fn.Response("Unauthorized email", status=403)
 
         #create the user in firebase auth
         user = auth.create_user(
@@ -75,9 +75,9 @@ def create_user_https(req: https_fn.Request) -> https_fn.Response:
         #create the user profile in firestore
         create_user_profile(user)
 
-        return https_fn.Response(response=f"User {user.uid} created", status=200)
+        return https_fn.Response(f"User {user.uid} created")
     except Exception as e:
-        return https_fn.Response(response=f"Error creating user: {str(e)}", status=500)
+        return https_fn.Response(f"Error creating user: {str(e)}", status=500)
 
 
 
@@ -95,7 +95,7 @@ def create_organization_https(req: https_fn.Request) -> https_fn.Response:
         email = data.get("email")
 
         if not organization_creation_name or not uid or not display_name or not email:
-            return https_fn.Response(response="Not all parameters provided", status=400)
+            return https_fn.Response("Not all parameters provided", status=400)
     
         org_data = {
             'created_at': firestore.SERVER_TIMESTAMP,
@@ -109,7 +109,7 @@ def create_organization_https(req: https_fn.Request) -> https_fn.Response:
         return https_fn.Response(f"Organization {organization_creation_name} created")
     
     except Exception as e:
-        return https_fn.Response(response=f"Error creating organization: {str(e)}", status=500)
+        return https_fn.Response(f"Error creating organization: {str(e)}", status=500)
 
     
 
@@ -122,7 +122,7 @@ def update_user_organizations(uid, organization_uid):
             'organizationUids': gcf.ArrayUnion([organization_uid])
         })
     except Exception as e:
-        print(f"Error updating user: {str(e)}")
+        return
 
 def add_user_to_organization(uid, organization_uid, display_name, email):
     try:
@@ -132,4 +132,4 @@ def add_user_to_organization(uid, organization_uid, display_name, email):
             'email': email,
         })
     except Exception as e:
-        print(f"Error updating organization: {str(e)}")
+        return
