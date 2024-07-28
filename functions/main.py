@@ -85,15 +85,12 @@ def create_user_https(req: https_fn.Request) -> https_fn.Response:
 @https_fn.on_call(cors=POSTcorsrules)
 def create_organization_https(req: https_fn.CallableRequest) -> Any:
     #create the organization in firestore
-    try:
-        # Read JSON data from request body
-        data = req.get_json().get("data", {})
-        
+    try:    
         # Extract parameters from JSON data
-        organization_creation_name = data.get("organizationCreationName")
-        uid = data.get("uid")
-        display_name = data.get("displayName")
-        email = data.get("email")
+        organization_creation_name = req.data["organizationCreationName"]
+        uid = req.auth.uid
+        display_name = req.auth.token.get("name", "")
+        email = req.auth.token.get("email", "")
 
         if not organization_creation_name or not uid or not display_name or not email:
             return https_fn.Response("Not all parameters provided", status=400)

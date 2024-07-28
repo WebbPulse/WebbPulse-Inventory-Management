@@ -44,9 +44,6 @@ class CreateOrganizationView extends StatelessWidget {
                           .httpsCallable('create_organization_https')
                           .call({
                         "organizationCreationName": organizationCreationName,
-                        "uid": authProvider.uid,
-                        "displayName": authProvider.displayName,
-                        "email": authProvider.email,
                       });
 
                       while (context.mounted == false) {
