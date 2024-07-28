@@ -108,8 +108,9 @@ def create_organization_https(req: https_fn.Request) -> https_fn.Response:
         add_user_to_organization(uid, organization_uid, display_name, email)
 
         return https_fn.Response(response={
-            "status":"success",
-            "data": f"Organization {organization_creation_name} created"
+            "response":{
+                "message": f"Organization {organization_creation_name} created"
+                }
             }, status=200)
     
     except Exception as e:
