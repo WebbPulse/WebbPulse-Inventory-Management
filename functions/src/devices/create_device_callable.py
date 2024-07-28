@@ -11,17 +11,17 @@ def create_device_callable(req: https_fn.CallableRequest) -> Any:
             )
 
         # Extract parameters
-        serial = req.data["serial"]
-        org_id = req.data["org_id"]
+        serial = req.data["deviceSerialNumber"]
+        org_id = req.data["orgUid"]
         
-        # Check if the organization_creation_name is provided and valid
+        # Check if the serial and org_id are provided and valid
         if not serial or not org_id:
             raise https_fn.HttpsError(
                 code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
                 message='The function must be called with  valid "serial" and "org_id" arguments.'
             )
 
-        # Create the organization in Firestore
+        # Create the device in Firestore
         db.collection('organizations').document(org_id).collection('devices').add({
             'serial': serial,
             'created_at': firestore.SERVER_TIMESTAMP,

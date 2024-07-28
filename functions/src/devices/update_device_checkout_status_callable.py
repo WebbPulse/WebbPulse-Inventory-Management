@@ -11,18 +11,18 @@ def update_device_checkout_status_callable(req: https_fn.CallableRequest) -> Any
             )
 
         # Extract parameters
-        serial = req.data["serial"]
-        org_id = req.data["org_id"]
+        serial = req.data["deviceSerialNumber"]
+        org_id = req.data["orgUid"]
         isCheckedOut = req.data["isCheckedOut"]
         
-        # Check if the organization_creation_name is provided and valid
+        # Check if the serial, org_id, and isCheckedOut are provided and valid
         if not serial or not org_id or not isCheckedOut:
             raise https_fn.HttpsError(
                 code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
                 message='The function must be called with valid "serial", "org_id", and "isCheckedOut" arguments.'
             )
 
-        # Create the organization in Firestore
+        # Update the device in Firestore
         querySnapshot = db.collection('organizations').document(org_id).collection('devices').where('serial', '==', serial).get()
         if len(querySnapshot) > 0:
             docId = querySnapshot[0].id
