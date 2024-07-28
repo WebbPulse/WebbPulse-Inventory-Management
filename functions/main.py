@@ -10,6 +10,8 @@ app = initialize_app(cred)
 from src.users.create_user_callable import create_user_callable
 from src.users.create_user_ui import create_user_ui
 from src.organizations.create_organization_callable import create_organization_callable
+from src.devices.create_device_callable import create_device_callable
+from src.devices.update_device_checkout_status_callable import update_device_checkout_status_callable
 
 
 
