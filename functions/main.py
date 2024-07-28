@@ -48,7 +48,7 @@ def create_user_ui(event: identity_fn.AuthBlockingEvent) -> identity_fn.BeforeCr
 
 POSTcorsrules=options.CorsOptions(cors_origins="*", cors_methods=["get", "post"])
 
-@https_fn.on_request(cors=POSTcorsrules)
+@https_fn.on_call(cors=POSTcorsrules)
 def create_user_https(req: https_fn.Request) -> https_fn.Response:
     #create the user in firebase auth
     try:
@@ -81,8 +81,8 @@ def create_user_https(req: https_fn.Request) -> https_fn.Response:
 
 
 
-@https_fn.on_request(cors=POSTcorsrules)
-def create_organization_https(req: https_fn.Request) -> https_fn.Response:
+@https_fn.on_call(cors=POSTcorsrules)
+def create_organization_https(req: https_fn.CallableRequest) -> https_fn.Response:
     #create the organization in firestore
     try:
         # Read JSON data from request body
@@ -106,7 +106,7 @@ def create_organization_https(req: https_fn.Request) -> https_fn.Response:
         update_user_organizations(uid, organization_uid)
         add_user_to_organization(uid, organization_uid, display_name, email)
 
-        return https_fn.Response(f"Organization {organization_creation_name} created")
+        return {"response": f"Organization {organization_uid} created"}
     
     except Exception as e:
         return https_fn.Response(f"Error creating organization: {str(e)}", status=500)
