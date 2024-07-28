@@ -96,7 +96,7 @@ def create_organization_https(req: https_fn.Request) -> https_fn.Response:
         email = data.get("email")
 
         if not organization_creation_name or not uid or not display_name or not email:
-            return https_fn.Response(response=f"Not all parameters provided", status=400)
+            return https_fn.Response(response="Not all parameters provided", status=400)
     
         org_data = {
             'created_at': firestore.SERVER_TIMESTAMP,
@@ -107,7 +107,7 @@ def create_organization_https(req: https_fn.Request) -> https_fn.Response:
         update_user_organizations(uid, organization_uid)
         add_user_to_organization(uid, organization_uid, display_name, email)
 
-        return https_fn.Response(response=f"Organization {organization_creation_name} created", status=200)
+        return https_fn.Response(response={"message":f"Organization {display_name} created","data":org_data}, status=200)
     
     except Exception as e:
         return https_fn.Response(response=f"Error creating organization: {str(e)}", status=500)
