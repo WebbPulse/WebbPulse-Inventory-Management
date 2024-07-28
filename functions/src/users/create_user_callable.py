@@ -1,41 +1,5 @@
-from firebase_functions import https_fn, identity_fn
-
-# The Firebase Admin SDK to access Cloud Firestore.
-from firebase_admin import firestore, auth
-import google.cloud.firestore as gcf
-from typing import Any
-
-from main import allowed_domains, db, POSTcorsrules
-
-def create_user_profile(user):
-    try:
-        user_data = {
-            'created_at': firestore.SERVER_TIMESTAMP,
-            'email': user.email,
-            'organizationUids': [],
-            'uid': user.uid,
-            'username': user.display_name,
-        }
-        db.collection('users').document(user.uid).set(user_data)
-    except Exception as e:
-        raise https_fn.HttpsError(code=https_fn.FunctionsErrorCode.UNKNOWN, message=f"Unknown Error creating user profile: {str(e)}")
-@identity_fn.before_user_created()
-def create_user_ui(event: identity_fn.AuthBlockingEvent) -> identity_fn.BeforeCreateResponse | None:
-    user = event.data
-    try:
-        if not user.email or user.email.split("@")[1] not in allowed_domains:
-            return https_fn.HttpsError(
-                code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
-                message="Unauthorized email"
-            )
-        create_user_profile(user)
-    except https_fn.HttpsError as e:
-        return identity_fn.BeforeCreateResponse(
-            error=identity_fn.Error(
-                message=e.message,
-                code=e.code
-            )
-        )
+from src.shared.shared import auth, https_fn, POSTcorsrules, allowed_domains, Any
+from src.users.helpers.create_user_profile import create_user_profile
 
 
 @https_fn.on_call(cors=POSTcorsrules)
