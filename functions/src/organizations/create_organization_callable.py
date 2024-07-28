@@ -1,11 +1,6 @@
-from firebase_functions import https_fn
-
-# The Firebase Admin SDK to access Cloud Firestore.
-from firebase_admin import firestore
-import google.cloud.firestore as gcf
-from typing import Any
-
-from main import db, POSTcorsrules
+from src.shared.shared import POSTcorsrules, db, firestore, https_fn, Any
+from src.organizations.helpers.add_user_to_organization import add_user_to_organization
+from src.organizations.helpers.update_user_organizations import update_user_organizations
 
 @https_fn.on_call(cors=POSTcorsrules)
 def create_organization_callable(req: https_fn.CallableRequest) -> Any:
@@ -53,23 +48,3 @@ def create_organization_callable(req: https_fn.CallableRequest) -> Any:
             code=https_fn.FunctionsErrorCode.UNKNOWN,
             message=f"Error creating organization: {str(e)}"
         )
-
-
-def update_user_organizations(uid, organization_uid):
-    try:
-        user_ref = db.collection('users').document(uid)
-        user_ref.update({
-            'organizationUids': gcf.ArrayUnion([organization_uid])
-        })
-    except Exception as e:
-        raise https_fn.HttpsError(code=https_fn.FunctionsErrorCode.UNKNOWN, message=f"Unknown Error updating user organizations: {str(e)}")
-
-def add_user_to_organization(uid, organization_uid, display_name, email):
-    try:
-        db.collection('organizations').document(organization_uid).collection('members').document(uid).set({
-            'createdAt': firestore.SERVER_TIMESTAMP,
-            'username': display_name,
-            'email': email,
-        })
-    except Exception as e:
-        raise https_fn.HttpsError(code=https_fn.FunctionsErrorCode.UNKNOWN, message=f"Unknown Error adding user to organization: {str(e)}")
