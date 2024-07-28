@@ -108,11 +108,11 @@ def create_organization_callable(req: https_fn.CallableRequest) -> Any:
         email = req.auth.token.get("email", "")
 
         # Checking attribute.
-        if not isinstance(organization_creation_name, str) or len(organization_creation_name) < 1:
+        if organization_creation_name == None or len(organization_creation_name) < 1: 
             # Throwing an HttpsError so that the client gets the error details.
             raise https_fn.HttpsError(code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
                                 message='The function must be called with one argument, "organization_creation_name"')
-
+        
         db.collection('organizations').add({
             'created_at': firestore.SERVER_TIMESTAMP,
             'name': organization_creation_name,
