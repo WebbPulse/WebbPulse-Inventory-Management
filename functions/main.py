@@ -66,7 +66,7 @@ def create_user_callable(req: https_fn.CallableRequest) -> Any:
         new_user_email = req.data["newUserEmail"]
 
         # Checking attribute.
-        if not isinstance(new_user_dispay_name, str) or len(new_user_dispay_name) < 1 or not isinstance(new_user_email, str) or len(new_user_email) < 1:
+        if not new_user_dispay_name or not new_user_email:
             # Throwing an HttpsError so that the client gets the error details.
             raise https_fn.HttpsError(code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
                                 message='The function must be called with two arguments, "new_user_dispay_name" and "new_user_email"')
@@ -115,7 +115,7 @@ def create_organization_callable(req: https_fn.CallableRequest) -> Any:
         email = req.auth.token.get("email", "")
 
         # Check if the organization_creation_name is provided and valid
-        if not isinstance(organization_creation_name, str) or len(organization_creation_name) < 1:
+        if not organization_creation_name:
             raise https_fn.HttpsError(
                 code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
                 message='The function must be called with a valid "organizationCreationName" argument.'
