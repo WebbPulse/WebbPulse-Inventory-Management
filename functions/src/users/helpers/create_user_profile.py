@@ -5,7 +5,6 @@ def create_user_profile(user):
         user_data = {
             'created_at': firestore.SERVER_TIMESTAMP,
             'email': user.email,
-            'organizationUids': [],
             'uid': user.uid,
             'username': user.display_name,
         }

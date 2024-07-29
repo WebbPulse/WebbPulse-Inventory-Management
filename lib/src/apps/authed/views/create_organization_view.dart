@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:webbcheck/src/apps/authed/views/org_selection_view.dart';
-import 'package:webbcheck/src/shared/helpers/snackbar.dart';
+import 'package:webbcheck/src/shared/helpers/asyncContextHelpers.dart';
 
 class CreateOrganizationView extends StatelessWidget {
   CreateOrganizationView({

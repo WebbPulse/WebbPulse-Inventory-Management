@@ -7,7 +7,7 @@ import '../../shared/providers/orgSelectorChangeNotifier.dart';
 
 import '../../shared/providers/firestoreService.dart';
 import '../../shared/providers/deviceCheckoutService.dart';
-import 'package:webbcheck/src/shared/helpers/snackbar.dart';
+import 'package:webbcheck/src/shared/helpers/asyncContextHelpers.dart';
 
 import 'views/org_selection_view.dart';
 
