@@ -20,12 +20,12 @@ def create_user_callable(req: https_fn.CallableRequest) -> Any:
         organization_uid = req.data["organizationUid"]
 
         # Checking attribute.
-        if not new_user_dispay_name or not new_user_email:
+        if not new_user_dispay_name or not new_user_email or not organization_uid:
             # Throwing an HttpsError so that the client gets the error details.
             raise https_fn.HttpsError(code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
-                                message='The function must be called with two arguments, "new_user_dispay_name" and "new_user_email"')
+                                message='The function must be called with three arguments: "userCreationDisplayName", "userCreationEmail", and "organizationUid".')
 
-        if new_user_dispay_name.split("@")[1] not in allowed_domains:
+        if new_user_email.split("@")[1] not in allowed_domains:
             raise https_fn.HttpsError(code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
                                 message='Unauthorized email for new user')
 
