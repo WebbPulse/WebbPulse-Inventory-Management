@@ -38,7 +38,8 @@ def create_user_callable(req: https_fn.CallableRequest) -> Any:
         )
         #create the user profile in firestore
         create_user_profile(user)
-        add_user_to_organization(user.id, organization_uid, new_user_dispay_name, new_user_email)
+        
+        add_user_to_organization(user.uid, organization_uid, new_user_dispay_name, new_user_email)
         update_user_organizations(req.auth.uid, organization_uid)
 
         return {"response": f"User {new_user_email} created"}
