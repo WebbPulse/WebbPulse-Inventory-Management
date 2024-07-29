@@ -20,12 +20,12 @@ def create_user_callable(req: https_fn.CallableRequest) -> Any:
         organization_uid = req.data["organizationUid"]
 
         # Checking attribute.
-        if not new_user_dispay_name or not new_user_email:
+        if not new_user_dispay_name or not new_user_email or not organization_uid:
             # Throwing an HttpsError so that the client gets the error details.
             raise https_fn.HttpsError(code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
-                                message='The function must be called with two arguments, "new_user_dispay_name" and "new_user_email"')
+                                message='The function must be called with three arguments: "userCreationDisplayName", "userCreationEmail", and "organizationUid".')
 
-        if new_user_dispay_name.split("@")[1] not in allowed_domains:
+        if new_user_email.split("@")[1] not in allowed_domains:
             raise https_fn.HttpsError(code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
                                 message='Unauthorized email for new user')
 
@@ -38,7 +38,7 @@ def create_user_callable(req: https_fn.CallableRequest) -> Any:
         )
         #create the user profile in firestore
         create_user_profile(user)
-        add_user_to_organization(req.auth.uid, organization_uid, new_user_dispay_name, new_user_email)
+        add_user_to_organization(user.id, organization_uid, new_user_dispay_name, new_user_email)
         update_user_organizations(req.auth.uid, organization_uid)
 
         return {"response": f"User {new_user_email} created"}
