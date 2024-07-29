@@ -1,5 +1,7 @@
 from src.shared.shared import auth, https_fn, POSTcorsrules, allowed_domains, Any
 from src.users.helpers.create_user_profile import create_user_profile
+from src.users.helpers.add_user_to_organization import add_user_to_organization
+from src.users.helpers.update_user_organizations import update_user_organizations
 
 
 @https_fn.on_call(cors=POSTcorsrules)
@@ -13,8 +15,9 @@ def create_user_callable(req: https_fn.CallableRequest) -> Any:
                                 message="The function must be called while authenticated.")
         
         # Extract parameters 
-        new_user_dispay_name = req.data["newUserDisplayName"]
-        new_user_email = req.data["newUserEmail"]
+        new_user_dispay_name = req.data["userCreationDisplayName"]
+        new_user_email = req.data["userCreationEmail"]
+        organization_uid = req.data["organizationUid"]
 
         # Checking attribute.
         if not new_user_dispay_name or not new_user_email:
@@ -35,6 +38,8 @@ def create_user_callable(req: https_fn.CallableRequest) -> Any:
         )
         #create the user profile in firestore
         create_user_profile(user)
+        add_user_to_organization(req.auth.uid, organization_uid, new_user_dispay_name, new_user_email)
+        update_user_organizations(req.auth.uid, organization_uid)
 
         return {"response": f"User {new_user_email} created"}
     except https_fn.HttpsError as e:
