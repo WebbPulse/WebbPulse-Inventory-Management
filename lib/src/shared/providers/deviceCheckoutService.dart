@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:webbcheck/src/shared/providers/firestoreService.dart';
 import 'package:cloud_functions/cloud_functions.dart';
-import 'package:webbcheck/src/shared/helpers/snackbar.dart';
+import 'package:webbcheck/src/shared/helpers/asyncContextHelpers.dart';
 
 class DeviceCheckoutService {
   final FirestoreService firestoreService;
