@@ -16,7 +16,7 @@ def update_device_checkout_status_callable(req: https_fn.CallableRequest) -> Any
         isCheckedOut = req.data["isCheckedOut"]
         
         # Check if the serial, org_id, and isCheckedOut are provided and valid
-        if not serial or not org_id or not isCheckedOut:
+        if not serial or not org_id or isCheckedOut is None:
             raise https_fn.HttpsError(
                 code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
                 message='The function must be called with valid "serial", "org_id", and "isCheckedOut" arguments.'
