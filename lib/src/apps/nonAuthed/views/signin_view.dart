@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:provider/provider.dart';
 
-import '../../../shared/providers/authenticationProvider.dart';
+import '../../../shared/providers/authenticationChangeNotifier.dart';
 import '../../authed/views/checkout_view.dart';
 
 class SignInView extends StatelessWidget {
@@ -15,7 +15,7 @@ class SignInView extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Sign In')),
       body: Center(
-        child: Consumer<AuthenticationProvider>(
+        child: Consumer<AuthenticationChangeNotifier>(
           builder: (context, authProvider, child) => SignInScreen(
             providers: [
               EmailAuthProvider(),

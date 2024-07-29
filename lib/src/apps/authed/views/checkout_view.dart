@@ -2,27 +2,25 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:webbcheck/src/shared/providers/orgSelectorProvider.dart';
-import 'package:webbcheck/src/shared/services/firestoreService.dart';
+import 'package:webbcheck/src/shared/providers/orgSelectorChangeNotifier.dart';
+import 'package:webbcheck/src/shared/providers/firestoreService.dart';
+import 'package:webbcheck/src/shared/providers/deviceCheckoutService.dart';
 
 import '../../../shared/widgets.dart';
-import '../../../shared/services/deviceCheckoutService.dart';
 
 class CheckoutView extends StatelessWidget {
-  CheckoutView(
-      {super.key,
-      required this.firestoreService,
-      required this.deviceCheckoutService});
+  CheckoutView({super.key});
+
+  final TextEditingController _controller = TextEditingController();
 
   static const routeName = '/checkout';
-  final TextEditingController _controller = TextEditingController();
-  final FirestoreService firestoreService;
-  final DeviceCheckoutService deviceCheckoutService;
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<OrgSelectorProvider>(
-      builder: (context, orgSelectorProvider, child) {
+    return Consumer3<OrgSelectorChangeNotifier, FirestoreService,
+        DeviceCheckoutService>(
+      builder: (context, orgSelectorProvider, firestoreService,
+          deviceCheckoutService, child) {
         return Scaffold(
           appBar: AppBar(
             title: const Text('Checkout Page'),

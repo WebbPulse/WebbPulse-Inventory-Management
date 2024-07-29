@@ -1,24 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'package:webbcheck/src/shared/providers/orgSelectorProvider.dart';
-import 'package:webbcheck/src/shared/services/firestoreService.dart';
-import 'package:webbcheck/src/shared/services/authService.dart';
+import 'package:webbcheck/src/shared/providers/orgSelectorChangeNotifier.dart';
+import 'package:webbcheck/src/shared/providers/firestoreService.dart';
 import '../../../shared/widgets.dart';
 
 class UsersView extends StatelessWidget {
-  UsersView({super.key, required this.firestoreService});
+  UsersView({super.key});
 
-  final AuthService authService = AuthService();
   final TextEditingController _controller = TextEditingController();
-  final FirestoreService firestoreService;
+
   static const routeName = '/users';
 
   @override
   Widget build(BuildContext context) {
     // The email is now directly available to use
-    return Consumer<OrgSelectorProvider>(
-      builder: (context, orgSelectorProvider, child) {
+    return Consumer2<OrgSelectorChangeNotifier, FirestoreService>(
+      builder: (context, orgSelectorProvider, firestoreService, child) {
         return StreamBuilder<List<String>>(
             stream: firestoreService
                 .getOrgMembersUidsStream(orgSelectorProvider.selectedOrgUid),
@@ -39,19 +37,20 @@ class UsersView extends StatelessWidget {
                               context: context,
                               builder: (BuildContext context) {
                                 return AlertDialog(
-                                  title: Text('Add New User'),
+                                  title: const Text('Add New User'),
                                   content: SingleChildScrollView(
                                     child: ConstrainedBox(
-                                      constraints: BoxConstraints(
+                                      constraints: const BoxConstraints(
                                           maxWidth:
                                               500), // Set your desired width here
                                       child: Column(
                                         mainAxisSize: MainAxisSize
                                             .min, // This ensures the column takes only the necessary space
                                         children: [
-                                          Text(
+                                          const Text(
                                               'Enter the email of the user to add'),
-                                          SizedBox(height: 16.0), // Spacing
+                                          const SizedBox(
+                                              height: 16.0), // Spacing
                                           TextField(
                                             controller: _controller,
                                             decoration: const InputDecoration(
@@ -82,7 +81,7 @@ class UsersView extends StatelessWidget {
                           child: const Text('Add New User'))
                     ],
                   ),
-                  drawer: AuthedDrawer(),
+                  drawer: const AuthedDrawer(),
                   body: Column(
                     children: [
                       const Center(child: Text('Users Page')),

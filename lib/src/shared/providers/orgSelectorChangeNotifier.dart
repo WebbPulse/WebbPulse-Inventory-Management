@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class OrgSelectorProvider extends ChangeNotifier {
+class OrgSelectorChangeNotifier extends ChangeNotifier {
   String _selectedOrgUid = '';
   String get selectedOrgUid => _selectedOrgUid;
 

@@ -1,26 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../shared/services/firestoreService.dart';
-import '../../../shared/services/deviceCheckoutService.dart';
-import '../../../shared/providers/orgSelectorProvider.dart';
+import '../../../shared/providers/firestoreService.dart';
+import '../../../shared/providers/deviceCheckoutService.dart';
+import '../../../shared/providers/orgSelectorChangeNotifier.dart';
 import '../../../shared/widgets.dart';
 
 class DevicesView extends StatelessWidget {
-  const DevicesView(
-      {super.key,
-      required this.firestoreService,
-      required this.deviceCheckoutService});
-
-  final FirestoreService firestoreService;
-  final DeviceCheckoutService deviceCheckoutService;
+  const DevicesView({super.key});
   static const routeName = '/devices';
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Consumer<OrgSelectorProvider>(
-      builder: (context, orgSelectorProvider, child) {
+    return Consumer3<OrgSelectorChangeNotifier, FirestoreService,
+        DeviceCheckoutService>(
+      builder: (context, orgSelectorProvider, firestoreService,
+          deviceCheckoutService, child) {
         return FutureBuilder<List<String>>(
             future: firestoreService
                 .getDevicesUids(orgSelectorProvider.selectedOrgUid),
@@ -50,11 +45,7 @@ class DevicesView extends StatelessWidget {
                                   final deviceId = devicesUids[index];
                                   return DeviceCard(
                                     deviceId: deviceId,
-                                    firestoreService: firestoreService,
-                                    deviceCheckoutService:
-                                        deviceCheckoutService,
                                     orgUid: orgSelectorProvider.selectedOrgUid,
-                                    theme: theme,
                                   );
                                 },
                               ),
@@ -74,45 +65,44 @@ class DeviceCard extends StatelessWidget {
   const DeviceCard({
     super.key,
     required this.deviceId,
-    required this.firestoreService,
-    required this.deviceCheckoutService,
     required this.orgUid,
-    required this.theme,
   });
 
   final String deviceId;
-  final FirestoreService firestoreService;
-  final DeviceCheckoutService deviceCheckoutService;
   final String orgUid;
-  final ThemeData theme;
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder(
-      stream: firestoreService.getDeviceDataStream(deviceId, orgUid),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError) {
-          return const Text('Error loading devices');
-        }
-        Map<String, dynamic> deviceData = snapshot.data!;
-        String deviceSerial = deviceData['serial'] ?? '';
-        bool deviceIsCheckedOut = deviceData['isCheckedOut'] ?? false;
+    final theme = Theme.of(context);
+    return Consumer2<FirestoreService, DeviceCheckoutService>(
+      builder: (context, firestoreService, deviceCheckoutService, child) {
+        return StreamBuilder(
+          stream: firestoreService.getDeviceDataStream(deviceId, orgUid),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return const Text('Error loading devices');
+            }
+            Map<String, dynamic> deviceData = snapshot.data!;
+            String deviceSerial = deviceData['serial'] ?? '';
+            bool deviceIsCheckedOut = deviceData['isCheckedOut'] ?? false;
 
-        return CustomCard(
-            theme: theme,
-            customCardLeading:
-                Icon(Icons.devices, color: theme.colorScheme.secondary),
-            titleText: deviceSerial,
-            customCardTrailing: ElevatedButton(
-              child: Text(deviceIsCheckedOut ? 'Check In' : 'Check Out'),
-              onPressed: () {
-                deviceCheckoutService.handleDeviceCheckout(
-                    context, deviceSerial, orgUid);
-              },
-            ),
-            onTapAction: () {});
+            return CustomCard(
+                theme: theme,
+                customCardLeading:
+                    Icon(Icons.devices, color: theme.colorScheme.secondary),
+                titleText: deviceSerial,
+                customCardTrailing: ElevatedButton(
+                  child: Text(deviceIsCheckedOut ? 'Check In' : 'Check Out'),
+                  onPressed: () {
+                    deviceCheckoutService.handleDeviceCheckout(
+                        context, deviceSerial, orgUid);
+                  },
+                ),
+                onTapAction: () {});
+          },
+        );
       },
     );
   }
