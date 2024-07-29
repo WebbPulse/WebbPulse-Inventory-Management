@@ -3,8 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart'
     hide EmailAuthProvider, PhoneAuthProvider;
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 
-class AuthenticationProvider extends ChangeNotifier {
-  AuthenticationProvider() {
+class AuthenticationChangeNotifier extends ChangeNotifier {
+  AuthenticationChangeNotifier() {
     init();
   }
 

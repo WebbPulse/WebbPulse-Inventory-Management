@@ -1,28 +1,24 @@
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
-import 'package:webbcheck/src/shared/services/firestoreService.dart';
+import 'package:webbcheck/src/shared/providers/firestoreService.dart';
 import 'package:webbcheck/src/apps/authed/views/create_organization_view.dart';
 import 'package:webbcheck/src/shared/widgets.dart';
-import '../../../shared/providers/orgSelectorProvider.dart';
-import '../../../shared/providers/authenticationProvider.dart';
+import '../../../shared/providers/orgSelectorChangeNotifier.dart';
+import '../../../shared/providers/authenticationChangeNotifier.dart';
 import 'checkout_view.dart';
 
 class OrgSelectionView extends StatelessWidget {
   const OrgSelectionView({
     super.key,
-    required this.firestoreService,
   });
 
   static const routeName = '/select-organization';
 
-  final FirestoreService firestoreService;
-
   @override
   Widget build(BuildContext context) {
-    // The email is now directly available to use
-
-    return Consumer<AuthenticationProvider>(
-      builder: (context, authProvider, child) => StreamBuilder<List<String>>(
+    return Consumer2<AuthenticationChangeNotifier, FirestoreService>(
+      builder: (context, authProvider, firestoreService, child) =>
+          StreamBuilder<List<String>>(
         stream: firestoreService.orgsUidsStream(authProvider.uid),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -60,7 +56,6 @@ class OrgSelectionView extends StatelessWidget {
                               final orgUid = organizationUids[index];
                               return OrgCard(
                                 orgUid: orgUid,
-                                firestoreService: firestoreService,
                               );
                             },
                           ),
@@ -91,17 +86,15 @@ class OrgCard extends StatelessWidget {
   const OrgCard({
     super.key,
     required this.orgUid,
-    required this.firestoreService,
   });
 
   final String orgUid;
-  final FirestoreService firestoreService;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Consumer<OrgSelectorProvider>(
-      builder: (context, orgSelectorProvider, child) {
+    return Consumer2<OrgSelectorChangeNotifier, FirestoreService>(
+      builder: (context, orgSelectorProvider, firestoreService, child) {
         return StreamBuilder(
           stream: firestoreService.getOrgNameStream(orgUid),
           builder: (context, snapshot) {

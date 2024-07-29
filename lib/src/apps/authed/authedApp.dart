@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 
-import '../../shared/providers/settingsProvider.dart';
-import '../../shared/providers/orgSelectorProvider.dart';
+import '../../shared/providers/settingsChangeNotifier.dart';
+import '../../shared/providers/orgSelectorChangeNotifier.dart';
 
-import '../../shared/services/firestoreService.dart';
-import '../../shared/services/deviceCheckoutService.dart';
+import '../../shared/providers/firestoreService.dart';
+import '../../shared/providers/deviceCheckoutService.dart';
+import 'package:webbcheck/src/shared/helpers/snackbar.dart';
 
 import 'views/org_selection_view.dart';
 
@@ -19,17 +21,26 @@ import 'views/create_organization_view.dart';
 class AuthedApp extends StatelessWidget {
   AuthedApp({
     super.key,
-    required this.firestoreService,
   });
-  final FirestoreService firestoreService;
+  final SnackBarHelpers snackBarHelpers = SnackBarHelpers();
+  final FirestoreService firestoreService = FirestoreService();
+  final FirebaseFunctions firebaseFunctions = FirebaseFunctions.instance;
   late final DeviceCheckoutService deviceCheckoutService =
-      DeviceCheckoutService(firestoreService: firestoreService);
+      DeviceCheckoutService(
+          firestoreService: firestoreService,
+          firebaseFunctions: firebaseFunctions);
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => OrgSelectorProvider(),
-      child: Consumer2<OrgSelectorProvider, SettingsProvider>(
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider<OrgSelectorChangeNotifier>(
+            create: (_) => OrgSelectorChangeNotifier()),
+        Provider<FirestoreService>(create: (_) => firestoreService),
+        Provider<FirebaseFunctions>.value(value: firebaseFunctions),
+        Provider<DeviceCheckoutService>(create: (_) => deviceCheckoutService),
+      ],
+      child: Consumer2<OrgSelectorChangeNotifier, SettingsChangeNotifier>(
         builder: (context, orgSelectorProvider, settingsProvider, child) {
           return MaterialApp(
             restorationScopeId: 'authedapp',
@@ -40,25 +51,20 @@ class AuthedApp extends StatelessWidget {
             onGenerateRoute: (RouteSettings routeSettings) {
               if (routeSettings.name == CreateOrganizationView.routeName) {
                 return MaterialPageRoute<void>(
-                  builder: (context) => CreateOrganizationView(
-                    firestoreService: firestoreService,
-                  ),
+                  builder: (context) => CreateOrganizationView(),
                 );
               }
 
               if (orgSelectorProvider.selectedOrgUid.isEmpty) {
                 return MaterialPageRoute<void>(
-                  builder: (context) => OrgSelectionView(
-                    firestoreService: firestoreService,
-                  ),
+                  builder: (context) => const OrgSelectionView(),
                 );
               }
 
               switch (routeSettings.name) {
                 case SettingsView.routeName:
                   return MaterialPageRoute<void>(
-                    builder: (context) =>
-                        SettingsView(settingsProvider: settingsProvider),
+                    builder: (context) => const SettingsView(),
                   );
                 case ProfileView.routeName:
                   return MaterialPageRoute<void>(
@@ -66,34 +72,23 @@ class AuthedApp extends StatelessWidget {
                   );
                 case DevicesView.routeName:
                   return MaterialPageRoute<void>(
-                    builder: (context) => DevicesView(
-                      firestoreService: firestoreService,
-                      deviceCheckoutService: deviceCheckoutService,
-                    ),
+                    builder: (context) => const DevicesView(),
                   );
                 case CheckoutView.routeName:
                   return MaterialPageRoute<void>(
-                    builder: (context) => CheckoutView(
-                        firestoreService: firestoreService,
-                        deviceCheckoutService: deviceCheckoutService),
+                    builder: (context) => CheckoutView(),
                   );
                 case UsersView.routeName:
                   return MaterialPageRoute<void>(
-                    builder: (context) => UsersView(
-                      firestoreService: firestoreService,
-                    ),
+                    builder: (context) => UsersView(),
                   );
                 case OrgSelectionView.routeName:
                   return MaterialPageRoute<void>(
-                    builder: (context) => OrgSelectionView(
-                      firestoreService: firestoreService,
-                    ),
+                    builder: (context) => const OrgSelectionView(),
                   );
                 default:
                   return MaterialPageRoute<void>(
-                    builder: (context) => CheckoutView(
-                        firestoreService: firestoreService,
-                        deviceCheckoutService: deviceCheckoutService),
+                    builder: (context) => CheckoutView(),
                   );
               }
             },
