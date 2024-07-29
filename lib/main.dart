@@ -2,42 +2,38 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 
-import 'src/shared/providers/authenticationProvider.dart';
-import 'src/shared/providers/settingsProvider.dart';
+import 'src/shared/providers/authenticationChangeNotifier.dart';
+import 'src/shared/providers/settingsChangeNotifier.dart';
 
 import 'src/apps/authed/authedApp.dart';
 import 'src/apps/nonAuthed/nonAuthedApp.dart';
 
-import 'src/shared/services/firestoreService.dart';
 import 'src/shared/services/settingsService.dart';
 import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final settingsProvider = SettingsProvider(SettingsService());
-  await settingsProvider.loadSettings();
+  final settingsChangeNotifier = SettingsChangeNotifier(SettingsService());
+  await settingsChangeNotifier.loadSettings();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  final FirestoreService firestoreService = FirestoreService();
 
   runApp(MultiProvider(
       providers: [
-        ChangeNotifierProvider<AuthenticationProvider>(
-          create: (_) => AuthenticationProvider(),
+        ChangeNotifierProvider<AuthenticationChangeNotifier>(
+          create: (_) => AuthenticationChangeNotifier(),
         ),
-        ChangeNotifierProvider<SettingsProvider>.value(
-          value: settingsProvider,
+        ChangeNotifierProvider<SettingsChangeNotifier>.value(
+          value: settingsChangeNotifier,
         ),
       ],
-      child: Consumer<AuthenticationProvider>(
+      child: Consumer<AuthenticationChangeNotifier>(
         builder: (context, authProvider, child) {
           if (authProvider.loggedIn) {
-            return AuthedApp(
-              firestoreService: firestoreService,
-            );
+            /// If the user is logged in, show the AuthedApp
+            return AuthedApp();
           } else {
-            return NonAuthedApp(
-              firestoreService: firestoreService,
-            );
+            /// If the user is not logged in, show the NonAuthedApp
+            return const NonAuthedApp();
           }
         },
       )));
