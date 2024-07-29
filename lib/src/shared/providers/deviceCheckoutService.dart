@@ -34,7 +34,7 @@ class DeviceCheckoutService {
             "isCheckedOut": true,
           });
 
-          await SnackBarHelpers.showSnackBarIfMounted(
+          await AsyncContextHelpers.showSnackBarIfMounted(
               context, 'Device added to organization and checked out!');
         } else {
           ///if device exists, check it in/out
@@ -49,16 +49,16 @@ class DeviceCheckoutService {
           });
 
           ///ensure context is mounted before showing snackbar
-          await SnackBarHelpers.showSnackBarIfMounted(context,
+          await AsyncContextHelpers.showSnackBarIfMounted(context,
               isCheckedOut ? 'Device checked in!' : 'Device checked out!');
         }
       } catch (e) {
         ///ensure context is mounted before showing snackbar
-        await SnackBarHelpers.showSnackBarIfMounted(
+        await AsyncContextHelpers.showSnackBarIfMounted(
             context, 'Failed to check in/out device: $e');
       }
     } else {
-      SnackBarHelpers.showSnackBar(context, 'Please enter a serial number');
+      AsyncContextHelpers.showSnackBar(context, 'Please enter a serial number');
     }
   }
 }

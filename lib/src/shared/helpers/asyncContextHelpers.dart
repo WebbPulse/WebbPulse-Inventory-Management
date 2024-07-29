@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class SnackBarHelpers {
+class AsyncContextHelpers {
   static void showSnackBar(BuildContext context, String message) {
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text(message)));
@@ -13,6 +13,15 @@ class SnackBarHelpers {
     }
     if (context.mounted) {
       showSnackBar(context, message);
+    }
+  }
+
+  static Future<void> popContextIfMounted(BuildContext context) async {
+    while (!context.mounted) {
+      await Future.delayed(const Duration(milliseconds: 100));
+    }
+    if (context.mounted) {
+      Navigator.of(context).pop();
     }
   }
 }

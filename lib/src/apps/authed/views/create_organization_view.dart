@@ -42,15 +42,15 @@ class CreateOrganizationView extends StatelessWidget {
                           .call({
                         "organizationCreationName": organizationCreationName,
                       });
-                      await SnackBarHelpers.showSnackBarIfMounted(
+                      await AsyncContextHelpers.showSnackBarIfMounted(
                           context, 'Organization created!');
                       Navigator.pushNamed(context, OrgSelectionView.routeName);
                     } catch (e) {
-                      await SnackBarHelpers.showSnackBarIfMounted(
+                      await AsyncContextHelpers.showSnackBarIfMounted(
                           context, 'Failed to create organization: $e');
                     }
                   } else {
-                    SnackBarHelpers.showSnackBar(
+                    AsyncContextHelpers.showSnackBar(
                         context, 'Please enter an organization name');
                   }
                 },

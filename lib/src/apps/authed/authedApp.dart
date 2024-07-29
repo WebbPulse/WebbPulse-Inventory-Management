@@ -22,7 +22,7 @@ class AuthedApp extends StatelessWidget {
   AuthedApp({
     super.key,
   });
-  final SnackBarHelpers snackBarHelpers = SnackBarHelpers();
+  final AsyncContextHelpers snackBarHelpers = AsyncContextHelpers();
   final FirestoreService firestoreService = FirestoreService();
   final FirebaseFunctions firebaseFunctions = FirebaseFunctions.instance;
   late final DeviceCheckoutService deviceCheckoutService =
