@@ -1,5 +1,5 @@
 from src.shared.shared import db, firestore, https_fn, identity_fn, allowed_domains
-from src.users.helpers.create_user_profile import create_user_profile
+from functions.src.users.helpers.create_global_user_profile import create_global_user_profile
 
 @identity_fn.before_user_created()
 def create_user_ui(event: identity_fn.AuthBlockingEvent) -> identity_fn.BeforeCreateResponse | None:
@@ -10,7 +10,7 @@ def create_user_ui(event: identity_fn.AuthBlockingEvent) -> identity_fn.BeforeCr
                 code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
                 message="Unauthorized email"
             )
-        create_user_profile(user)
+        create_global_user_profile(user)
     except https_fn.HttpsError as e:
         return identity_fn.BeforeCreateResponse(
             error=identity_fn.Error(

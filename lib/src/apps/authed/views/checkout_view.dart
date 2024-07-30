@@ -43,7 +43,7 @@ class CheckoutView extends StatelessWidget {
                     await deviceCheckoutService.handleDeviceCheckout(
                       context,
                       deviceSerialNumber,
-                      orgSelectorProvider.selectedOrgUid,
+                      orgSelectorProvider.selectedOrgId,
                     );
                   },
                   child: const Text('Checkout Serial Number'),

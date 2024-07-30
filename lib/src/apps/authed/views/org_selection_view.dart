@@ -19,27 +19,27 @@ class OrgSelectionView extends StatelessWidget {
     return Consumer2<AuthenticationChangeNotifier, FirestoreService>(
       builder: (context, authProvider, firestoreService, child) =>
           StreamBuilder<List<String>>(
-        stream: firestoreService.orgsUidsStream(authProvider.uid),
+        stream: firestoreService.orgsIdsStream(authProvider.uid),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
             return const Text('Error loading organizations');
           }
-          final List<String> organizationUids = snapshot.data ?? [];
+          final List<String> orgIds = snapshot.data ?? [];
           return Scaffold(
             appBar: AppBar(title: const Text('Account Selection')),
             body: Column(
               children: [
                 const Center(child: Text('Select an Organization')),
                 Expanded(
-                  child: organizationUids.isNotEmpty
+                  child: orgIds.isNotEmpty
                       ? CustomLayoutBuilder(
                           childWidget: ListView.builder(
                             physics: const BouncingScrollPhysics(),
-                            itemCount: organizationUids.length + 1,
+                            itemCount: orgIds.length + 1,
                             itemBuilder: (context, index) {
-                              if (index == organizationUids.length) {
+                              if (index == orgIds.length) {
                                 return Padding(
                                   padding:
                                       const EdgeInsets.symmetric(vertical: 8.0),
@@ -53,9 +53,9 @@ class OrgSelectionView extends StatelessWidget {
                                   ),
                                 );
                               }
-                              final orgUid = organizationUids[index];
+                              final orgId = orgIds[index];
                               return OrgCard(
-                                orgUid: orgUid,
+                                orgId: orgId,
                               );
                             },
                           ),
@@ -85,10 +85,10 @@ class OrgSelectionView extends StatelessWidget {
 class OrgCard extends StatelessWidget {
   const OrgCard({
     super.key,
-    required this.orgUid,
+    required this.orgId,
   });
 
-  final String orgUid;
+  final String orgId;
 
   @override
   Widget build(BuildContext context) {
@@ -96,7 +96,7 @@ class OrgCard extends StatelessWidget {
     return Consumer2<OrgSelectorChangeNotifier, FirestoreService>(
       builder: (context, orgSelectorProvider, firestoreService, child) {
         return StreamBuilder(
-          stream: firestoreService.getOrgNameStream(orgUid),
+          stream: firestoreService.getOrgNameStream(orgId),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
@@ -112,7 +112,7 @@ class OrgCard extends StatelessWidget {
               titleText: orgName,
               customCardTrailing: null,
               onTapAction: () {
-                orgSelectorProvider.selectOrg(orgUid);
+                orgSelectorProvider.selectOrg(orgId);
                 Navigator.pushNamed(context, CheckoutView.routeName);
               },
             );

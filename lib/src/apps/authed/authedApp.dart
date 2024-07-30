@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_functions/cloud_functions.dart';
+import 'package:webbcheck/src/shared/providers/authenticationChangeNotifier.dart';
 
 import '../../shared/providers/settingsChangeNotifier.dart';
 import '../../shared/providers/orgSelectorChangeNotifier.dart';
@@ -40,57 +41,93 @@ class AuthedApp extends StatelessWidget {
         Provider<FirebaseFunctions>.value(value: firebaseFunctions),
         Provider<DeviceCheckoutService>(create: (_) => deviceCheckoutService),
       ],
-      child: Consumer2<OrgSelectorChangeNotifier, SettingsChangeNotifier>(
-        builder: (context, orgSelectorProvider, settingsProvider, child) {
-          return MaterialApp(
-            restorationScopeId: 'authedapp',
-            title: 'WebbPulse Checkout',
-            theme: ThemeData(),
-            darkTheme: ThemeData.dark(),
-            themeMode: settingsProvider.themeMode,
-            onGenerateRoute: (RouteSettings routeSettings) {
-              if (routeSettings.name == CreateOrganizationView.routeName) {
-                return MaterialPageRoute<void>(
-                  builder: (context) => CreateOrganizationView(),
+      child: Consumer3<OrgSelectorChangeNotifier, SettingsChangeNotifier,
+          AuthenticationChangeNotifier>(
+        builder: (context, orgSelectorProvider, settingsProvider, authProvider,
+            child) {
+          return StreamBuilder<String>(
+            stream: firestoreService.getCurrentDisplayName(authProvider.uid),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              } else if (snapshot.hasError) {
+                return const Text('Error loading');
+              }
+              final currentFirebaseDisplayName = snapshot.data;
+              if (currentFirebaseDisplayName == null) {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
+              if (authProvider.displayName != currentFirebaseDisplayName) {
+                return FutureBuilder<void>(
+                  future: firebaseFunctions
+                      .httpsCallable('update_global_user_display_name_callable')
+                      .call(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    } else if (snapshot.hasError) {
+                      return const Text('Error loading');
+                    }
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  },
                 );
               }
 
-              if (orgSelectorProvider.selectedOrgUid.isEmpty) {
-                return MaterialPageRoute<void>(
-                  builder: (context) => const OrgSelectionView(),
-                );
-              }
+              return MaterialApp(
+                restorationScopeId: 'authedapp',
+                title: 'WebbPulse Checkout',
+                theme: ThemeData(),
+                darkTheme: ThemeData.dark(),
+                themeMode: settingsProvider.themeMode,
+                onGenerateRoute: (RouteSettings routeSettings) {
+                  if (routeSettings.name == CreateOrganizationView.routeName) {
+                    return MaterialPageRoute<void>(
+                      builder: (context) => CreateOrganizationView(),
+                    );
+                  }
 
-              switch (routeSettings.name) {
-                case SettingsView.routeName:
-                  return MaterialPageRoute<void>(
-                    builder: (context) => const SettingsView(),
-                  );
-                case ProfileView.routeName:
-                  return MaterialPageRoute<void>(
-                    builder: (context) => const ProfileView(),
-                  );
-                case DevicesView.routeName:
-                  return MaterialPageRoute<void>(
-                    builder: (context) => const DevicesView(),
-                  );
-                case CheckoutView.routeName:
-                  return MaterialPageRoute<void>(
-                    builder: (context) => CheckoutView(),
-                  );
-                case UsersView.routeName:
-                  return MaterialPageRoute<void>(
-                    builder: (context) => UsersView(),
-                  );
-                case OrgSelectionView.routeName:
-                  return MaterialPageRoute<void>(
-                    builder: (context) => const OrgSelectionView(),
-                  );
-                default:
-                  return MaterialPageRoute<void>(
-                    builder: (context) => CheckoutView(),
-                  );
-              }
+                  if (orgSelectorProvider.selectedOrgId.isEmpty) {
+                    return MaterialPageRoute<void>(
+                      builder: (context) => const OrgSelectionView(),
+                    );
+                  }
+
+                  switch (routeSettings.name) {
+                    case SettingsView.routeName:
+                      return MaterialPageRoute<void>(
+                        builder: (context) => const SettingsView(),
+                      );
+                    case ProfileView.routeName:
+                      return MaterialPageRoute<void>(
+                        builder: (context) => const ProfileView(),
+                      );
+                    case DevicesView.routeName:
+                      return MaterialPageRoute<void>(
+                        builder: (context) => const DevicesView(),
+                      );
+                    case CheckoutView.routeName:
+                      return MaterialPageRoute<void>(
+                        builder: (context) => CheckoutView(),
+                      );
+                    case UsersView.routeName:
+                      return MaterialPageRoute<void>(
+                        builder: (context) => UsersView(),
+                      );
+                    case OrgSelectionView.routeName:
+                      return MaterialPageRoute<void>(
+                        builder: (context) => const OrgSelectionView(),
+                      );
+                    default:
+                      return MaterialPageRoute<void>(
+                        builder: (context) => CheckoutView(),
+                      );
+                  }
+                },
+              );
             },
           );
         },

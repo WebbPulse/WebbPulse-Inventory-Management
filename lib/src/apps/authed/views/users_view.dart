@@ -12,8 +12,6 @@ class UsersView extends StatelessWidget {
 
   final TextEditingController _userCreationEmailController =
       TextEditingController();
-  final TextEditingController _userCreationNameController =
-      TextEditingController();
 
   static const routeName = '/users';
 
@@ -26,14 +24,14 @@ class UsersView extends StatelessWidget {
           firebaseFunctions, child) {
         return StreamBuilder<List<String>>(
             stream: firestoreService
-                .getOrgMembersUidsStream(orgSelectorProvider.selectedOrgUid),
+                .getOrgMembersUidsStream(orgSelectorProvider.selectedOrgId),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
               } else if (snapshot.hasError) {
                 return const Text('Error loading users');
               }
-              final orgMembersUids = snapshot.data ?? [];
+              final orgMembersIds = snapshot.data ?? [];
               return Scaffold(
                   appBar: AppBar(
                     title: const Text('Users Page'),
@@ -58,13 +56,7 @@ class UsersView extends StatelessWidget {
                                               'Enter the email of the user to add'),
                                           const SizedBox(
                                               height: 16.0), // Spacing
-                                          TextField(
-                                            controller:
-                                                _userCreationNameController,
-                                            decoration: const InputDecoration(
-                                              labelText: 'Display Name',
-                                            ),
-                                          ),
+
                                           TextField(
                                             controller:
                                                 _userCreationEmailController,
@@ -79,23 +71,17 @@ class UsersView extends StatelessWidget {
                                   actions: <Widget>[
                                     ElevatedButton(
                                       onPressed: () async {
-                                        final userCreationName =
-                                            _userCreationNameController.text;
                                         final userCreationEmail =
                                             _userCreationEmailController.text;
-                                        if (userCreationEmail.isNotEmpty &&
-                                            userCreationName.isNotEmpty) {
+                                        if (userCreationEmail.isNotEmpty) {
                                           await firebaseFunctions
                                               .httpsCallable(
                                                   'create_user_callable')
                                               .call({
                                             "userCreationEmail":
                                                 userCreationEmail,
-                                            "userCreationDisplayName":
-                                                userCreationName,
-                                            "organizationUid":
-                                                orgSelectorProvider
-                                                    .selectedOrgUid
+                                            "orgId": orgSelectorProvider
+                                                .selectedOrgId
                                           });
                                           await AsyncContextHelpers
                                               .popContextIfMounted(context);
@@ -115,11 +101,10 @@ class UsersView extends StatelessWidget {
                   body: Column(
                     children: [
                       const Center(child: Text('Users Page')),
-                      for (final orgMembersUid in orgMembersUids)
+                      for (final orgMembersId in orgMembersIds)
                         StreamBuilder(
                           stream: firestoreService.getMemberDisplayNameStream(
-                              orgMembersUid,
-                              orgSelectorProvider.selectedOrgUid),
+                              orgMembersId, orgSelectorProvider.selectedOrgId),
                           builder: (context, snapshot) {
                             if (snapshot.connectionState ==
                                 ConnectionState.waiting) {
@@ -136,7 +121,7 @@ class UsersView extends StatelessWidget {
                             );
                           },
                         ),
-                      if (orgMembersUids.isEmpty) const Text('No users found'),
+                      if (orgMembersIds.isEmpty) const Text('No users found'),
                     ],
                   ));
             });
