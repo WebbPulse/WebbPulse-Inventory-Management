@@ -15,12 +15,11 @@ def create_user_callable(req: https_fn.CallableRequest) -> Any:
                                 message="The function must be called while authenticated.")
         
         # Extract parameters 
-        new_user_dispay_name = req.data["userCreationDisplayName"]
         new_user_email = req.data["userCreationEmail"]
-        organization_uid = req.data["organizationUid"]
+        org_id = req.data["orgId"]
 
         # Checking attribute.
-        if not new_user_dispay_name or not new_user_email or not organization_uid:
+        if not new_user_email or not org_id:
             # Throwing an HttpsError so that the client gets the error details.
             raise https_fn.HttpsError(code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
                                 message='The function must be called with three arguments: "userCreationDisplayName", "userCreationEmail", and "organizationUid".')
@@ -44,19 +43,18 @@ def create_user_callable(req: https_fn.CallableRequest) -> Any:
                 user = auth.create_user(
                     email=new_user_email,
                     email_verified=False,
-                    display_name=new_user_dispay_name,
                     disabled=False
                 )
                 return False
 
         if user_exists_in_auth():   
-            add_user_to_organization(user.uid, organization_uid, new_user_dispay_name, new_user_email)
-            update_user_organizations(user.uid, organization_uid)
+            add_user_to_organization(user.uid, org_id, user.display_name, new_user_email)
+            update_user_organizations(user.uid, org_id)
             response_message = f"User {new_user_email} added to organization."
         else:
             create_user_profile(user)
-            add_user_to_organization(user.uid, organization_uid, new_user_dispay_name, new_user_email)
-            update_user_organizations(user.uid, organization_uid)
+            add_user_to_organization(user.uid, org_id, user.display_name, new_user_email)
+            update_user_organizations(user.uid, org_id)
             response_message = f"User {new_user_email} created and added to organization."
 
         return {"response": response_message}

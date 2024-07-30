@@ -12,7 +12,7 @@ def create_device_callable(req: https_fn.CallableRequest) -> Any:
 
         # Extract parameters
         serial = req.data["deviceSerialNumber"]
-        org_id = req.data["orgUid"]
+        org_id = req.data["orgId"]
         
         # Check if the serial and org_id are provided and valid
         if not serial or not org_id:

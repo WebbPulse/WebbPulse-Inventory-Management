@@ -34,10 +34,10 @@ class FirestoreService {
     }
   }
 
-  Stream<String> getOrgNameStream(String orgUid) {
+  Stream<String> getOrgNameStream(String orgId) {
     return _db
         .collection('organizations')
-        .doc(orgUid)
+        .doc(orgId)
         .snapshots()
         .map((snapshot) {
       return (snapshot.data()?['name'] ?? '') as String;
@@ -47,14 +47,14 @@ class FirestoreService {
     });
   }
 
-  Future<List<String>> getDevicesUids(String? orgUid) async {
-    if (orgUid == null) {
+  Future<List<String>> getDevicesUids(String? orgId) async {
+    if (orgId == null) {
       return [];
     }
     try {
       final querySnapshot = await FirebaseFirestore.instance
           .collection('organizations')
-          .doc(orgUid)
+          .doc(orgId)
           .collection('devices')
           .get();
       final documentUIDs = querySnapshot.docs.map((doc) => doc.id).toList();
@@ -65,7 +65,7 @@ class FirestoreService {
     }
   }
 
-  Stream<List<String>> orgsUidsStream(String? uid) {
+  Stream<List<String>> orgsIdsStream(String? uid) {
     if (uid == null) {
       return Stream.value([]);
     }
@@ -97,13 +97,13 @@ class FirestoreService {
     });
   }
 
-  Stream<List<String>> getOrgMembersUidsStream(String? orgUid) {
-    if (orgUid == null) {
+  Stream<List<String>> getOrgMembersUidsStream(String? orgId) {
+    if (orgId == null) {
       return Stream.value([]);
     }
     return FirebaseFirestore.instance
         .collection('organizations')
-        .doc(orgUid)
+        .doc(orgId)
         .collection('members')
         .snapshots()
         .map((querySnapshot) {

@@ -55,7 +55,7 @@ class AuthedApp extends StatelessWidget {
                 );
               }
 
-              if (orgSelectorProvider.selectedOrgUid.isEmpty) {
+              if (orgSelectorProvider.selectedOrgId.isEmpty) {
                 return MaterialPageRoute<void>(
                   builder: (context) => const OrgSelectionView(),
                 );

@@ -18,14 +18,14 @@ class DevicesView extends StatelessWidget {
           deviceCheckoutService, child) {
         return FutureBuilder<List<String>>(
             future: firestoreService
-                .getDevicesUids(orgSelectorProvider.selectedOrgUid),
+                .getDevicesUids(orgSelectorProvider.selectedOrgId),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
               } else if (snapshot.hasError) {
                 return const Center(child: Text('Error loading devices'));
               }
-              final List<String> devicesUids = snapshot.data ?? [];
+              final List<String> deviceIds = snapshot.data ?? [];
               return Scaffold(
                 appBar: AppBar(
                   title: const Text('Devices'),
@@ -35,17 +35,17 @@ class DevicesView extends StatelessWidget {
                   children: [
                     const Center(child: Text('Device List')),
                     Expanded(
-                      child: devicesUids.isNotEmpty
+                      child: deviceIds.isNotEmpty
                           ? SizedBox(
                               width: MediaQuery.of(context).size.width * 0.8,
                               child: ListView.builder(
                                 physics: const BouncingScrollPhysics(),
-                                itemCount: devicesUids.length,
+                                itemCount: deviceIds.length,
                                 itemBuilder: (context, index) {
-                                  final deviceId = devicesUids[index];
+                                  final deviceId = deviceIds[index];
                                   return DeviceCard(
                                     deviceId: deviceId,
-                                    orgUid: orgSelectorProvider.selectedOrgUid,
+                                    orgId: orgSelectorProvider.selectedOrgId,
                                   );
                                 },
                               ),
@@ -65,11 +65,11 @@ class DeviceCard extends StatelessWidget {
   const DeviceCard({
     super.key,
     required this.deviceId,
-    required this.orgUid,
+    required this.orgId,
   });
 
   final String deviceId;
-  final String orgUid;
+  final String orgId;
 
   @override
   Widget build(BuildContext context) {
@@ -77,7 +77,7 @@ class DeviceCard extends StatelessWidget {
     return Consumer2<FirestoreService, DeviceCheckoutService>(
       builder: (context, firestoreService, deviceCheckoutService, child) {
         return StreamBuilder(
-          stream: firestoreService.getDeviceDataStream(deviceId, orgUid),
+          stream: firestoreService.getDeviceDataStream(deviceId, orgId),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
@@ -97,7 +97,7 @@ class DeviceCard extends StatelessWidget {
                   child: Text(deviceIsCheckedOut ? 'Check In' : 'Check Out'),
                   onPressed: () {
                     deviceCheckoutService.handleDeviceCheckout(
-                        context, deviceSerial, orgUid);
+                        context, deviceSerial, orgId);
                   },
                 ),
                 onTapAction: () {});
