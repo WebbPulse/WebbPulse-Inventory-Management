@@ -27,7 +27,7 @@ def create_organization_callable(req: https_fn.CallableRequest) -> Any:
 
         # Create the organization in Firestore
         db.collection('organizations').add({
-            'created_at': firestore.SERVER_TIMESTAMP,
+            'createdAt': firestore.SERVER_TIMESTAMP,
             'name': org_creation_name,
         })
 

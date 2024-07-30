@@ -1,4 +1,4 @@
-from firebase_functions import options, https_fn, identity_fn
+from firebase_functions import options, https_fn, identity_fn, firestore_fn
 from firebase_admin import firestore, auth
 from firebase_admin.auth import UserNotFoundError
 import google.cloud.firestore as gcf

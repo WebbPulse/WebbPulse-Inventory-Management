@@ -71,7 +71,7 @@ class FirestoreService {
     }
 
     return _db.collection('users').doc(uid).snapshots().map((snapshot) {
-      return List<String>.from(snapshot.data()?['organizationUids'] ?? []);
+      return List<String>.from(snapshot.data()?['orgIds'] ?? []);
     }).handleError((error) {
       print('Error getting organizations: $error');
       return Stream.value([]);
@@ -127,9 +127,9 @@ class FirestoreService {
         .doc(orgMembersUid)
         .snapshots()
         .map((snapshot) {
-      return (snapshot.data()?['username'] ?? '') as String;
+      return (snapshot.data()?['displayName'] ?? '') as String;
     }).handleError((e) {
-      print('Error checking username: $e');
+      print('Error checking displayName: $e');
       return '';
     });
   }
