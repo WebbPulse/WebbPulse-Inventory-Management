@@ -12,6 +12,7 @@ from src.users.create_user_ui import create_user_ui
 from src.organizations.create_organization_callable import create_organization_callable
 from src.devices.create_device_callable import create_device_callable
 from src.devices.update_device_checkout_status_callable import update_device_checkout_status_callable
+from src.users.monitor_for_user_changes import monitor_for_user_changes
 
 
 
