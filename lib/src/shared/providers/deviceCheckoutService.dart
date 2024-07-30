@@ -14,23 +14,23 @@ class DeviceCheckoutService {
   Future<void> handleDeviceCheckout(
     BuildContext context,
     String deviceSerialNumber,
-    String orgUid,
+    String orgId,
   ) async {
     if (deviceSerialNumber.isNotEmpty) {
       try {
         ///if device does not exist in firestore, create it and check it out
         if (!await firestoreService.doesDeviceExistInFirestore(
-            deviceSerialNumber, orgUid)) {
+            deviceSerialNumber, orgId)) {
           await firebaseFunctions.httpsCallable('create_device_callable').call({
             "deviceSerialNumber": deviceSerialNumber,
-            "orgUid": orgUid,
+            "orgId": orgId,
           });
 
           await firebaseFunctions
               .httpsCallable('update_device_checkout_status_callable')
               .call({
             "deviceSerialNumber": deviceSerialNumber,
-            "orgUid": orgUid,
+            "orgId": orgId,
             "isCheckedOut": true,
           });
 
@@ -39,12 +39,12 @@ class DeviceCheckoutService {
         } else {
           ///if device exists, check it in/out
           bool isCheckedOut = await firestoreService
-              .isDeviceCheckedOutInFirestore(deviceSerialNumber, orgUid);
+              .isDeviceCheckedOutInFirestore(deviceSerialNumber, orgId);
           await firebaseFunctions
               .httpsCallable('update_device_checkout_status_callable')
               .call({
             "deviceSerialNumber": deviceSerialNumber,
-            "orgUid": orgUid,
+            "orgId": orgId,
             "isCheckedOut": !isCheckedOut,
           });
 

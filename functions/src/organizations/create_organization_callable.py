@@ -13,13 +13,13 @@ def create_organization_callable(req: https_fn.CallableRequest) -> Any:
             )
 
         # Extract parameters
-        organization_creation_name = req.data["organizationCreationName"]
+        org_creation_name = req.data["orgCreationName"]
         uid = req.auth.uid
         display_name = req.auth.token.get("name", "")
         email = req.auth.token.get("email", "")
 
         # Check if the organization_creation_name is provided and valid
-        if not organization_creation_name:
+        if not org_creation_name:
             raise https_fn.HttpsError(
                 code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
                 message='The function must be called with a valid "organizationCreationName" argument.'
@@ -28,17 +28,17 @@ def create_organization_callable(req: https_fn.CallableRequest) -> Any:
         # Create the organization in Firestore
         db.collection('organizations').add({
             'created_at': firestore.SERVER_TIMESTAMP,
-            'name': organization_creation_name,
+            'name': org_creation_name,
         })
 
         # Retrieve the newly created organization UID
-        organization_uid = db.collection('organizations').where('name', '==', organization_creation_name).get()[0].id
+        org_id = db.collection('organizations').where('name', '==', org_creation_name).get()[0].id
 
         # Update user organizations and add user to the organization
-        update_user_organizations(uid, organization_uid)
-        add_user_to_organization(uid, organization_uid, display_name, email)
+        update_user_organizations(uid, org_id)
+        add_user_to_organization(uid, org_id, display_name, email)
 
-        return {"response": f"Organization {organization_uid} created"}
+        return {"response": f"Organization {org_id} created"}
     except https_fn.HttpsError as e:
         # Re-raise known HttpsErrors
         raise e

@@ -12,7 +12,7 @@ def update_device_checkout_status_callable(req: https_fn.CallableRequest) -> Any
 
         # Extract parameters
         serial = req.data["deviceSerialNumber"]
-        org_id = req.data["orgUid"]
+        org_id = req.data["orgId"]
         isCheckedOut = req.data["isCheckedOut"]
         
         # Check if the serial, org_id, and isCheckedOut are provided and valid

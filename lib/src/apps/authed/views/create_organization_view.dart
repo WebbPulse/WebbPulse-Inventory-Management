@@ -33,14 +33,14 @@ class CreateOrganizationView extends StatelessWidget {
               const SizedBox(height: 16.0),
               ElevatedButton(
                 onPressed: () async {
-                  final organizationCreationName = _controller.text;
+                  final orgCreationName = _controller.text;
 
-                  if (organizationCreationName.isNotEmpty) {
+                  if (orgCreationName.isNotEmpty) {
                     try {
                       await firebaseFunctions
                           .httpsCallable('create_organization_callable')
                           .call({
-                        "organizationCreationName": organizationCreationName,
+                        "orgCreationName": orgCreationName,
                       });
                       await AsyncContextHelpers.showSnackBarIfMounted(
                           context, 'Organization created!');
