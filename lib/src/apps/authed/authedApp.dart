@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_functions/cloud_functions.dart';
+import 'package:webbcheck/src/shared/providers/authenticationChangeNotifier.dart';
 
 import '../../shared/providers/settingsChangeNotifier.dart';
 import '../../shared/providers/orgSelectorChangeNotifier.dart';
@@ -40,8 +41,10 @@ class AuthedApp extends StatelessWidget {
         Provider<FirebaseFunctions>.value(value: firebaseFunctions),
         Provider<DeviceCheckoutService>(create: (_) => deviceCheckoutService),
       ],
-      child: Consumer2<OrgSelectorChangeNotifier, SettingsChangeNotifier>(
-        builder: (context, orgSelectorProvider, settingsProvider, child) {
+      child: Consumer3<OrgSelectorChangeNotifier, SettingsChangeNotifier,
+          AuthenticationChangeNotifier>(
+        builder: (context, orgSelectorProvider, settingsProvider, authProvider,
+            child) {
           return MaterialApp(
             restorationScopeId: 'authedapp',
             title: 'WebbPulse Checkout',
