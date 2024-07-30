@@ -13,6 +13,7 @@ from src.organizations.create_organization_callable import create_organization_c
 from src.devices.create_device_callable import create_device_callable
 from src.devices.update_device_checkout_status_callable import update_device_checkout_status_callable
 from src.users.monitor_for_user_changes import monitor_for_user_changes
+from src.users.update_global_user_display_name_callable import update_global_user_display_name_callable
 
 
 

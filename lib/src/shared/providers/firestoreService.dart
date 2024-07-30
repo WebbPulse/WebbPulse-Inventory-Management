@@ -133,4 +133,16 @@ class FirestoreService {
       return '';
     });
   }
+
+  Stream<String> getCurrentDisplayName(String? uid) {
+    if (uid == null) {
+      return Stream.value('');
+    }
+    return _db.collection('users').doc(uid).snapshots().map((snapshot) {
+      return (snapshot.data()?['displayName'] ?? '') as String;
+    }).handleError((e) {
+      print('Error getting current display name: $e');
+      return '';
+    });
+  }
 }

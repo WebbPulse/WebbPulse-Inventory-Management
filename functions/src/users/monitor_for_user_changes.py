@@ -14,7 +14,7 @@ def monitor_for_user_changes(event: Event[Change[DocumentSnapshot]]) -> None:
     display_name = event.data.after.get("displayName")
     # Update the user display name in all organizations
     for org_id in org_ids:
-        update_user_display_names_in_orgs(org_id, uid, display_name)
+      update_user_display_names_in_orgs(org_id, uid, display_name)
         
 
 
