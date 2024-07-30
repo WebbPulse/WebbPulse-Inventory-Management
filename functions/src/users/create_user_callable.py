@@ -1,4 +1,4 @@
-from src.shared.shared import auth, https_fn, POSTcorsrules, allowed_domains, Any
+from src.shared.shared import auth, https_fn, POSTcorsrules, allowed_domains, Any, UserNotFoundError
 from src.users.helpers.create_user_profile import create_user_profile
 from src.users.helpers.add_user_to_organization import add_user_to_organization
 from src.users.helpers.update_user_organizations import update_user_organizations
@@ -29,20 +29,38 @@ def create_user_callable(req: https_fn.CallableRequest) -> Any:
             raise https_fn.HttpsError(code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
                                 message='Unauthorized email for new user')
 
-        #create the user in firebase auth
-        user = auth.create_user(
-            email=new_user_email,
-            email_verified=False,
-            display_name=new_user_dispay_name,
-            disabled=False
-        )
-        #create the user profile in firestore
-        create_user_profile(user)
-        
-        add_user_to_organization(user.uid, organization_uid, new_user_dispay_name, new_user_email)
-        update_user_organizations(user.uid, organization_uid)
+        user = None
+        response_message = ""
 
-        return {"response": f"User {new_user_email} created"}
+        def user_exists_in_auth():
+            nonlocal user
+            try:
+                # User exists
+                user = auth.get_user_by_email(new_user_email)
+                return True
+                    
+            except UserNotFoundError:
+                #create the user in firebase auth
+                user = auth.create_user(
+                    email=new_user_email,
+                    email_verified=False,
+                    display_name=new_user_dispay_name,
+                    disabled=False
+                )
+                return False
+
+        if user_exists_in_auth():   
+            add_user_to_organization(user.uid, organization_uid, new_user_dispay_name, new_user_email)
+            update_user_organizations(user.uid, organization_uid)
+            response_message = f"User {new_user_email} added to organization."
+        else:
+            create_user_profile(user)
+            add_user_to_organization(user.uid, organization_uid, new_user_dispay_name, new_user_email)
+            update_user_organizations(user.uid, organization_uid)
+            response_message = f"User {new_user_email} created and added to organization."
+
+        return {"response": response_message}
+    
     except https_fn.HttpsError as e:
         # Re-raise known HttpsErrors
         raise e
