@@ -45,89 +45,55 @@ class AuthedApp extends StatelessWidget {
           AuthenticationChangeNotifier>(
         builder: (context, orgSelectorProvider, settingsProvider, authProvider,
             child) {
-          return StreamBuilder<String>(
-            stream: firestoreService.getCurrentDisplayName(authProvider.uid),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              } else if (snapshot.hasError) {
-                return const Text('Error loading');
-              }
-              final currentFirebaseDisplayName = snapshot.data;
-              if (currentFirebaseDisplayName == null) {
-                return const Center(
-                  child: CircularProgressIndicator(),
-                );
-              }
-              if (authProvider.displayName != currentFirebaseDisplayName) {
-                return FutureBuilder<void>(
-                  future: firebaseFunctions
-                      .httpsCallable('update_global_user_display_name_callable')
-                      .call(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
-                    } else if (snapshot.hasError) {
-                      return const Text('Error loading');
-                    }
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  },
+          return MaterialApp(
+            restorationScopeId: 'authedapp',
+            title: 'WebbPulse Checkout',
+            theme: ThemeData(),
+            darkTheme: ThemeData.dark(),
+            themeMode: settingsProvider.themeMode,
+            onGenerateRoute: (RouteSettings routeSettings) {
+              if (routeSettings.name == CreateOrganizationView.routeName) {
+                return MaterialPageRoute<void>(
+                  builder: (context) => CreateOrganizationView(),
                 );
               }
 
-              return MaterialApp(
-                restorationScopeId: 'authedapp',
-                title: 'WebbPulse Checkout',
-                theme: ThemeData(),
-                darkTheme: ThemeData.dark(),
-                themeMode: settingsProvider.themeMode,
-                onGenerateRoute: (RouteSettings routeSettings) {
-                  if (routeSettings.name == CreateOrganizationView.routeName) {
-                    return MaterialPageRoute<void>(
-                      builder: (context) => CreateOrganizationView(),
-                    );
-                  }
+              if (orgSelectorProvider.selectedOrgId.isEmpty) {
+                return MaterialPageRoute<void>(
+                  builder: (context) => const OrgSelectionView(),
+                );
+              }
 
-                  if (orgSelectorProvider.selectedOrgId.isEmpty) {
-                    return MaterialPageRoute<void>(
-                      builder: (context) => const OrgSelectionView(),
-                    );
-                  }
-
-                  switch (routeSettings.name) {
-                    case SettingsView.routeName:
-                      return MaterialPageRoute<void>(
-                        builder: (context) => const SettingsView(),
-                      );
-                    case ProfileView.routeName:
-                      return MaterialPageRoute<void>(
-                        builder: (context) => const ProfileView(),
-                      );
-                    case DevicesView.routeName:
-                      return MaterialPageRoute<void>(
-                        builder: (context) => const DevicesView(),
-                      );
-                    case CheckoutView.routeName:
-                      return MaterialPageRoute<void>(
-                        builder: (context) => CheckoutView(),
-                      );
-                    case UsersView.routeName:
-                      return MaterialPageRoute<void>(
-                        builder: (context) => UsersView(),
-                      );
-                    case OrgSelectionView.routeName:
-                      return MaterialPageRoute<void>(
-                        builder: (context) => const OrgSelectionView(),
-                      );
-                    default:
-                      return MaterialPageRoute<void>(
-                        builder: (context) => CheckoutView(),
-                      );
-                  }
-                },
-              );
+              switch (routeSettings.name) {
+                case SettingsView.routeName:
+                  return MaterialPageRoute<void>(
+                    builder: (context) => const SettingsView(),
+                  );
+                case ProfileView.routeName:
+                  return MaterialPageRoute<void>(
+                    builder: (context) => const ProfileView(),
+                  );
+                case DevicesView.routeName:
+                  return MaterialPageRoute<void>(
+                    builder: (context) => const DevicesView(),
+                  );
+                case CheckoutView.routeName:
+                  return MaterialPageRoute<void>(
+                    builder: (context) => CheckoutView(),
+                  );
+                case UsersView.routeName:
+                  return MaterialPageRoute<void>(
+                    builder: (context) => UsersView(),
+                  );
+                case OrgSelectionView.routeName:
+                  return MaterialPageRoute<void>(
+                    builder: (context) => const OrgSelectionView(),
+                  );
+                default:
+                  return MaterialPageRoute<void>(
+                    builder: (context) => CheckoutView(),
+                  );
+              }
             },
           );
         },

@@ -22,7 +22,7 @@ def update_global_user_display_name_callable(req: https_fn.CallableRequest) -> A
                                 message='The function must be called with one argument: "DisplayName".')
 
         try:
-            db.collection('users').document(uid).set({
+            db.collection('users').document(uid).update({
                 'displayName': display_name 
             })
         except:
