@@ -28,8 +28,11 @@ jobs:
         with:
           flutter-version: '3.22.2'
       
-      - name: Install dependencies
-        run: flutter pub get
+      - name: Install flutter dependencies
+        run: |
+          cd hosting 
+          flutter pub get
+          cd ..
 
       - name: Deploy Functions and Hosting
         env:
@@ -44,3 +47,5 @@ jobs:
           export GOOGLE_APPLICATION_CREDENTIALS=./functions/gcp_key.json
           firebase experiments:enable webframeworks
           firebase deploy --only functions,hosting
+          
+          
