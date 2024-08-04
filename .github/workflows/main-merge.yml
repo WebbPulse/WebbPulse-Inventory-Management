@@ -28,7 +28,7 @@ jobs:
         with:
           flutter-version: '3.22.2'
       
-      - name: Install dependencies
+      - name: Install flutter dependencies
         run: |
           cd hosting 
           flutter pub get
