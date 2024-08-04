@@ -1,43 +1,10 @@
 {
-  "flutter": {
-    "platforms": {
-      "android": {
-        "default": {
-          "projectId": "webbcheck",
-          "appId": "1:511369160204:android:bd59fb4b7d64934ea73029",
-          "fileOutput": "android/app/google-services.json"
-        }
-      },
-      "dart": {
-        "lib/firebase_options.dart": {
-          "projectId": "webbcheck",
-          "configurations": {
-            "android": "1:511369160204:android:bd59fb4b7d64934ea73029",
-            "ios": "1:511369160204:ios:b21146c5ce992a42a73029",
-            "web": "1:511369160204:web:342f3109e8032f1ba73029"
-          }
-        }
-      }
-    }
-  },
-  "hosting": {
-    "source": ".",
-    "ignore": [
-      "firebase.json",
-      "**/.*",
-      "**/node_modules/**"
-    ],
-    "frameworksBackend": {
-      "region": "us-west1"
-    }
-  },
   "firestore": {
     "rules": "firestore.rules",
     "indexes": "firestore.indexes.json"
   },
   "functions": [
-    { 
-      "runtime": "python312",
+    {
       "source": "functions",
       "codebase": "default",
       "ignore": [
@@ -47,7 +14,40 @@
         "firebase-debug.*.log",
         "*.local"
       ]
-      
     }
-  ]
+  ],
+  "hosting": {
+    "source": "hosting",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "frameworksBackend": { "region": "us-west1" }
+  },
+  "emulators": {
+    "auth": { "port": 9099 },
+    "functions": { "port": 5001 },
+    "firestore": { "port": 8080 },
+    "hosting": { "port": 5000 },
+    "ui": { "enabled": true },
+    "singleProjectMode": true
+  },
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "webbpulse-inventory-management",
+          "appId": "1:1096617861007:android:4dde651b745ab57d9a75fa",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "webbpulse-inventory-management",
+          "configurations": {
+            "android": "1:1096617861007:android:4dde651b745ab57d9a75fa",
+            "ios": "1:1096617861007:ios:f146be2b9c3b3d049a75fa",
+            "web": "1:1096617861007:web:b7d00eb71b0e024a9a75fa"
+          }
+        }
+      }
+    }
+  }
 }
