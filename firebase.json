@@ -19,7 +19,7 @@
   "hosting": {
     "source": "hosting",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
-    "frameworksBackend": { "region": "us-west1" }
+    "frameworksBackend": { "region": "us-central1" }
   },
   "emulators": {
     "auth": { "port": 9099 },
