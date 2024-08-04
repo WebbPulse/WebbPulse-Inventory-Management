@@ -5,5 +5,5 @@ import google.cloud.firestore as gcf
 from typing import Any
 
 allowed_domains = ["gmail.com","verkada.com"]
-POSTcorsrules=options.CorsOptions(cors_origins="*", cors_methods=["get", "post"])
+corsrules=options.CorsOptions(cors_origins="*", cors_methods="*")
 db = firestore.client()
