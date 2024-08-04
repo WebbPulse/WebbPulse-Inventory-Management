@@ -34,4 +34,4 @@ jobs:
           deactivate
           echo "$FIREBASE_APPLICATION_CREDENTIALS" > ./functions/gcp_key.json
           export GOOGLE_APPLICATION_CREDENTIALS=./functions/gcp_key.json
-          firebase deploy --only functions --debug
+          firebase deploy --only functions
