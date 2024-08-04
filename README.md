@@ -1,3 +1,3 @@
-# webbpulse_checkout
+# WebbPulse Inventory Management
 
-A new Flutter project.
+A program built in flutter to do simple tracking of device checkout status

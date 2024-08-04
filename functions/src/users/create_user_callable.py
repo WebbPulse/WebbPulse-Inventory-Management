@@ -1,10 +1,10 @@
-from src.shared.shared import auth, https_fn, POSTcorsrules, allowed_domains, Any, UserNotFoundError
+from src.shared.shared import auth, https_fn, corsrules, allowed_domains, Any, UserNotFoundError
 from src.users.helpers.create_global_user_profile import create_global_user_profile
 from src.users.helpers.add_user_to_organization import add_user_to_organization
 from src.users.helpers.update_user_organizations import update_user_organizations
 
 
-@https_fn.on_call(cors=POSTcorsrules)
+@https_fn.on_call(cors=corsrules)
 def create_user_callable(req: https_fn.CallableRequest) -> Any:
     #create the user in firebase auth
     try:
