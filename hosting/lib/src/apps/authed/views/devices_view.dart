@@ -70,7 +70,7 @@ class DevicesView extends StatelessWidget {
                           return filteredDevices.isNotEmpty
                               ? SizedBox(
                                   width:
-                                      MediaQuery.of(context).size.width * 0.8,
+                                      MediaQuery.of(context).size.width * 0.95,
                                   child: ListView.builder(
                                     physics: const BouncingScrollPhysics(),
                                     itemCount: filteredDevices.length,
@@ -135,17 +135,68 @@ class DeviceCard extends StatelessWidget {
                 customCardLeading:
                     Icon(Icons.devices, color: theme.colorScheme.secondary),
                 customCardTitle: Text(deviceSerialNumber),
-                customCardTrailing: ElevatedButton(
-                  child: Text(deviceIsCheckedOut ? 'Check In' : 'Check Out'),
-                  onPressed: () {
-                    deviceCheckoutService.handleDeviceCheckout(
-                        context, deviceSerialNumber, orgId);
-                  },
+                customCardTrailing: DeviceButton(
+                  deviceSerialNumber: deviceSerialNumber,
+                  orgId: orgId,
+                  deviceCheckoutService: deviceCheckoutService,
+                  deviceIsCheckedOut: deviceIsCheckedOut,
                 ),
                 onTapAction: () {});
           },
         );
       },
+    );
+  }
+}
+
+class DeviceButton extends StatefulWidget {
+  final String deviceSerialNumber;
+  final String orgId;
+  final DeviceCheckoutService deviceCheckoutService;
+  final bool deviceIsCheckedOut;
+  
+  const DeviceButton({
+    super.key,
+    required this.deviceSerialNumber,
+    required this.orgId,
+    required this.deviceCheckoutService,
+    required this.deviceIsCheckedOut,
+  });
+  @override
+  _DeviceButtonState createState() => _DeviceButtonState();
+}
+
+class _DeviceButtonState extends State<DeviceButton> {
+  var _isLoading = false;
+  
+  @override
+  void dispose() {
+    // Add any resource cleanup code here if needed in the future
+    super.dispose();
+  }
+
+  void _onSubmit() {
+    setState(() => _isLoading = true);
+    widget.deviceCheckoutService.handleDeviceCheckout(
+      context, widget.deviceSerialNumber, widget.orgId,
+    ).then((_) {
+      setState(() => _isLoading = false);
+    });
+    Future.delayed(
+      const Duration(seconds: 2),
+      () => setState(() => _isLoading = false),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton.icon(
+      onPressed: _isLoading ? null : _onSubmit,
+      style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(16.0)),
+      icon: _isLoading
+          ? const CircularProgressIndicator()
+          : const Icon(Icons.login),
+      label: Text(widget.deviceIsCheckedOut ? 'Check In' : 'Check Out'),
     );
   }
 }

@@ -95,7 +95,9 @@ class UsersView extends StatelessWidget {
                             },
                           );
                         },
+                        style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(16.0)),
                         child: const Text('Add New User'))
+                        
                   ],
                 ),
                 drawer: const AuthedDrawer(),
@@ -137,7 +139,7 @@ class UsersView extends StatelessWidget {
                           return filteredMembers.isNotEmpty
                               ? SizedBox(
                                   width:
-                                      MediaQuery.of(context).size.width * 0.8,
+                                      MediaQuery.of(context).size.width * 0.95,
                                   child: ListView.builder(
                                     physics: const BouncingScrollPhysics(),
                                     itemCount: filteredMembers.length,
@@ -223,7 +225,7 @@ class UserCard extends StatelessWidget {
               )
             ]),
             customCardTrailing: ElevatedButton(
-              style: ElevatedButton.styleFrom(padding: EdgeInsets.all(5)),
+              style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(16.0)),
               child: Text('Manage User'),
               onPressed: () {},
             ),
