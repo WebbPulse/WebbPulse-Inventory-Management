@@ -43,7 +43,7 @@ def create_user_callable(req: https_fn.CallableRequest) -> Any:
                 user = auth.create_user(
                     email=new_user_email,
                     email_verified=False,
-                    display_name="",
+                    
                     disabled=False
                 )
                 return False
