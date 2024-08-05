@@ -65,7 +65,7 @@ class DevicesView extends StatelessWidget {
                         builder: (context, query, child) {
                           final filteredDevices = devicesDocs.where((doc) {
                             final data = doc.data() as Map<String, dynamic>;
-                            final serial = data['serial'] ?? '';
+                            final serial = data['deviceSerialNumber'] ?? '';
                             return serial.contains(query);
                           }).toList();
 
