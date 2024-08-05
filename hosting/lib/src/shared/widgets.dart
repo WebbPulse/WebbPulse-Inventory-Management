@@ -122,12 +122,12 @@ class CustomCard extends StatelessWidget {
       {super.key,
       required this.theme,
       required this.customCardLeading,
-      required this.titleText,
+      required this.customCardTitle,
       required this.customCardTrailing,
       required this.onTapAction});
   final ThemeData theme;
   final dynamic customCardLeading;
-  final String titleText;
+  final dynamic customCardTitle;
   final dynamic customCardTrailing;
   final dynamic onTapAction;
 
@@ -139,11 +139,7 @@ class CustomCard extends StatelessWidget {
               const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
           tileColor: theme.colorScheme.secondary.withOpacity(0),
           leading: customCardLeading,
-          title: Text(
-            titleText,
-            style: theme.textTheme.bodyMedium
-                ?.copyWith(color: theme.colorScheme.secondary),
-          ),
+          title: customCardTitle,
           trailing: customCardTrailing,
           onTap: onTapAction,
         ),

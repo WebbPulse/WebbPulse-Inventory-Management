@@ -44,7 +44,7 @@ class LandingView extends StatelessWidget {
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 16.0, vertical: 8.0),
                               child: Text(
-                                'WebbPulse Device Checkout',
+                                'WebbPulse Inventory Management',
                                 style: theme.textTheme.titleLarge,
                               ),
                             ),
@@ -53,7 +53,7 @@ class LandingView extends StatelessWidget {
                             theme: theme,
                             customCardLeading: Icon(Icons.login,
                                 color: theme.colorScheme.secondary),
-                            titleText: 'Register',
+                            customCardTitle: 'Register',
                             customCardTrailing: null,
                             onTapAction: () {
                               Navigator.pushNamed(
@@ -64,7 +64,7 @@ class LandingView extends StatelessWidget {
                             theme: theme,
                             customCardLeading: Icon(Icons.login,
                                 color: theme.colorScheme.secondary),
-                            titleText: 'Sign In',
+                            customCardTitle: Text('Sign In'),
                             customCardTrailing: null,
                             onTapAction: () {
                               Navigator.pushNamed(

@@ -16,10 +16,8 @@ class DevicesView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer3<OrgSelectorChangeNotifier, FirestoreService,
-        DeviceCheckoutService>(
-      builder: (context, orgSelectorProvider, firestoreService,
-          deviceCheckoutService, child) {
+    return Consumer2<OrgSelectorChangeNotifier, FirestoreService>(
+      builder: (context, orgSelectorProvider, firestoreService, child) {
         return FutureBuilder<List<DocumentSnapshot>>(
             future: firestoreService
                 .getOrgDevices(orgSelectorProvider.selectedOrgId),
@@ -65,7 +63,7 @@ class DevicesView extends StatelessWidget {
                         builder: (context, query, child) {
                           final filteredDevices = devicesDocs.where((doc) {
                             final data = doc.data() as Map<String, dynamic>;
-                            final serial = data['serial'] ?? '';
+                            final serial = data['deviceSerialNumber'] ?? '';
                             return serial.contains(query);
                           }).toList();
 
@@ -136,7 +134,7 @@ class DeviceCard extends StatelessWidget {
                 theme: theme,
                 customCardLeading:
                     Icon(Icons.devices, color: theme.colorScheme.secondary),
-                titleText: deviceSerialNumber,
+                customCardTitle: Text(deviceSerialNumber),
                 customCardTrailing: ElevatedButton(
                   child: Text(deviceIsCheckedOut ? 'Check In' : 'Check Out'),
                   onPressed: () {

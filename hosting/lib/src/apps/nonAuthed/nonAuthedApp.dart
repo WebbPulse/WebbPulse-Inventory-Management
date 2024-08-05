@@ -18,7 +18,7 @@ class NonAuthedApp extends StatelessWidget {
     return Consumer<SettingsChangeNotifier>(
       builder: (context, settingsProvider, child) => MaterialApp(
         restorationScopeId: 'nonauthedapp',
-        title: 'WebbPulse Checkout',
+        title: 'WebbPulse Inventory Management',
         theme: ThemeData(),
         darkTheme: ThemeData.dark(),
         themeMode: settingsProvider.themeMode,
