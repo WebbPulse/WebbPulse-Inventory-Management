@@ -4,7 +4,7 @@ def add_user_to_organization(uid, org_id, display_name, email):
     try:
         org_member_ref = db.collection('organizations').document(org_id).collection('members').document(uid)
         org_member_ref.set({
-            'userId': uid,
+            'orgMemberId': uid,
             'createdAt': firestore.SERVER_TIMESTAMP,
             'displayName': display_name,
             'email': email,

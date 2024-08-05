@@ -81,10 +81,13 @@ class DevicesView extends StatelessWidget {
                                           filteredDevices[index].data()
                                               as Map<String, dynamic>;
                                       final deviceId = deviceData['deviceId'];
+                                      final deviceSerialNumber =
+                                          deviceData['deviceSerialNumber'];
                                       return DeviceCard(
                                         deviceId: deviceId,
                                         orgId:
                                             orgSelectorProvider.selectedOrgId,
+                                        deviceSerialNumber: deviceSerialNumber,
                                       );
                                     },
                                   ),
@@ -107,10 +110,12 @@ class DeviceCard extends StatelessWidget {
     super.key,
     required this.deviceId,
     required this.orgId,
+    required this.deviceSerialNumber,
   });
 
   final String deviceId;
   final String orgId;
+  final String deviceSerialNumber;
 
   @override
   Widget build(BuildContext context) {
@@ -118,27 +123,25 @@ class DeviceCard extends StatelessWidget {
     return Consumer2<FirestoreService, DeviceCheckoutService>(
       builder: (context, firestoreService, deviceCheckoutService, child) {
         return StreamBuilder(
-          stream: firestoreService.getDeviceDataStream(deviceId, orgId),
+          stream: firestoreService.deviceCheckoutStatusStream(deviceId, orgId),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
             } else if (snapshot.hasError) {
               return const Text('Error loading devices');
             }
-            Map<String, dynamic> deviceData = snapshot.data!;
-            String deviceSerial = deviceData['serial'] ?? '';
-            bool deviceIsCheckedOut = deviceData['isCheckedOut'] ?? false;
+            final deviceIsCheckedOut = snapshot.data as bool;
 
             return CustomCard(
                 theme: theme,
                 customCardLeading:
                     Icon(Icons.devices, color: theme.colorScheme.secondary),
-                titleText: deviceSerial,
+                titleText: deviceSerialNumber,
                 customCardTrailing: ElevatedButton(
                   child: Text(deviceIsCheckedOut ? 'Check In' : 'Check Out'),
                   onPressed: () {
                     deviceCheckoutService.handleDeviceCheckout(
-                        context, deviceSerial, orgId);
+                        context, deviceSerialNumber, orgId);
                   },
                 ),
                 onTapAction: () {});
