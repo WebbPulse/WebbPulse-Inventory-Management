@@ -47,7 +47,7 @@ class AuthedApp extends StatelessWidget {
             child) {
           return MaterialApp(
             restorationScopeId: 'authedapp',
-            title: 'WebbPulse Checkout',
+            title: 'WebbPulse Inventory Management',
             theme: ThemeData(),
             darkTheme: ThemeData.dark(),
             themeMode: settingsProvider.themeMode,
