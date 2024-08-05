@@ -44,7 +44,7 @@ class LandingView extends StatelessWidget {
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 16.0, vertical: 8.0),
                               child: Text(
-                                'WebbPulse Device Checkout',
+                                'WebbPulse Inventory Management',
                                 style: theme.textTheme.titleLarge,
                               ),
                             ),

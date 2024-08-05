@@ -3,37 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class FirestoreService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  Future<bool> doesDeviceExistInFirestore(String? serial, String? orgId) async {
-    try {
-      final querySnapshot = await _db
-          .collection('organizations')
-          .doc(orgId)
-          .collection('devices')
-          .where('serial', isEqualTo: serial)
-          .get();
-      return querySnapshot.docs.isNotEmpty;
-    } catch (e) {
-      print('Error checking device exists: $e');
-      return false;
-    }
-  }
-
-  Future<bool> isDeviceCheckedOutInFirestore(
-      String? serial, String? orgId) async {
-    try {
-      final querySnapshot = await _db
-          .collection('organizations')
-          .doc(orgId)
-          .collection('devices')
-          .where('serial', isEqualTo: serial)
-          .get();
-      return querySnapshot.docs.first.data()['isCheckedOut'];
-    } catch (e) {
-      print('Error checking device checkout status: $e');
-      return false;
-    }
-  }
-
   Stream<String> getOrgNameStream(String orgId) {
     return _db
         .collection('organizations')
@@ -45,24 +14,6 @@ class FirestoreService {
       print('Error checking organization name: $e');
       return '';
     });
-  }
-
-  Future<List<String>> getDevicesUids(String? orgId) async {
-    if (orgId == null) {
-      return [];
-    }
-    try {
-      final querySnapshot = await FirebaseFirestore.instance
-          .collection('organizations')
-          .doc(orgId)
-          .collection('devices')
-          .get();
-      final documentUIDs = querySnapshot.docs.map((doc) => doc.id).toList();
-      return documentUIDs;
-    } catch (e) {
-      print('Error retrieving device UIDs: $e');
-      return <String>[]; // Return an empty list in case of error
-    }
   }
 
   Stream<List<String>> orgsIdsStream(String? uid) {
@@ -78,10 +29,53 @@ class FirestoreService {
     });
   }
 
-  Stream<Map<String, dynamic>> getDeviceDataStream(
-      String? deviceId, String? orgId) {
+  Future<bool> doesDeviceExistInFirestore(
+      String? deviceSerialNumber, String? orgId) async {
+    try {
+      final querySnapshot = await _db
+          .collection('organizations')
+          .doc(orgId)
+          .collection('devices')
+          .where('deviceSerialNumber', isEqualTo: deviceSerialNumber)
+          .get();
+      return querySnapshot.docs.isNotEmpty;
+    } catch (e) {
+      print('Error checking device exists: $e');
+      return false;
+    }
+  }
+
+  Future<bool> isDeviceCheckedOutInFirestore(
+      String? serial, String? orgId) async {
+    try {
+      final querySnapshot = await _db
+          .collection('organizations')
+          .doc(orgId)
+          .collection('devices')
+          .where('deviceSerialNumber', isEqualTo: serial)
+          .get();
+      return querySnapshot.docs.first.data()['isCheckedOut'];
+    } catch (e) {
+      print('Error checking device checkout status: $e');
+      return false;
+    }
+  }
+
+  Future<List<DocumentSnapshot>> getOrgDevices(String orgId) async {
+    try {
+      CollectionReference collectionRef =
+          _db.collection('organizations').doc(orgId).collection('devices');
+      QuerySnapshot querySnapshot = await collectionRef.get();
+      return querySnapshot.docs;
+    } catch (e) {
+      print('Error getting organization devices: $e');
+      return <DocumentSnapshot>[]; // Return an empty list in case of error
+    }
+  }
+
+  Stream<bool> deviceCheckoutStatusStream(String? deviceId, String? orgId) {
     if (deviceId == null || orgId == null) {
-      return Stream.value({});
+      return Stream.value(false);
     }
     return _db
         .collection('organizations')
@@ -90,10 +84,14 @@ class FirestoreService {
         .doc(deviceId)
         .snapshots()
         .map((snapshot) {
-      return snapshot.data() ?? {};
+      final data = snapshot.data();
+      if (data == null) {
+        return false;
+      }
+      return data['isCheckedOut'] as bool? ?? false;
     }).handleError((e) {
       print('Error checking device data: $e');
-      return {};
+      return false;
     });
   }
 

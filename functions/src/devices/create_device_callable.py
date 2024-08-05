@@ -22,8 +22,10 @@ def create_device_callable(req: https_fn.CallableRequest) -> Any:
             )
 
         # Create the device in Firestore
-        db.collection('organizations').document(org_id).collection('devices').add({
-            'serial': serial,
+        device_ref = db.collection('organizations').document(org_id).collection('devices').document()
+        device_ref.set({
+            'deviceId': device_ref.id,
+            'deviceSerialNumber': serial,
             'createdAt': firestore.SERVER_TIMESTAMP,
             'isCheckedOut': False,
         })
