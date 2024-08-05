@@ -109,7 +109,9 @@ class OrgCard extends StatelessWidget {
               theme: theme,
               customCardLeading:
                   Icon(Icons.home, color: theme.colorScheme.secondary),
-              titleText: orgName,
+              customCardTitle: Container(
+                child: Text(orgName),
+              ),
               customCardTrailing: null,
               onTapAction: () {
                 orgSelectorProvider.selectOrg(orgId);

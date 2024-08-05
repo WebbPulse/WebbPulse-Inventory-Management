@@ -95,6 +95,18 @@ class FirestoreService {
     });
   }
 
+  Future<List<DocumentSnapshot>> getOrgMembers(String orgId) async {
+    try {
+      CollectionReference collectionRef =
+          _db.collection('organizations').doc(orgId).collection('members');
+      QuerySnapshot querySnapshot = await collectionRef.get();
+      return querySnapshot.docs;
+    } catch (e) {
+      print('Error getting organization members: $e');
+      return <DocumentSnapshot>[]; // Return an empty list in case of error
+    }
+  }
+
   Stream<List<String>> getOrgMembersUidsStream(String? orgId) {
     if (orgId == null) {
       return Stream.value([]);
