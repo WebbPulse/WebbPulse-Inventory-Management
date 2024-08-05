@@ -53,7 +53,7 @@ class LandingView extends StatelessWidget {
                             theme: theme,
                             customCardLeading: Icon(Icons.login,
                                 color: theme.colorScheme.secondary),
-                            customCardTitle: 'Register',
+                            customCardTitle: Text('Register'),
                             customCardTrailing: null,
                             onTapAction: () {
                               Navigator.pushNamed(
