@@ -1,8 +1,8 @@
-from src.shared.shared import https_fn, corsrules, Any, db
+from src.shared.shared import https_fn, POSTcorsrules, Any, db
 
 
 
-@https_fn.on_call(cors=corsrules)
+@https_fn.on_call(cors=POSTcorsrules)
 def update_global_user_display_name_callable(req: https_fn.CallableRequest) -> Any:
     #create the user in firebase auth
     try:

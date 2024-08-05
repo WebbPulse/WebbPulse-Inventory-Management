@@ -1,6 +1,6 @@
-from src.shared.shared import corsrules, db, firestore, https_fn, Any
+from src.shared.shared import POSTcorsrules, db, firestore, https_fn, Any
 
-@https_fn.on_call(cors=corsrules)
+@https_fn.on_call(cors=POSTcorsrules)
 def update_device_checkout_status_callable(req: https_fn.CallableRequest) -> Any:
     try:
         # Check if the user is authenticated
