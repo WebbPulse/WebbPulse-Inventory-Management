@@ -1,8 +1,8 @@
-from src.shared.shared import corsrules, db, firestore, https_fn, Any
+from src.shared.shared import POSTcorsrules, db, firestore, https_fn, Any
 from src.users.helpers.add_user_to_organization import add_user_to_organization
 from src.users.helpers.update_user_organizations import update_user_organizations
 
-@https_fn.on_call(cors=corsrules)
+@https_fn.on_call(cors=POSTcorsrules)
 def create_organization_callable(req: https_fn.CallableRequest) -> Any:
     try:
         # Check if the user is authenticated
