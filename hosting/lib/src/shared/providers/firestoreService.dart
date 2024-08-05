@@ -3,6 +3,32 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class FirestoreService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
+  Stream<String> getOrgNameStream(String orgId) {
+    return _db
+        .collection('organizations')
+        .doc(orgId)
+        .snapshots()
+        .map((snapshot) {
+      return (snapshot.data()?['name'] ?? '') as String;
+    }).handleError((e) {
+      print('Error checking organization name: $e');
+      return '';
+    });
+  }
+
+  Stream<List<String>> orgsIdsStream(String? uid) {
+    if (uid == null) {
+      return Stream.value([]);
+    }
+
+    return _db.collection('users').doc(uid).snapshots().map((snapshot) {
+      return List<String>.from(snapshot.data()?['orgIds'] ?? []);
+    }).handleError((error) {
+      print('Error getting organizations: $error');
+      return Stream.value([]);
+    });
+  }
+
   Future<bool> doesDeviceExistInFirestore(String? serial, String? orgId) async {
     try {
       final querySnapshot = await _db
@@ -34,48 +60,16 @@ class FirestoreService {
     }
   }
 
-  Stream<String> getOrgNameStream(String orgId) {
-    return _db
-        .collection('organizations')
-        .doc(orgId)
-        .snapshots()
-        .map((snapshot) {
-      return (snapshot.data()?['name'] ?? '') as String;
-    }).handleError((e) {
-      print('Error checking organization name: $e');
-      return '';
-    });
-  }
-
-  Future<List<String>> getDevicesUids(String? orgId) async {
-    if (orgId == null) {
-      return [];
-    }
+  Future<List<DocumentSnapshot>> getOrgDevices(String orgId) async {
     try {
-      final querySnapshot = await FirebaseFirestore.instance
-          .collection('organizations')
-          .doc(orgId)
-          .collection('devices')
-          .get();
-      final documentUIDs = querySnapshot.docs.map((doc) => doc.id).toList();
-      return documentUIDs;
+      CollectionReference collectionRef =
+          _db.collection('organizations').doc(orgId).collection('devices');
+      QuerySnapshot querySnapshot = await collectionRef.get();
+      return querySnapshot.docs;
     } catch (e) {
-      print('Error retrieving device UIDs: $e');
-      return <String>[]; // Return an empty list in case of error
+      print('Error getting organization devices: $e');
+      return <DocumentSnapshot>[]; // Return an empty list in case of error
     }
-  }
-
-  Stream<List<String>> orgsIdsStream(String? uid) {
-    if (uid == null) {
-      return Stream.value([]);
-    }
-
-    return _db.collection('users').doc(uid).snapshots().map((snapshot) {
-      return List<String>.from(snapshot.data()?['orgIds'] ?? []);
-    }).handleError((error) {
-      print('Error getting organizations: $error');
-      return Stream.value([]);
-    });
   }
 
   Stream<Map<String, dynamic>> getDeviceDataStream(

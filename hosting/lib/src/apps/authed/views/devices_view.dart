@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../../shared/providers/firestoreService.dart';
 import '../../../shared/providers/deviceCheckoutService.dart';
@@ -7,8 +8,11 @@ import '../../../shared/providers/orgSelectorChangeNotifier.dart';
 import '../../../shared/widgets.dart';
 
 class DevicesView extends StatelessWidget {
-  const DevicesView({super.key});
+  DevicesView({super.key});
   static const routeName = '/devices';
+
+  final TextEditingController _searchController = TextEditingController();
+  final ValueNotifier<String> _searchQuery = ValueNotifier<String>('');
 
   @override
   Widget build(BuildContext context) {
@@ -16,16 +20,17 @@ class DevicesView extends StatelessWidget {
         DeviceCheckoutService>(
       builder: (context, orgSelectorProvider, firestoreService,
           deviceCheckoutService, child) {
-        return FutureBuilder<List<String>>(
+        return FutureBuilder<List<DocumentSnapshot>>(
             future: firestoreService
-                .getDevicesUids(orgSelectorProvider.selectedOrgId),
+                .getOrgDevices(orgSelectorProvider.selectedOrgId),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
               } else if (snapshot.hasError) {
                 return const Center(child: Text('Error loading devices'));
               }
-              final List<String> deviceIds = snapshot.data ?? [];
+              final List<DocumentSnapshot> devicesDocs = snapshot.data!;
+
               return Scaffold(
                 appBar: AppBar(
                   title: const Text('Devices'),
@@ -33,24 +38,60 @@ class DevicesView extends StatelessWidget {
                 drawer: const AuthedDrawer(),
                 body: Column(
                   children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: TextField(
+                        controller: _searchController,
+                        decoration: InputDecoration(
+                          labelText: 'Search by Serial',
+                          border: OutlineInputBorder(),
+                          suffixIcon: IconButton(
+                            icon: Icon(Icons.clear),
+                            onPressed: () {
+                              _searchController.clear();
+                              _searchQuery.value = '';
+                            },
+                          ),
+                        ),
+                        onChanged: (value) {
+                          _searchQuery.value = value;
+                        },
+                      ),
+                    ),
                     const Center(child: Text('Device List')),
                     Expanded(
-                      child: deviceIds.isNotEmpty
-                          ? SizedBox(
-                              width: MediaQuery.of(context).size.width * 0.8,
-                              child: ListView.builder(
-                                physics: const BouncingScrollPhysics(),
-                                itemCount: deviceIds.length,
-                                itemBuilder: (context, index) {
-                                  final deviceId = deviceIds[index];
-                                  return DeviceCard(
-                                    deviceId: deviceId,
-                                    orgId: orgSelectorProvider.selectedOrgId,
-                                  );
-                                },
-                              ),
-                            )
-                          : const Center(child: Text('No devices found')),
+                      child: ValueListenableBuilder<String>(
+                        valueListenable: _searchQuery,
+                        builder: (context, query, child) {
+                          final filteredDevices = devicesDocs.where((doc) {
+                            final data = doc.data() as Map<String, dynamic>;
+                            final serial = data['serial'] ?? '';
+                            return serial.contains(query);
+                          }).toList();
+
+                          return filteredDevices.isNotEmpty
+                              ? SizedBox(
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.8,
+                                  child: ListView.builder(
+                                    physics: const BouncingScrollPhysics(),
+                                    itemCount: filteredDevices.length,
+                                    itemBuilder: (context, index) {
+                                      Map<String, dynamic> deviceData =
+                                          filteredDevices[index].data()
+                                              as Map<String, dynamic>;
+                                      final deviceId = deviceData['deviceId'];
+                                      return DeviceCard(
+                                        deviceId: deviceId,
+                                        orgId:
+                                            orgSelectorProvider.selectedOrgId,
+                                      );
+                                    },
+                                  ),
+                                )
+                              : const Center(child: Text('No devices found'));
+                        },
+                      ),
                     ),
                   ],
                 ),
