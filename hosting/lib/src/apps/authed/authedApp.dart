@@ -75,7 +75,7 @@ class AuthedApp extends StatelessWidget {
                   );
                 case DevicesView.routeName:
                   return MaterialPageRoute<void>(
-                    builder: (context) => const DevicesView(),
+                    builder: (context) => DevicesView(),
                   );
                 case CheckoutView.routeName:
                   return MaterialPageRoute<void>(
