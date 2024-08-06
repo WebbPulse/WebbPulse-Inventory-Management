@@ -3,56 +3,85 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../shared/providers/orgSelectorChangeNotifier.dart';
-import '../../../shared/providers/firestoreService.dart';
 import '../../../shared/providers/deviceCheckoutService.dart';
-
 import '../../../shared/widgets.dart';
 
 class CheckoutView extends StatelessWidget {
   CheckoutView({super.key});
 
-  final TextEditingController _controller = TextEditingController();
-
   static const routeName = '/checkout';
 
   @override
   Widget build(BuildContext context) {
-    return Consumer3<OrgSelectorChangeNotifier, FirestoreService,
-        DeviceCheckoutService>(
-      builder: (context, orgSelectorProvider, firestoreService,
-          deviceCheckoutService, child) {
-        return Scaffold(
-          appBar: AppBar(
-            title: const Text('Checkout Page'),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Checkout Page'),
+      ),
+      drawer: const AuthedDrawer(),
+      body: const Padding(
+        padding: EdgeInsets.all(16.0),
+        child: CheckoutForm(),
+      ),
+    );
+  }
+}
+
+class CheckoutForm extends StatefulWidget {
+  const CheckoutForm({super.key});
+
+  @override
+  _CheckoutFormState createState() => _CheckoutFormState();
+}
+
+class _CheckoutFormState extends State<CheckoutForm> {
+  var _isLoading = false;
+  final TextEditingController _checkoutTextController = TextEditingController();
+
+  @override
+  void dispose() {
+    _checkoutTextController.dispose();
+    super.dispose();
+  }
+
+  void _onSubmit() async {
+    setState(() => _isLoading = true);
+    final orgId = Provider.of<OrgSelectorChangeNotifier>(context, listen: false)
+        .selectedOrgId;
+    final deviceCheckoutService =
+        Provider.of<DeviceCheckoutService>(context, listen: false);
+    try {
+      await deviceCheckoutService.handleDeviceCheckout(
+        context,
+        _checkoutTextController.text,
+        orgId,
+      );
+    } catch (e) {
+      // Handle error if needed
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        TextField(
+          controller: _checkoutTextController,
+          decoration: const InputDecoration(
+            labelText: 'Serial Number',
           ),
-          drawer: const AuthedDrawer(),
-          body: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                TextField(
-                  controller: _controller,
-                  decoration: const InputDecoration(
-                    labelText: 'Serial Number',
-                  ),
-                ),
-                const SizedBox(height: 16.0),
-                ElevatedButton(
-                  onPressed: () async {
-                    final deviceSerialNumber = _controller.text;
-                    await deviceCheckoutService.handleDeviceCheckout(
-                      context,
-                      deviceSerialNumber,
-                      orgSelectorProvider.selectedOrgId,
-                    );
-                  },
-                  child: const Text('Checkout Serial Number'),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
+        ),
+        const SizedBox(height: 16.0),
+        ElevatedButton.icon(
+          onPressed: _isLoading ? null : _onSubmit,
+          style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(16.0)),
+          icon: _isLoading
+              ? const CircularProgressIndicator()
+              : const Icon(Icons.login),
+          label: const Text('Checkout Serial Number'),
+        ),
+      ],
     );
   }
 }

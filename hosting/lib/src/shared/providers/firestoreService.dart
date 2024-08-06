@@ -3,17 +3,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class FirestoreService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  Stream<String> getOrgNameStream(String orgId) {
-    return _db
-        .collection('organizations')
-        .doc(orgId)
-        .snapshots()
-        .map((snapshot) {
-      return (snapshot.data()?['name'] ?? '') as String;
-    }).handleError((e) {
-      print('Error checking organization name: $e');
-      return '';
-    });
+  Stream<DocumentSnapshot> getUserOrgStream(String orgId) {
+    try {
+      DocumentReference documentRef =
+          _db.collection('organizations').doc(orgId);
+      return documentRef.snapshots();
+    } catch (e) {
+      print('Error getting organization: $e');
+      return Stream.error('Failed to get organization');
+    }
   }
 
   Stream<List<String>> orgsIdsStream(String? uid) {
@@ -105,54 +103,5 @@ class FirestoreService {
       print('Error getting organization members: $e');
       return <DocumentSnapshot>[]; // Return an empty list in case of error
     }
-  }
-
-  Stream<List<String>> getOrgMembersUidsStream(String? orgId) {
-    if (orgId == null) {
-      return Stream.value([]);
-    }
-    return FirebaseFirestore.instance
-        .collection('organizations')
-        .doc(orgId)
-        .collection('members')
-        .snapshots()
-        .map((querySnapshot) {
-      final documentUIDs = querySnapshot.docs.map((doc) => doc.id).toList();
-      return documentUIDs;
-    }).handleError((e) {
-      print('Error retrieving member UIDs: $e');
-      return <String>[]; // Return an empty list in case of error
-    });
-  }
-
-  Stream<String> getMemberDisplayNameStream(
-      String? orgMembersUid, String? orgId) {
-    if (orgMembersUid == null || orgId == null) {
-      return Stream.value('');
-    }
-    return _db
-        .collection('organizations')
-        .doc(orgId)
-        .collection('members')
-        .doc(orgMembersUid)
-        .snapshots()
-        .map((snapshot) {
-      return (snapshot.data()?['displayName'] ?? '') as String;
-    }).handleError((e) {
-      print('Error checking displayName: $e');
-      return '';
-    });
-  }
-
-  Stream<String> getCurrentDisplayName(String? uid) {
-    if (uid == null) {
-      return Stream.value('');
-    }
-    return _db.collection('users').doc(uid).snapshots().map((snapshot) {
-      return (snapshot.data()?['displayName'] ?? '') as String;
-    }).handleError((e) {
-      print('Error getting current display name: $e');
-      return '';
-    });
   }
 }
