@@ -15,8 +15,8 @@ def create_organization_callable(req: https_fn.CallableRequest) -> Any:
         # Extract parameters
         org_name = req.data["orgName"]
         uid = req.auth.uid
-        display_name = req.auth.token.get("name", "")
-        email = req.auth.token.get("email", "")
+        org_member_display_name = req.auth.token.get("name", "")
+        org_member_email = req.auth.token.get("email", "")
 
         # Check if the organization_creation_name is provided and valid
         if not org_name:
@@ -34,11 +34,11 @@ def create_organization_callable(req: https_fn.CallableRequest) -> Any:
         })
 
         # Retrieve the newly created organization UID
-        org_id = db.collection('organizations').where('name', '==', org_name).get()[0].id
+        org_id = db.collection('organizations').where('orgName', '==', org_name).get()[0].id
 
         # Update user organizations and add user to the organization
         update_user_organizations(uid, org_id)
-        add_user_to_organization(uid, org_id, display_name, email)
+        add_user_to_organization(uid, org_id, org_member_display_name, org_member_email)
 
         return {"response": f"Organization {org_id} created"}
     except https_fn.HttpsError as e:

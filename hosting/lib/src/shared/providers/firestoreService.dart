@@ -20,7 +20,7 @@ class FirestoreService {
     }
 
     return _db.collection('users').doc(uid).snapshots().map((snapshot) {
-      return List<String>.from(snapshot.data()?['orgIds'] ?? []);
+      return List<String>.from(snapshot.data()?['userOrgIds'] ?? []);
     }).handleError((error) {
       print('Error getting organizations: $error');
       return Stream.value([]);
@@ -52,22 +52,10 @@ class FirestoreService {
           .collection('devices')
           .where('deviceSerialNumber', isEqualTo: serial)
           .get();
-      return querySnapshot.docs.first.data()['isCheckedOut'];
+      return querySnapshot.docs.first.data()['isDeviceCheckedOut'];
     } catch (e) {
       print('Error checking device checkout status: $e');
       return false;
-    }
-  }
-
-  Future<List<DocumentSnapshot>> getOrgDevices(String orgId) async {
-    try {
-      CollectionReference collectionRef =
-          _db.collection('organizations').doc(orgId).collection('devices');
-      QuerySnapshot querySnapshot = await collectionRef.get();
-      return querySnapshot.docs;
-    } catch (e) {
-      print('Error getting organization devices: $e');
-      return <DocumentSnapshot>[]; // Return an empty list in case of error
     }
   }
 
@@ -86,11 +74,23 @@ class FirestoreService {
       if (data == null) {
         return false;
       }
-      return data['isCheckedOut'] as bool? ?? false;
+      return data['isDeviceCheckedOut'] as bool? ?? false;
     }).handleError((e) {
       print('Error checking device data: $e');
       return false;
     });
+  }
+
+  Future<List<DocumentSnapshot>> getOrgDevices(String orgId) async {
+    try {
+      CollectionReference collectionRef =
+          _db.collection('organizations').doc(orgId).collection('devices');
+      QuerySnapshot querySnapshot = await collectionRef.get();
+      return querySnapshot.docs;
+    } catch (e) {
+      print('Error getting organization devices: $e');
+      return <DocumentSnapshot>[]; // Return an empty list in case of error
+    }
   }
 
   Future<List<DocumentSnapshot>> getOrgMembers(String orgId) async {

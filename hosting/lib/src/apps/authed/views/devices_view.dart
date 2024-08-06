@@ -150,7 +150,7 @@ class DeviceCard extends StatelessWidget {
             } else if (snapshot.hasError) {
               return const Text('Error loading devices');
             }
-            final deviceIsCheckedOut = snapshot.data as bool;
+            final isDeviceCheckedOut = snapshot.data as bool;
 
             return CustomCard(
               theme: theme,
@@ -160,7 +160,7 @@ class DeviceCard extends StatelessWidget {
               customCardTrailing: DeviceButton(
                 deviceSerialNumber: deviceSerialNumber,
                 orgId: orgId,
-                deviceIsCheckedOut: deviceIsCheckedOut,
+                isDeviceCheckedOut: isDeviceCheckedOut,
               ),
               onTapAction: () {},
             );
@@ -174,13 +174,13 @@ class DeviceCard extends StatelessWidget {
 class DeviceButton extends StatefulWidget {
   final String deviceSerialNumber;
   final String orgId;
-  final bool deviceIsCheckedOut;
+  final bool isDeviceCheckedOut;
 
   const DeviceButton({
     super.key,
     required this.deviceSerialNumber,
     required this.orgId,
-    required this.deviceIsCheckedOut,
+    required this.isDeviceCheckedOut,
   });
 
   @override
@@ -220,7 +220,7 @@ class _DeviceButtonState extends State<DeviceButton> {
       icon: _isLoading
           ? const CircularProgressIndicator()
           : const Icon(Icons.login),
-      label: Text(widget.deviceIsCheckedOut ? 'Check In' : 'Check Out'),
+      label: Text(widget.isDeviceCheckedOut ? 'Check In' : 'Check Out'),
     );
   }
 }

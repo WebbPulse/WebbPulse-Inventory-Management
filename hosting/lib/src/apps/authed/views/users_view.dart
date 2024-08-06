@@ -36,7 +36,7 @@ class UsersView extends StatelessWidget {
               } else if (snapshot.hasError) {
                 return const Center(child: Text('Error loading devices'));
               }
-              final List<DocumentSnapshot> membersDocs = snapshot.data!;
+              final List<DocumentSnapshot> orgMemberDocs = snapshot.data!;
 
               return Column(
                 children: [
@@ -46,32 +46,35 @@ class UsersView extends StatelessWidget {
                     child: ValueListenableBuilder<String>(
                       valueListenable: _searchQuery,
                       builder: (context, query, child) {
-                        final filteredMembers = membersDocs.where((doc) {
+                        final filteredMemberDocs = orgMemberDocs.where((doc) {
                           final data = doc.data() as Map<String, dynamic>;
-                          final email = data['email'] ?? '';
-                          final displayName = data['displayName'] ?? '';
-                          return email.contains(query) ||
-                              displayName.contains(query);
+                          final orgMemberEmail = data['orgMemberEmail'] ?? '';
+                          final orgMemberDisplayName =
+                              data['orgMemberDisplayName'] ?? '';
+                          return orgMemberEmail.contains(query) ||
+                              orgMemberDisplayName.contains(query);
                         }).toList();
 
-                        return filteredMembers.isNotEmpty
+                        return filteredMemberDocs.isNotEmpty
                             ? SizedBox(
                                 width: MediaQuery.of(context).size.width * 0.95,
                                 child: ListView.builder(
                                   physics: const BouncingScrollPhysics(),
-                                  itemCount: filteredMembers.length,
+                                  itemCount: filteredMemberDocs.length,
                                   itemBuilder: (context, index) {
                                     Map<String, dynamic> userData =
-                                        filteredMembers[index].data()
+                                        filteredMemberDocs[index].data()
                                             as Map<String, dynamic>;
                                     final orgMemberId = userData['orgMemberId'];
-                                    final displayName = userData['displayName'];
-                                    final email = userData['email'];
+                                    final orgMemberDisplayName =
+                                        userData['orgMemberDisplayName'];
+                                    final email = userData['orgMemberEmail'];
                                     return UserCard(
                                       orgMemberId: orgMemberId,
                                       orgId: orgSelectorProvider.selectedOrgId,
-                                      displayName: displayName,
-                                      email: email,
+                                      orgMemberDisplayName:
+                                          orgMemberDisplayName,
+                                      orgMemberEmail: email,
                                     );
                                   },
                                 ),
@@ -189,7 +192,7 @@ class _AddUserButtonState extends State<AddUserButton> {
                         await firebaseFunctions
                             .httpsCallable('create_user_callable')
                             .call({
-                          "userCreationEmail": userCreationEmail,
+                          "userEmail": userCreationEmail,
                           "orgId": orgSelectorProvider.selectedOrgId,
                         });
                         await AsyncContextHelpers.popContextIfMounted(context);
@@ -217,14 +220,14 @@ class UserCard extends StatelessWidget {
     super.key,
     required this.orgMemberId,
     required this.orgId,
-    required this.displayName,
-    required this.email,
+    required this.orgMemberDisplayName,
+    required this.orgMemberEmail,
   });
 
   final String orgMemberId;
   final String orgId;
-  final String displayName;
-  final String email;
+  final String orgMemberDisplayName;
+  final String orgMemberEmail;
 
   @override
   Widget build(BuildContext context) {
@@ -239,7 +242,7 @@ class UserCard extends StatelessWidget {
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Wrap(
                 children: [
-                  Text(displayName,
+                  Text(orgMemberDisplayName,
                       style: TextStyle(fontWeight: FontWeight.bold)),
                 ],
               ),
@@ -248,7 +251,7 @@ class UserCard extends StatelessWidget {
                   Text('Email: ',
                       style: theme.textTheme.labelSmall
                           ?.copyWith(fontWeight: FontWeight.bold)),
-                  Text(email, style: theme.textTheme.labelSmall),
+                  Text(orgMemberEmail, style: theme.textTheme.labelSmall),
                 ],
               ),
               Wrap(
