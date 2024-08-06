@@ -26,20 +26,20 @@ class OrgSelectionView extends StatelessWidget {
           } else if (snapshot.hasError) {
             return const Text('Error loading organizations');
           }
-          final List<String> orgIds = snapshot.data ?? [];
+          final List<String> userOrgIds = snapshot.data ?? [];
           return Scaffold(
             appBar: AppBar(title: const Text('Account Selection')),
             body: Column(
               children: [
                 const Center(child: Text('Select an Organization')),
                 Expanded(
-                  child: orgIds.isNotEmpty
+                  child: userOrgIds.isNotEmpty
                       ? CustomLayoutBuilder(
                           childWidget: ListView.builder(
                             physics: const BouncingScrollPhysics(),
-                            itemCount: orgIds.length + 1,
+                            itemCount: userOrgIds.length + 1,
                             itemBuilder: (context, index) {
-                              if (index == orgIds.length) {
+                              if (index == userOrgIds.length) {
                                 return Padding(
                                   padding:
                                       const EdgeInsets.symmetric(vertical: 8.0),
@@ -53,7 +53,7 @@ class OrgSelectionView extends StatelessWidget {
                                   ),
                                 );
                               }
-                              final orgId = orgIds[index];
+                              final orgId = userOrgIds[index];
                               return OrgCard(
                                 orgId: orgId,
                               );

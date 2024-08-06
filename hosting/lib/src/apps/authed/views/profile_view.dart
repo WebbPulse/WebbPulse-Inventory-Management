@@ -21,12 +21,12 @@ class ProfileView extends StatelessWidget {
         body: ProfileScreen(
           actions: [
             DisplayNameChangedAction(
-              (context, user, displayName) async {
+              (context, user, userDisplayName) async {
                 await firebaseFunctions
                     .httpsCallable('update_global_user_display_name_callable')
                     .call(
                   {
-                    'displayName': displayName,
+                    'userDisplayName': userDisplayName,
                   },
                 );
               },
