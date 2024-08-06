@@ -11,14 +11,18 @@ class DevicesView extends StatelessWidget {
   DevicesView({super.key});
   static const routeName = '/devices';
 
-  final TextEditingController _searchController = TextEditingController();
   final ValueNotifier<String> _searchQuery = ValueNotifier<String>('');
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<OrgSelectorChangeNotifier, FirestoreService>(
-      builder: (context, orgSelectorProvider, firestoreService, child) {
-        return FutureBuilder<List<DocumentSnapshot>>(
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Devices'),
+      ),
+      drawer: const AuthedDrawer(),
+      body: Consumer2<OrgSelectorChangeNotifier, FirestoreService>(
+        builder: (context, orgSelectorProvider, firestoreService, child) {
+          return FutureBuilder<List<DocumentSnapshot>>(
             future: firestoreService
                 .getOrgDevices(orgSelectorProvider.selectedOrgId),
             builder: (context, snapshot) {
@@ -29,76 +33,94 @@ class DevicesView extends StatelessWidget {
               }
               final List<DocumentSnapshot> devicesDocs = snapshot.data!;
 
-              return Scaffold(
-                appBar: AppBar(
-                  title: const Text('Devices'),
-                ),
-                drawer: const AuthedDrawer(),
-                body: Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: TextField(
-                        controller: _searchController,
-                        decoration: InputDecoration(
-                          labelText: 'Search by Serial',
-                          border: OutlineInputBorder(),
-                          suffixIcon: IconButton(
-                            icon: Icon(Icons.clear),
-                            onPressed: () {
-                              _searchController.clear();
-                              _searchQuery.value = '';
-                            },
-                          ),
-                        ),
-                        onChanged: (value) {
-                          _searchQuery.value = value;
-                        },
-                      ),
-                    ),
-                    const Center(child: Text('Device List')),
-                    Expanded(
-                      child: ValueListenableBuilder<String>(
-                        valueListenable: _searchQuery,
-                        builder: (context, query, child) {
-                          final filteredDevices = devicesDocs.where((doc) {
-                            final data = doc.data() as Map<String, dynamic>;
-                            final serial = data['deviceSerialNumber'] ?? '';
-                            return serial.contains(query);
-                          }).toList();
+              return Column(
+                children: [
+                  SearchTextField(searchQuery: _searchQuery),
+                  const Center(child: Text('Device List')),
+                  Expanded(
+                    child: ValueListenableBuilder<String>(
+                      valueListenable: _searchQuery,
+                      builder: (context, query, child) {
+                        final filteredDevices = devicesDocs.where((doc) {
+                          final data = doc.data() as Map<String, dynamic>;
+                          final serial = data['deviceSerialNumber'] ?? '';
+                          return serial.contains(query);
+                        }).toList();
 
-                          return filteredDevices.isNotEmpty
-                              ? SizedBox(
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.95,
-                                  child: ListView.builder(
-                                    physics: const BouncingScrollPhysics(),
-                                    itemCount: filteredDevices.length,
-                                    itemBuilder: (context, index) {
-                                      Map<String, dynamic> deviceData =
-                                          filteredDevices[index].data()
-                                              as Map<String, dynamic>;
-                                      final deviceId = deviceData['deviceId'];
-                                      final deviceSerialNumber =
-                                          deviceData['deviceSerialNumber'];
-                                      return DeviceCard(
-                                        deviceId: deviceId,
-                                        orgId:
-                                            orgSelectorProvider.selectedOrgId,
-                                        deviceSerialNumber: deviceSerialNumber,
-                                      );
-                                    },
-                                  ),
-                                )
-                              : const Center(child: Text('No devices found'));
-                        },
-                      ),
+                        return filteredDevices.isNotEmpty
+                            ? SizedBox(
+                                width: MediaQuery.of(context).size.width * 0.95,
+                                child: ListView.builder(
+                                  physics: const BouncingScrollPhysics(),
+                                  itemCount: filteredDevices.length,
+                                  itemBuilder: (context, index) {
+                                    Map<String, dynamic> deviceData =
+                                        filteredDevices[index].data()
+                                            as Map<String, dynamic>;
+                                    final deviceId = deviceData['deviceId'];
+                                    final deviceSerialNumber =
+                                        deviceData['deviceSerialNumber'];
+                                    return DeviceCard(
+                                      deviceId: deviceId,
+                                      orgId: orgSelectorProvider.selectedOrgId,
+                                      deviceSerialNumber: deviceSerialNumber,
+                                    );
+                                  },
+                                ),
+                              )
+                            : const Center(child: Text('No devices found'));
+                      },
                     ),
-                  ],
-                ),
+                  ),
+                ],
               );
-            });
-      },
+            },
+          );
+        },
+      ),
+    );
+  }
+}
+
+class SearchTextField extends StatefulWidget {
+  final ValueNotifier<String> searchQuery;
+
+  SearchTextField({required this.searchQuery});
+
+  @override
+  _SearchTextFieldState createState() => _SearchTextFieldState();
+}
+
+class _SearchTextFieldState extends State<SearchTextField> {
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: TextField(
+        controller: _searchController,
+        decoration: InputDecoration(
+          labelText: 'Search by Serial',
+          border: OutlineInputBorder(),
+          suffixIcon: IconButton(
+            icon: Icon(Icons.clear),
+            onPressed: () {
+              _searchController.clear();
+              widget.searchQuery.value = '';
+            },
+          ),
+        ),
+        onChanged: (value) {
+          widget.searchQuery.value = value;
+        },
+      ),
     );
   }
 }
@@ -118,8 +140,8 @@ class DeviceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Consumer2<FirestoreService, DeviceCheckoutService>(
-      builder: (context, firestoreService, deviceCheckoutService, child) {
+    return Consumer<FirestoreService>(
+      builder: (context, firestoreService, child) {
         return StreamBuilder(
           stream: firestoreService.deviceCheckoutStatusStream(deviceId, orgId),
           builder: (context, snapshot) {
@@ -131,17 +153,17 @@ class DeviceCard extends StatelessWidget {
             final deviceIsCheckedOut = snapshot.data as bool;
 
             return CustomCard(
-                theme: theme,
-                customCardLeading:
-                    Icon(Icons.devices, color: theme.colorScheme.secondary),
-                customCardTitle: Text(deviceSerialNumber),
-                customCardTrailing: DeviceButton(
-                  deviceSerialNumber: deviceSerialNumber,
-                  orgId: orgId,
-                  deviceCheckoutService: deviceCheckoutService,
-                  deviceIsCheckedOut: deviceIsCheckedOut,
-                ),
-                onTapAction: () {});
+              theme: theme,
+              customCardLeading:
+                  Icon(Icons.devices, color: theme.colorScheme.secondary),
+              customCardTitle: Text(deviceSerialNumber),
+              customCardTrailing: DeviceButton(
+                deviceSerialNumber: deviceSerialNumber,
+                orgId: orgId,
+                deviceIsCheckedOut: deviceIsCheckedOut,
+              ),
+              onTapAction: () {},
+            );
           },
         );
       },
@@ -152,40 +174,42 @@ class DeviceCard extends StatelessWidget {
 class DeviceButton extends StatefulWidget {
   final String deviceSerialNumber;
   final String orgId;
-  final DeviceCheckoutService deviceCheckoutService;
   final bool deviceIsCheckedOut;
-  
+
   const DeviceButton({
     super.key,
     required this.deviceSerialNumber,
     required this.orgId,
-    required this.deviceCheckoutService,
     required this.deviceIsCheckedOut,
   });
+
   @override
   _DeviceButtonState createState() => _DeviceButtonState();
 }
 
 class _DeviceButtonState extends State<DeviceButton> {
   var _isLoading = false;
-  
+
   @override
   void dispose() {
-    // Add any resource cleanup code here if needed in the future
     super.dispose();
   }
 
-  void _onSubmit() {
+  void _onSubmit() async {
     setState(() => _isLoading = true);
-    widget.deviceCheckoutService.handleDeviceCheckout(
-      context, widget.deviceSerialNumber, widget.orgId,
-    ).then((_) {
+    final deviceCheckoutService =
+        Provider.of<DeviceCheckoutService>(context, listen: false);
+    try {
+      await deviceCheckoutService.handleDeviceCheckout(
+        context,
+        widget.deviceSerialNumber,
+        widget.orgId,
+      );
+    } catch (e) {
+      // Handle error if needed
+    } finally {
       setState(() => _isLoading = false);
-    });
-    Future.delayed(
-      const Duration(seconds: 2),
-      () => setState(() => _isLoading = false),
-    );
+    }
   }
 
   @override

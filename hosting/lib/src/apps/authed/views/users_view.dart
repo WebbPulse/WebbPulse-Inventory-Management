@@ -11,20 +11,23 @@ import '../../../shared/helpers/asyncContextHelpers.dart';
 class UsersView extends StatelessWidget {
   UsersView({super.key});
 
-  final TextEditingController _userCreationEmailController =
-      TextEditingController();
   static const routeName = '/users';
 
-  final TextEditingController _searchController = TextEditingController();
   final ValueNotifier<String> _searchQuery = ValueNotifier<String>('');
 
   @override
   Widget build(BuildContext context) {
-    return Consumer3<OrgSelectorChangeNotifier, FirestoreService,
-        FirebaseFunctions>(
-      builder: (context, orgSelectorProvider, firestoreService,
-          firebaseFunctions, child) {
-        return FutureBuilder<List<DocumentSnapshot>>(
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Users Page'),
+        actions: [
+          AddUserButton(),
+        ],
+      ),
+      drawer: const AuthedDrawer(),
+      body: Consumer2<OrgSelectorChangeNotifier, FirestoreService>(
+        builder: (context, orgSelectorProvider, firestoreService, child) {
+          return FutureBuilder<List<DocumentSnapshot>>(
             future: firestoreService
                 .getOrgMembers(orgSelectorProvider.selectedOrgId),
             builder: (context, snapshot) {
@@ -34,143 +37,177 @@ class UsersView extends StatelessWidget {
                 return const Center(child: Text('Error loading devices'));
               }
               final List<DocumentSnapshot> membersDocs = snapshot.data!;
-              return Scaffold(
-                appBar: AppBar(
-                  title: const Text('Users Page'),
-                  actions: [
-                    ElevatedButton(
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return AlertDialog(
-                                title: const Text('Add New User'),
-                                content: SingleChildScrollView(
-                                  child: ConstrainedBox(
-                                    constraints: const BoxConstraints(
-                                        maxWidth:
-                                            500), // Set your desired width here
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize
-                                          .min, // This ensures the column takes only the necessary space
-                                      children: [
-                                        const Text(
-                                            'Enter the email of the user to add'),
-                                        const SizedBox(height: 16.0), // Spacing
 
-                                        TextField(
-                                          controller:
-                                              _userCreationEmailController,
-                                          decoration: const InputDecoration(
-                                            labelText: 'Email',
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
+              return Column(
+                children: [
+                  SearchTextField(searchQuery: _searchQuery),
+                  const Center(child: Text('User List')),
+                  Expanded(
+                    child: ValueListenableBuilder<String>(
+                      valueListenable: _searchQuery,
+                      builder: (context, query, child) {
+                        final filteredMembers = membersDocs.where((doc) {
+                          final data = doc.data() as Map<String, dynamic>;
+                          final email = data['email'] ?? '';
+                          final displayName = data['displayName'] ?? '';
+                          return email.contains(query) ||
+                              displayName.contains(query);
+                        }).toList();
+
+                        return filteredMembers.isNotEmpty
+                            ? SizedBox(
+                                width: MediaQuery.of(context).size.width * 0.95,
+                                child: ListView.builder(
+                                  physics: const BouncingScrollPhysics(),
+                                  itemCount: filteredMembers.length,
+                                  itemBuilder: (context, index) {
+                                    Map<String, dynamic> userData =
+                                        filteredMembers[index].data()
+                                            as Map<String, dynamic>;
+                                    final orgMemberId = userData['orgMemberId'];
+                                    final displayName = userData['displayName'];
+                                    final email = userData['email'];
+                                    return UserCard(
+                                      orgMemberId: orgMemberId,
+                                      orgId: orgSelectorProvider.selectedOrgId,
+                                      displayName: displayName,
+                                      email: email,
+                                    );
+                                  },
                                 ),
-                                actions: <Widget>[
-                                  ElevatedButton(
-                                    onPressed: () async {
-                                      final userCreationEmail =
-                                          _userCreationEmailController.text;
-                                      if (userCreationEmail.isNotEmpty) {
-                                        await firebaseFunctions
-                                            .httpsCallable(
-                                                'create_user_callable')
-                                            .call({
-                                          "userCreationEmail":
-                                              userCreationEmail,
-                                          "orgId":
-                                              orgSelectorProvider.selectedOrgId
-                                        });
-                                        await AsyncContextHelpers
-                                            .popContextIfMounted(context);
-                                      }
-                                    },
-                                    child: const Text('Add User'),
-                                  ),
-                                ],
-                              );
-                            },
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(16.0)),
-                        child: const Text('Add New User'))
-                        
-                  ],
-                ),
-                drawer: const AuthedDrawer(),
-                body: Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: TextField(
-                        controller: _searchController,
-                        decoration: InputDecoration(
-                          labelText: 'Search by Email or Display Name',
-                          border: OutlineInputBorder(),
-                          suffixIcon: IconButton(
-                            icon: Icon(Icons.clear),
-                            onPressed: () {
-                              _searchController.clear();
-                              _searchQuery.value = '';
-                            },
-                          ),
-                        ),
-                        onChanged: (value) {
-                          _searchQuery.value = value;
-                        },
-                      ),
+                              )
+                            : const Center(child: Text('No users found'));
+                      },
                     ),
-                    const Center(child: Text('User List')),
-                    Expanded(
-                      child: ValueListenableBuilder<String>(
-                        valueListenable: _searchQuery,
-                        builder: (context, query, child) {
-                          final filteredMembers = membersDocs.where((doc) {
-                            final data = doc.data() as Map<String, dynamic>;
-                            final email = data['email'] ?? '';
-                            final displayName = data['displayName'] ?? '';
-                            return email.contains(query) ||
-                                displayName.contains(query);
-                          }).toList();
-
-                          return filteredMembers.isNotEmpty
-                              ? SizedBox(
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.95,
-                                  child: ListView.builder(
-                                    physics: const BouncingScrollPhysics(),
-                                    itemCount: filteredMembers.length,
-                                    itemBuilder: (context, index) {
-                                      Map<String, dynamic> userData =
-                                          filteredMembers[index].data()
-                                              as Map<String, dynamic>;
-                                      final orgMemberId =
-                                          userData['orgMemberId'];
-                                      final displayName =
-                                          userData['displayName'];
-                                      final email = userData['email'];
-                                      return UserCard(
-                                        orgMemberId: orgMemberId,
-                                        orgId:
-                                            orgSelectorProvider.selectedOrgId,
-                                        displayName: displayName,
-                                        email: email,
-                                      );
-                                    },
-                                  ),
-                                )
-                              : const Center(child: Text('No users found'));
-                        },
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               );
-            });
+            },
+          );
+        },
+      ),
+    );
+  }
+}
+
+class SearchTextField extends StatefulWidget {
+  final ValueNotifier<String> searchQuery;
+
+  SearchTextField({required this.searchQuery});
+
+  @override
+  _SearchTextFieldState createState() => _SearchTextFieldState();
+}
+
+class _SearchTextFieldState extends State<SearchTextField> {
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: TextField(
+        controller: _searchController,
+        decoration: InputDecoration(
+          labelText: 'Search by Email or Display Name',
+          border: OutlineInputBorder(),
+          suffixIcon: IconButton(
+            icon: Icon(Icons.clear),
+            onPressed: () {
+              _searchController.clear();
+              widget.searchQuery.value = '';
+            },
+          ),
+        ),
+        onChanged: (value) {
+          widget.searchQuery.value = value;
+        },
+      ),
+    );
+  }
+}
+
+class AddUserButton extends StatefulWidget {
+  @override
+  _AddUserButtonState createState() => _AddUserButtonState();
+}
+
+class _AddUserButtonState extends State<AddUserButton> {
+  final TextEditingController _userCreationEmailController =
+      TextEditingController();
+
+  @override
+  void dispose() {
+    _userCreationEmailController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      onPressed: () {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('Add New User'),
+              content: SingleChildScrollView(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 500),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text('Enter the email of the user to add'),
+                      const SizedBox(height: 16.0),
+                      TextField(
+                        controller: _userCreationEmailController,
+                        decoration: const InputDecoration(
+                          labelText: 'Email',
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              actions: <Widget>[
+                ElevatedButton(
+                  onPressed: () async {
+                    final userCreationEmail = _userCreationEmailController.text;
+                    final orgSelectorProvider =
+                        Provider.of<OrgSelectorChangeNotifier>(context,
+                            listen: false);
+                    final firebaseFunctions =
+                        Provider.of<FirebaseFunctions>(context, listen: false);
+                    if (userCreationEmail.isNotEmpty) {
+                      try {
+                        await firebaseFunctions
+                            .httpsCallable('create_user_callable')
+                            .call({
+                          "userCreationEmail": userCreationEmail,
+                          "orgId": orgSelectorProvider.selectedOrgId,
+                        });
+                        await AsyncContextHelpers.popContextIfMounted(context);
+                      } catch (e) {
+                        await AsyncContextHelpers.showSnackBarIfMounted(
+                            context, 'Failed to create organization: $e');
+                      }
+                    }
+                  },
+                  child: const Text('Add User'),
+                ),
+              ],
+            );
+          },
+        );
       },
+      style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(16.0)),
+      child: const Text('Add New User'),
     );
   }
 }
@@ -222,10 +259,11 @@ class UserCard extends StatelessWidget {
                   Text('no role logic implemented yet',
                       style: theme.textTheme.labelSmall),
                 ],
-              )
+              ),
             ]),
             customCardTrailing: ElevatedButton(
-              style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(16.0)),
+              style:
+                  ElevatedButton.styleFrom(padding: const EdgeInsets.all(16.0)),
               child: Text('Manage User'),
               onPressed: () {},
             ),

@@ -96,14 +96,14 @@ class OrgCard extends StatelessWidget {
     return Consumer2<OrgSelectorChangeNotifier, FirestoreService>(
       builder: (context, orgSelectorProvider, firestoreService, child) {
         return StreamBuilder(
-          stream: firestoreService.getOrgNameStream(orgId),
+          stream: firestoreService.getUserOrgStream(orgId),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
             } else if (snapshot.hasError) {
               return const Text('Error loading organizations');
             }
-            final String orgName = snapshot.data ?? '';
+            final String orgName = snapshot.data?['orgName'] ?? '';
 
             return CustomCard(
               theme: theme,
