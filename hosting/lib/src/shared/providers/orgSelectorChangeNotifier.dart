@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 
 class OrgSelectorChangeNotifier extends ChangeNotifier {
-  String _selectedOrgUid = '';
-  String get selectedOrgId => _selectedOrgUid;
+  String _selectedOrgId = '';
+  String get selectedOrgId => _selectedOrgId;
 
-  void selectOrg(String orgUid) {
-    _selectedOrgUid = orgUid;
+  void selectOrg(String orgId) {
+    _selectedOrgId = orgId;
     notifyListeners();
   }
 
   void clearSelectedOrg() {
-    _selectedOrgUid = '';
+    _selectedOrgId = '';
     notifyListeners();
   }
 }

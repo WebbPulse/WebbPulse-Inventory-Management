@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -85,14 +86,20 @@ class DevicesView extends StatelessWidget {
 class SearchTextField extends StatefulWidget {
   final ValueNotifier<String> searchQuery;
 
-  SearchTextField({required this.searchQuery});
+  const SearchTextField({required this.searchQuery});
 
   @override
   _SearchTextFieldState createState() => _SearchTextFieldState();
 }
 
 class _SearchTextFieldState extends State<SearchTextField> {
-  final TextEditingController _searchController = TextEditingController();
+  late TextEditingController _searchController;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController = TextEditingController();
+  }
 
   @override
   void dispose() {
@@ -140,8 +147,8 @@ class DeviceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Consumer<FirestoreService>(
-      builder: (context, firestoreService, child) {
+    return Consumer2<FirestoreService, DeviceCheckoutService>(
+      builder: (context, firestoreService, deviceCheckoutService, child) {
         return StreamBuilder(
           stream: firestoreService.deviceCheckoutStatusStream(deviceId, orgId),
           builder: (context, snapshot) {
@@ -159,7 +166,6 @@ class DeviceCard extends StatelessWidget {
               customCardTitle: Text(deviceSerialNumber),
               customCardTrailing: DeviceButton(
                 deviceSerialNumber: deviceSerialNumber,
-                orgId: orgId,
                 isDeviceCheckedOut: isDeviceCheckedOut,
               ),
               onTapAction: () {},
@@ -173,13 +179,11 @@ class DeviceCard extends StatelessWidget {
 
 class DeviceButton extends StatefulWidget {
   final String deviceSerialNumber;
-  final String orgId;
   final bool isDeviceCheckedOut;
 
   const DeviceButton({
     super.key,
     required this.deviceSerialNumber,
-    required this.orgId,
     required this.isDeviceCheckedOut,
   });
 
@@ -199,11 +203,13 @@ class _DeviceButtonState extends State<DeviceButton> {
     setState(() => _isLoading = true);
     final deviceCheckoutService =
         Provider.of<DeviceCheckoutService>(context, listen: false);
+    final orgId = Provider.of<OrgSelectorChangeNotifier>(context, listen: false)
+        .selectedOrgId;
     try {
       await deviceCheckoutService.handleDeviceCheckout(
         context,
         widget.deviceSerialNumber,
-        widget.orgId,
+        orgId,
       );
     } catch (e) {
       // Handle error if needed
