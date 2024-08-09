@@ -5,6 +5,7 @@ import '../../shared/providers/authenticationChangeNotifier.dart';
 
 import '../../shared/providers/settingsChangeNotifier.dart';
 import '../../shared/providers/orgSelectorChangeNotifier.dart';
+import '../../shared/providers/orgMemberSelectorChangeNotifier.dart';
 
 import '../../shared/providers/firestoreService.dart';
 import '../../shared/providers/deviceCheckoutService.dart';
@@ -18,6 +19,7 @@ import 'views/devices_view.dart';
 import 'views/checkout_view.dart';
 import 'views/users_view.dart';
 import 'views/create_organization_view.dart';
+import 'views/manage_user_view.dart';
 
 class AuthedApp extends StatelessWidget {
   AuthedApp({
@@ -37,14 +39,16 @@ class AuthedApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider<OrgSelectorChangeNotifier>(
             create: (_) => OrgSelectorChangeNotifier()),
+        ChangeNotifierProvider<OrgMemberSelectorChangeNotifier>(
+            create: (_) => OrgMemberSelectorChangeNotifier()),
         Provider<FirestoreService>(create: (_) => firestoreService),
         Provider<FirebaseFunctions>.value(value: firebaseFunctions),
         Provider<DeviceCheckoutService>(create: (_) => deviceCheckoutService),
       ],
-      child: Consumer3<OrgSelectorChangeNotifier, SettingsChangeNotifier,
-          AuthenticationChangeNotifier>(
+      child: Consumer4<OrgSelectorChangeNotifier, SettingsChangeNotifier,
+          AuthenticationChangeNotifier, OrgMemberSelectorChangeNotifier>(
         builder: (context, orgSelectorProvider, settingsProvider, authProvider,
-            child) {
+            orgMemberSelectorProvider, child) {
           return MaterialApp(
             restorationScopeId: 'authedapp',
             title: 'WebbPulse Inventory Management',
@@ -61,6 +65,12 @@ class AuthedApp extends StatelessWidget {
               if (orgSelectorProvider.selectedOrgId.isEmpty) {
                 return MaterialPageRoute<void>(
                   builder: (context) => const OrgSelectionView(),
+                );
+              }
+
+              if (orgMemberSelectorProvider.selectedOrgMemberId.isEmpty) {
+                return MaterialPageRoute<void>(
+                  builder: (context) => UsersView(),
                 );
               }
 
@@ -88,6 +98,10 @@ class AuthedApp extends StatelessWidget {
                 case OrgSelectionView.routeName:
                   return MaterialPageRoute<void>(
                     builder: (context) => const OrgSelectionView(),
+                  );
+                case ManageUserView.routeName:
+                  return MaterialPageRoute<void>(
+                    builder: (context) => const ManageUserView(),
                   );
                 default:
                   return MaterialPageRoute<void>(

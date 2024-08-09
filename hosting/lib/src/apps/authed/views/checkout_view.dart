@@ -35,11 +35,16 @@ class CheckoutForm extends StatefulWidget {
 
 class _CheckoutFormState extends State<CheckoutForm> {
   var _isLoading = false;
-  final TextEditingController _checkoutTextController = TextEditingController();
+  late TextEditingController _controller;
 
   @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController();
+  }
+
   void dispose() {
-    _checkoutTextController.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -52,7 +57,7 @@ class _CheckoutFormState extends State<CheckoutForm> {
     try {
       await deviceCheckoutService.handleDeviceCheckout(
         context,
-        _checkoutTextController.text,
+        _controller.text,
         orgId,
       );
     } catch (e) {
@@ -67,7 +72,7 @@ class _CheckoutFormState extends State<CheckoutForm> {
     return Column(
       children: [
         TextField(
-          controller: _checkoutTextController,
+          controller: _controller,
           decoration: const InputDecoration(
             labelText: 'Serial Number',
           ),
