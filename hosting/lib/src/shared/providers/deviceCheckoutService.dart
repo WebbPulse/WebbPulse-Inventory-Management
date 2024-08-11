@@ -25,6 +25,7 @@ class DeviceCheckoutService {
           await firebaseFunctions.httpsCallable('create_device_callable').call({
             "deviceSerialNumber": deviceSerialNumber,
             "orgId": orgId,
+            "isDeviceCheckedOut": false,
           });
 
           await firebaseFunctions
@@ -33,6 +34,7 @@ class DeviceCheckoutService {
             "deviceSerialNumber": deviceSerialNumber,
             "orgId": orgId,
             "isDeviceCheckedOut": true,
+            "deviceCheckedOutBy": deviceCheckedOutBy,
           });
 
           await AsyncContextHelpers.showSnackBarIfMounted(
