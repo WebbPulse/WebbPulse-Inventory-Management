@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 
 import 'providers/firestoreService.dart';
 import 'providers/deviceCheckoutService.dart';
@@ -307,26 +308,98 @@ class DeviceCard extends StatelessWidget {
     return Consumer2<FirestoreService, DeviceCheckoutService>(
       builder: (context, firestoreService, deviceCheckoutService, child) {
         return StreamBuilder(
-          stream: firestoreService.deviceCheckoutStatusStream(deviceId, orgId),
+          stream: firestoreService.getOrgDevice(deviceId, orgId),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
             } else if (snapshot.hasError) {
               return const Text('Error loading devices');
             }
-            final isDeviceCheckedOut = snapshot.data as bool;
+            final deviceData = snapshot.data?.data() as Map<String, dynamic>;
+            final orgMemberId = deviceData['deviceCheckedOutBy'];
 
-            return CustomCard(
-              theme: theme,
-              customCardLeading:
-                  Icon(Icons.devices, color: theme.colorScheme.secondary),
-              customCardTitle: Text(deviceSerialNumber),
-              customCardTrailing: DeviceCheckoutButton(
-                deviceSerialNumber: deviceSerialNumber,
-                isDeviceCheckedOut: isDeviceCheckedOut,
-              ),
-              onTapAction: () {},
-            );
+            return StreamBuilder<DocumentSnapshot?>(
+                stream: firestoreService.getOrgMember(orgId, orgMemberId),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return const Text('Error loading org member data');
+                  } else if (!snapshot.hasData ||
+                      snapshot.data == null ||
+                      snapshot.data!.data() == null) {
+                    return CustomCard(
+                      theme: theme,
+                      customCardLeading: Icon(Icons.devices,
+                          color: theme.colorScheme.secondary),
+                      customCardTitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Wrap(
+                              children: [
+                                Text(deviceSerialNumber,
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold)),
+                              ],
+                            ),
+                          ]),
+                      customCardTrailing: DeviceCheckoutButton(
+                        deviceSerialNumber: deviceSerialNumber,
+                        isDeviceCheckedOut: deviceData['isDeviceCheckedOut'],
+                      ),
+                      onTapAction: () {},
+                    );
+                  }
+
+                  Map<String, dynamic> orgMemberData =
+                      snapshot.data?.data() as Map<String, dynamic>;
+                  final Timestamp deviceCheckedOutAtTimestamp =
+                      deviceData['deviceCheckedOutAt'];
+                  final DateTime deviceCheckedOutAt =
+                      deviceCheckedOutAtTimestamp.toDate();
+                  final String deviceCheckedOutAtFormatted =
+                      DateFormat('yyyy-MM-dd kk:mm a')
+                          .format(deviceCheckedOutAt);
+                  return CustomCard(
+                    theme: theme,
+                    customCardLeading:
+                        Icon(Icons.devices, color: theme.colorScheme.secondary),
+                    customCardTitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Wrap(
+                            children: [
+                              Text(deviceSerialNumber,
+                                  style:
+                                      TextStyle(fontWeight: FontWeight.bold)),
+                            ],
+                          ),
+                          Wrap(
+                            children: [
+                              Text('Checked Out By: ',
+                                  style: theme.textTheme.labelSmall
+                                      ?.copyWith(fontWeight: FontWeight.bold)),
+                              Text(orgMemberData['orgMemberDisplayName'],
+                                  style: theme.textTheme.labelSmall),
+                            ],
+                          ),
+                          Wrap(
+                            children: [
+                              Text('Checked Out On: ',
+                                  style: theme.textTheme.labelSmall
+                                      ?.copyWith(fontWeight: FontWeight.bold)),
+                              Text(deviceCheckedOutAtFormatted,
+                                  style: theme.textTheme.labelSmall),
+                            ],
+                          )
+                        ]),
+                    customCardTrailing: DeviceCheckoutButton(
+                      deviceSerialNumber: deviceSerialNumber,
+                      isDeviceCheckedOut: deviceData['isDeviceCheckedOut'],
+                    ),
+                    onTapAction: () {},
+                  );
+                });
           },
         );
       },

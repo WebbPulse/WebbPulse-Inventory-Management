@@ -24,8 +24,7 @@ class ProfileView extends StatelessWidget {
         ),
         drawer: const AuthedDrawer(),
         body: StreamBuilder<DocumentSnapshot>(
-            stream: firestoreService
-                .getUserStream(authenticationChangeNotifier.uid!),
+            stream: firestoreService.getUser(authenticationChangeNotifier.uid!),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());

@@ -28,11 +28,18 @@ def update_device_checkout_status_callable(req: https_fn.CallableRequest) -> Any
         if len(querySnapshot) > 0:
             docId = querySnapshot[0].id
             
-            
+            if is_device_checked_out:
+                db.collection('organizations').document(org_id).collection('devices').document(docId).update({
+                'isDeviceCheckedOut': True,
+                'deviceCheckedOutBy': deviceCheckedOutBy,
+                'deviceCheckedOutAt': firestore.SERVER_TIMESTAMP,
+            })    
                 
-            db.collection('organizations').document(org_id).collection('devices').document(docId).update({
-                'isDeviceCheckedOut': is_device_checked_out,
-                'deviceCheckedOutBy': deviceCheckedOutBy
+            else:
+                db.collection('organizations').document(org_id).collection('devices').document(docId).update({
+                'isDeviceCheckedOut': False,
+                'deviceCheckedOutBy': '',
+                'deviceCheckedOutAt': None,
             })
         else:
             raise https_fn.HttpsError(
