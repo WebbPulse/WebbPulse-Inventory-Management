@@ -28,6 +28,8 @@ def create_device_callable(req: https_fn.CallableRequest) -> Any:
             'deviceSerialNumber': serial,
             'createdAt': firestore.SERVER_TIMESTAMP,
             'isDeviceCheckedOut': False,
+            'deviceCheckedOutBy': '',
+            'deviceCheckedOutAt': None,
         })
 
         return {"response": f"Device {serial} created"}

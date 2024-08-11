@@ -353,6 +353,7 @@ class DeviceCard extends StatelessWidget {
 
                   Map<String, dynamic> orgMemberData =
                       snapshot.data?.data() as Map<String, dynamic>;
+
                   final Timestamp deviceCheckedOutAtTimestamp =
                       deviceData['deviceCheckedOutAt'];
                   final DateTime deviceCheckedOutAt =
@@ -360,45 +361,99 @@ class DeviceCard extends StatelessWidget {
                   final String deviceCheckedOutAtFormatted =
                       DateFormat('yyyy-MM-dd kk:mm a')
                           .format(deviceCheckedOutAt);
-                  return CustomCard(
-                    theme: theme,
-                    customCardLeading:
-                        Icon(Icons.devices, color: theme.colorScheme.secondary),
-                    customCardTitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Wrap(
+
+                  return LayoutBuilder(builder: (context, constraints) {
+                    if (constraints.maxWidth < 400) {
+                      return CustomCard(
+                        theme: theme,
+                        customCardLeading: null,
+                        customCardTitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(deviceSerialNumber,
-                                  style:
-                                      TextStyle(fontWeight: FontWeight.bold)),
-                            ],
-                          ),
-                          Wrap(
-                            children: [
-                              Text('Checked Out By: ',
-                                  style: theme.textTheme.labelSmall
-                                      ?.copyWith(fontWeight: FontWeight.bold)),
-                              Text(orgMemberData['orgMemberDisplayName'],
-                                  style: theme.textTheme.labelSmall),
-                            ],
-                          ),
-                          Wrap(
-                            children: [
-                              Text('Checked Out On: ',
-                                  style: theme.textTheme.labelSmall
-                                      ?.copyWith(fontWeight: FontWeight.bold)),
-                              Text(deviceCheckedOutAtFormatted,
-                                  style: theme.textTheme.labelSmall),
-                            ],
-                          )
-                        ]),
-                    customCardTrailing: DeviceCheckoutButton(
-                      deviceSerialNumber: deviceSerialNumber,
-                      isDeviceCheckedOut: deviceData['isDeviceCheckedOut'],
-                    ),
-                    onTapAction: () {},
-                  );
+                              Icon(Icons.devices,
+                                  color: theme.colorScheme.secondary),
+                              Wrap(
+                                children: [
+                                  Text(deviceSerialNumber,
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold)),
+                                ],
+                              ),
+                              Wrap(
+                                children: [
+                                  Text('Checked Out By: ',
+                                      style: theme.textTheme.labelSmall
+                                          ?.copyWith(
+                                              fontWeight: FontWeight.bold)),
+                                  Text(orgMemberData['orgMemberDisplayName'],
+                                      style: theme.textTheme.labelSmall),
+                                ],
+                              ),
+                              Wrap(
+                                children: [
+                                  Text('Checked Out On: ',
+                                      style: theme.textTheme.labelSmall
+                                          ?.copyWith(
+                                              fontWeight: FontWeight.bold)),
+                                  Text(deviceCheckedOutAtFormatted,
+                                      style: theme.textTheme.labelSmall),
+                                ],
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  DeviceCheckoutButton(
+                                    deviceSerialNumber: deviceSerialNumber,
+                                    isDeviceCheckedOut:
+                                        deviceData['isDeviceCheckedOut'],
+                                  ),
+                                ],
+                              ),
+                            ]),
+                        customCardTrailing: null,
+                        onTapAction: () {},
+                      );
+                    }
+                    return CustomCard(
+                      theme: theme,
+                      customCardLeading: Icon(Icons.devices,
+                          color: theme.colorScheme.secondary),
+                      customCardTitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Wrap(
+                              children: [
+                                Text(deviceSerialNumber,
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold)),
+                              ],
+                            ),
+                            Wrap(
+                              children: [
+                                Text('Checked Out By: ',
+                                    style: theme.textTheme.labelSmall?.copyWith(
+                                        fontWeight: FontWeight.bold)),
+                                Text(orgMemberData['orgMemberDisplayName'],
+                                    style: theme.textTheme.labelSmall),
+                              ],
+                            ),
+                            Wrap(
+                              children: [
+                                Text('Checked Out On: ',
+                                    style: theme.textTheme.labelSmall?.copyWith(
+                                        fontWeight: FontWeight.bold)),
+                                Text(deviceCheckedOutAtFormatted,
+                                    style: theme.textTheme.labelSmall),
+                              ],
+                            )
+                          ]),
+                      customCardTrailing: DeviceCheckoutButton(
+                        deviceSerialNumber: deviceSerialNumber,
+                        isDeviceCheckedOut: deviceData['isDeviceCheckedOut'],
+                      ),
+                      onTapAction: () {},
+                    );
+                  });
                 });
           },
         );
