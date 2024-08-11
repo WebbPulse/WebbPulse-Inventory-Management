@@ -93,6 +93,21 @@ class FirestoreService {
     }
   }
 
+  Future<List<DocumentSnapshot>> getOrgMemberDevices(
+      String orgId, String orgMemberId) async {
+    try {
+      CollectionReference collectionRef =
+          _db.collection('organizations').doc(orgId).collection('devices');
+      QuerySnapshot querySnapshot = await collectionRef
+          .where('deviceCheckedOutBy', isEqualTo: orgMemberId)
+          .get();
+      return querySnapshot.docs;
+    } catch (e) {
+      print('Error getting organization member devices: $e');
+      return <DocumentSnapshot>[]; // Return an empty list in case of error
+    }
+  }
+
   Stream<List<DocumentSnapshot>> getOrgMembers(String orgId) {
     try {
       CollectionReference collectionRef =
