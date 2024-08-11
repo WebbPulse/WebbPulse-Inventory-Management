@@ -5,8 +5,6 @@ import 'package:webbcheck/src/shared/providers/firestoreService.dart';
 import 'package:webbcheck/src/shared/providers/orgMemberSelectorChangeNotifier.dart';
 import 'package:webbcheck/src/shared/providers/orgSelectorChangeNotifier.dart';
 
-import '../../../shared/widgets.dart';
-
 class ManageUserView extends StatelessWidget {
   const ManageUserView({super.key});
   static const routeName = '/manage-user';

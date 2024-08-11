@@ -36,20 +36,40 @@ class ProfileView extends StatelessWidget {
                 return const Center(child: Text('User not found'));
               }
               final DocumentSnapshot user = snapshot.data!;
-
+              if (user['userPhotoURL'] == '') {
+                return ProfileScreen(
+                  actions: [
+                    DisplayNameChangedAction(
+                      (context, user, userDisplayName) async {
+                        await firebaseFunctions
+                            .httpsCallable(
+                                'update_global_user_display_name_callable')
+                            .call(
+                          {
+                            'userDisplayName': userDisplayName,
+                          },
+                        );
+                      },
+                    ),
+                  ],
+                  providers: [
+                    EmailAuthProvider(),
+                  ],
+                  children: [
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                        child: const Text('Change Profile Picture'),
+                        onPressed: () {
+                          showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return ChangeProfilePictureAlertDialog();
+                              });
+                        }),
+                  ],
+                );
+              }
               return ProfileScreen(
-                children: [
-                  SizedBox(height: 16),
-                  ElevatedButton(
-                      child: Text('Change Profile Picture'),
-                      onPressed: () {
-                        showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return ChangeProfilePictureAlertDialog();
-                            });
-                      }),
-                ],
                 avatar: CircleAvatar(
                   radius: 75,
                   backgroundImage: NetworkImage(user['userPhotoURL']),
@@ -70,6 +90,19 @@ class ProfileView extends StatelessWidget {
                 ],
                 providers: [
                   EmailAuthProvider(),
+                ],
+                children: [
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    child: const Text('Change Profile Picture'),
+                    onPressed: () {
+                      showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return ChangeProfilePictureAlertDialog();
+                          });
+                    },
+                  ),
                 ],
               );
             }),
@@ -158,21 +191,29 @@ class _ChangeProfilePictureAlertDialogState
         ),
       ),
       actions: <Widget>[
-        ElevatedButton.icon(
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-          style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(16.0)),
-          icon: const Icon(Icons.arrow_back),
-          label: const Text('Go Back'),
-        ),
-        ElevatedButton.icon(
-          onPressed: _isLoading ? null : _onSubmit,
-          style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(16.0)),
-          icon: _isLoading
-              ? const CircularProgressIndicator()
-              : const Icon(Icons.photo),
-          label: const Text('Change Profile Picture'),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            ElevatedButton.icon(
+              onPressed: _isLoading ? null : _onSubmit,
+              style:
+                  ElevatedButton.styleFrom(padding: const EdgeInsets.all(16.0)),
+              icon: _isLoading
+                  ? const CircularProgressIndicator()
+                  : const Icon(Icons.photo),
+              label: const Text('Change Profile Picture'),
+            ),
+            const SizedBox(height: 16.0),
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              style:
+                  ElevatedButton.styleFrom(padding: const EdgeInsets.all(16.0)),
+              icon: const Icon(Icons.arrow_back),
+              label: const Text('Go Back'),
+            ),
+          ],
         ),
       ],
     );
