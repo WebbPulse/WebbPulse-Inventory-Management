@@ -94,14 +94,15 @@ class ProfileView extends StatelessWidget {
                 children: [
                   const SizedBox(height: 16),
                   ElevatedButton(
-                      child: const Text('Change Profile Picture'),
-                      onPressed: () {
-                        showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return ChangeProfilePictureAlertDialog();
-                            });
-                      }),
+                    child: const Text('Change Profile Picture'),
+                    onPressed: () {
+                      showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return ChangeProfilePictureAlertDialog();
+                          });
+                    },
+                  ),
                 ],
               );
             }),
@@ -190,21 +191,29 @@ class _ChangeProfilePictureAlertDialogState
         ),
       ),
       actions: <Widget>[
-        ElevatedButton.icon(
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-          style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(16.0)),
-          icon: const Icon(Icons.arrow_back),
-          label: const Text('Go Back'),
-        ),
-        ElevatedButton.icon(
-          onPressed: _isLoading ? null : _onSubmit,
-          style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(16.0)),
-          icon: _isLoading
-              ? const CircularProgressIndicator()
-              : const Icon(Icons.photo),
-          label: const Text('Change Profile Picture'),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            ElevatedButton.icon(
+              onPressed: _isLoading ? null : _onSubmit,
+              style:
+                  ElevatedButton.styleFrom(padding: const EdgeInsets.all(16.0)),
+              icon: _isLoading
+                  ? const CircularProgressIndicator()
+                  : const Icon(Icons.photo),
+              label: const Text('Change Profile Picture'),
+            ),
+            const SizedBox(height: 16.0),
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              style:
+                  ElevatedButton.styleFrom(padding: const EdgeInsets.all(16.0)),
+              icon: const Icon(Icons.arrow_back),
+              label: const Text('Go Back'),
+            ),
+          ],
         ),
       ],
     );

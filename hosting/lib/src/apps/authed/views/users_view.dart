@@ -277,17 +277,12 @@ class UserCard extends StatelessWidget {
                 ],
               ),
             ]),
-            customCardTrailing: ElevatedButton(
-              style:
-                  ElevatedButton.styleFrom(padding: const EdgeInsets.all(16.0)),
-              child: Text('Manage User'),
-              onPressed: () {
-                orgMemberSelectorChangeNotifier
-                    .selectOrgMember(userData['orgMemberId']);
-                Navigator.pushNamed(context, ManageUserView.routeName);
-              },
-            ),
-            onTapAction: () {});
+            customCardTrailing: null,
+            onTapAction: () {
+              orgMemberSelectorChangeNotifier
+                  .selectOrgMember(userData['orgMemberId']);
+              Navigator.pushNamed(context, ManageUserView.routeName);
+            });
       },
     );
   }
