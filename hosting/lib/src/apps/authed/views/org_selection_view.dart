@@ -96,7 +96,7 @@ class OrgCard extends StatelessWidget {
     return Consumer2<OrgSelectorChangeNotifier, FirestoreService>(
       builder: (context, orgSelectorProvider, firestoreService, child) {
         return StreamBuilder(
-          stream: firestoreService.getUserOrgStream(orgId),
+          stream: firestoreService.getOrgStream(orgId),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());

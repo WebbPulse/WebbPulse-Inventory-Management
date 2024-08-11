@@ -50,8 +50,8 @@ class _CheckoutFormState extends State<CheckoutForm> {
 
   void _onSubmit() async {
     setState(() => _isLoading = true);
-    final orgId = Provider.of<OrgSelectorChangeNotifier>(context, listen: false)
-        .selectedOrgId;
+    final orgId =
+        Provider.of<OrgSelectorChangeNotifier>(context, listen: false).orgId;
     final deviceCheckoutService =
         Provider.of<DeviceCheckoutService>(context, listen: false);
     try {

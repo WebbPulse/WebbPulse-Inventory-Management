@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class FirestoreService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  Stream<DocumentSnapshot> getUserOrgStream(String orgId) {
+  Stream<DocumentSnapshot> getOrgStream(String orgId) {
     try {
       DocumentReference documentRef =
           _db.collection('organizations').doc(orgId);
@@ -104,6 +104,31 @@ class FirestoreService {
       print('Error getting organization members: $e');
       return Stream.value(
           <DocumentSnapshot>[]); // Return an empty list in case of error
+    }
+  }
+
+  Stream<DocumentSnapshot> getOrgMemberStream(
+      String orgId, String orgMemberId) {
+    try {
+      DocumentReference documentRef = _db
+          .collection('organizations')
+          .doc(orgId)
+          .collection('members')
+          .doc(orgMemberId);
+      return documentRef.snapshots();
+    } catch (e) {
+      print('Error getting org member: $e');
+      return Stream.error('Failed to get org member');
+    }
+  }
+
+  Stream<DocumentSnapshot> getUserStream(String? uid) {
+    try {
+      DocumentReference documentRef = _db.collection('users').doc(uid);
+      return documentRef.snapshots();
+    } catch (e) {
+      print('Error getting user: $e');
+      return Stream.error('Failed to get user');
     }
   }
 }

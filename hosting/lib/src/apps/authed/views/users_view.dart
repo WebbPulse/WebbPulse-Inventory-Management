@@ -42,8 +42,7 @@ class UsersView extends StatelessWidget {
       body: Consumer2<OrgSelectorChangeNotifier, FirestoreService>(
         builder: (context, orgSelectorProvider, firestoreService, child) {
           return StreamBuilder<List<DocumentSnapshot>>(
-            stream: firestoreService
-                .getOrgMembers(orgSelectorProvider.selectedOrgId),
+            stream: firestoreService.getOrgMembers(orgSelectorProvider.orgId),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
@@ -177,7 +176,7 @@ class _AddUserAlertDialogState extends State<AddUserAlertDialog> {
       try {
         await firebaseFunctions.httpsCallable('create_user_callable').call({
           "userEmail": userCreationEmail,
-          "orgId": orgSelectorProvider.selectedOrgId,
+          "orgId": orgSelectorProvider.orgId,
         });
         AsyncContextHelpers.showSnackBarIfMounted(
             context, 'User created successfully');

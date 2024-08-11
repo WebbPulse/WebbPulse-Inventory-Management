@@ -24,8 +24,7 @@ class DevicesView extends StatelessWidget {
       body: Consumer2<OrgSelectorChangeNotifier, FirestoreService>(
         builder: (context, orgSelectorProvider, firestoreService, child) {
           return FutureBuilder<List<DocumentSnapshot>>(
-            future: firestoreService
-                .getOrgDevices(orgSelectorProvider.selectedOrgId),
+            future: firestoreService.getOrgDevices(orgSelectorProvider.orgId),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
@@ -63,7 +62,7 @@ class DevicesView extends StatelessWidget {
                                         deviceData['deviceSerialNumber'];
                                     return DeviceCard(
                                       deviceId: deviceId,
-                                      orgId: orgSelectorProvider.selectedOrgId,
+                                      orgId: orgSelectorProvider.orgId,
                                       deviceSerialNumber: deviceSerialNumber,
                                     );
                                   },
@@ -203,8 +202,8 @@ class _DeviceButtonState extends State<DeviceButton> {
     setState(() => _isLoading = true);
     final deviceCheckoutService =
         Provider.of<DeviceCheckoutService>(context, listen: false);
-    final orgId = Provider.of<OrgSelectorChangeNotifier>(context, listen: false)
-        .selectedOrgId;
+    final orgId =
+        Provider.of<OrgSelectorChangeNotifier>(context, listen: false).orgId;
     try {
       await deviceCheckoutService.handleDeviceCheckout(
         context,

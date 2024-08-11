@@ -8,6 +8,7 @@ def create_global_user_profile(user):
             'userOrgIds': [],
             'uid': user.uid,
             'userDisplayName': user.email,
+            'userPhotoURL': "",
         }
         db.collection('users').document(user.uid).set(user_data)
     except Exception as e:
