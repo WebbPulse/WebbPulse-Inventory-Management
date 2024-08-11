@@ -15,16 +15,16 @@ def create_user_callable(req: https_fn.CallableRequest) -> Any:
                                 message="The function must be called while authenticated.")
         
         # Extract parameters 
-        new_user_email = req.data["userCreationEmail"]
+        user_email = req.data["userEmail"]
         org_id = req.data["orgId"]
 
         # Checking attribute.
-        if not new_user_email or not org_id:
+        if not user_email or not org_id:
             # Throwing an HttpsError so that the client gets the error details.
             raise https_fn.HttpsError(code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
                                 message='The function must be called with three arguments: "userCreationDisplayName", "userCreationEmail", and "organizationUid".')
 
-        if new_user_email.split("@")[1] not in allowed_domains:
+        if user_email.split("@")[1] not in allowed_domains:
             raise https_fn.HttpsError(code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
                                 message='Unauthorized email for new user')
 
@@ -35,28 +35,27 @@ def create_user_callable(req: https_fn.CallableRequest) -> Any:
             nonlocal user
             try:
                 # User exists
-                user = auth.get_user_by_email(new_user_email)
+                user = auth.get_user_by_email(user_email)
                 return True
                     
             except UserNotFoundError:
                 #create the user in firebase auth
                 user = auth.create_user(
-                    email=new_user_email,
+                    email=user_email,
                     email_verified=False,
-                    
                     disabled=False
                 )
                 return False
 
         if user_exists_in_auth():   
-            add_user_to_organization(user.uid, org_id, user.display_name, new_user_email)
+            add_user_to_organization(user.uid, org_id, user.display_name, user_email)
             update_user_organizations(user.uid, org_id)
-            response_message = f"User {new_user_email} added to organization."
+            response_message = f"User {user_email} added to organization."
         else:
             create_global_user_profile(user)
-            add_user_to_organization(user.uid, org_id, user.display_name, new_user_email)
+            add_user_to_organization(user.uid, org_id, user.display_name, user_email)
             update_user_organizations(user.uid, org_id)
-            response_message = f"User {new_user_email} created and added to organization."
+            response_message = f"User {user_email} created and added to organization."
 
         return {"response": response_message}
     

@@ -3,17 +3,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class FirestoreService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  Stream<String> getOrgNameStream(String orgId) {
-    return _db
-        .collection('organizations')
-        .doc(orgId)
-        .snapshots()
-        .map((snapshot) {
-      return (snapshot.data()?['name'] ?? '') as String;
-    }).handleError((e) {
-      print('Error checking organization name: $e');
-      return '';
-    });
+  Stream<DocumentSnapshot> getOrgStream(String orgId) {
+    try {
+      DocumentReference documentRef =
+          _db.collection('organizations').doc(orgId);
+      return documentRef.snapshots();
+    } catch (e) {
+      print('Error getting organization: $e');
+      return Stream.error('Failed to get organization');
+    }
   }
 
   Stream<List<String>> orgsIdsStream(String? uid) {
@@ -22,7 +20,7 @@ class FirestoreService {
     }
 
     return _db.collection('users').doc(uid).snapshots().map((snapshot) {
-      return List<String>.from(snapshot.data()?['orgIds'] ?? []);
+      return List<String>.from(snapshot.data()?['userOrgIds'] ?? []);
     }).handleError((error) {
       print('Error getting organizations: $error');
       return Stream.value([]);
@@ -54,22 +52,10 @@ class FirestoreService {
           .collection('devices')
           .where('deviceSerialNumber', isEqualTo: serial)
           .get();
-      return querySnapshot.docs.first.data()['isCheckedOut'];
+      return querySnapshot.docs.first.data()['isDeviceCheckedOut'];
     } catch (e) {
       print('Error checking device checkout status: $e');
       return false;
-    }
-  }
-
-  Future<List<DocumentSnapshot>> getOrgDevices(String orgId) async {
-    try {
-      CollectionReference collectionRef =
-          _db.collection('organizations').doc(orgId).collection('devices');
-      QuerySnapshot querySnapshot = await collectionRef.get();
-      return querySnapshot.docs;
-    } catch (e) {
-      print('Error getting organization devices: $e');
-      return <DocumentSnapshot>[]; // Return an empty list in case of error
     }
   }
 
@@ -88,59 +74,61 @@ class FirestoreService {
       if (data == null) {
         return false;
       }
-      return data['isCheckedOut'] as bool? ?? false;
+      return data['isDeviceCheckedOut'] as bool? ?? false;
     }).handleError((e) {
       print('Error checking device data: $e');
       return false;
     });
   }
 
-  Stream<List<String>> getOrgMembersUidsStream(String? orgId) {
-    if (orgId == null) {
-      return Stream.value([]);
+  Future<List<DocumentSnapshot>> getOrgDevices(String orgId) async {
+    try {
+      CollectionReference collectionRef =
+          _db.collection('organizations').doc(orgId).collection('devices');
+      QuerySnapshot querySnapshot = await collectionRef.get();
+      return querySnapshot.docs;
+    } catch (e) {
+      print('Error getting organization devices: $e');
+      return <DocumentSnapshot>[]; // Return an empty list in case of error
     }
-    return FirebaseFirestore.instance
-        .collection('organizations')
-        .doc(orgId)
-        .collection('members')
-        .snapshots()
-        .map((querySnapshot) {
-      final documentUIDs = querySnapshot.docs.map((doc) => doc.id).toList();
-      return documentUIDs;
-    }).handleError((e) {
-      print('Error retrieving member UIDs: $e');
-      return <String>[]; // Return an empty list in case of error
-    });
   }
 
-  Stream<String> getMemberDisplayNameStream(
-      String? orgMembersUid, String? orgId) {
-    if (orgMembersUid == null || orgId == null) {
-      return Stream.value('');
+  Stream<List<DocumentSnapshot>> getOrgMembers(String orgId) {
+    try {
+      CollectionReference collectionRef =
+          _db.collection('organizations').doc(orgId).collection('members');
+      return collectionRef.snapshots().map((querySnapshot) {
+        return querySnapshot.docs;
+      });
+    } catch (e) {
+      print('Error getting organization members: $e');
+      return Stream.value(
+          <DocumentSnapshot>[]); // Return an empty list in case of error
     }
-    return _db
-        .collection('organizations')
-        .doc(orgId)
-        .collection('members')
-        .doc(orgMembersUid)
-        .snapshots()
-        .map((snapshot) {
-      return (snapshot.data()?['displayName'] ?? '') as String;
-    }).handleError((e) {
-      print('Error checking displayName: $e');
-      return '';
-    });
   }
 
-  Stream<String> getCurrentDisplayName(String? uid) {
-    if (uid == null) {
-      return Stream.value('');
+  Stream<DocumentSnapshot> getOrgMemberStream(
+      String orgId, String orgMemberId) {
+    try {
+      DocumentReference documentRef = _db
+          .collection('organizations')
+          .doc(orgId)
+          .collection('members')
+          .doc(orgMemberId);
+      return documentRef.snapshots();
+    } catch (e) {
+      print('Error getting org member: $e');
+      return Stream.error('Failed to get org member');
     }
-    return _db.collection('users').doc(uid).snapshots().map((snapshot) {
-      return (snapshot.data()?['displayName'] ?? '') as String;
-    }).handleError((e) {
-      print('Error getting current display name: $e');
-      return '';
-    });
+  }
+
+  Stream<DocumentSnapshot> getUserStream(String? uid) {
+    try {
+      DocumentReference documentRef = _db.collection('users').doc(uid);
+      return documentRef.snapshots();
+    } catch (e) {
+      print('Error getting user: $e');
+      return Stream.error('Failed to get user');
+    }
   }
 }

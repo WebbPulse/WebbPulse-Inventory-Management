@@ -53,7 +53,7 @@ class LandingView extends StatelessWidget {
                             theme: theme,
                             customCardLeading: Icon(Icons.login,
                                 color: theme.colorScheme.secondary),
-                            titleText: 'Register',
+                            customCardTitle: Text('Register'),
                             customCardTrailing: null,
                             onTapAction: () {
                               Navigator.pushNamed(
@@ -64,7 +64,7 @@ class LandingView extends StatelessWidget {
                             theme: theme,
                             customCardLeading: Icon(Icons.login,
                                 color: theme.colorScheme.secondary),
-                            titleText: 'Sign In',
+                            customCardTitle: Text('Sign In'),
                             customCardTrailing: null,
                             onTapAction: () {
                               Navigator.pushNamed(

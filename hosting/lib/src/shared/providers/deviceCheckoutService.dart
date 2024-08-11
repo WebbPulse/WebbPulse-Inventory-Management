@@ -31,26 +31,29 @@ class DeviceCheckoutService {
               .call({
             "deviceSerialNumber": deviceSerialNumber,
             "orgId": orgId,
-            "isCheckedOut": true,
+            "isDeviceCheckedOut": true,
           });
 
           await AsyncContextHelpers.showSnackBarIfMounted(
               context, 'Device added to organization and checked out!');
         } else {
           ///if device exists, check it in/out
-          bool isCheckedOut = await firestoreService
+          bool isDeviceCheckedOut = await firestoreService
               .isDeviceCheckedOutInFirestore(deviceSerialNumber, orgId);
           await firebaseFunctions
               .httpsCallable('update_device_checkout_status_callable')
               .call({
             "deviceSerialNumber": deviceSerialNumber,
             "orgId": orgId,
-            "isCheckedOut": !isCheckedOut,
+            "isDeviceCheckedOut": !isDeviceCheckedOut,
           });
 
           ///ensure context is mounted before showing snackbar
-          await AsyncContextHelpers.showSnackBarIfMounted(context,
-              isCheckedOut ? 'Device checked in!' : 'Device checked out!');
+          await AsyncContextHelpers.showSnackBarIfMounted(
+              context,
+              isDeviceCheckedOut
+                  ? 'Device checked in!'
+                  : 'Device checked out!');
         }
       } catch (e) {
         ///ensure context is mounted before showing snackbar

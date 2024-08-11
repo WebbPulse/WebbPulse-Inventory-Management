@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -11,18 +12,19 @@ class DevicesView extends StatelessWidget {
   DevicesView({super.key});
   static const routeName = '/devices';
 
-  final TextEditingController _searchController = TextEditingController();
   final ValueNotifier<String> _searchQuery = ValueNotifier<String>('');
 
   @override
   Widget build(BuildContext context) {
-    return Consumer3<OrgSelectorChangeNotifier, FirestoreService,
-        DeviceCheckoutService>(
-      builder: (context, orgSelectorProvider, firestoreService,
-          deviceCheckoutService, child) {
-        return FutureBuilder<List<DocumentSnapshot>>(
-            future: firestoreService
-                .getOrgDevices(orgSelectorProvider.selectedOrgId),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Devices'),
+      ),
+      drawer: const AuthedDrawer(),
+      body: Consumer2<OrgSelectorChangeNotifier, FirestoreService>(
+        builder: (context, orgSelectorProvider, firestoreService, child) {
+          return FutureBuilder<List<DocumentSnapshot>>(
+            future: firestoreService.getOrgDevices(orgSelectorProvider.orgId),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
@@ -31,76 +33,100 @@ class DevicesView extends StatelessWidget {
               }
               final List<DocumentSnapshot> devicesDocs = snapshot.data!;
 
-              return Scaffold(
-                appBar: AppBar(
-                  title: const Text('Devices'),
-                ),
-                drawer: const AuthedDrawer(),
-                body: Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: TextField(
-                        controller: _searchController,
-                        decoration: InputDecoration(
-                          labelText: 'Search by Serial',
-                          border: OutlineInputBorder(),
-                          suffixIcon: IconButton(
-                            icon: Icon(Icons.clear),
-                            onPressed: () {
-                              _searchController.clear();
-                              _searchQuery.value = '';
-                            },
-                          ),
-                        ),
-                        onChanged: (value) {
-                          _searchQuery.value = value;
-                        },
-                      ),
-                    ),
-                    const Center(child: Text('Device List')),
-                    Expanded(
-                      child: ValueListenableBuilder<String>(
-                        valueListenable: _searchQuery,
-                        builder: (context, query, child) {
-                          final filteredDevices = devicesDocs.where((doc) {
-                            final data = doc.data() as Map<String, dynamic>;
-                            final serial = data['deviceSerialNumber'] ?? '';
-                            return serial.contains(query);
-                          }).toList();
+              return Column(
+                children: [
+                  SearchTextField(searchQuery: _searchQuery),
+                  const Center(child: Text('Device List')),
+                  Expanded(
+                    child: ValueListenableBuilder<String>(
+                      valueListenable: _searchQuery,
+                      builder: (context, query, child) {
+                        final filteredDevices = devicesDocs.where((doc) {
+                          final data = doc.data() as Map<String, dynamic>;
+                          final serial = data['deviceSerialNumber'] ?? '';
+                          return serial.contains(query);
+                        }).toList();
 
-                          return filteredDevices.isNotEmpty
-                              ? SizedBox(
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.8,
-                                  child: ListView.builder(
-                                    physics: const BouncingScrollPhysics(),
-                                    itemCount: filteredDevices.length,
-                                    itemBuilder: (context, index) {
-                                      Map<String, dynamic> deviceData =
-                                          filteredDevices[index].data()
-                                              as Map<String, dynamic>;
-                                      final deviceId = deviceData['deviceId'];
-                                      final deviceSerialNumber =
-                                          deviceData['deviceSerialNumber'];
-                                      return DeviceCard(
-                                        deviceId: deviceId,
-                                        orgId:
-                                            orgSelectorProvider.selectedOrgId,
-                                        deviceSerialNumber: deviceSerialNumber,
-                                      );
-                                    },
-                                  ),
-                                )
-                              : const Center(child: Text('No devices found'));
-                        },
-                      ),
+                        return filteredDevices.isNotEmpty
+                            ? SizedBox(
+                                width: MediaQuery.of(context).size.width * 0.95,
+                                child: ListView.builder(
+                                  physics: const BouncingScrollPhysics(),
+                                  itemCount: filteredDevices.length,
+                                  itemBuilder: (context, index) {
+                                    Map<String, dynamic> deviceData =
+                                        filteredDevices[index].data()
+                                            as Map<String, dynamic>;
+                                    final deviceId = deviceData['deviceId'];
+                                    final deviceSerialNumber =
+                                        deviceData['deviceSerialNumber'];
+                                    return DeviceCard(
+                                      deviceId: deviceId,
+                                      orgId: orgSelectorProvider.orgId,
+                                      deviceSerialNumber: deviceSerialNumber,
+                                    );
+                                  },
+                                ),
+                              )
+                            : const Center(child: Text('No devices found'));
+                      },
                     ),
-                  ],
-                ),
+                  ),
+                ],
               );
-            });
-      },
+            },
+          );
+        },
+      ),
+    );
+  }
+}
+
+class SearchTextField extends StatefulWidget {
+  final ValueNotifier<String> searchQuery;
+
+  const SearchTextField({required this.searchQuery});
+
+  @override
+  _SearchTextFieldState createState() => _SearchTextFieldState();
+}
+
+class _SearchTextFieldState extends State<SearchTextField> {
+  late TextEditingController _searchController;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: TextField(
+        controller: _searchController,
+        decoration: InputDecoration(
+          labelText: 'Search by Serial',
+          border: OutlineInputBorder(),
+          suffixIcon: IconButton(
+            icon: Icon(Icons.clear),
+            onPressed: () {
+              _searchController.clear();
+              widget.searchQuery.value = '';
+            },
+          ),
+        ),
+        onChanged: (value) {
+          widget.searchQuery.value = value;
+        },
+      ),
     );
   }
 }
@@ -130,24 +156,76 @@ class DeviceCard extends StatelessWidget {
             } else if (snapshot.hasError) {
               return const Text('Error loading devices');
             }
-            final deviceIsCheckedOut = snapshot.data as bool;
+            final isDeviceCheckedOut = snapshot.data as bool;
 
             return CustomCard(
-                theme: theme,
-                customCardLeading:
-                    Icon(Icons.devices, color: theme.colorScheme.secondary),
-                titleText: deviceSerialNumber,
-                customCardTrailing: ElevatedButton(
-                  child: Text(deviceIsCheckedOut ? 'Check In' : 'Check Out'),
-                  onPressed: () {
-                    deviceCheckoutService.handleDeviceCheckout(
-                        context, deviceSerialNumber, orgId);
-                  },
-                ),
-                onTapAction: () {});
+              theme: theme,
+              customCardLeading:
+                  Icon(Icons.devices, color: theme.colorScheme.secondary),
+              customCardTitle: Text(deviceSerialNumber),
+              customCardTrailing: DeviceButton(
+                deviceSerialNumber: deviceSerialNumber,
+                isDeviceCheckedOut: isDeviceCheckedOut,
+              ),
+              onTapAction: () {},
+            );
           },
         );
       },
+    );
+  }
+}
+
+class DeviceButton extends StatefulWidget {
+  final String deviceSerialNumber;
+  final bool isDeviceCheckedOut;
+
+  const DeviceButton({
+    super.key,
+    required this.deviceSerialNumber,
+    required this.isDeviceCheckedOut,
+  });
+
+  @override
+  _DeviceButtonState createState() => _DeviceButtonState();
+}
+
+class _DeviceButtonState extends State<DeviceButton> {
+  var _isLoading = false;
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  void _onSubmit() async {
+    setState(() => _isLoading = true);
+    final deviceCheckoutService =
+        Provider.of<DeviceCheckoutService>(context, listen: false);
+    final orgId =
+        Provider.of<OrgSelectorChangeNotifier>(context, listen: false).orgId;
+    try {
+      await deviceCheckoutService.handleDeviceCheckout(
+        context,
+        widget.deviceSerialNumber,
+        orgId,
+      );
+    } catch (e) {
+      // Handle error if needed
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton.icon(
+      onPressed: _isLoading ? null : _onSubmit,
+      style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(16.0)),
+      icon: _isLoading
+          ? const CircularProgressIndicator()
+          : const Icon(Icons.login),
+      label: Text(widget.isDeviceCheckedOut ? 'Check In' : 'Check Out'),
     );
   }
 }

@@ -28,7 +28,7 @@ void main() async {
       ],
       child: Consumer<AuthenticationChangeNotifier>(
         builder: (context, authProvider, child) {
-          if (authProvider.loggedIn) {
+          if (authProvider.userLoggedIn) {
             /// If the user is logged in, show the AuthedApp
             return AuthedApp();
           } else {

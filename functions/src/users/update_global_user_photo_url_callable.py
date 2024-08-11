@@ -3,7 +3,7 @@ from src.shared.shared import https_fn, POSTcorsrules, Any, db
 
 
 @https_fn.on_call(cors=POSTcorsrules)
-def update_global_user_display_name_callable(req: https_fn.CallableRequest) -> Any:
+def update_global_user_photo_url_callable(req: https_fn.CallableRequest) -> Any:
     #create the user in firebase auth
     try:
         # Checking that the user is authenticated.
@@ -13,21 +13,21 @@ def update_global_user_display_name_callable(req: https_fn.CallableRequest) -> A
                                 message="The function must be called while authenticated.")
         
         # Extract parameters 
-        user_display_name = req.data["userDisplayName"]
+        user_photo_url = req.data["userPhotoURL"]
         uid = req.auth.uid
         # Checking attribute.
-        if not user_display_name:
+        if not user_photo_url:
             # Throwing an HttpsError so that the client gets the error details.
             raise https_fn.HttpsError(code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
-                                message='The function must be called with one argument: "DisplayName".')
+                                message='The function must be called with one argument: "userPhotoURL".')
 
         try:
             db.collection('users').document(uid).update({
-                'userDisplayName': user_display_name 
+                'userPhotoURL': user_photo_url 
             })
         except:
-            raise https_fn.HttpsError(code=https_fn.FunctionsErrorCode.UNKNOWN, message=f"Error updating user display name: {str(e)}")
-        return {"response": f"User display name updated to {user_display_name}"}
+            raise https_fn.HttpsError(code=https_fn.FunctionsErrorCode.UNKNOWN, message=f"Error updating user photo url: {str(e)}")
+        return {"response": f"User photo url updated to {user_photo_url}"}
     
     except https_fn.HttpsError as e:
         # Re-raise known HttpsErrors

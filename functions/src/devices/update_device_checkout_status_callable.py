@@ -13,10 +13,10 @@ def update_device_checkout_status_callable(req: https_fn.CallableRequest) -> Any
         # Extract parameters
         device_serial_number = req.data["deviceSerialNumber"]
         org_id = req.data["orgId"]
-        isCheckedOut = req.data["isCheckedOut"]
+        is_device_checked_out = req.data["isDeviceCheckedOut"]
         
         # Check if the serial, org_id, and isCheckedOut are provided and valid
-        if not device_serial_number or not org_id or isCheckedOut is None:
+        if not device_serial_number or not org_id or is_device_checked_out is None:
             raise https_fn.HttpsError(
                 code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
                 message='The function must be called with valid "serial", "org_id", and "isCheckedOut" arguments.'
@@ -27,7 +27,7 @@ def update_device_checkout_status_callable(req: https_fn.CallableRequest) -> Any
         if len(querySnapshot) > 0:
             docId = querySnapshot[0].id
             db.collection('organizations').document(org_id).collection('devices').document(docId).update({
-                'isCheckedOut': isCheckedOut,
+                'isDeviceCheckedOut': is_device_checked_out,
             })
         else:
             raise https_fn.HttpsError(

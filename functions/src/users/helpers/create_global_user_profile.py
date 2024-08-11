@@ -4,10 +4,11 @@ def create_global_user_profile(user):
     try:
         user_data = {
             'createdAt': firestore.SERVER_TIMESTAMP,
-            'email': user.email,
-            'orgIds': [],
+            'userEmail': user.email,
+            'userOrgIds': [],
             'uid': user.uid,
-            'displayName': user.email,
+            'userDisplayName': user.email,
+            'userPhotoURL': "",
         }
         db.collection('users').document(user.uid).set(user_data)
     except Exception as e:

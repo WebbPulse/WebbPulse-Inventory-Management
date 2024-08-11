@@ -8,20 +8,20 @@ class AuthenticationChangeNotifier extends ChangeNotifier {
     init();
   }
 
-  bool _loggedIn = false;
-  bool get loggedIn => _loggedIn;
+  bool _userLoggedIn = false;
+  bool get userLoggedIn => _userLoggedIn;
 
   String? _uid;
   String? get uid => _uid;
 
-  String? _email;
-  String? get email => _email;
+  String? _userEmail;
+  String? get userEmail => _userEmail;
 
-  bool _verified = false;
-  bool get verified => _verified;
+  bool _userVerified = false;
+  bool get userVerified => _userVerified;
 
-  String? _displayName;
-  String? get displayName => _displayName;
+  String? _userDisplayName;
+  String? get userDisplayName => _userDisplayName;
 
   Future<void> init() async {
     FirebaseUIAuth.configureProviders([
@@ -30,19 +30,19 @@ class AuthenticationChangeNotifier extends ChangeNotifier {
 
     FirebaseAuth.instance.authStateChanges().listen((user) {
       if (user != null) {
-        _loggedIn = true;
+        _userLoggedIn = true;
         _uid = user.uid;
-        _email = user.email;
-        _verified = user.emailVerified;
-        _displayName = user.displayName;
+        _userEmail = user.email;
+        _userVerified = user.emailVerified;
+        _userDisplayName = user.displayName;
       } else {
-        _loggedIn = false;
+        _userLoggedIn = false;
         _uid = null;
-        _email = null;
-        _verified = false;
-        _displayName = null;
+        _userEmail = null;
+        _userVerified = false;
+        _userDisplayName = null;
       }
-      print('Auth state changed: loggedIn=$_loggedIn, uid=$_uid');
+      print('Auth state changed: loggedIn=$_userLoggedIn, uid=$_uid');
       notifyListeners();
     });
   }
