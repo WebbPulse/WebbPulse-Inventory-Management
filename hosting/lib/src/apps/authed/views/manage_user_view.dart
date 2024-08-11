@@ -30,9 +30,8 @@ class ManageUserView extends StatelessWidget {
         ),
         body: orgSelectorProvider.orgId.isNotEmpty &&
                 orgMemberSelectorProvider.orgMemberId.isNotEmpty
-            ? StreamBuilder<DocumentSnapshot>(
-                stream: firestoreService.getOrgMemberStream(
-                    orgSelectorProvider.orgId,
+            ? StreamBuilder<DocumentSnapshot?>(
+                stream: firestoreService.getOrgMember(orgSelectorProvider.orgId,
                     orgMemberSelectorProvider.orgMemberId),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
@@ -137,8 +136,8 @@ class ManageUserView extends StatelessWidget {
                                       .titleLarge
                                       ?.copyWith(fontWeight: FontWeight.bold),
                                 ),
-                                FutureBuilder<List<DocumentSnapshot>>(
-                                  future: firestoreService.getOrgMemberDevices(
+                                StreamBuilder<List<DocumentSnapshot>>(
+                                  stream: firestoreService.getOrgMemberDevices(
                                       orgSelectorProvider.orgId,
                                       orgMemberSelectorProvider.orgMemberId),
                                   builder: (context, snapshot) {
