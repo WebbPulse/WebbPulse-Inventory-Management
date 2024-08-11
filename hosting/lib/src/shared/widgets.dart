@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import 'providers/firestoreService.dart';
 import 'providers/deviceCheckoutService.dart';
 import 'providers/orgSelectorChangeNotifier.dart';
+import 'providers/authenticationChangeNotifier.dart';
 
 import '../apps/authed/views/org_selection_view.dart';
 
@@ -361,11 +362,14 @@ class _DeviceCheckoutButtonState extends State<DeviceCheckoutButton> {
         Provider.of<DeviceCheckoutService>(context, listen: false);
     final orgId =
         Provider.of<OrgSelectorChangeNotifier>(context, listen: false).orgId;
+    final deviceCheckedOutBy =
+        Provider.of<AuthenticationChangeNotifier>(context, listen: false).uid;
     try {
       await deviceCheckoutService.handleDeviceCheckout(
         context,
         widget.deviceSerialNumber,
         orgId,
+        deviceCheckedOutBy!,
       );
     } catch (e) {
       // Handle error if needed
