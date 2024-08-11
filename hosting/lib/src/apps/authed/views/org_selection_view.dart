@@ -19,7 +19,7 @@ class OrgSelectionView extends StatelessWidget {
     return Consumer2<AuthenticationChangeNotifier, FirestoreService>(
       builder: (context, authProvider, firestoreService, child) =>
           StreamBuilder<List<String>>(
-        stream: firestoreService.orgsIdsStream(authProvider.uid),
+        stream: firestoreService.getUserOrgsIds(authProvider.uid),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -96,7 +96,7 @@ class OrgCard extends StatelessWidget {
     return Consumer2<OrgSelectorChangeNotifier, FirestoreService>(
       builder: (context, orgSelectorProvider, firestoreService, child) {
         return StreamBuilder(
-          stream: firestoreService.getOrgStream(orgId),
+          stream: firestoreService.getOrg(orgId),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());

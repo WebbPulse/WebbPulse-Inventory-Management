@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class FirestoreService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  Stream<DocumentSnapshot> getOrgStream(String orgId) {
+  Stream<DocumentSnapshot> getOrg(String orgId) {
     try {
       DocumentReference documentRef =
           _db.collection('organizations').doc(orgId);
@@ -14,7 +14,7 @@ class FirestoreService {
     }
   }
 
-  Stream<List<String>> orgsIdsStream(String? uid) {
+  Stream<List<String>> getUserOrgsIds(String? uid) {
     if (uid == null) {
       return Stream.value([]);
     }
@@ -59,26 +59,18 @@ class FirestoreService {
     }
   }
 
-  Stream<bool> deviceCheckoutStatusStream(String? deviceId, String? orgId) {
-    if (deviceId == null || orgId == null) {
-      return Stream.value(false);
+  Stream<DocumentSnapshot> getOrgDevice(String? deviceId, String? orgId) {
+    try {
+      DocumentReference documentRef = _db
+          .collection('organizations')
+          .doc(orgId)
+          .collection('devices')
+          .doc(deviceId);
+      return documentRef.snapshots();
+    } catch (e) {
+      print('Error getting organization: $e');
+      return Stream.error('Failed to get organization');
     }
-    return _db
-        .collection('organizations')
-        .doc(orgId)
-        .collection('devices')
-        .doc(deviceId)
-        .snapshots()
-        .map((snapshot) {
-      final data = snapshot.data();
-      if (data == null) {
-        return false;
-      }
-      return data['isDeviceCheckedOut'] as bool? ?? false;
-    }).handleError((e) {
-      print('Error checking device data: $e');
-      return false;
-    });
   }
 
   Future<List<DocumentSnapshot>> getOrgDevices(String orgId) async {
@@ -91,6 +83,21 @@ class FirestoreService {
       print('Error getting organization devices: $e');
       return <DocumentSnapshot>[]; // Return an empty list in case of error
     }
+  }
+
+  Stream<List<DocumentSnapshot>> getOrgMemberDevices(
+      String orgId, String orgMemberId) {
+    CollectionReference collectionRef =
+        _db.collection('organizations').doc(orgId).collection('devices');
+
+    return collectionRef
+        .where('deviceCheckedOutBy', isEqualTo: orgMemberId)
+        .snapshots()
+        .map((querySnapshot) => querySnapshot.docs)
+        .handleError((error) {
+      print('Error getting organization member devices: $error');
+      return <DocumentSnapshot>[]; // Return an empty list in case of error
+    });
   }
 
   Stream<List<DocumentSnapshot>> getOrgMembers(String orgId) {
@@ -107,8 +114,11 @@ class FirestoreService {
     }
   }
 
-  Stream<DocumentSnapshot> getOrgMemberStream(
-      String orgId, String orgMemberId) {
+  Stream<DocumentSnapshot?> getOrgMember(String orgId, String orgMemberId) {
+    if (orgMemberId.isEmpty) {
+      return Stream.value(null);
+    }
+
     try {
       DocumentReference documentRef = _db
           .collection('organizations')
@@ -122,7 +132,7 @@ class FirestoreService {
     }
   }
 
-  Stream<DocumentSnapshot> getUserStream(String? uid) {
+  Stream<DocumentSnapshot> getUser(String? uid) {
     try {
       DocumentReference documentRef = _db.collection('users').doc(uid);
       return documentRef.snapshots();
