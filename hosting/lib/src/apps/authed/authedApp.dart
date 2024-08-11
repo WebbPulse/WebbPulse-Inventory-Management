@@ -62,15 +62,15 @@ class AuthedApp extends StatelessWidget {
                 );
               }
 
-              if (orgSelectorProvider.selectedOrgId.isEmpty) {
+              if (orgSelectorProvider.orgId.isEmpty) {
                 return MaterialPageRoute<void>(
                   builder: (context) => const OrgSelectionView(),
                 );
               }
 
-              if (orgMemberSelectorProvider.selectedOrgMemberId.isNotEmpty) {
+              if (orgMemberSelectorProvider.orgMemberId.isNotEmpty) {
                 return MaterialPageRoute<void>(
-                  builder: (context) => ManageUserView(),
+                  builder: (context) => const ManageUserView(),
                 );
               }
 
