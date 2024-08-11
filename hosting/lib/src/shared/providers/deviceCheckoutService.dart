@@ -15,6 +15,7 @@ class DeviceCheckoutService {
     BuildContext context,
     String deviceSerialNumber,
     String orgId,
+    String deviceCheckedOutBy,
   ) async {
     if (deviceSerialNumber.isNotEmpty) {
       try {
@@ -40,13 +41,29 @@ class DeviceCheckoutService {
           ///if device exists, check it in/out
           bool isDeviceCheckedOut = await firestoreService
               .isDeviceCheckedOutInFirestore(deviceSerialNumber, orgId);
-          await firebaseFunctions
-              .httpsCallable('update_device_checkout_status_callable')
-              .call({
-            "deviceSerialNumber": deviceSerialNumber,
-            "orgId": orgId,
-            "isDeviceCheckedOut": !isDeviceCheckedOut,
-          });
+
+          if (isDeviceCheckedOut) {
+            ///if device is checked out, check it in
+            await firebaseFunctions
+                .httpsCallable('update_device_checkout_status_callable')
+                .call({
+              "deviceSerialNumber": deviceSerialNumber,
+              "orgId": orgId,
+              "isDeviceCheckedOut": false,
+              "deviceCheckedOutBy": '',
+            });
+          } else {
+            ///if device is checked in, check it out
+
+            await firebaseFunctions
+                .httpsCallable('update_device_checkout_status_callable')
+                .call({
+              "deviceSerialNumber": deviceSerialNumber,
+              "orgId": orgId,
+              "isDeviceCheckedOut": true,
+              "deviceCheckedOutBy": deviceCheckedOutBy,
+            });
+          }
 
           ///ensure context is mounted before showing snackbar
           await AsyncContextHelpers.showSnackBarIfMounted(

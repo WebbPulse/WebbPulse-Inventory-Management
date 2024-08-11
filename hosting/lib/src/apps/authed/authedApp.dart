@@ -15,7 +15,7 @@ import 'views/org_selection_view.dart';
 
 import 'views/settings_view.dart';
 import 'views/profile_view.dart';
-import 'views/devices_view.dart';
+import 'views/organization_devices_view.dart';
 import 'views/checkout_view.dart';
 import 'views/users_view.dart';
 import 'views/create_organization_view.dart';
@@ -83,9 +83,9 @@ class AuthedApp extends StatelessWidget {
                   return MaterialPageRoute<void>(
                     builder: (context) => const ProfileView(),
                   );
-                case DevicesView.routeName:
+                case OrganizationDevicesView.routeName:
                   return MaterialPageRoute<void>(
-                    builder: (context) => DevicesView(),
+                    builder: (context) => OrganizationDevicesView(),
                   );
                 case CheckoutView.routeName:
                   return MaterialPageRoute<void>(

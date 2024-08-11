@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../shared/providers/orgSelectorChangeNotifier.dart';
+import '../../../shared/providers/authenticationChangeNotifier.dart';
 import '../../../shared/providers/deviceCheckoutService.dart';
 import '../../../shared/widgets.dart';
 
@@ -54,11 +55,14 @@ class _CheckoutFormState extends State<CheckoutForm> {
         Provider.of<OrgSelectorChangeNotifier>(context, listen: false).orgId;
     final deviceCheckoutService =
         Provider.of<DeviceCheckoutService>(context, listen: false);
+    final deviceCheckedOutBy =
+        Provider.of<AuthenticationChangeNotifier>(context, listen: false).uid;
     try {
       await deviceCheckoutService.handleDeviceCheckout(
         context,
         _controller.text,
         orgId,
+        deviceCheckedOutBy!,
       );
     } catch (e) {
       // Handle error if needed

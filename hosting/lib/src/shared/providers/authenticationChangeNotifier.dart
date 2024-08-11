@@ -42,7 +42,6 @@ class AuthenticationChangeNotifier extends ChangeNotifier {
         _userVerified = false;
         _userDisplayName = null;
       }
-      print('Auth state changed: loggedIn=$_userLoggedIn, uid=$_uid');
       notifyListeners();
     });
   }

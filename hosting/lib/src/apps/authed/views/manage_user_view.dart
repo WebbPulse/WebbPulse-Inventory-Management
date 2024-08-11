@@ -4,10 +4,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:webbcheck/src/shared/providers/firestoreService.dart';
 import 'package:webbcheck/src/shared/providers/orgMemberSelectorChangeNotifier.dart';
 import 'package:webbcheck/src/shared/providers/orgSelectorChangeNotifier.dart';
+import 'package:webbcheck/src/shared/widgets.dart';
 
 class ManageUserView extends StatelessWidget {
   const ManageUserView({super.key});
   static const routeName = '/manage-user';
+
   @override
   Widget build(BuildContext context) {
     return Consumer3<OrgSelectorChangeNotifier, OrgMemberSelectorChangeNotifier,
@@ -73,7 +75,7 @@ class ManageUserView extends StatelessWidget {
                                             .onSecondary,
                                         fontWeight: FontWeight.bold),
                               ),
-                              SizedBox(height: 16),
+                              const SizedBox(height: 16),
                               Text(
                                 '${orgMember['orgMemberDisplayName']}',
                                 style: Theme.of(context)
@@ -84,7 +86,7 @@ class ManageUserView extends StatelessWidget {
                                             .colorScheme
                                             .onSecondary),
                               ),
-                              SizedBox(height: 16),
+                              const SizedBox(height: 16),
                               if (orgMember['orgMemberPhotoURL'] != null)
                                 CircleAvatar(
                                   radius: 75,
@@ -101,7 +103,7 @@ class ManageUserView extends StatelessWidget {
                                     color: Colors.white,
                                   ),
                                 ),
-                              SizedBox(height: 16),
+                              const SizedBox(height: 16),
                               Text(
                                 'Role:\n Lets say this is a role',
                                 style: Theme.of(context)
@@ -112,7 +114,7 @@ class ManageUserView extends StatelessWidget {
                                             .colorScheme
                                             .onSecondary),
                               ),
-                              SizedBox(height: 16),
+                              const SizedBox(height: 16),
                               ElevatedButton(
                                 onPressed: () {
                                   // Handle button press
@@ -122,15 +124,51 @@ class ManageUserView extends StatelessWidget {
                             ],
                           ),
                         ),
-                        const Expanded(
-                          flex: 4,
+                        Expanded(
                           child: Padding(
-                            padding: EdgeInsets.all(16.0),
+                            padding: const EdgeInsets.all(16.0),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                    'This is where the main content of the Manage User view will go.'),
+                                  'Checked Out Devices',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleLarge
+                                      ?.copyWith(fontWeight: FontWeight.bold),
+                                ),
+                                FutureBuilder<List<DocumentSnapshot>>(
+                                  future: firestoreService.getOrgMemberDevices(
+                                      orgSelectorProvider.orgId,
+                                      orgMemberSelectorProvider.orgMemberId),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.connectionState ==
+                                        ConnectionState.waiting) {
+                                      return const Center(
+                                          child: CircularProgressIndicator());
+                                    } else if (snapshot.hasError) {
+                                      return const Center(
+                                          child: Text('Error loading devices'));
+                                    }
+
+                                    // Handle case where snapshot.data might be null or empty
+                                    if (!snapshot.hasData ||
+                                        snapshot.data!.isEmpty) {
+                                      return const Center(
+                                          child: Text('No devices found'));
+                                    }
+
+                                    final List<DocumentSnapshot> devicesDocs =
+                                        snapshot.data!;
+
+                                    return Expanded(
+                                      // Ensure FutureBuilder's content gets proper layout constraints
+                                      child: DeviceList(
+                                        devicesDocs: devicesDocs,
+                                      ),
+                                    );
+                                  },
+                                ),
                               ],
                             ),
                           ),
