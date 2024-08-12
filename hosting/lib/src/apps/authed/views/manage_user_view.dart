@@ -205,7 +205,6 @@ class _UserRoleDropdownButtonState extends State<UserRoleDropdownButton> {
 
       AsyncContextHelpers.showSnackBarIfMounted(
           context, 'User role updated successfully');
-      AsyncContextHelpers.popContextIfMounted(context);
     } catch (e) {
       await AsyncContextHelpers.showSnackBarIfMounted(
           context, 'Failed to update user role: $e');
