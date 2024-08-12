@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:webbcheck/src/shared/providers/firestoreService.dart';
 import 'package:webbcheck/src/shared/providers/orgMemberSelectorChangeNotifier.dart';
 import 'package:webbcheck/src/shared/providers/orgSelectorChangeNotifier.dart';
 import 'package:webbcheck/src/shared/widgets.dart';
+import 'package:webbcheck/src/shared/helpers/asyncContextHelpers.dart';
 
 class ManageUserView extends StatelessWidget {
   const ManageUserView({super.key});
@@ -42,7 +44,7 @@ class ManageUserView extends StatelessWidget {
                   if (!snapshot.hasData || !snapshot.data!.exists) {
                     return const Center(child: Text('User not found'));
                   }
-                  final DocumentSnapshot orgMember = snapshot.data!;
+                  final DocumentSnapshot orgMemberData = snapshot.data!;
                   return LayoutBuilder(builder: (context, constraints) {
                     double containerWidth;
 
@@ -64,7 +66,7 @@ class ManageUserView extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Text(
-                                'User Information',
+                                '${orgMemberData['orgMemberDisplayName']}',
                                 style: Theme.of(context)
                                     .textTheme
                                     .titleLarge
@@ -75,22 +77,11 @@ class ManageUserView extends StatelessWidget {
                                         fontWeight: FontWeight.bold),
                               ),
                               const SizedBox(height: 16),
-                              Text(
-                                '${orgMember['orgMemberDisplayName']}',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleMedium
-                                    ?.copyWith(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .onSecondary),
-                              ),
-                              const SizedBox(height: 16),
-                              if (orgMember['orgMemberPhotoURL'] != null)
+                              if (orgMemberData['orgMemberPhotoURL'] != null)
                                 CircleAvatar(
                                   radius: 75,
                                   backgroundImage: NetworkImage(
-                                      orgMember['orgMemberPhotoURL']!),
+                                      orgMemberData['orgMemberPhotoURL']!),
                                 )
                               else
                                 const CircleAvatar(
@@ -103,23 +94,8 @@ class ManageUserView extends StatelessWidget {
                                   ),
                                 ),
                               const SizedBox(height: 16),
-                              Text(
-                                'Role:\n Lets say this is a role',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleMedium
-                                    ?.copyWith(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .onSecondary),
-                              ),
-                              const SizedBox(height: 16),
-                              ElevatedButton(
-                                onPressed: () {
-                                  // Handle button press
-                                },
-                                child: const Text('Manage Role'),
-                              ),
+                              UserRoleDropdownButton(
+                                  orgMemberData: orgMemberData),
                             ],
                           ),
                         ),
@@ -182,5 +158,94 @@ class ManageUserView extends StatelessWidget {
             : const Center(child: CircularProgressIndicator()),
       );
     });
+  }
+}
+
+class UserRoleDropdownButton extends StatefulWidget {
+  final DocumentSnapshot orgMemberData;
+
+  const UserRoleDropdownButton({required this.orgMemberData, Key? key})
+      : super(key: key);
+
+  @override
+  _UserRoleDropdownButtonState createState() => _UserRoleDropdownButtonState();
+}
+
+class _UserRoleDropdownButtonState extends State<UserRoleDropdownButton> {
+  String? selectedValue;
+  List<String> items = ['Org Admin', 'Org Member'];
+  var _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedValue = widget.orgMemberData['orgMemberRole'];
+  }
+
+  void dispose() {
+    super.dispose();
+  }
+
+  void _onChanged() async {
+    final orgSelectorProvider =
+        Provider.of<OrgSelectorChangeNotifier>(context, listen: false);
+    final firebaseFunctions =
+        Provider.of<FirebaseFunctions>(context, listen: false);
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      await firebaseFunctions.httpsCallable('update_user_role_callable').call({
+        "orgMemberRole": selectedValue,
+        "orgMemberId": widget.orgMemberData.id,
+        "orgId": orgSelectorProvider.orgId,
+      });
+
+      AsyncContextHelpers.showSnackBarIfMounted(
+          context, 'User role updated successfully');
+      AsyncContextHelpers.popContextIfMounted(context);
+    } catch (e) {
+      await AsyncContextHelpers.showSnackBarIfMounted(
+          context, 'Failed to update user role: $e');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: DropdownButton<String>(
+          value: selectedValue,
+          hint: Text('Role'),
+          elevation: 16,
+          style: Theme.of(context)
+              .textTheme
+              .labelSmall
+              ?.copyWith(fontWeight: FontWeight.bold),
+          icon: _isLoading
+              ? const CircularProgressIndicator()
+              : const Icon(Icons.arrow_drop_down),
+          onChanged: (String? newValue) {
+            setState(() {
+              selectedValue = newValue;
+            });
+            _isLoading ? null : _onChanged();
+          },
+          items: items.map<DropdownMenuItem<String>>((String value) {
+            return DropdownMenuItem<String>(
+              value: value,
+              child: Text(value),
+            );
+          }).toList(),
+        ),
+      ),
+    );
   }
 }
