@@ -7,16 +7,19 @@ from src.users.helpers.update_user_organizations import update_user_organization
 @https_fn.on_call(cors=POSTcorsrules)
 def create_user_callable(req: https_fn.CallableRequest) -> Any:
     #create the user in firebase auth
-    try:
-        # Checking that the user is authenticated.
+    try: 
+        user_email = req.data["userEmail"]
+        org_id = req.data["orgId"]
+        
+         # Checking that the user is authenticated.
         if req.auth is None:
         # Throwing an HttpsError so that the client gets the error details.
             raise https_fn.HttpsError(code=https_fn.FunctionsErrorCode.FAILED_PRECONDITION,
                                 message="The function must be called while authenticated.")
         
-        # Extract parameters 
-        user_email = req.data["userEmail"]
-        org_id = req.data["orgId"]
+        if auth.verify_id_token(req.auth.token).get(f"org_admin_{org_id}") is False:
+            raise https_fn.HttpsError(code=https_fn.FunctionsErrorCode.PERMISSION_DENIED,
+                                message="Unauthorized access.")
 
         # Checking attribute.
         if not user_email or not org_id:
