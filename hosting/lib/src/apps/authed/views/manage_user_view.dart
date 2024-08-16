@@ -173,7 +173,7 @@ class UserRoleDropdownButton extends StatefulWidget {
 
 class _UserRoleDropdownButtonState extends State<UserRoleDropdownButton> {
   String? selectedValue;
-  List<String> items = ['Org Admin', 'Org Member'];
+  List<String> items = ['admin', 'member'];
   var _isLoading = false;
 
   @override
