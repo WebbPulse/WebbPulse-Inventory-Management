@@ -205,8 +205,9 @@ class DeviceList extends StatelessWidget {
                 builder: (context, query, child) {
                   final filteredDevices = devicesDocs.where((doc) {
                     final data = doc.data() as Map<String, dynamic>;
-                    final serial = data['deviceSerialNumber'] ?? '';
-                    return serial.contains(query);
+                    final deviceSerialNumber = data['deviceSerialNumber'] ?? '';
+
+                    return deviceSerialNumber.contains(query);
                   }).toList();
 
                   return filteredDevices.isNotEmpty
@@ -219,13 +220,10 @@ class DeviceList extends StatelessWidget {
                               Map<String, dynamic> deviceData =
                                   filteredDevices[index].data()
                                       as Map<String, dynamic>;
-                              final deviceId = deviceData['deviceId'];
-                              final deviceSerialNumber =
-                                  deviceData['deviceSerialNumber'];
+
                               return DeviceCard(
-                                deviceId: deviceId,
+                                deviceData: deviceData,
                                 orgId: orgSelectorProvider.orgId,
-                                deviceSerialNumber: deviceSerialNumber,
                               );
                             },
                           ),
@@ -293,18 +291,18 @@ class _SerialSearchTextFieldState extends State<SerialSearchTextField> {
 class DeviceCard extends StatelessWidget {
   const DeviceCard({
     super.key,
-    required this.deviceId,
     required this.orgId,
-    required this.deviceSerialNumber,
+    required this.deviceData,
   });
 
-  final String deviceId;
+  final Map<String, dynamic> deviceData;
   final String orgId;
-  final String deviceSerialNumber;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final String deviceId = deviceData['deviceId'];
+    final String deviceSerialNumber = deviceData['deviceSerialNumber'];
     return Consumer2<FirestoreService, DeviceCheckoutService>(
       builder: (context, firestoreService, deviceCheckoutService, child) {
         return StreamBuilder(

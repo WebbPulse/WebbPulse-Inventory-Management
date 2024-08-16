@@ -64,8 +64,10 @@ class UsersView extends StatelessWidget {
                           final orgMemberEmail = data['orgMemberEmail'] ?? '';
                           final orgMemberDisplayName =
                               data['orgMemberDisplayName'] ?? '';
+                          final orgMemberRole = data['orgMemberRole'] ?? '';
                           return orgMemberEmail.contains(query) ||
-                              orgMemberDisplayName.contains(query);
+                              orgMemberDisplayName.contains(query) ||
+                              orgMemberRole.contains(query);
                         }).toList();
 
                         return filteredMemberDocs.isNotEmpty
@@ -246,6 +248,7 @@ class UserCard extends StatelessWidget {
             userData['orgMemberDisplayName'] ?? 'Display Name Loading...';
         String orgMemberEmail =
             userData['orgMemberEmail'] ?? 'Email Loading...';
+        String orgMemberRole = userData['orgMemberRole'] ?? 'Role Loading...';
 
         return CustomCard(
             theme: theme,
@@ -269,11 +272,10 @@ class UserCard extends StatelessWidget {
               ),
               Wrap(
                 children: [
-                  Text('Roles: ',
+                  Text('Role: ',
                       style: theme.textTheme.labelSmall
                           ?.copyWith(fontWeight: FontWeight.bold)),
-                  Text('no role logic implemented yet',
-                      style: theme.textTheme.labelSmall),
+                  Text(orgMemberRole, style: theme.textTheme.labelSmall),
                 ],
               ),
             ]),
