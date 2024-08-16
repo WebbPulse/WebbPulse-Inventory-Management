@@ -17,7 +17,7 @@ def create_user_callable(req: https_fn.CallableRequest) -> Any:
             raise https_fn.HttpsError(code=https_fn.FunctionsErrorCode.FAILED_PRECONDITION,
                                 message="The function must be called while authenticated.")
         
-        if auth.verify_id_token(req.auth.token).get(f"org_admin_{org_id}") is False:
+        if auth.verify_id_token(req.auth).get(f"org_admin_{org_id}") is False:
             raise https_fn.HttpsError(code=https_fn.FunctionsErrorCode.PERMISSION_DENIED,
                                 message="Unauthorized access.")
 
