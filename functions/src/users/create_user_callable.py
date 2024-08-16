@@ -6,30 +6,32 @@ from src.users.helpers.update_user_organizations import update_user_organization
 
 @https_fn.on_call(cors=POSTcorsrules)
 def create_user_callable(req: https_fn.CallableRequest) -> Any:
-    #create the user in firebase auth
+    # Create the user in Firebase Auth
     try: 
         user_email = req.data["userEmail"]
         org_id = req.data["orgId"]
         
-         # Checking that the user is authenticated.
+        # Checking that the user is authenticated.
         if req.auth is None:
-        # Throwing an HttpsError so that the client gets the error details.
+            # Throwing an HttpsError so that the client gets the error details.
             raise https_fn.HttpsError(code=https_fn.FunctionsErrorCode.FAILED_PRECONDITION,
-                                message="The function must be called while authenticated.")
+                                      message="The function must be called while authenticated.")
         
-        if req.auth.token.get(f"org_admin_{org_id}") is False:
+        # Check for the admin role
+        is_admin = req.auth.token.get(f"org_admin_{org_id}", None)
+        if not is_admin:
             raise https_fn.HttpsError(code=https_fn.FunctionsErrorCode.PERMISSION_DENIED,
-                                message=f"Unauthorized access. token: {req.auth.token}")
+                                      message=f"Unauthorized access. token: {req.auth.token}")
 
         # Checking attribute.
         if not user_email or not org_id:
             # Throwing an HttpsError so that the client gets the error details.
             raise https_fn.HttpsError(code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
-                                message='The function must be called with three arguments: "userCreationDisplayName", "userCreationEmail", and "organizationUid".')
+                                      message='The function must be called with two arguments: "userEmail" and "orgId".')
 
         if user_email.split("@")[1] not in allowed_domains:
             raise https_fn.HttpsError(code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
-                                message='Unauthorized email for new user')
+                                      message='Unauthorized email for new user')
 
         user = None
         response_message = ""
@@ -41,8 +43,8 @@ def create_user_callable(req: https_fn.CallableRequest) -> Any:
                 user = auth.get_user_by_email(user_email)
                 return True
                     
-            except UserNotFoundError:
-                #create the user in firebase auth
+            except auth.UserNotFoundError:
+                # Create the user in Firebase Auth
                 user = auth.create_user(
                     email=user_email,
                     email_verified=False,
@@ -60,7 +62,8 @@ def create_user_callable(req: https_fn.CallableRequest) -> Any:
             update_user_organizations(user.uid, org_id)
             response_message = f"User {user_email} created and added to organization."
 
-        return {"response": response_message}
+        return {"response": response_message,
+                "token": req.auth.token}
     
     except https_fn.HttpsError as e:
         # Re-raise known HttpsErrors
