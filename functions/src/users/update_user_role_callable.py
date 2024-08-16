@@ -32,7 +32,7 @@ def update_user_role_callable(req: https_fn.CallableRequest) -> Any:
                 auth.set_custom_user_claims(org_member_id, {f'org_admin_{org_id}': False, f'org_member_{org_id}': True})
         except:
             raise https_fn.HttpsError(code=https_fn.FunctionsErrorCode.UNKNOWN, message=f"Error updating user photo url: {str(e)}")
-        return {"response": f"User role updated to: {org_member_role}"}
+        return {"response": f"User role updated to: {org_member_role} token: {req.auth.token}"}
     
     except https_fn.HttpsError as e:
         # Re-raise known HttpsErrors
