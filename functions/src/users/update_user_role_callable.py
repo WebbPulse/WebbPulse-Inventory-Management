@@ -1,4 +1,4 @@
-from src.shared.shared import https_fn, POSTcorsrules, Any, db
+from src.shared.shared import https_fn, POSTcorsrules, Any, db, auth
 
 
 
@@ -26,6 +26,10 @@ def update_user_role_callable(req: https_fn.CallableRequest) -> Any:
             db.collection('organizations').document(org_id).collection('members').document(org_member_id).update({
                 'orgMemberRole': org_member_role 
             })
+            if org_member_role == "admin":
+                auth.set_custom_user_claims(org_member_id, {f'org_admin_{org_id}': True, f'org_member_{org_id}': True})
+            elif org_member_role == "member":
+                auth.set_custom_user_claims(org_member_id, {f'org_admin_{org_id}': False, f'org_member_{org_id}': True})
         except:
             raise https_fn.HttpsError(code=https_fn.FunctionsErrorCode.UNKNOWN, message=f"Error updating user photo url: {str(e)}")
         return {"response": f"User role updated to: {org_member_role}"}
