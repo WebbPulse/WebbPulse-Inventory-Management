@@ -32,7 +32,7 @@ class AuthedApp extends StatelessWidget {
       DeviceCheckoutService(
           firestoreService: firestoreService,
           firebaseFunctions: firebaseFunctions);
-
+  
   @override
   Widget build(BuildContext context) {
     return MultiProvider(

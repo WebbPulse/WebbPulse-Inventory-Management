@@ -27,7 +27,7 @@ def update_user_role_callable(req: https_fn.CallableRequest) -> Any:
                 message='The function must be called with the following arguments: orgId, orgMemberId, orgMemberRole'
             )
 
-        # Update role in Firestore
+        # Update role in Firestoreß
         db.collection('organizations').document(org_id).collection('members').document(org_member_id).update({
             'orgMemberRole': org_member_role 
         })
@@ -46,6 +46,8 @@ def update_user_role_callable(req: https_fn.CallableRequest) -> Any:
         
         # Set the updated custom claims
         auth.set_custom_user_claims(org_member_id, custom_claims)
+
+        auth.revoke_refresh_tokens(org_member_id)
         
         return {"response": f"User role updated to: {org_member_role} token: {custom_claims}"}
     

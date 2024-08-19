@@ -86,6 +86,10 @@ class ProfileView extends StatelessWidget {
                       );
                     },
                   ),
+                  SignedOutAction( (context) 
+                  {
+                    authenticationChangeNotifier.setUserWasLoggedIn(false);
+                  }),
                 ],
                 providers: [
                   EmailAuthProvider(),
