@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:webbcheck/src/shared/providers/authenticationChangeNotifier.dart';
 
 import '../../shared/providers/settingsChangeNotifier.dart';
-
+import 'views/user_session_revoked_view.dart';
 import 'views/landing_view.dart';
 import 'views/register_view.dart';
 import 'views/signin_view.dart';
@@ -15,14 +16,19 @@ class NonAuthedApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<SettingsChangeNotifier>(
-      builder: (context, settingsProvider, child) => MaterialApp(
+    return Consumer2<AuthenticationChangeNotifier,SettingsChangeNotifier>(
+      builder: (context, authenticationChangeNotifier, settingsProvider, child) => MaterialApp(
         restorationScopeId: 'nonauthedapp',
         title: 'WebbPulse Inventory Management',
         theme: ThemeData(),
         darkTheme: ThemeData.dark(),
         themeMode: settingsProvider.themeMode,
         onGenerateRoute: (RouteSettings routeSettings) {
+          if (authenticationChangeNotifier.userWasLoggedIn == true) {
+                return MaterialPageRoute<void>(
+                  builder: (context) => const UserSessionRevokedView(),
+                );
+              }
           switch (routeSettings.name) {
             case RegisterView.routeName:
               return MaterialPageRoute<void>(
