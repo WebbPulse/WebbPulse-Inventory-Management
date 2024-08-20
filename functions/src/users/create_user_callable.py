@@ -17,16 +17,6 @@ def create_user_callable(req: https_fn.CallableRequest) -> Any:
             raise https_fn.HttpsError(code=https_fn.FunctionsErrorCode.FAILED_PRECONDITION,
                                       message="The function must be called while authenticated.")
         
-        # Check if the token is valid based on the revokeTime custom claim
-        auth_time = req.auth.token.get('auth_time', 0)  # auth_time in seconds
-        revoke_time = req.auth.token.get('revokeTime', 0)  # revokeTime in seconds
-        
-        if revoke_time < auth_time:
-            raise https_fn.HttpsError(
-                code=https_fn.FunctionsErrorCode.UNAUTHENTICATED,
-                message="The session has been revoked. Please sign in again."
-            )
-        
         # Check for the admin role
         is_admin = req.auth.token.get(f"org_admin_{org_id}", None)
         if not is_admin:
