@@ -1,4 +1,5 @@
-from src.shared.shared import https_fn, POSTcorsrules, Any, db, auth
+from src.shared.shared import https_fn, POSTcorsrules, Any, db, auth, time
+
 
 
 
@@ -43,13 +44,19 @@ def update_user_role_callable(req: https_fn.CallableRequest) -> Any:
         elif org_member_role == "member":
             custom_claims.pop(f'org_admin_{org_id}', None)  # Remove the admin claim
             custom_claims[f'org_member_{org_id}'] = True
+
+        # Add a revokeTime claim to force token invalidation
+        revoke_time = int(time.time())  # Current timestamp in seconds
+        custom_claims['revokeTime'] = revoke_time
+        
         
         # Set the updated custom claims
         auth.set_custom_user_claims(org_member_id, custom_claims)
-
+        # Revoke the refresh tokens to ensure new tokens will include the updated claims
         auth.revoke_refresh_tokens(org_member_id)
         
-        return {"response": f"User role updated to: {org_member_role} token: {custom_claims}"}
+        
+        return {"response": f"User role updated to: {org_member_role} token: {req.auth.token}"}
     
     except Exception as e:
         raise https_fn.HttpsError(

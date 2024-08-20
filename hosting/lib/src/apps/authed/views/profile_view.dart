@@ -35,44 +35,15 @@ class ProfileView extends StatelessWidget {
                 return const Center(child: Text('User not found'));
               }
               final DocumentSnapshot user = snapshot.data!;
-              if (user['userPhotoURL'] == '') {
-                return ProfileScreen(
-                  actions: [
-                    DisplayNameChangedAction(
-                      (context, user, userDisplayName) async {
-                        await firebaseFunctions
-                            .httpsCallable(
-                                'update_global_user_display_name_callable')
-                            .call(
-                          {
-                            'userDisplayName': userDisplayName,
-                          },
-                        );
-                      },
-                    ),
-                  ],
-                  providers: [
-                    EmailAuthProvider(),
-                  ],
-                  children: [
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                        child: const Text('Change Profile Picture'),
-                        onPressed: () {
-                          showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return ChangeProfilePictureAlertDialog();
-                              });
-                        }),
-                  ],
-                );
-              }
+              final bool hasPhoto = user['userPhotoURL'] != '';
+
               return ProfileScreen(
-                avatar: CircleAvatar(
-                  radius: 75,
-                  backgroundImage: NetworkImage(user['userPhotoURL']),
-                ),
+                avatar: hasPhoto
+                    ? CircleAvatar(
+                        radius: 75,
+                        backgroundImage: NetworkImage(user['userPhotoURL']),
+                      )
+                    : null,
                 actions: [
                   DisplayNameChangedAction(
                     (context, user, userDisplayName) async {
@@ -86,8 +57,7 @@ class ProfileView extends StatelessWidget {
                       );
                     },
                   ),
-                  SignedOutAction( (context) 
-                  {
+                  SignedOutAction((context) {
                     authenticationChangeNotifier.setUserWasLoggedIn(false);
                   }),
                 ],
@@ -97,15 +67,14 @@ class ProfileView extends StatelessWidget {
                 children: [
                   const SizedBox(height: 16),
                   ElevatedButton(
-                    child: const Text('Change Profile Picture'),
-                    onPressed: () {
-                      showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return ChangeProfilePictureAlertDialog();
-                          });
-                    },
-                  ),
+                      child: const Text('Change Profile Picture'),
+                      onPressed: () {
+                        showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return ChangeProfilePictureAlertDialog();
+                            });
+                      }),
                 ],
               );
             }),
