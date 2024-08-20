@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_functions/cloud_functions.dart';
+
 import '../../shared/providers/authenticationChangeNotifier.dart';
 
 import '../../shared/providers/settingsChangeNotifier.dart';
@@ -32,7 +33,7 @@ class AuthedApp extends StatelessWidget {
       DeviceCheckoutService(
           firestoreService: firestoreService,
           firebaseFunctions: firebaseFunctions);
-  
+
   @override
   Widget build(BuildContext context) {
     return MultiProvider(

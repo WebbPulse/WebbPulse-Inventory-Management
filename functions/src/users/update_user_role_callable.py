@@ -49,7 +49,8 @@ def update_user_role_callable(req: https_fn.CallableRequest) -> Any:
 
         auth.revoke_refresh_tokens(org_member_id)
         
-        return {"response": f"User role updated to: {org_member_role} token: {custom_claims}"}
+        
+        return {"response": f"User role updated to: {org_member_role} token: {req.auth.token}"}
     
     except Exception as e:
         raise https_fn.HttpsError(

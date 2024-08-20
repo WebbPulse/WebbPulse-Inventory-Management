@@ -36,7 +36,7 @@ class AuthenticationChangeNotifier extends ChangeNotifier {
     ]);
 
     FirebaseAuth.instance.authStateChanges().listen((user) {
-      /// user IS NOT logged and 
+      /// user IS NOT logged and
       /// WAS logged in previously
       if (user == null && _userWasLoggedIn) {
         _userLoggedIn = false;
@@ -45,6 +45,7 @@ class AuthenticationChangeNotifier extends ChangeNotifier {
         _userVerified = false;
         _userDisplayName = null;
       }
+
       /// user IS logged in
       else if (user != null) {
         _userLoggedIn = true;
@@ -52,8 +53,11 @@ class AuthenticationChangeNotifier extends ChangeNotifier {
         _userEmail = user.email;
         _userVerified = user.emailVerified;
         _userDisplayName = user.displayName;
-        _userWasLoggedIn = true; /// mark the user as having been logged in previously
-      } 
+        _userWasLoggedIn = true;
+
+        /// mark the user as having been logged in previously
+      }
+
       /// user IS NOT logged in and
       /// WAS NOT logged in previously
       else {
@@ -63,11 +67,7 @@ class AuthenticationChangeNotifier extends ChangeNotifier {
         _userVerified = false;
         _userDisplayName = null;
       }
-
-      print('User was logged in: $_userWasLoggedIn');
       notifyListeners();
     });
   }
-  
 }
-
