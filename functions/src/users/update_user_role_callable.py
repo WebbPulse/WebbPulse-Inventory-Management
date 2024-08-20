@@ -44,10 +44,11 @@ def update_user_role_callable(req: https_fn.CallableRequest) -> Any:
         elif org_member_role == "member":
             custom_claims.pop(f'org_admin_{org_id}', None)  # Remove the admin claim
             custom_claims[f'org_member_{org_id}'] = True
-
-        # Add a revokeTime claim to force token invalidation
-        revoke_time = int(time.time())  # Current timestamp in seconds
-        custom_claims['revokeTime'] = revoke_time
+        else:
+            raise https_fn.HttpsError(
+                code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
+                message='Invalid role'
+            )
         
         
         # Set the updated custom claims
