@@ -10,8 +10,7 @@ service cloud.firestore {
       }
 
       function isTokenValid() {
-        // Ensure that the token's auth_time is after the revokeTime
-        return request.auth.token.auth_time > request.auth.token.revokeTime;
+        return request.auth.token.auth_time > request.auth.token.revokeTime || !request.auth.token.revokeTime;
       }
     }
   }
