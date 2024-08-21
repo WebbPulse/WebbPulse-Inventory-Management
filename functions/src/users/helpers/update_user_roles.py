@@ -1,6 +1,11 @@
 from src.shared.shared import https_fn, db, auth, time
 
 def update_user_roles(org_member_id, org_member_role, org_id):
+            # Update role in Firestore
+            db.collection('organizations').document(org_id).collection('members').document(org_member_id).update({
+                'orgMemberRole': org_member_role 
+            })
+            
             # Retrieve existing custom claims
             user = auth.get_user(org_member_id)
             
