@@ -18,6 +18,12 @@ def update_user_roles(org_member_id, org_member_role, org_id, revoke_tokens):
             message='Custom claims are not set for the user.'
         ) 
 
+    if custom_claims:
+        raise https_fn.HttpsError(
+            code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
+            message=f'Custom claims:{custom_claims}.'
+        )
+
     # Prepare the claims to update
     if org_member_role == "admin":
         custom_claims[f'org_admin_{org_id}'] = True
