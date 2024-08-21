@@ -9,20 +9,7 @@ def update_user_roles(org_member_id, org_member_role, org_id, revoke_tokens):
     
     # Retrieve existing custom claims
     user = auth.get_user(org_member_id)
-    custom_claims = user.custom_claims
-
-    # Raise an exception if custom_claims is None
-    if custom_claims is None:
-        raise https_fn.HttpsError(
-            code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
-            message='Custom claims are not set for the user.'
-        ) 
-
-    if custom_claims:
-        raise https_fn.HttpsError(
-            code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
-            message=f'Custom claims:{custom_claims}.'
-        )
+    custom_claims = user.custom_claims or {}
 
     # Prepare the claims to update
     if org_member_role == "admin":
