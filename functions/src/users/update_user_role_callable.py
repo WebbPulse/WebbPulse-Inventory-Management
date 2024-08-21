@@ -1,4 +1,4 @@
-from src.shared.shared import https_fn, POSTcorsrules, Any, db, auth, time
+from src.shared.shared import https_fn, POSTcorsrules, Any, db, auth, time, firestore
 
 
 
@@ -55,6 +55,10 @@ def update_user_role_callable(req: https_fn.CallableRequest) -> Any:
         auth.set_custom_user_claims(org_member_id, custom_claims)
         # Revoke the refresh tokens to ensure new tokens will include the updated claims
         auth.revoke_refresh_tokens(org_member_id)
+        # Mark metadata revoke time in firestore
+        db.collection('usersMetadata').document(org_member_id).update({
+            'mostRecentTokenRevokeTime': time.time()
+        })
         
         
         return {"response": f"User role updated to: {org_member_role} token: {req.auth.token}"}
