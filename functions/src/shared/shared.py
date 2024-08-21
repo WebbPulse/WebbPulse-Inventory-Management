@@ -22,8 +22,10 @@ def check_user_token_current(req: https_fn.CallableRequest):
     
     mostRecentTokenRevokeTime = user_metadata['mostRecentTokenRevokeTime']
 
+    
+
     # Check if the user token is current
-    if req.auth.auth_time is None or req.auth.auth_time < mostRecentTokenRevokeTime:
+    if req.auth.get('auth_time') < mostRecentTokenRevokeTime:
         raise https_fn.HttpsError(
             code=https_fn.FunctionsErrorCode.FAILED_PRECONDITION,
             message="The function must be called with a valid token."
