@@ -1,4 +1,4 @@
-from src.shared.shared import https_fn, POSTcorsrules, Any, db
+from src.shared.shared import https_fn, POSTcorsrules, Any, db, check_user_is_authed, check_user_token_current
 
 
 
@@ -6,15 +6,14 @@ from src.shared.shared import https_fn, POSTcorsrules, Any, db
 def update_global_user_photo_url_callable(req: https_fn.CallableRequest) -> Any:
     #create the user in firebase auth
     try:
-        # Checking that the user is authenticated.
-        if req.auth is None:
-        # Throwing an HttpsError so that the client gets the error details.
-            raise https_fn.HttpsError(code=https_fn.FunctionsErrorCode.FAILED_PRECONDITION,
-                                message="The function must be called while authenticated.")
-        
-        # Extract parameters 
+        #Extract parameters 
         user_photo_url = req.data["userPhotoURL"]
         uid = req.auth.uid
+        
+        # Check if the user is authenticated
+        check_user_is_authed(req)
+        check_user_token_current(req)
+        
         # Checking attribute.
         if not user_photo_url:
             # Throwing an HttpsError so that the client gets the error details.

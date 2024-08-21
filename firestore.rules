@@ -6,11 +6,11 @@ service cloud.firestore {
     // Function to check if the user's token is still valid
     function hasValidToken() {
       // Check if revokeTime exists in the metadata and validate the auth_time against it
-      let revokeTime = get(/databases/$(database)/documents/usersMetadata/$(request.auth.uid)).data.revokeTime;
-      return revokeTime == null || request.auth.token.auth_time > revokeTime;
+      let mostRecentTokenRevokeTime = get(/databases/$(database)/documents/usersMetadata/$(request.auth.uid)).data.mostRecentTokenRevokeTime;
+      return request.auth.token.auth_time > mostRecentTokenRevokeTime;
     }
     // Function to check if the user is authenticated and accessing their own data
-    function isAuthenticatedUser() {
+    function isAuthenticated() {
       return request.auth != null;
     }
     // Function to check if the user is the owner of the document (accessing their own data)
@@ -19,20 +19,22 @@ service cloud.firestore {
     }
 
     // Rule for the metadata collection
-    match /metadata/{userId} {
-      allow read: if isAuthenticatedUser() && isOwner(userId);
+    match /usersMetadata/{userId} {
+      allow read: if isAuthenticated() && isOwner(userId);
       allow write: if false;  // Disallow any client-side writes
     }
     
     // Rule for the users collection
     match /users/{userId} {
-      allow read, write: if isAuthenticatedUser() && hasValidToken() && isOwner(userId);
+      allow read: if isAuthenticated() && hasValidToken() && isOwner(userId);
+      allow write: if false; // Disallow any client-side writes
     }
     // Match for the organizations collection
     match /organizations/{orgId}/{document=**} {
       // Allow read and write access if the user is an authenticated member of the organization
-      allow read, write: if isAuthenticatedUser() && isOrgMember(orgId) && hasValidToken();
-
+      allow read: if isAuthenticated() && isOrgMember(orgId) && hasValidToken();
+			allow write: if false; // Disallow any client-side writes
+      
       // Function to check if the user is a member of the organization
       function isOrgMember(orgId) {
         // Check if the user is listed as a member in the organization document

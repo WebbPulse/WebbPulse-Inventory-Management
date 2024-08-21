@@ -1,21 +1,18 @@
-from src.shared.shared import POSTcorsrules, db, firestore, https_fn, Any
+from src.shared.shared import POSTcorsrules, db, firestore, https_fn, Any, check_user_is_org_member, check_user_is_authed, check_user_token_current
 
 @https_fn.on_call(cors=POSTcorsrules)
 def update_device_checkout_status_callable(req: https_fn.CallableRequest) -> Any:
     try:
-        # Check if the user is authenticated
-        if req.auth is None:
-            raise https_fn.HttpsError(
-                code=https_fn.FunctionsErrorCode.FAILED_PRECONDITION,
-                message="The function must be called while authenticated."
-            )
-
+        org_id = req.data["orgId"]
         # Extract parameters
         device_serial_number = req.data["deviceSerialNumber"]
-        org_id = req.data["orgId"]
         is_device_checked_out = req.data["isDeviceCheckedOut"]
         deviceCheckedOutBy = req.data["deviceCheckedOutBy"]
         
+        check_user_is_authed(req)
+        check_user_token_current(req)
+        check_user_is_org_member(req, org_id)
+
         # Check if the serial, org_id, and isCheckedOut are provided and valid
         if not device_serial_number or not org_id or is_device_checked_out is None:
             raise https_fn.HttpsError(
