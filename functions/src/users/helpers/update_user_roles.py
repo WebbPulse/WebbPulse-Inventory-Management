@@ -1,4 +1,4 @@
-from shared.shared import https_fn, db, auth, time
+from src.shared.shared import https_fn, db, auth, time
 
 def update_user_roles(org_member_id, org_member_role, org_id):
             # Retrieve existing custom claims
