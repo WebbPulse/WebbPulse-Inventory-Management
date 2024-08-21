@@ -64,6 +64,7 @@ class _CreateOrganizationFormState extends State<CreateOrganizationForm> {
           "orgName": orgName,
         });
 
+        /// Refresh the user's ID token to get the roles for the newly created organization
         await firebaseAuth.user!.getIdToken(true);
 
         AsyncContextHelpers.showSnackBarIfMounted(

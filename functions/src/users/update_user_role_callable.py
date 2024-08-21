@@ -24,8 +24,8 @@ def update_user_role_callable(req: https_fn.CallableRequest) -> Any:
                 code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
                 message='The function must be called with the following arguments: orgId, orgMemberId, orgMemberRole'
             )
-
-        update_user_roles(org_member_id, org_member_role, org_id)
+        # Update user role, true at the end means we revoke the existing refresh token
+        update_user_roles(org_member_id, org_member_role, org_id, True)
 
         return {"response": f"User role updated to: {org_member_role}"}
     except https_fn.HttpsError as e:
