@@ -24,7 +24,7 @@ def update_user_role_callable(req: https_fn.CallableRequest) -> Any:
                 message='The function must be called with the following arguments: orgId, orgMemberId, orgMemberRole'
             )
 
-        # Update role in Firestoreß
+        # Update role in Firestore
         db.collection('organizations').document(org_id).collection('members').document(org_member_id).update({
             'orgMemberRole': org_member_role 
         })
@@ -58,7 +58,9 @@ def update_user_role_callable(req: https_fn.CallableRequest) -> Any:
         
         
         return {"response": f"User role updated to: {org_member_role}"}
-    
+    except https_fn.HttpsError as e:
+        # Re-raise known HttpsErrors
+        raise e
     except Exception as e:
         raise https_fn.HttpsError(
             code=https_fn.FunctionsErrorCode.UNKNOWN,
