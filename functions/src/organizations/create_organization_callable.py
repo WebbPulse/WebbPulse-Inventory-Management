@@ -1,22 +1,22 @@
-from src.shared.shared import POSTcorsrules, db, firestore, https_fn, Any
+from src.shared.shared import POSTcorsrules, db, firestore, https_fn, Any, check_user_is_authed, check_user_token_current
 from src.users.helpers.add_user_to_organization import add_user_to_organization
 from src.users.helpers.update_user_organizations import update_user_organizations
 
 @https_fn.on_call(cors=POSTcorsrules)
 def create_organization_callable(req: https_fn.CallableRequest) -> Any:
     try:
-        # Check if the user is authenticated
-        if req.auth is None:
-            raise https_fn.HttpsError(
-                code=https_fn.FunctionsErrorCode.FAILED_PRECONDITION,
-                message="The function must be called while authenticated."
-            )
-
+        
         # Extract parameters
         org_name = req.data["orgName"]
         uid = req.auth.uid
         org_member_display_name = req.auth.token.get("name", "")
         org_member_email = req.auth.token.get("email", "")
+        
+        # Check if the user is authenticated
+        check_user_is_authed(req)
+        check_user_token_current(req)
+
+        
 
         # Check if the organization_creation_name is provided and valid
         if not org_name:

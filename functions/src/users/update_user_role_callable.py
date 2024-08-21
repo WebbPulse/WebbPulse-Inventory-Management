@@ -1,4 +1,4 @@
-from src.shared.shared import https_fn, POSTcorsrules, Any, db, auth, time, firestore
+from src.shared.shared import https_fn, POSTcorsrules, Any, db, auth, time, firestore, check_user_is_org_admin, check_user_is_authed, check_user_token_current
 
 
 
@@ -7,18 +7,14 @@ from src.shared.shared import https_fn, POSTcorsrules, Any, db, auth, time, fire
 def update_user_role_callable(req: https_fn.CallableRequest) -> Any:
     # Create the user in Firebase Auth
     try:
-        # Checking that the user is authenticated.
-        if req.auth is None:
-            # Throwing an HttpsError so that the client gets the error details.
-            raise https_fn.HttpsError(
-                code=https_fn.FunctionsErrorCode.FAILED_PRECONDITION,
-                message="The function must be called while authenticated."
-            )
-        
         # Extract parameters
         org_id = req.data["orgId"]
         org_member_id = req.data["orgMemberId"]
         org_member_role = req.data["orgMemberRole"]
+        
+        check_user_is_authed(req)
+        check_user_token_current(req)
+        check_user_is_org_admin(req, org_id)
         
         # Checking attribute.
         if not org_id or not org_member_id or not org_member_role:
@@ -61,7 +57,7 @@ def update_user_role_callable(req: https_fn.CallableRequest) -> Any:
         })
         
         
-        return {"response": f"User role updated to: {org_member_role} token: {req.auth.token}"}
+        return {"response": f"User role updated to: {org_member_role}"}
     
     except Exception as e:
         raise https_fn.HttpsError(

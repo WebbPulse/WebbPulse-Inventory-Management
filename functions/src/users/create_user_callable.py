@@ -1,4 +1,4 @@
-from src.shared.shared import auth, https_fn, POSTcorsrules, allowed_domains, Any, UserNotFoundError
+from src.shared.shared import auth, https_fn, POSTcorsrules, allowed_domains, Any, UserNotFoundError, check_user_is_org_admin, check_user_is_authed, check_user_token_current
 from src.users.helpers.create_global_user_profile import create_global_user_profile
 from src.users.helpers.add_user_to_organization import add_user_to_organization
 from src.users.helpers.update_user_organizations import update_user_organizations
@@ -11,17 +11,9 @@ def create_user_callable(req: https_fn.CallableRequest) -> Any:
         user_email = req.data["userEmail"]
         org_id = req.data["orgId"]
         
-        # Checking that the user is authenticated.
-        if req.auth is None:
-            # Throwing an HttpsError so that the client gets the error details.
-            raise https_fn.HttpsError(code=https_fn.FunctionsErrorCode.FAILED_PRECONDITION,
-                                      message="The function must be called while authenticated.")
-        
-        # Check for the admin role
-        is_admin = req.auth.token.get(f"org_admin_{org_id}", None)
-        if not is_admin:
-            raise https_fn.HttpsError(code=https_fn.FunctionsErrorCode.PERMISSION_DENIED,
-                                      message=f"Unauthorized access.")
+        check_user_is_authed(req)
+        check_user_token_current(req)
+        check_user_is_org_admin(req, org_id)
 
         # Checking attribute.
         if not user_email or not org_id:
