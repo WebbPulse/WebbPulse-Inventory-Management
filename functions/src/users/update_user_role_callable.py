@@ -27,7 +27,7 @@ def update_user_role_callable(req: https_fn.CallableRequest) -> Any:
         # Update user role, true at the end means we revoke the existing refresh token
         update_user_roles(org_member_id, org_member_role, org_id, True)
 
-        return {"response": f"User role updated to: {org_member_role}"}
+        return {"response": f"User role updated to: {org_member_role}, token: {req.auth.token}"}
     except https_fn.HttpsError as e:
         # Re-raise known HttpsErrors
         raise e
