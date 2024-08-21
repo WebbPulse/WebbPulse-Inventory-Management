@@ -6,7 +6,7 @@ service cloud.firestore {
     // Function to check if the user's token is still valid
     function hasValidToken() {
       // Check if revokeTime exists in the metadata and validate the auth_time against it
-      let revokeTime = get(/databases/$(database)/documents/metadata/$(request.auth.uid)).data.revokeTime;
+      let revokeTime = get(/databases/$(database)/documents/usersMetadata/$(request.auth.uid)).data.revokeTime;
       return revokeTime == null || request.auth.token.auth_time > revokeTime;
     }
     // Function to check if the user is authenticated and accessing their own data
@@ -29,7 +29,7 @@ service cloud.firestore {
       allow read, write: if isAuthenticatedUser() && hasValidToken() && isOwner(userId);
     }
     // Match for the organizations collection
-    match /organizations/{orgId} {
+    match /organizations/{orgId}/{document=**} {
       // Allow read and write access if the user is an authenticated member of the organization
       allow read, write: if isAuthenticatedUser() && isOrgMember(orgId) && hasValidToken();
 

@@ -47,7 +47,7 @@ class UsersView extends StatelessWidget {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
               } else if (snapshot.hasError) {
-                return const Center(child: Text('Error loading devices'));
+                return const Center(child: Text('Error loading users'));
               }
               final List<DocumentSnapshot> orgMemberDocs = snapshot.data!;
 
