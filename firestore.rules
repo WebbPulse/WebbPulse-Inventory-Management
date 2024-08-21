@@ -2,14 +2,43 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
-      allow read, write: if isAuthenticated();
-
-      function isAuthenticated() {
-        return request.auth != null;
-      }
-
-      
+    
+    // Function to check if the user's token is still valid
+    function hasValidToken() {
+      // Check if revokeTime exists in the metadata and validate the auth_time against it
+      let revokeTime = get(/databases/$(database)/documents/metadata/$(request.auth.uid)).data.revokeTime;
+      return revokeTime == null || request.auth.token.auth_time > revokeTime;
     }
+    // Function to check if the user is authenticated and accessing their own data
+    function isAuthenticatedUser() {
+      return request.auth != null;
+    }
+    // Function to check if the user is the owner of the document (accessing their own data)
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    // Rule for the metadata collection
+    match /metadata/{userId} {
+      allow read: if isAuthenticatedUser() && isOwner(userId);
+      allow write: if false;  // Disallow any client-side writes
+    }
+    
+    // Rule for the users collection
+    match /users/{userId} {
+      allow read, write: if isAuthenticatedUser() && hasValidToken() && isOwner(userId);
+    }
+    // Match for the organizations collection
+    match /organizations/{orgId} {
+      // Allow read and write access if the user is an authenticated member of the organization
+      allow read, write: if isAuthenticatedUser() && isOrgMember(orgId) && hasValidToken();
+
+      // Function to check if the user is a member of the organization
+      function isOrgMember(orgId) {
+        // Check if the user is listed as a member in the organization document
+        return exists(/databases/$(database)/documents/organizations/$(orgId)/members/$(request.auth.uid));
+      }
+    }
+    
   }
 }
