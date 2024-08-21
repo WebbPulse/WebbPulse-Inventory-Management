@@ -12,23 +12,17 @@ def update_user_roles(org_member_id, org_member_role, org_id, revoke_tokens):
     custom_claims = user.custom_claims or {}
 
     # Prepare the claims to update
-    new_claims = {}
-
     if org_member_role == "admin":
-        new_claims[f'org_admin_{org_id}'] = True
-        new_claims[f'org_member_{org_id}'] = True
+        custom_claims[f'org_admin_{org_id}'] = True
+        custom_claims[f'org_member_{org_id}'] = True
     elif org_member_role == "member":
-        new_claims.pop(f'org_admin_{org_id}', None)  # Remove the admin claim if it exists
-        new_claims[f'org_member_{org_id}'] = True
+        custom_claims.pop(f'org_admin_{org_id}', None)  # Remove the admin claim if it exists
+        custom_claims[f'org_member_{org_id}'] = True
     else:
         raise https_fn.HttpsError(
             code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
             message=f'Invalid role: {org_member_role}'
         )
-
-    # Merge the new claims with the existing claims
-    for key, value in new_claims.items():
-        custom_claims[key] = value
 
     # Set the updated custom claims
     auth.set_custom_user_claims(org_member_id, custom_claims)
