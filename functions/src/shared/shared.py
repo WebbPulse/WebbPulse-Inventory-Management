@@ -23,7 +23,7 @@ def check_user_token_current(req: https_fn.CallableRequest):
     mostRecentTokenRevokeTime = user_metadata['mostRecentTokenRevokeTime']
 
     # Check if the user token is current
-    if  req.auth['auth_time'] < mostRecentTokenRevokeTime:
+    if  req.auth.token.get('auth_time') < mostRecentTokenRevokeTime:
         raise https_fn.HttpsError(
             code=https_fn.FunctionsErrorCode.FAILED_PRECONDITION,
             message="The function must be called with a valid token."
@@ -40,10 +40,10 @@ def check_user_is_org_member(req: https_fn.CallableRequest, org_id: str):
         # Check for the member role
         if req.auth.token.get(f"org_member_{org_id}") is None:
             raise https_fn.HttpsError(code=https_fn.FunctionsErrorCode.PERMISSION_DENIED,
-                                      message=f"Unauthorized access.")
+                                      message=f"Unauthorized access. User is not a member of the organization.")
 
 def check_user_is_org_admin(req: https_fn.CallableRequest, org_id: str):
         # Check for the admin role
         if req.auth.token.get(f"org_admin_{org_id}") is None:
             raise https_fn.HttpsError(code=https_fn.FunctionsErrorCode.PERMISSION_DENIED,
-                                      message=f"Unauthorized access.")
+                                      message=f"Unauthorized access. User is not an admin of the organization.")

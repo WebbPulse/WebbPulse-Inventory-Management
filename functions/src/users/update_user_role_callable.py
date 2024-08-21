@@ -1,4 +1,5 @@
-from src.shared.shared import https_fn, POSTcorsrules, Any, db, auth, time, firestore, check_user_is_org_admin, check_user_is_authed, check_user_token_current
+from src.shared.shared import https_fn, POSTcorsrules, Any, db, auth, check_user_is_org_admin, check_user_is_authed, check_user_token_current
+from src.users.helpers.update_user_roles import update_user_roles
 
 
 
@@ -23,42 +24,13 @@ def update_user_role_callable(req: https_fn.CallableRequest) -> Any:
                 code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
                 message='The function must be called with the following arguments: orgId, orgMemberId, orgMemberRole'
             )
+        # Update user role, true at the end means we revoke the existing refresh token
+        update_user_roles(org_member_id, org_member_role, org_id, True)
 
-        # Update role in Firestoreß
-        db.collection('organizations').document(org_id).collection('members').document(org_member_id).update({
-            'orgMemberRole': org_member_role 
-        })
-        
-        # Retrieve existing custom claims
-        user = auth.get_user(org_member_id)
-        custom_claims = user.custom_claims or {}
-
-        # Update claims based on role
-        if org_member_role == "admin":
-            custom_claims[f'org_admin_{org_id}'] = True
-            custom_claims[f'org_member_{org_id}'] = True
-        elif org_member_role == "member":
-            custom_claims.pop(f'org_admin_{org_id}', None)  # Remove the admin claim
-            custom_claims[f'org_member_{org_id}'] = True
-        else:
-            raise https_fn.HttpsError(
-                code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
-                message='Invalid role'
-            )
-        
-        
-        # Set the updated custom claims
-        auth.set_custom_user_claims(org_member_id, custom_claims)
-        # Revoke the refresh tokens to ensure new tokens will include the updated claims
-        auth.revoke_refresh_tokens(org_member_id)
-        # Mark metadata revoke time in firestore
-        db.collection('usersMetadata').document(org_member_id).update({
-            'mostRecentTokenRevokeTime': time.time()
-        })
-        
-        
         return {"response": f"User role updated to: {org_member_role}"}
-    
+    except https_fn.HttpsError as e:
+        # Re-raise known HttpsErrors
+        raise e
     except Exception as e:
         raise https_fn.HttpsError(
             code=https_fn.FunctionsErrorCode.UNKNOWN,

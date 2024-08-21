@@ -12,6 +12,9 @@ class AuthenticationChangeNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
+  User? _user;
+  User? get user => _user;
+
   bool _userWasLoggedIn = false; // Track if the user was logged in previously
   bool get userWasLoggedIn => _userWasLoggedIn;
 
@@ -48,6 +51,7 @@ class AuthenticationChangeNotifier extends ChangeNotifier {
 
       /// user IS logged in
       else if (user != null) {
+        _user = user;
         _userLoggedIn = true;
         _uid = user.uid;
         _userEmail = user.email;

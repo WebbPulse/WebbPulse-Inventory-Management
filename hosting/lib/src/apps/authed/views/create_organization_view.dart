@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_functions/cloud_functions.dart';
+import 'package:webbcheck/src/shared/providers/authenticationChangeNotifier.dart';
 
 import 'org_selection_view.dart';
 import '../../../shared/helpers/asyncContextHelpers.dart';
@@ -51,6 +52,8 @@ class _CreateOrganizationFormState extends State<CreateOrganizationForm> {
     final orgName = _controller.text;
     final firebaseFunctions =
         Provider.of<FirebaseFunctions>(context, listen: false);
+    final firebaseAuth =
+        Provider.of<AuthenticationChangeNotifier>(context, listen: false);
 
     if (orgName.isNotEmpty) {
       try {
@@ -60,6 +63,9 @@ class _CreateOrganizationFormState extends State<CreateOrganizationForm> {
             .call({
           "orgName": orgName,
         });
+
+        /// Refresh the user's ID token to get the roles for the newly created organization
+        await firebaseAuth.user!.getIdToken(true);
 
         AsyncContextHelpers.showSnackBarIfMounted(
             context, 'Organization created!');
