@@ -1,6 +1,7 @@
 from src.shared.shared import POSTcorsrules, db, firestore, https_fn, Any, check_user_is_authed, check_user_token_current
 from src.users.helpers.add_user_to_organization import add_user_to_organization
 from src.users.helpers.update_user_organizations import update_user_organizations
+from src.users.helpers.update_user_roles import update_user_roles
 
 @https_fn.on_call(cors=POSTcorsrules)
 def create_organization_callable(req: https_fn.CallableRequest) -> Any:
@@ -39,6 +40,7 @@ def create_organization_callable(req: https_fn.CallableRequest) -> Any:
         # Update user organizations and add user to the organization
         update_user_organizations(uid, org_id)
         add_user_to_organization(uid, org_id, org_member_display_name, org_member_email)
+        update_user_roles(uid, "admin", org_id)
 
         return {"response": f"Organization {org_id} created"}
     except https_fn.HttpsError as e:
