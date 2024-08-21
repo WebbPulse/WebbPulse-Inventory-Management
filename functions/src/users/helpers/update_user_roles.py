@@ -1,6 +1,7 @@
 from src.shared.shared import https_fn, db, auth, time
+from src.users.helpers.revoke_refresh_tokens import revoke_refresh_tokens
 
-def update_user_roles(org_member_id, org_member_role, org_id):
+def update_user_roles(org_member_id, org_member_role, org_id, revoke_tokens):
             # Update role in Firestore
             db.collection('organizations').document(org_id).collection('members').document(org_member_id).update({
                 'orgMemberRole': org_member_role 
@@ -25,9 +26,5 @@ def update_user_roles(org_member_id, org_member_role, org_id):
                 )
             # Set the updated custom claims
             auth.set_custom_user_claims(org_member_id, custom_claims)
-            # Revoke the refresh tokens to ensure new tokens will include the updated claims
-            auth.revoke_refresh_tokens(org_member_id)
-            # Mark metadata revoke time in firestore
-            db.collection('usersMetadata').document(org_member_id).update({
-                'mostRecentTokenRevokeTime': time.time()
-            })
+            if revoke_tokens == True:
+                revoke_refresh_tokens(org_member_id)

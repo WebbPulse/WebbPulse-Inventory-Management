@@ -40,7 +40,7 @@ def create_organization_callable(req: https_fn.CallableRequest) -> Any:
         # Update user organizations and add user to the organization
         update_user_organizations(uid, org_id)
         add_user_to_organization(uid, org_id, org_member_display_name, org_member_email)
-        update_user_roles(uid, "admin", org_id)
+        update_user_roles(uid, "admin", org_id, False)
 
         return {"response": f"Organization {org_id} created"}
     except https_fn.HttpsError as e:
