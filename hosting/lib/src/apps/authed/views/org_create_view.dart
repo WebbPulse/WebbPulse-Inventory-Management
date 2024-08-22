@@ -6,8 +6,8 @@ import 'package:webbcheck/src/shared/providers/authentication_change_notifier.da
 import 'org_selection_view.dart';
 import '../../../shared/helpers/async_context_helpers.dart';
 
-class CreateOrganizationView extends StatelessWidget {
-  const CreateOrganizationView({super.key});
+class OrgCreateView extends StatelessWidget {
+  const OrgCreateView({super.key});
 
   static const routeName = '/create-organization';
 

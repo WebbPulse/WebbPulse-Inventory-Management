@@ -8,8 +8,8 @@ import 'package:webbcheck/src/shared/widgets.dart';
 import 'package:webbcheck/src/shared/helpers/async_context_helpers.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class ProfileView extends StatelessWidget {
-  const ProfileView({super.key});
+class ProfileSettingsView extends StatelessWidget {
+  const ProfileSettingsView({super.key});
   static const routeName = '/profile';
 
   @override
@@ -25,7 +25,7 @@ class ProfileView extends StatelessWidget {
         drawer: const AuthedDrawer(),
         body: StreamBuilder<DocumentSnapshot>(
             stream: firestoreService
-                .getUser(authenticationChangeNotifier.user!.uid),
+                .getGlobalUserDocument(authenticationChangeNotifier.user!.uid),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
@@ -35,14 +35,15 @@ class ProfileView extends StatelessWidget {
               if (!snapshot.hasData || !snapshot.data!.exists) {
                 return const Center(child: Text('User not found'));
               }
-              final DocumentSnapshot user = snapshot.data!;
-              final bool hasPhoto = user['userPhotoURL'] != '';
+              final DocumentSnapshot userDocument = snapshot.data!;
+              final bool hasPhoto = userDocument['userPhotoURL'] != '';
 
               return ProfileScreen(
                 avatar: hasPhoto
                     ? CircleAvatar(
                         radius: 75,
-                        backgroundImage: NetworkImage(user['userPhotoURL']),
+                        backgroundImage:
+                            NetworkImage(userDocument['userPhotoURL']),
                       )
                     : null,
                 actions: [

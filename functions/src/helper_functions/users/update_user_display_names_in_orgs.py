@@ -1,4 +1,4 @@
-from src.shared.shared import db
+from src.shared import db
 
 def update_user_display_names_in_orgs(org_id, uid, org_member_display_name):
     try:

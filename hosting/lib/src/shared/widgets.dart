@@ -14,11 +14,11 @@ import 'providers/authentication_change_notifier.dart';
 
 import '../apps/authed/views/org_selection_view.dart';
 
-import '../apps/authed/views/profile_view.dart';
-import '../apps/authed/views/settings_view.dart';
-import '../apps/authed/views/checkout_view.dart';
-import '../apps/authed/views/organization_devices_view.dart';
-import '../apps/authed/views/users_view.dart';
+import '../apps/authed/views/profile_settings_view.dart';
+import '../apps/authed/views/user_settings_view.dart';
+import '../apps/authed/views/device_checkout_view.dart';
+import '../apps/authed/views/org_device_list_view.dart';
+import '../apps/authed/views/org_member_list_view.dart';
 
 class AuthedDrawer extends StatelessWidget {
   const AuthedDrawer({super.key});
@@ -38,31 +38,31 @@ class AuthedDrawer extends StatelessWidget {
           ListTile(
             title: const Text('Checkout'),
             onTap: () {
-              Navigator.pushNamed(context, CheckoutView.routeName);
+              Navigator.pushNamed(context, DeviceCheckoutView.routeName);
             },
           ),
           ListTile(
             title: const Text('Devices'),
             onTap: () {
-              Navigator.pushNamed(context, OrganizationDevicesView.routeName);
+              Navigator.pushNamed(context, OrgDeviceListView.routeName);
             },
           ),
           ListTile(
             title: const Text('Users'),
             onTap: () {
-              Navigator.pushNamed(context, UsersView.routeName);
+              Navigator.pushNamed(context, OrgMemberListView.routeName);
             },
           ),
           ListTile(
             title: const Text('Settings'),
             onTap: () {
-              Navigator.pushNamed(context, SettingsView.routeName);
+              Navigator.pushNamed(context, UserSettingsView.routeName);
             },
           ),
           ListTile(
             title: const Text('Profile'),
             onTap: () {
-              Navigator.pushNamed(context, ProfileView.routeName);
+              Navigator.pushNamed(context, ProfileSettingsView.routeName);
             },
           ),
           ListTile(
@@ -306,7 +306,7 @@ class DeviceCard extends StatelessWidget {
     return Consumer2<FirestoreReadService, DeviceCheckoutService>(
       builder: (context, firestoreService, deviceCheckoutService, child) {
         return StreamBuilder(
-          stream: firestoreService.getOrgDevice(deviceId, orgId),
+          stream: firestoreService.getOrgDeviceDocument(deviceId, orgId),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
@@ -317,7 +317,8 @@ class DeviceCard extends StatelessWidget {
             final orgMemberId = deviceData['deviceCheckedOutBy'];
 
             return StreamBuilder<DocumentSnapshot?>(
-                stream: firestoreService.getOrgMember(orgId, orgMemberId),
+                stream:
+                    firestoreService.getOrgMemberDocument(orgId, orgMemberId),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());

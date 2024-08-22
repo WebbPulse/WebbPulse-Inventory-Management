@@ -3,7 +3,7 @@ import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:provider/provider.dart';
 
 import '../../../shared/providers/authentication_change_notifier.dart';
-import '../../authed/views/checkout_view.dart';
+import '../../authed/views/device_checkout_view.dart';
 
 class SignInView extends StatelessWidget {
   const SignInView({super.key});
@@ -22,7 +22,7 @@ class SignInView extends StatelessWidget {
             ],
             actions: [
               AuthStateChangeAction<SignedIn>((context, state) {
-                Navigator.pushNamed(context, CheckoutView.routeName);
+                Navigator.pushNamed(context, DeviceCheckoutView.routeName);
               }),
             ],
           ),

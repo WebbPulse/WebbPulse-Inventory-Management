@@ -1,4 +1,4 @@
-from src.shared.shared import db, firestore, https_fn
+from src.shared import db, firestore, https_fn
 
 def create_global_user_profile(user):
     try:

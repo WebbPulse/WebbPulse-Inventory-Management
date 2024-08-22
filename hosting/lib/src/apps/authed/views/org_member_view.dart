@@ -8,8 +8,8 @@ import 'package:webbcheck/src/shared/providers/org_selector_change_notifier.dart
 import 'package:webbcheck/src/shared/widgets.dart';
 import 'package:webbcheck/src/shared/helpers/async_context_helpers.dart';
 
-class ManageUserView extends StatelessWidget {
-  const ManageUserView({super.key});
+class OrgMemberView extends StatelessWidget {
+  const OrgMemberView({super.key});
   static const routeName = '/manage-user';
 
   @override
@@ -33,7 +33,8 @@ class ManageUserView extends StatelessWidget {
         body: orgSelectorProvider.orgId.isNotEmpty &&
                 orgMemberSelectorProvider.orgMemberId.isNotEmpty
             ? StreamBuilder<DocumentSnapshot?>(
-                stream: firestoreService.getOrgMember(orgSelectorProvider.orgId,
+                stream: firestoreService.getOrgMemberDocument(
+                    orgSelectorProvider.orgId,
                     orgMemberSelectorProvider.orgMemberId),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
@@ -113,9 +114,11 @@ class ManageUserView extends StatelessWidget {
                                       ?.copyWith(fontWeight: FontWeight.bold),
                                 ),
                                 StreamBuilder<List<DocumentSnapshot>>(
-                                  stream: firestoreService.getOrgMemberDevices(
-                                      orgSelectorProvider.orgId,
-                                      orgMemberSelectorProvider.orgMemberId),
+                                  stream: firestoreService
+                                      .getOrgMemberDevicesDocuments(
+                                          orgSelectorProvider.orgId,
+                                          orgMemberSelectorProvider
+                                              .orgMemberId),
                                   builder: (context, snapshot) {
                                     if (snapshot.connectionState ==
                                         ConnectionState.waiting) {

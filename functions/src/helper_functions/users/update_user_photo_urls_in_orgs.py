@@ -1,4 +1,4 @@
-from src.shared.shared import db
+from src.shared import db
 
 def update_user_photo_urls_in_orgs(org_id, uid, org_member_photo_url):
     try:

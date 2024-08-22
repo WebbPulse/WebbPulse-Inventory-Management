@@ -14,13 +14,13 @@ import '../../shared/helpers/async_context_helpers.dart';
 
 import 'views/org_selection_view.dart';
 
-import 'views/settings_view.dart';
-import 'views/profile_view.dart';
-import 'views/organization_devices_view.dart';
-import 'views/checkout_view.dart';
-import 'views/users_view.dart';
-import 'views/create_organization_view.dart';
-import 'views/manage_user_view.dart';
+import 'views/user_settings_view.dart';
+import 'views/profile_settings_view.dart';
+import 'views/org_device_list_view.dart';
+import 'views/device_checkout_view.dart';
+import 'views/org_member_list_view.dart';
+import 'views/org_create_view.dart';
+import 'views/org_member_view.dart';
 
 class AuthedApp extends StatelessWidget {
   AuthedApp({
@@ -57,9 +57,9 @@ class AuthedApp extends StatelessWidget {
             darkTheme: ThemeData.dark(),
             themeMode: settingsProvider.themeMode,
             onGenerateRoute: (RouteSettings routeSettings) {
-              if (routeSettings.name == CreateOrganizationView.routeName) {
+              if (routeSettings.name == OrgCreateView.routeName) {
                 return MaterialPageRoute<void>(
-                  builder: (context) => const CreateOrganizationView(),
+                  builder: (context) => const OrgCreateView(),
                 );
               }
 
@@ -71,42 +71,42 @@ class AuthedApp extends StatelessWidget {
 
               if (orgMemberSelectorProvider.orgMemberId.isNotEmpty) {
                 return MaterialPageRoute<void>(
-                  builder: (context) => const ManageUserView(),
+                  builder: (context) => const OrgMemberView(),
                 );
               }
 
               switch (routeSettings.name) {
-                case SettingsView.routeName:
+                case UserSettingsView.routeName:
                   return MaterialPageRoute<void>(
-                    builder: (context) => const SettingsView(),
+                    builder: (context) => const UserSettingsView(),
                   );
-                case ProfileView.routeName:
+                case ProfileSettingsView.routeName:
                   return MaterialPageRoute<void>(
-                    builder: (context) => const ProfileView(),
+                    builder: (context) => const ProfileSettingsView(),
                   );
-                case OrganizationDevicesView.routeName:
+                case OrgDeviceListView.routeName:
                   return MaterialPageRoute<void>(
-                    builder: (context) => const OrganizationDevicesView(),
+                    builder: (context) => const OrgDeviceListView(),
                   );
-                case CheckoutView.routeName:
+                case DeviceCheckoutView.routeName:
                   return MaterialPageRoute<void>(
-                    builder: (context) => const CheckoutView(),
+                    builder: (context) => const DeviceCheckoutView(),
                   );
-                case UsersView.routeName:
+                case OrgMemberListView.routeName:
                   return MaterialPageRoute<void>(
-                    builder: (context) => UsersView(),
+                    builder: (context) => OrgMemberListView(),
                   );
                 case OrgSelectionView.routeName:
                   return MaterialPageRoute<void>(
                     builder: (context) => const OrgSelectionView(),
                   );
-                case ManageUserView.routeName:
+                case OrgMemberView.routeName:
                   return MaterialPageRoute<void>(
-                    builder: (context) => const ManageUserView(),
+                    builder: (context) => const OrgMemberView(),
                   );
                 default:
                   return MaterialPageRoute<void>(
-                    builder: (context) => const CheckoutView(),
+                    builder: (context) => const DeviceCheckoutView(),
                   );
               }
             },

@@ -1,5 +1,5 @@
-from src.shared.shared import https_fn, db, auth, time
-from src.users.helpers.revoke_refresh_tokens import revoke_refresh_tokens
+from src.shared import https_fn, db, auth, time
+from src.helper_functions.users.revoke_refresh_tokens import revoke_refresh_tokens
 
 def update_user_roles(org_member_id, org_member_role, org_id, revoke_tokens):
     # Update role in Firestore

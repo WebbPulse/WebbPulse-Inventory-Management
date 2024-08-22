@@ -1,7 +1,7 @@
-from src.shared.shared import auth, https_fn, POSTcorsrules, allowed_domains, Any, UserNotFoundError, check_user_is_org_admin, check_user_is_authed, check_user_token_current
-from src.users.helpers.create_global_user_profile import create_global_user_profile
-from src.users.helpers.add_user_to_organization import add_user_to_organization
-from src.users.helpers.update_user_organizations import update_user_organizations
+from src.shared import auth, https_fn, POSTcorsrules, allowed_domains, Any, UserNotFoundError, check_user_is_org_admin, check_user_is_authed, check_user_token_current
+from src.helper_functions.users.create_global_user_profile import create_global_user_profile
+from src.helper_functions.users.add_user_to_organization import add_user_to_organization
+from src.helper_functions.users.update_user_organizations import update_user_organizations
 
 
 @https_fn.on_call(cors=POSTcorsrules)
