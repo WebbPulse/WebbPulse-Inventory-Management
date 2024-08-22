@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 
-import '../../shared/providers/authenticationChangeNotifier.dart';
+import '../../shared/providers/authentication_change_notifier.dart';
 
-import '../../shared/providers/settingsChangeNotifier.dart';
-import '../../shared/providers/orgSelectorChangeNotifier.dart';
-import '../../shared/providers/orgMemberSelectorChangeNotifier.dart';
+import '../../shared/providers/settings_change_notifier.dart';
+import '../../shared/providers/org_selector_change_notifier.dart';
+import '../../shared/providers/org_member_selector_change_notifier.dart';
 
-import '../../shared/providers/firestoreService.dart';
-import '../../shared/providers/deviceCheckoutService.dart';
-import '../../shared/helpers/asyncContextHelpers.dart';
+import '../../shared/providers/firestore_read_service.dart';
+import '../../shared/providers/device_checkout_service.dart';
+import '../../shared/helpers/async_context_helpers.dart';
 
 import 'views/org_selection_view.dart';
 
@@ -27,7 +27,7 @@ class AuthedApp extends StatelessWidget {
     super.key,
   });
   final AsyncContextHelpers snackBarHelpers = AsyncContextHelpers();
-  final FirestoreService firestoreService = FirestoreService();
+  final FirestoreReadService firestoreService = FirestoreReadService();
   final FirebaseFunctions firebaseFunctions = FirebaseFunctions.instance;
   late final DeviceCheckoutService deviceCheckoutService =
       DeviceCheckoutService(
@@ -42,7 +42,7 @@ class AuthedApp extends StatelessWidget {
             create: (_) => OrgSelectorChangeNotifier()),
         ChangeNotifierProvider<OrgMemberSelectorChangeNotifier>(
             create: (_) => OrgMemberSelectorChangeNotifier()),
-        Provider<FirestoreService>(create: (_) => firestoreService),
+        Provider<FirestoreReadService>(create: (_) => firestoreService),
         Provider<FirebaseFunctions>.value(value: firebaseFunctions),
         Provider<DeviceCheckoutService>(create: (_) => deviceCheckoutService),
       ],
@@ -59,7 +59,7 @@ class AuthedApp extends StatelessWidget {
             onGenerateRoute: (RouteSettings routeSettings) {
               if (routeSettings.name == CreateOrganizationView.routeName) {
                 return MaterialPageRoute<void>(
-                  builder: (context) => CreateOrganizationView(),
+                  builder: (context) => const CreateOrganizationView(),
                 );
               }
 
@@ -86,11 +86,11 @@ class AuthedApp extends StatelessWidget {
                   );
                 case OrganizationDevicesView.routeName:
                   return MaterialPageRoute<void>(
-                    builder: (context) => OrganizationDevicesView(),
+                    builder: (context) => const OrganizationDevicesView(),
                   );
                 case CheckoutView.routeName:
                   return MaterialPageRoute<void>(
-                    builder: (context) => CheckoutView(),
+                    builder: (context) => const CheckoutView(),
                   );
                 case UsersView.routeName:
                   return MaterialPageRoute<void>(
@@ -106,7 +106,7 @@ class AuthedApp extends StatelessWidget {
                   );
                 default:
                   return MaterialPageRoute<void>(
-                    builder: (context) => CheckoutView(),
+                    builder: (context) => const CheckoutView(),
                   );
               }
             },

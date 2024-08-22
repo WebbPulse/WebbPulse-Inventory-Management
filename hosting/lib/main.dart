@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 
-import 'src/shared/providers/authenticationChangeNotifier.dart';
-import 'src/shared/providers/settingsChangeNotifier.dart';
+import 'src/shared/providers/authentication_change_notifier.dart';
+import 'src/shared/providers/settings_change_notifier.dart';
 
-import 'src/apps/authed/authedApp.dart';
-import 'src/apps/nonAuthed/nonAuthedApp.dart';
+import 'src/apps/authed/authed_app.dart';
+import 'src/apps/non_authed/non_authed_app.dart';
 
-import 'src/shared/services/settingsService.dart';
+import 'src/shared/non_provider_services/settings_service.dart';
 import 'firebase_options.dart';
 
 void main() async {

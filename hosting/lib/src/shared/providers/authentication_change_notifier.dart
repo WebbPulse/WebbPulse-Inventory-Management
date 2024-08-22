@@ -21,18 +21,6 @@ class AuthenticationChangeNotifier extends ChangeNotifier {
   bool _userLoggedIn = false;
   bool get userLoggedIn => _userLoggedIn;
 
-  String? _uid;
-  String? get uid => _uid;
-
-  String? _userEmail;
-  String? get userEmail => _userEmail;
-
-  bool _userVerified = false;
-  bool get userVerified => _userVerified;
-
-  String? _userDisplayName;
-  String? get userDisplayName => _userDisplayName;
-
   Future<void> init() async {
     FirebaseUIAuth.configureProviders([
       EmailAuthProvider(),
@@ -43,20 +31,12 @@ class AuthenticationChangeNotifier extends ChangeNotifier {
       /// WAS logged in previously
       if (user == null && _userWasLoggedIn) {
         _userLoggedIn = false;
-        _uid = null;
-        _userEmail = null;
-        _userVerified = false;
-        _userDisplayName = null;
       }
 
       /// user IS logged in
       else if (user != null) {
         _user = user;
         _userLoggedIn = true;
-        _uid = user.uid;
-        _userEmail = user.email;
-        _userVerified = user.emailVerified;
-        _userDisplayName = user.displayName;
         _userWasLoggedIn = true;
 
         /// mark the user as having been logged in previously
@@ -65,11 +45,8 @@ class AuthenticationChangeNotifier extends ChangeNotifier {
       /// user IS NOT logged in and
       /// WAS NOT logged in previously
       else {
+        _user = null;
         _userLoggedIn = false;
-        _uid = null;
-        _userEmail = null;
-        _userVerified = false;
-        _userDisplayName = null;
       }
       notifyListeners();
     });

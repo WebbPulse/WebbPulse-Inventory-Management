@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:provider/provider.dart';
 
-import '../../../shared/providers/authenticationChangeNotifier.dart';
+import '../../../shared/providers/authentication_change_notifier.dart';
 import '../../authed/views/checkout_view.dart';
 
 class SignInView extends StatelessWidget {

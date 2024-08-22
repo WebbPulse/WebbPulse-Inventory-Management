@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:webbcheck/src/apps/nonAuthed/views/landing_view.dart';
+import 'package:webbcheck/src/apps/non_authed/views/landing_view.dart';
 
-import '../../../shared/providers/authenticationChangeNotifier.dart';
+import '../../../shared/providers/authentication_change_notifier.dart';
 
 class UserSessionExpiredView extends StatelessWidget {
   const UserSessionExpiredView({super.key});
@@ -19,7 +19,7 @@ class UserSessionExpiredView extends StatelessWidget {
               child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Text('User Session Expired'),
+              const Text('User Session Expired'),
               ElevatedButton(
                 onPressed: () {
                   authenticationChangeNotifier.setUserWasLoggedIn(false);

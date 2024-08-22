@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class FirestoreService {
+class FirestoreReadService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
   Stream<DocumentSnapshot> getOrg(String orgId) {
@@ -9,7 +9,6 @@ class FirestoreService {
           _db.collection('organizations').doc(orgId);
       return documentRef.snapshots();
     } catch (e) {
-      print('Error getting organization: $e');
       return Stream.error('Failed to get organization');
     }
   }
@@ -22,7 +21,6 @@ class FirestoreService {
     return _db.collection('users').doc(uid).snapshots().map((snapshot) {
       return List<String>.from(snapshot.data()?['userOrgIds'] ?? []);
     }).handleError((error) {
-      print('Error getting organizations: $error');
       return Stream.value([]);
     });
   }
@@ -38,7 +36,6 @@ class FirestoreService {
           .get();
       return querySnapshot.docs.isNotEmpty;
     } catch (e) {
-      print('Error checking device exists: $e');
       return false;
     }
   }
@@ -54,7 +51,6 @@ class FirestoreService {
           .get();
       return querySnapshot.docs.first.data()['isDeviceCheckedOut'];
     } catch (e) {
-      print('Error checking device checkout status: $e');
       return false;
     }
   }
@@ -68,7 +64,6 @@ class FirestoreService {
           .doc(deviceId);
       return documentRef.snapshots();
     } catch (e) {
-      print('Error getting organization: $e');
       return Stream.error('Failed to get organization');
     }
   }
@@ -80,7 +75,6 @@ class FirestoreService {
       QuerySnapshot querySnapshot = await collectionRef.get();
       return querySnapshot.docs;
     } catch (e) {
-      print('Error getting organization devices: $e');
       return <DocumentSnapshot>[]; // Return an empty list in case of error
     }
   }
@@ -95,7 +89,6 @@ class FirestoreService {
         .snapshots()
         .map((querySnapshot) => querySnapshot.docs)
         .handleError((error) {
-      print('Error getting organization member devices: $error');
       return <DocumentSnapshot>[]; // Return an empty list in case of error
     });
   }
@@ -108,7 +101,6 @@ class FirestoreService {
         return querySnapshot.docs;
       });
     } catch (e) {
-      print('Error getting organization members: $e');
       return Stream.value(
           <DocumentSnapshot>[]); // Return an empty list in case of error
     }
@@ -127,7 +119,6 @@ class FirestoreService {
           .doc(orgMemberId);
       return documentRef.snapshots();
     } catch (e) {
-      print('Error getting org member: $e');
       return Stream.error('Failed to get org member');
     }
   }
@@ -137,7 +128,6 @@ class FirestoreService {
       DocumentReference documentRef = _db.collection('users').doc(uid);
       return documentRef.snapshots();
     } catch (e) {
-      print('Error getting user: $e');
       return Stream.error('Failed to get user');
     }
   }
