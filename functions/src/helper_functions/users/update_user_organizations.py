@@ -1,4 +1,4 @@
-from src.shared.shared import db, gcf, https_fn
+from src.shared import db, gcf, https_fn
 
 def update_user_organizations(uid, org_id):
     try:

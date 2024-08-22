@@ -2,7 +2,7 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:webbcheck/src/apps/authed/views/manage_user_view.dart';
+import 'package:webbcheck/src/apps/authed/views/org_member_view.dart';
 
 import '../../../shared/providers/org_selector_change_notifier.dart';
 import '../../../shared/providers/org_member_selector_change_notifier.dart';
@@ -10,8 +10,8 @@ import '../../../shared/providers/firestore_read_service.dart';
 import '../../../shared/widgets.dart';
 import '../../../shared/helpers/async_context_helpers.dart';
 
-class UsersView extends StatelessWidget {
-  UsersView({super.key});
+class OrgMemberListView extends StatelessWidget {
+  OrgMemberListView({super.key});
 
   static const routeName = '/users';
 
@@ -42,7 +42,8 @@ class UsersView extends StatelessWidget {
       body: Consumer2<OrgSelectorChangeNotifier, FirestoreReadService>(
         builder: (context, orgSelectorProvider, firestoreService, child) {
           return StreamBuilder<List<DocumentSnapshot>>(
-            stream: firestoreService.getOrgMembers(orgSelectorProvider.orgId),
+            stream: firestoreService
+                .getOrgMembersDocuments(orgSelectorProvider.orgId),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
@@ -285,7 +286,7 @@ class UserCard extends StatelessWidget {
             onTapAction: () {
               orgMemberSelectorChangeNotifier
                   .selectOrgMember(userData['orgMemberId']);
-              Navigator.pushNamed(context, ManageUserView.routeName);
+              Navigator.pushNamed(context, OrgMemberView.routeName);
             });
       },
     );

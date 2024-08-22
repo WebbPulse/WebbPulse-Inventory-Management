@@ -7,8 +7,8 @@ import '../../../shared/providers/authentication_change_notifier.dart';
 import '../../../shared/providers/device_checkout_service.dart';
 import '../../../shared/widgets.dart';
 
-class CheckoutView extends StatelessWidget {
-  const CheckoutView({super.key});
+class DeviceCheckoutView extends StatelessWidget {
+  const DeviceCheckoutView({super.key});
 
   static const routeName = '/checkout';
 

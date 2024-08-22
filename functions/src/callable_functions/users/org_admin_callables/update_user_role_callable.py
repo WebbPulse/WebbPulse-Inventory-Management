@@ -1,5 +1,5 @@
-from src.shared.shared import https_fn, POSTcorsrules, Any, db, auth, check_user_is_org_admin, check_user_is_authed, check_user_token_current
-from src.users.helpers.update_user_roles import update_user_roles
+from src.shared import https_fn, POSTcorsrules, Any, db, auth, check_user_is_org_admin, check_user_is_authed, check_user_token_current
+from src.helper_functions.users.update_user_roles import update_user_roles
 
 
 

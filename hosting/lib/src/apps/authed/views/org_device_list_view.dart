@@ -7,8 +7,8 @@ import '../../../shared/providers/firestore_read_service.dart';
 import '../../../shared/providers/org_selector_change_notifier.dart';
 import '../../../shared/widgets.dart';
 
-class OrganizationDevicesView extends StatelessWidget {
-  const OrganizationDevicesView({super.key});
+class OrgDeviceListView extends StatelessWidget {
+  const OrgDeviceListView({super.key});
   static const routeName = '/devices';
 
   @override
@@ -21,7 +21,8 @@ class OrganizationDevicesView extends StatelessWidget {
       body: Consumer2<OrgSelectorChangeNotifier, FirestoreReadService>(
         builder: (context, orgSelectorProvider, firestoreService, child) {
           return FutureBuilder<List<DocumentSnapshot>>(
-            future: firestoreService.getOrgDevices(orgSelectorProvider.orgId),
+            future: firestoreService
+                .getOrgDevicesDocuments(orgSelectorProvider.orgId),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());

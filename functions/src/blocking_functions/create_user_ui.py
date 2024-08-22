@@ -1,5 +1,5 @@
-from src.shared.shared import db, firestore, https_fn, identity_fn, allowed_domains
-from src.users.helpers.create_global_user_profile import create_global_user_profile
+from src.shared import db, firestore, https_fn, identity_fn, allowed_domains
+from src.helper_functions.users import create_global_user_profile
 
 @identity_fn.before_user_created()
 def create_user_ui(event: identity_fn.AuthBlockingEvent) -> identity_fn.BeforeCreateResponse | None:

@@ -1,7 +1,7 @@
-from src.shared.shared import POSTcorsrules, db, firestore, https_fn, Any, check_user_is_authed, check_user_token_current
-from src.users.helpers.add_user_to_organization import add_user_to_organization
-from src.users.helpers.update_user_organizations import update_user_organizations
-from src.users.helpers.update_user_roles import update_user_roles
+from src.shared import POSTcorsrules, db, firestore, https_fn, Any, check_user_is_authed, check_user_token_current
+from src.helper_functions.users.add_user_to_organization import add_user_to_organization
+from src.helper_functions.users.update_user_organizations import update_user_organizations
+from src.helper_functions.users.update_user_roles import update_user_roles
 
 @https_fn.on_call(cors=POSTcorsrules)
 def create_organization_callable(req: https_fn.CallableRequest) -> Any:

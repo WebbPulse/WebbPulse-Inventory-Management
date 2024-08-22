@@ -1,4 +1,4 @@
-from src.shared.shared import POSTcorsrules, db, firestore, https_fn, Any, check_user_is_org_member, check_user_is_authed, check_user_token_current
+from src.shared import POSTcorsrules, db, firestore, https_fn, Any, check_user_is_org_member, check_user_is_authed, check_user_token_current
 
 @https_fn.on_call(cors=POSTcorsrules)
 def create_device_callable(req: https_fn.CallableRequest) -> Any:

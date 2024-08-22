@@ -1,11 +1,11 @@
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import '../../../shared/providers/firestore_read_service.dart';
-import 'create_organization_view.dart';
+import 'org_create_view.dart';
 import '../../../shared/widgets.dart';
 import '../../../shared/providers/org_selector_change_notifier.dart';
 import '../../../shared/providers/authentication_change_notifier.dart';
-import 'checkout_view.dart';
+import 'device_checkout_view.dart';
 
 class OrgSelectionView extends StatelessWidget {
   const OrgSelectionView({
@@ -45,8 +45,8 @@ class OrgSelectionView extends StatelessWidget {
                                       const EdgeInsets.symmetric(vertical: 8.0),
                                   child: ElevatedButton(
                                     onPressed: () {
-                                      Navigator.pushNamed(context,
-                                          CreateOrganizationView.routeName);
+                                      Navigator.pushNamed(
+                                          context, OrgCreateView.routeName);
                                     },
                                     child:
                                         const Text('Create New Organization'),
@@ -66,7 +66,7 @@ class OrgSelectionView extends StatelessWidget {
                             ElevatedButton(
                               onPressed: () {
                                 Navigator.pushNamed(
-                                    context, CreateOrganizationView.routeName);
+                                    context, OrgCreateView.routeName);
                               },
                               child: const Text('Create New Organization'),
                             ),
@@ -96,7 +96,7 @@ class OrgCard extends StatelessWidget {
     return Consumer2<OrgSelectorChangeNotifier, FirestoreReadService>(
       builder: (context, orgSelectorProvider, firestoreService, child) {
         return StreamBuilder(
-          stream: firestoreService.getOrg(orgId),
+          stream: firestoreService.getOrgDocument(orgId),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
@@ -113,7 +113,7 @@ class OrgCard extends StatelessWidget {
               customCardTrailing: null,
               onTapAction: () {
                 orgSelectorProvider.selectOrg(orgId);
-                Navigator.pushNamed(context, CheckoutView.routeName);
+                Navigator.pushNamed(context, DeviceCheckoutView.routeName);
               },
             );
           },

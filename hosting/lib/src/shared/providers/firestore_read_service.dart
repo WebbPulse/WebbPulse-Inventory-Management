@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class FirestoreReadService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  Stream<DocumentSnapshot> getOrg(String orgId) {
+  Stream<DocumentSnapshot> getOrgDocument(String orgId) {
     try {
       DocumentReference documentRef =
           _db.collection('organizations').doc(orgId);
@@ -55,7 +55,8 @@ class FirestoreReadService {
     }
   }
 
-  Stream<DocumentSnapshot> getOrgDevice(String? deviceId, String? orgId) {
+  Stream<DocumentSnapshot> getOrgDeviceDocument(
+      String? deviceId, String? orgId) {
     try {
       DocumentReference documentRef = _db
           .collection('organizations')
@@ -68,7 +69,7 @@ class FirestoreReadService {
     }
   }
 
-  Future<List<DocumentSnapshot>> getOrgDevices(String orgId) async {
+  Future<List<DocumentSnapshot>> getOrgDevicesDocuments(String orgId) async {
     try {
       CollectionReference collectionRef =
           _db.collection('organizations').doc(orgId).collection('devices');
@@ -79,7 +80,7 @@ class FirestoreReadService {
     }
   }
 
-  Stream<List<DocumentSnapshot>> getOrgMemberDevices(
+  Stream<List<DocumentSnapshot>> getOrgMemberDevicesDocuments(
       String orgId, String orgMemberId) {
     CollectionReference collectionRef =
         _db.collection('organizations').doc(orgId).collection('devices');
@@ -93,7 +94,7 @@ class FirestoreReadService {
     });
   }
 
-  Stream<List<DocumentSnapshot>> getOrgMembers(String orgId) {
+  Stream<List<DocumentSnapshot>> getOrgMembersDocuments(String orgId) {
     try {
       CollectionReference collectionRef =
           _db.collection('organizations').doc(orgId).collection('members');
@@ -106,7 +107,8 @@ class FirestoreReadService {
     }
   }
 
-  Stream<DocumentSnapshot?> getOrgMember(String orgId, String orgMemberId) {
+  Stream<DocumentSnapshot?> getOrgMemberDocument(
+      String orgId, String orgMemberId) {
     if (orgMemberId.isEmpty) {
       return Stream.value(null);
     }
@@ -123,7 +125,7 @@ class FirestoreReadService {
     }
   }
 
-  Stream<DocumentSnapshot> getUser(String? uid) {
+  Stream<DocumentSnapshot> getGlobalUserDocument(String? uid) {
     try {
       DocumentReference documentRef = _db.collection('users').doc(uid);
       return documentRef.snapshots();
