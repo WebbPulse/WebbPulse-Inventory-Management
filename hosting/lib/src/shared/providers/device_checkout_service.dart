@@ -1,12 +1,12 @@
 // device_checkout_service.dart
 
 import 'package:flutter/material.dart';
-import 'firestoreService.dart';
+import 'firestore_read_service.dart';
 import 'package:cloud_functions/cloud_functions.dart';
-import '../helpers/asyncContextHelpers.dart';
+import '../helpers/async_context_helpers.dart';
 
 class DeviceCheckoutService {
-  final FirestoreService firestoreService;
+  final FirestoreReadService firestoreService;
   final FirebaseFunctions firebaseFunctions;
   DeviceCheckoutService(
       {required this.firestoreService, required this.firebaseFunctions});

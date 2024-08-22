@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
-import 'package:webbcheck/src/shared/providers/firestoreService.dart';
-import 'package:webbcheck/src/shared/providers/orgMemberSelectorChangeNotifier.dart';
-import 'package:webbcheck/src/shared/providers/orgSelectorChangeNotifier.dart';
+import 'package:webbcheck/src/shared/providers/firestore_read_service.dart';
+import 'package:webbcheck/src/shared/providers/org_member_selector_change_notifier.dart';
+import 'package:webbcheck/src/shared/providers/org_selector_change_notifier.dart';
 import 'package:webbcheck/src/shared/widgets.dart';
-import 'package:webbcheck/src/shared/helpers/asyncContextHelpers.dart';
+import 'package:webbcheck/src/shared/helpers/async_context_helpers.dart';
 
 class ManageUserView extends StatelessWidget {
   const ManageUserView({super.key});
@@ -15,14 +15,14 @@ class ManageUserView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer3<OrgSelectorChangeNotifier, OrgMemberSelectorChangeNotifier,
-            FirestoreService>(
+            FirestoreReadService>(
         builder: (context, orgSelectorProvider, orgMemberSelectorProvider,
             firestoreService, child) {
       return Scaffold(
         appBar: AppBar(
           title: const Text('Manage User'),
           leading: IconButton(
-            icon: Icon(Icons.arrow_back),
+            icon: const Icon(Icons.arrow_back),
             onPressed: () {
               /// Clear the selected org member
               orgMemberSelectorProvider.clearSelectedOrgMember();
@@ -164,14 +164,13 @@ class ManageUserView extends StatelessWidget {
 class UserRoleDropdownButton extends StatefulWidget {
   final DocumentSnapshot orgMemberData;
 
-  const UserRoleDropdownButton({required this.orgMemberData, Key? key})
-      : super(key: key);
+  const UserRoleDropdownButton({required this.orgMemberData, super.key});
 
   @override
-  _UserRoleDropdownButtonState createState() => _UserRoleDropdownButtonState();
+  UserRoleDropdownButtonState createState() => UserRoleDropdownButtonState();
 }
 
-class _UserRoleDropdownButtonState extends State<UserRoleDropdownButton> {
+class UserRoleDropdownButtonState extends State<UserRoleDropdownButton> {
   String? selectedValue;
   List<String> items = ['admin', 'member'];
   var _isLoading = false;
@@ -182,6 +181,7 @@ class _UserRoleDropdownButtonState extends State<UserRoleDropdownButton> {
     selectedValue = widget.orgMemberData['orgMemberRole'];
   }
 
+  @override
   void dispose() {
     super.dispose();
   }
@@ -222,7 +222,7 @@ class _UserRoleDropdownButtonState extends State<UserRoleDropdownButton> {
         padding: const EdgeInsets.all(8.0),
         child: DropdownButton<String>(
           value: selectedValue,
-          hint: Text('Role'),
+          hint: const Text('Role'),
           elevation: 16,
           style: Theme.of(context)
               .textTheme

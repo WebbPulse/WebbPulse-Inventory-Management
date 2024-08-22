@@ -2,13 +2,13 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../shared/providers/orgSelectorChangeNotifier.dart';
-import '../../../shared/providers/authenticationChangeNotifier.dart';
-import '../../../shared/providers/deviceCheckoutService.dart';
+import '../../../shared/providers/org_selector_change_notifier.dart';
+import '../../../shared/providers/authentication_change_notifier.dart';
+import '../../../shared/providers/device_checkout_service.dart';
 import '../../../shared/widgets.dart';
 
 class CheckoutView extends StatelessWidget {
-  CheckoutView({super.key});
+  const CheckoutView({super.key});
 
   static const routeName = '/checkout';
 
@@ -31,10 +31,10 @@ class CheckoutForm extends StatefulWidget {
   const CheckoutForm({super.key});
 
   @override
-  _CheckoutFormState createState() => _CheckoutFormState();
+  CheckoutFormState createState() => CheckoutFormState();
 }
 
-class _CheckoutFormState extends State<CheckoutForm> {
+class CheckoutFormState extends State<CheckoutForm> {
   var _isLoading = false;
   late TextEditingController _controller;
 
@@ -44,6 +44,7 @@ class _CheckoutFormState extends State<CheckoutForm> {
     _controller = TextEditingController();
   }
 
+  @override
   void dispose() {
     _controller.dispose();
     super.dispose();
@@ -56,13 +57,15 @@ class _CheckoutFormState extends State<CheckoutForm> {
     final deviceCheckoutService =
         Provider.of<DeviceCheckoutService>(context, listen: false);
     final deviceCheckedOutBy =
-        Provider.of<AuthenticationChangeNotifier>(context, listen: false).uid;
+        Provider.of<AuthenticationChangeNotifier>(context, listen: false)
+            .user!
+            .uid;
     try {
       await deviceCheckoutService.handleDeviceCheckout(
         context,
         _controller.text,
         orgId,
-        deviceCheckedOutBy!,
+        deviceCheckedOutBy,
       );
     } catch (e) {
       // Handle error if needed

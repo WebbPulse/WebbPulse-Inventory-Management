@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:webbcheck/src/apps/authed/views/manage_user_view.dart';
 
-import '../../../shared/providers/orgSelectorChangeNotifier.dart';
-import '../../../shared/providers/orgMemberSelectorChangeNotifier.dart';
-import '../../../shared/providers/firestoreService.dart';
+import '../../../shared/providers/org_selector_change_notifier.dart';
+import '../../../shared/providers/org_member_selector_change_notifier.dart';
+import '../../../shared/providers/firestore_read_service.dart';
 import '../../../shared/widgets.dart';
-import '../../../shared/helpers/asyncContextHelpers.dart';
+import '../../../shared/helpers/async_context_helpers.dart';
 
 class UsersView extends StatelessWidget {
   UsersView({super.key});
@@ -28,7 +28,7 @@ class UsersView extends StatelessWidget {
               showDialog(
                 context: context,
                 builder: (BuildContext context) {
-                  return AddUserAlertDialog();
+                  return const AddUserAlertDialog();
                 },
               );
             },
@@ -39,7 +39,7 @@ class UsersView extends StatelessWidget {
         ],
       ),
       drawer: const AuthedDrawer(),
-      body: Consumer2<OrgSelectorChangeNotifier, FirestoreService>(
+      body: Consumer2<OrgSelectorChangeNotifier, FirestoreReadService>(
         builder: (context, orgSelectorProvider, firestoreService, child) {
           return StreamBuilder<List<DocumentSnapshot>>(
             stream: firestoreService.getOrgMembers(orgSelectorProvider.orgId),
@@ -103,13 +103,13 @@ class UsersView extends StatelessWidget {
 class SearchTextField extends StatefulWidget {
   final ValueNotifier<String> searchQuery;
 
-  SearchTextField({required this.searchQuery});
+  const SearchTextField({super.key, required this.searchQuery});
 
   @override
-  _SearchTextFieldState createState() => _SearchTextFieldState();
+  SearchTextFieldState createState() => SearchTextFieldState();
 }
 
-class _SearchTextFieldState extends State<SearchTextField> {
+class SearchTextFieldState extends State<SearchTextField> {
   final TextEditingController _searchController = TextEditingController();
 
   @override
@@ -126,9 +126,9 @@ class _SearchTextFieldState extends State<SearchTextField> {
         controller: _searchController,
         decoration: InputDecoration(
           labelText: 'Search by Email or Display Name',
-          border: OutlineInputBorder(),
+          border: const OutlineInputBorder(),
           suffixIcon: IconButton(
-            icon: Icon(Icons.clear),
+            icon: const Icon(Icons.clear),
             onPressed: () {
               _searchController.clear();
               widget.searchQuery.value = '';
@@ -144,11 +144,13 @@ class _SearchTextFieldState extends State<SearchTextField> {
 }
 
 class AddUserAlertDialog extends StatefulWidget {
+  const AddUserAlertDialog({super.key});
+
   @override
-  _AddUserAlertDialogState createState() => _AddUserAlertDialogState();
+  AddUserAlertDialogState createState() => AddUserAlertDialogState();
 }
 
-class _AddUserAlertDialogState extends State<AddUserAlertDialog> {
+class AddUserAlertDialogState extends State<AddUserAlertDialog> {
   late TextEditingController _userCreationEmailController;
   var _isLoading = false;
 
@@ -241,7 +243,7 @@ class UserCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Consumer2<FirestoreService, OrgMemberSelectorChangeNotifier>(
+    return Consumer2<FirestoreReadService, OrgMemberSelectorChangeNotifier>(
       builder:
           (context, firestoreService, orgMemberSelectorChangeNotifier, child) {
         String orgMemberDisplayName =
@@ -259,7 +261,7 @@ class UserCard extends StatelessWidget {
               Wrap(
                 children: [
                   Text(orgMemberDisplayName,
-                      style: TextStyle(fontWeight: FontWeight.bold)),
+                      style: const TextStyle(fontWeight: FontWeight.bold)),
                 ],
               ),
               Wrap(

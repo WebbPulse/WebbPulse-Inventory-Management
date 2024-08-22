@@ -2,10 +2,10 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:provider/provider.dart';
-import 'package:webbcheck/src/shared/providers/authenticationChangeNotifier.dart';
-import 'package:webbcheck/src/shared/providers/firestoreService.dart';
+import 'package:webbcheck/src/shared/providers/authentication_change_notifier.dart';
+import 'package:webbcheck/src/shared/providers/firestore_read_service.dart';
 import 'package:webbcheck/src/shared/widgets.dart';
-import 'package:webbcheck/src/shared/helpers/asyncContextHelpers.dart';
+import 'package:webbcheck/src/shared/helpers/async_context_helpers.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ProfileView extends StatelessWidget {
@@ -15,7 +15,7 @@ class ProfileView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer3<FirebaseFunctions, AuthenticationChangeNotifier,
-            FirestoreService>(
+            FirestoreReadService>(
         builder: (context, firebaseFunctions, authenticationChangeNotifier,
             firestoreService, child) {
       return Scaffold(
@@ -24,7 +24,8 @@ class ProfileView extends StatelessWidget {
         ),
         drawer: const AuthedDrawer(),
         body: StreamBuilder<DocumentSnapshot>(
-            stream: firestoreService.getUser(authenticationChangeNotifier.uid!),
+            stream: firestoreService
+                .getUser(authenticationChangeNotifier.user!.uid),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
@@ -72,7 +73,7 @@ class ProfileView extends StatelessWidget {
                         showDialog(
                             context: context,
                             builder: (BuildContext context) {
-                              return ChangeProfilePictureAlertDialog();
+                              return const ChangeProfilePictureAlertDialog();
                             });
                       }),
                 ],
@@ -84,12 +85,14 @@ class ProfileView extends StatelessWidget {
 }
 
 class ChangeProfilePictureAlertDialog extends StatefulWidget {
+  const ChangeProfilePictureAlertDialog({super.key});
+
   @override
-  _ChangeProfilePictureAlertDialogState createState() =>
-      _ChangeProfilePictureAlertDialogState();
+  ChangeProfilePictureAlertDialogState createState() =>
+      ChangeProfilePictureAlertDialogState();
 }
 
-class _ChangeProfilePictureAlertDialogState
+class ChangeProfilePictureAlertDialogState
     extends State<ChangeProfilePictureAlertDialog> {
   late TextEditingController _userPhotoURLController;
   var _isLoading = false;

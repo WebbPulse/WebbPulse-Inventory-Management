@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../shared/providers/settingsChangeNotifier.dart';
+import '../../../shared/providers/settings_change_notifier.dart';
 import '../../../shared/widgets.dart';
 
 /// Displays the various settings that can be customized by the user.

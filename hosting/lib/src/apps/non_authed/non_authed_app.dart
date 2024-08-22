@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:webbcheck/src/shared/providers/authenticationChangeNotifier.dart';
+import 'package:webbcheck/src/shared/providers/authentication_change_notifier.dart';
 
-import '../../shared/providers/settingsChangeNotifier.dart';
+import '../../shared/providers/settings_change_notifier.dart';
 import 'views/user_session_expired_view.dart';
 import 'views/landing_view.dart';
 import 'views/register_view.dart';

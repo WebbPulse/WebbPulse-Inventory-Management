@@ -1,10 +1,10 @@
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
-import '../../../shared/providers/firestoreService.dart';
+import '../../../shared/providers/firestore_read_service.dart';
 import 'create_organization_view.dart';
 import '../../../shared/widgets.dart';
-import '../../../shared/providers/orgSelectorChangeNotifier.dart';
-import '../../../shared/providers/authenticationChangeNotifier.dart';
+import '../../../shared/providers/org_selector_change_notifier.dart';
+import '../../../shared/providers/authentication_change_notifier.dart';
 import 'checkout_view.dart';
 
 class OrgSelectionView extends StatelessWidget {
@@ -16,10 +16,10 @@ class OrgSelectionView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<AuthenticationChangeNotifier, FirestoreService>(
+    return Consumer2<AuthenticationChangeNotifier, FirestoreReadService>(
       builder: (context, authProvider, firestoreService, child) =>
           StreamBuilder<List<String>>(
-        stream: firestoreService.getUserOrgsIds(authProvider.uid),
+        stream: firestoreService.getUserOrgsIds(authProvider.user!.uid),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -93,7 +93,7 @@ class OrgCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Consumer2<OrgSelectorChangeNotifier, FirestoreService>(
+    return Consumer2<OrgSelectorChangeNotifier, FirestoreReadService>(
       builder: (context, orgSelectorProvider, firestoreService, child) {
         return StreamBuilder(
           stream: firestoreService.getOrg(orgId),
@@ -109,9 +109,7 @@ class OrgCard extends StatelessWidget {
               theme: theme,
               customCardLeading:
                   Icon(Icons.home, color: theme.colorScheme.secondary),
-              customCardTitle: Container(
-                child: Text(orgName),
-              ),
+              customCardTitle: Text(orgName),
               customCardTrailing: null,
               onTapAction: () {
                 orgSelectorProvider.selectOrg(orgId);

@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_functions/cloud_functions.dart';
-import 'package:webbcheck/src/shared/providers/authenticationChangeNotifier.dart';
+import 'package:webbcheck/src/shared/providers/authentication_change_notifier.dart';
 
 import 'org_selection_view.dart';
-import '../../../shared/helpers/asyncContextHelpers.dart';
+import '../../../shared/helpers/async_context_helpers.dart';
 
 class CreateOrganizationView extends StatelessWidget {
-  CreateOrganizationView({super.key});
+  const CreateOrganizationView({super.key});
 
   static const routeName = '/create-organization';
 
@@ -29,10 +29,10 @@ class CreateOrganizationForm extends StatefulWidget {
   const CreateOrganizationForm({super.key});
 
   @override
-  _CreateOrganizationFormState createState() => _CreateOrganizationFormState();
+  CreateOrganizationFormState createState() => CreateOrganizationFormState();
 }
 
-class _CreateOrganizationFormState extends State<CreateOrganizationForm> {
+class CreateOrganizationFormState extends State<CreateOrganizationForm> {
   late TextEditingController _controller;
   var _isLoading = false;
 
