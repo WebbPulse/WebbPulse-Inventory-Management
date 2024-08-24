@@ -60,15 +60,24 @@ class OrgMemberListView extends StatelessWidget {
                     child: ValueListenableBuilder<String>(
                       valueListenable: _searchQuery,
                       builder: (context, query, child) {
+                        final lowerCaseQuery =
+                            query.toLowerCase(); // Convert query to lowercase
                         final filteredMemberDocs = orgMemberDocs.where((doc) {
                           final data = doc.data() as Map<String, dynamic>;
-                          final orgMemberEmail = data['orgMemberEmail'] ?? '';
+                          final orgMemberEmail = (data['orgMemberEmail'] ?? '')
+                              .toString()
+                              .toLowerCase();
                           final orgMemberDisplayName =
-                              data['orgMemberDisplayName'] ?? '';
-                          final orgMemberRole = data['orgMemberRole'] ?? '';
-                          return orgMemberEmail.contains(query) ||
-                              orgMemberDisplayName.contains(query) ||
-                              orgMemberRole.contains(query);
+                              (data['orgMemberDisplayName'] ?? '')
+                                  .toString()
+                                  .toLowerCase();
+                          final orgMemberRole = (data['orgMemberRole'] ?? '')
+                              .toString()
+                              .toLowerCase();
+
+                          return orgMemberEmail.contains(lowerCaseQuery) ||
+                              orgMemberDisplayName.contains(lowerCaseQuery) ||
+                              orgMemberRole.contains(lowerCaseQuery);
                         }).toList();
 
                         return filteredMemberDocs.isNotEmpty

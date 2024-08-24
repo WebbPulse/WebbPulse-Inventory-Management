@@ -17,6 +17,10 @@ service cloud.firestore {
     function isOwner(userId) {
       return request.auth.uid == userId;
     }
+    // Function to check if the user has a custom auth claim for the organization
+    function hasOrgMemberClaim(orgId) {
+      return request.auth.token["org_member_" + orgId] == true;
+    }
 
     // Rule for the metadata collection
     match /usersMetadata/{userId} {
@@ -32,14 +36,8 @@ service cloud.firestore {
     // Match for the organizations collection
     match /organizations/{orgId}/{document=**} {
       // Allow read and write access if the user is an authenticated member of the organization
-      allow read: if isAuthenticated() && isOrgMember(orgId) && hasValidToken();
+      allow read: if isAuthenticated() && hasOrgMemberClaim(orgId) && hasValidToken();
 			allow write: if false; // Disallow any client-side writes
-      
-      // Function to check if the user is a member of the organization
-      function isOrgMember(orgId) {
-        // Check if the user is listed as a member in the organization document
-        return exists(/databases/$(database)/documents/organizations/$(orgId)/members/$(request.auth.uid));
-      }
     }
     
   }

@@ -203,11 +203,22 @@ class DeviceList extends StatelessWidget {
               child: ValueListenableBuilder<String>(
                 valueListenable: _searchQuery,
                 builder: (context, query, child) {
+                  final lowerCaseQuery =
+                      query.toLowerCase(); // Convert query to lowercase
                   final filteredDevices = devicesDocs.where((doc) {
                     final data = doc.data() as Map<String, dynamic>;
-                    final deviceSerialNumber = data['deviceSerialNumber'] ?? '';
+                    // Convert the boolean value to "checked in" or "checked out"
+                    final isDeviceCheckedOut =
+                        data['isDeviceCheckedOut'] == true
+                            ? 'checked out'
+                            : 'checked in';
+                    final deviceSerialNumber =
+                        (data['deviceSerialNumber'] ?? '')
+                            .toString()
+                            .toLowerCase();
 
-                    return deviceSerialNumber.contains(query);
+                    return deviceSerialNumber.contains(lowerCaseQuery) ||
+                        isDeviceCheckedOut.contains(lowerCaseQuery);
                   }).toList();
 
                   return filteredDevices.isNotEmpty
