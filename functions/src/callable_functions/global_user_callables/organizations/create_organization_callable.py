@@ -31,6 +31,7 @@ def create_organization_callable(req: https_fn.CallableRequest) -> Any:
             'orgId': org_id,
             'createdAt': firestore.SERVER_TIMESTAMP,
             'orgName': org_name,
+            'orgBackgroundImageURL': "",
         })
 
         # Update user organizations and add user to the organization

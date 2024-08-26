@@ -29,9 +29,11 @@ class OrgSelectionView extends StatelessWidget {
           }
           final List<String> userOrgIds = snapshot.data ?? [];
           return Scaffold(
-            appBar: AppBar(title: const Text('Organization Selection')),
             body: Column(
               children: [
+                SizedBox(
+                  height: 16,
+                ),
                 const Center(child: Text('Select an Organization')),
                 Expanded(
                   child: userOrgIds.isNotEmpty

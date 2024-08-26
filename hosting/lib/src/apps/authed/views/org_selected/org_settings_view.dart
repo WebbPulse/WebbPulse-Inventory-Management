@@ -1,3 +1,4 @@
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -105,7 +106,82 @@ class OrgSettingsView extends StatelessWidget {
                                         // Change Org Image Button with Border
                                         ElevatedButton.icon(
                                           onPressed: () {
-                                            // Placeholder for image picker logic
+                                            showDialog(
+                                              context: context,
+                                              builder: (context) {
+                                                final TextEditingController
+                                                    _urlController =
+                                                    TextEditingController();
+
+                                                return AlertDialog(
+                                                  title: const Text(
+                                                      'Change Organization Image URL'),
+                                                  content: TextField(
+                                                    controller: _urlController,
+                                                    decoration:
+                                                        const InputDecoration(
+                                                      labelText: 'Image URL',
+                                                      border:
+                                                          OutlineInputBorder(),
+                                                    ),
+                                                  ),
+                                                  actions: [
+                                                    TextButton(
+                                                      onPressed: () {
+                                                        Navigator.of(context)
+                                                            .pop();
+                                                      },
+                                                      child:
+                                                          const Text('Cancel'),
+                                                    ),
+                                                    ElevatedButton(
+                                                      style: ElevatedButton
+                                                          .styleFrom(
+                                                        backgroundColor: theme
+                                                            .colorScheme.surface
+                                                            .withOpacity(0.95),
+                                                        side: BorderSide(
+                                                          color: theme
+                                                              .colorScheme
+                                                              .primary
+                                                              .withOpacity(0.5),
+                                                          width: 1.5,
+                                                        ),
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .all(16.0),
+                                                      ),
+                                                      onPressed: () async {
+                                                        final firebaseFunctions =
+                                                            Provider.of<
+                                                                    FirebaseFunctions>(
+                                                                context,
+                                                                listen: false);
+                                                        final newImageUrl =
+                                                            _urlController.text;
+                                                        if (newImageUrl
+                                                            .isNotEmpty) {
+                                                          firebaseFunctions
+                                                              .httpsCallable(
+                                                                  'update_org_background_image_callable')
+                                                              .call({
+                                                            'orgId':
+                                                                orgDocument.id,
+                                                            'orgBackgroundImageURL':
+                                                                newImageUrl,
+                                                          });
+                                                          // After updating, you can pop the dialog
+                                                          Navigator.of(context)
+                                                              .pop();
+                                                        }
+                                                      },
+                                                      child:
+                                                          const Text('Update'),
+                                                    ),
+                                                  ],
+                                                );
+                                              },
+                                            );
                                           },
                                           icon: const Icon(Icons.image),
                                           label: const Text(

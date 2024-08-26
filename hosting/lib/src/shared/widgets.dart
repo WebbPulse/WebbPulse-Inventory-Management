@@ -167,55 +167,60 @@ class AuthedDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: <Widget>[
-          DrawerHeader(
-            decoration: BoxDecoration(
-              color: Theme.of(context).primaryColor,
+    return AuthClaimChecker(builder: (context, userClaims) {
+      return Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            DrawerHeader(
+              decoration: BoxDecoration(
+                color: Theme.of(context).primaryColor,
+              ),
+              child: const Text('Menu'),
             ),
-            child: const Text('Menu'),
-          ),
-          ListTile(
-            title: const Text('Checkout'),
-            onTap: () {
-              Navigator.pushNamed(context, DeviceCheckoutView.routeName);
-            },
-          ),
-          ListTile(
-            title: const Text('Devices'),
-            onTap: () {
-              Navigator.pushNamed(context, OrgDeviceListView.routeName);
-            },
-          ),
-          ListTile(
-            title: const Text('Users'),
-            onTap: () {
-              Navigator.pushNamed(context, OrgMemberListView.routeName);
-            },
-          ),
-          ListTile(
-            title: const Text('Profile'),
-            onTap: () {
-              Navigator.pushNamed(context, ProfileSettingsView.routeName);
-            },
-          ),
-          ListTile(
-            title: const Text('Organization Settings'),
-            onTap: () {
-              Navigator.pushNamed(context, OrgSettingsView.routeName);
-            },
-          ),
-          ListTile(
-            title: const Text('Organization List'),
-            onTap: () {
-              Navigator.pushNamed(context, OrgSelectionView.routeName);
-            },
-          ),
-        ],
-      ),
-    );
+            ListTile(
+              title: const Text('Organization List'),
+              onTap: () {
+                Navigator.pushNamed(context, OrgSelectionView.routeName);
+              },
+            ),
+            ListTile(
+              title: const Text('Checkout'),
+              onTap: () {
+                Navigator.pushNamed(context, DeviceCheckoutView.routeName);
+              },
+            ),
+            ListTile(
+              title: const Text('Devices'),
+              onTap: () {
+                Navigator.pushNamed(context, OrgDeviceListView.routeName);
+              },
+            ),
+            ListTile(
+              title: const Text('Users'),
+              onTap: () {
+                Navigator.pushNamed(context, OrgMemberListView.routeName);
+              },
+            ),
+            ListTile(
+              title: const Text('Profile'),
+              onTap: () {
+                Navigator.pushNamed(context, ProfileSettingsView.routeName);
+              },
+            ),
+            if (userClaims[
+                    'org_admin_${Provider.of<OrgSelectorChangeNotifier>(context).orgId}'] ==
+                true)
+              ListTile(
+                title: const Text('Organization Settings'),
+                onTap: () {
+                  Navigator.pushNamed(context, OrgSettingsView.routeName);
+                },
+              ),
+          ],
+        ),
+      );
+    });
   }
 }
 
