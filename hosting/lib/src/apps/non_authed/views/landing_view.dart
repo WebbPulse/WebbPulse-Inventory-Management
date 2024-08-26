@@ -27,7 +27,7 @@ class LandingView extends StatelessWidget {
                 maxHeight: MediaQuery.of(context).size.height,
               ),
               child: Center(
-                child: CustomLayoutBuilder(
+                child: SmallLayoutBuilder(
                   childWidget: Card(
                     color: theme.colorScheme.onPrimary,
                     margin: const EdgeInsets.symmetric(vertical: 8.0),

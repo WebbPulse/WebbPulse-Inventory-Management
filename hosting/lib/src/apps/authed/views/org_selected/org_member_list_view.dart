@@ -2,13 +2,13 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:webbcheck/src/apps/authed/views/org_member_view.dart';
+import 'package:webbcheck/src/apps/authed/views/org_selected/org_member_view.dart';
 
-import '../../../shared/providers/org_selector_change_notifier.dart';
-import '../../../shared/providers/org_member_selector_change_notifier.dart';
-import '../../../shared/providers/firestore_read_service.dart';
-import '../../../shared/widgets.dart';
-import '../../../shared/helpers/async_context_helpers.dart';
+import '../../../../shared/providers/org_selector_change_notifier.dart';
+import '../../../../shared/providers/org_member_selector_change_notifier.dart';
+import '../../../../shared/providers/firestore_read_service.dart';
+import '../../../../shared/widgets.dart';
+import '../../../../shared/helpers/async_context_helpers.dart';
 
 class OrgMemberListView extends StatelessWidget {
   OrgMemberListView({super.key});
@@ -19,9 +19,10 @@ class OrgMemberListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    ThemeData theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Users Page'),
+      appBar: OrgNameAppBar(
+        titleSuffix: 'Users',
         actions: [
           ElevatedButton(
             onPressed: () {
@@ -32,8 +33,14 @@ class OrgMemberListView extends StatelessWidget {
                 },
               );
             },
-            style:
-                ElevatedButton.styleFrom(padding: const EdgeInsets.all(16.0)),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
+              side: BorderSide(
+                color: theme.colorScheme.primary.withOpacity(0.5),
+                width: 1.5,
+              ),
+              padding: const EdgeInsets.all(16.0),
+            ),
             child: const Text('Add New User'),
           )
         ],
@@ -60,15 +67,24 @@ class OrgMemberListView extends StatelessWidget {
                     child: ValueListenableBuilder<String>(
                       valueListenable: _searchQuery,
                       builder: (context, query, child) {
+                        final lowerCaseQuery =
+                            query.toLowerCase(); // Convert query to lowercase
                         final filteredMemberDocs = orgMemberDocs.where((doc) {
                           final data = doc.data() as Map<String, dynamic>;
-                          final orgMemberEmail = data['orgMemberEmail'] ?? '';
+                          final orgMemberEmail = (data['orgMemberEmail'] ?? '')
+                              .toString()
+                              .toLowerCase();
                           final orgMemberDisplayName =
-                              data['orgMemberDisplayName'] ?? '';
-                          final orgMemberRole = data['orgMemberRole'] ?? '';
-                          return orgMemberEmail.contains(query) ||
-                              orgMemberDisplayName.contains(query) ||
-                              orgMemberRole.contains(query);
+                              (data['orgMemberDisplayName'] ?? '')
+                                  .toString()
+                                  .toLowerCase();
+                          final orgMemberRole = (data['orgMemberRole'] ?? '')
+                              .toString()
+                              .toLowerCase();
+
+                          return orgMemberEmail.contains(lowerCaseQuery) ||
+                              orgMemberDisplayName.contains(lowerCaseQuery) ||
+                              orgMemberRole.contains(lowerCaseQuery);
                         }).toList();
 
                         return filteredMemberDocs.isNotEmpty
@@ -199,6 +215,7 @@ class AddUserAlertDialogState extends State<AddUserAlertDialog> {
 
   @override
   Widget build(BuildContext context) {
+    ThemeData theme = Theme.of(context);
     return AlertDialog(
       title: const Text('Add New User'),
       content: SingleChildScrollView(
@@ -207,8 +224,6 @@ class AddUserAlertDialogState extends State<AddUserAlertDialog> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('Enter the email of the user to add'),
-              const SizedBox(height: 16.0),
               TextField(
                 controller: _userCreationEmailController,
                 decoration: const InputDecoration(
@@ -222,7 +237,14 @@ class AddUserAlertDialogState extends State<AddUserAlertDialog> {
       actions: <Widget>[
         ElevatedButton.icon(
           onPressed: _isLoading ? null : _onSubmit,
-          style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(16.0)),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
+            side: BorderSide(
+              color: theme.colorScheme.primary.withOpacity(0.5),
+              width: 1.5,
+            ),
+            padding: const EdgeInsets.all(16.0),
+          ),
           icon: _isLoading
               ? const CircularProgressIndicator()
               : const Icon(Icons.add),

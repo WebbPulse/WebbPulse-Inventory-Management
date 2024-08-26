@@ -1,4 +1,4 @@
-from src.shared import https_fn, POSTcorsrules, Any, db, auth, check_user_is_org_admin, check_user_is_authed, check_user_token_current
+from src.shared import https_fn, POSTcorsrules, Any, db, auth, check_user_is_org_admin, check_user_is_authed, check_user_token_current, check_user_is_email_verified, allowed_domains
 from src.helper_functions.users.update_user_roles import update_user_roles
 
 
@@ -14,6 +14,7 @@ def update_user_role_callable(req: https_fn.CallableRequest) -> Any:
         org_member_role = req.data["orgMemberRole"]
         
         check_user_is_authed(req)
+        check_user_is_email_verified(req)
         check_user_token_current(req)
         check_user_is_org_admin(req, org_id)
         

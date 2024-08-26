@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import '../../../shared/providers/firestore_read_service.dart';
+import '../../../../shared/providers/firestore_read_service.dart';
 
-import '../../../shared/providers/org_selector_change_notifier.dart';
-import '../../../shared/widgets.dart';
+import '../../../../shared/providers/org_selector_change_notifier.dart';
+import '../../../../shared/widgets.dart';
 
 class OrgDeviceListView extends StatelessWidget {
   const OrgDeviceListView({super.key});
@@ -14,8 +14,8 @@ class OrgDeviceListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Devices'),
+      appBar: const OrgNameAppBar(
+        titleSuffix: 'Devices',
       ),
       drawer: const AuthedDrawer(),
       body: Consumer2<OrgSelectorChangeNotifier, FirestoreReadService>(

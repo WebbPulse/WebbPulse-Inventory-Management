@@ -7,6 +7,7 @@ import 'package:webbcheck/src/shared/providers/firestore_read_service.dart';
 import 'package:webbcheck/src/shared/widgets.dart';
 import 'package:webbcheck/src/shared/helpers/async_context_helpers.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:webbcheck/src/shared/providers/settings_change_notifier.dart';
 
 class ProfileSettingsView extends StatelessWidget {
   const ProfileSettingsView({super.key});
@@ -14,10 +15,11 @@ class ProfileSettingsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer3<FirebaseFunctions, AuthenticationChangeNotifier,
-            FirestoreReadService>(
+    ThemeData theme = Theme.of(context);
+    return Consumer4<FirebaseFunctions, AuthenticationChangeNotifier,
+            FirestoreReadService, SettingsChangeNotifier>(
         builder: (context, firebaseFunctions, authenticationChangeNotifier,
-            firestoreService, child) {
+            firestoreService, settingsChangeNotifier, child) {
       return Scaffold(
         appBar: AppBar(
           title: const Text('Profile'),
@@ -68,15 +70,46 @@ class ProfileSettingsView extends StatelessWidget {
                 ],
                 children: [
                   const SizedBox(height: 16),
+                  DropdownButton<ThemeMode>(
+                    // Read the selected themeMode from the controller
+                    value: settingsChangeNotifier.themeMode,
+                    // Call the updateThemeMode method any time the user selects a theme.
+                    onChanged: settingsChangeNotifier.updateThemeMode,
+                    items: const [
+                      DropdownMenuItem(
+                        value: ThemeMode.system,
+                        child: Text('System Theme'),
+                      ),
+                      DropdownMenuItem(
+                        value: ThemeMode.light,
+                        child: Text('Light Theme'),
+                      ),
+                      DropdownMenuItem(
+                        value: ThemeMode.dark,
+                        child: Text('Dark Theme'),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
                   ElevatedButton(
-                      child: const Text('Change Profile Picture'),
-                      onPressed: () {
-                        showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return const ChangeProfilePictureAlertDialog();
-                            });
-                      }),
+                    child: const Text('Change Profile Picture'),
+                    onPressed: () {
+                      showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return const ChangeProfilePictureAlertDialog();
+                          });
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor:
+                          theme.colorScheme.surface.withOpacity(0.95),
+                      side: BorderSide(
+                        color: theme.colorScheme.primary.withOpacity(0.5),
+                        width: 1.5,
+                      ),
+                      padding: const EdgeInsets.all(16.0),
+                    ),
+                  ),
                 ],
               );
             }),
