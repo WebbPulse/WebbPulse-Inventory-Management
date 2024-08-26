@@ -1,4 +1,4 @@
-from src.shared import https_fn, POSTcorsrules, Any, db, check_user_is_authed, check_user_token_current
+from src.shared import https_fn, POSTcorsrules, Any, db, check_user_is_authed, check_user_token_current, check_user_is_email_verified
 
 
 
@@ -12,6 +12,7 @@ def update_global_user_photo_url_callable(req: https_fn.CallableRequest) -> Any:
         
         # Check if the user is authenticated
         check_user_is_authed(req)
+        check_user_is_email_verified(req)
         check_user_token_current(req)
         
         # Checking attribute.

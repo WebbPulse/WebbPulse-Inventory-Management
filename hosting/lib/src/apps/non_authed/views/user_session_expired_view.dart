@@ -12,7 +12,6 @@ class UserSessionExpiredView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('User Session Expired')),
       body: Center(
         child: Consumer<AuthenticationChangeNotifier>(
           builder: (context, authenticationChangeNotifier, child) => Center(

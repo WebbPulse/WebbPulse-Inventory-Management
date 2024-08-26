@@ -22,6 +22,10 @@ service cloud.firestore {
       return request.auth.token["org_member_" + orgId] == true;
     }
 
+    function isEmailVerified() {
+      return request.auth.token.email_verified == true;
+    } 
+
     // Rule for the metadata collection
     match /usersMetadata/{userId} {
       allow read: if isAuthenticated() && isOwner(userId);
@@ -30,13 +34,13 @@ service cloud.firestore {
     
     // Rule for the users collection
     match /users/{userId} {
-      allow read: if isAuthenticated() && hasValidToken() && isOwner(userId);
+      allow read: if isAuthenticated() && hasValidToken() && isOwner(userId) && isEmailVerified();
       allow write: if false; // Disallow any client-side writes
     }
     // Match for the organizations collection
     match /organizations/{orgId}/{document=**} {
       // Allow read and write access if the user is an authenticated member of the organization
-      allow read: if isAuthenticated() && hasOrgMemberClaim(orgId) && hasValidToken();
+      allow read: if isAuthenticated() && hasOrgMemberClaim(orgId) && hasValidToken() && isEmailVerified();
 			allow write: if false; // Disallow any client-side writes
     }
     

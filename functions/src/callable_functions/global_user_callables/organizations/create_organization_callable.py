@@ -1,4 +1,4 @@
-from src.shared import POSTcorsrules, db, firestore, https_fn, Any, check_user_is_authed, check_user_token_current
+from src.shared import POSTcorsrules, db, firestore, https_fn, Any, check_user_is_authed, check_user_token_current, check_user_is_email_verified
 from src.helper_functions.users.add_user_to_organization import add_user_to_organization
 from src.helper_functions.users.update_user_organizations import update_user_organizations
 from src.helper_functions.users.update_user_roles import update_user_roles
@@ -14,6 +14,7 @@ def create_organization_callable(req: https_fn.CallableRequest) -> Any:
         
         # Check if the user is authenticated
         check_user_is_authed(req)
+        check_user_is_email_verified(req)
         check_user_token_current(req)
 
         # Check if the organization_creation_name is provided and valid

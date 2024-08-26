@@ -5,7 +5,7 @@ import 'org_create_view.dart';
 import '../../../shared/widgets.dart';
 import '../../../shared/providers/org_selector_change_notifier.dart';
 import '../../../shared/providers/authentication_change_notifier.dart';
-import 'device_checkout_view.dart';
+import 'org_selected/device_checkout_view.dart';
 
 class OrgSelectionView extends StatelessWidget {
   const OrgSelectionView({
@@ -16,6 +16,7 @@ class OrgSelectionView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    ThemeData theme = Theme.of(context);
     return Consumer2<AuthenticationChangeNotifier, FirestoreReadService>(
       builder: (context, authProvider, firestoreService, child) =>
           StreamBuilder<List<String>>(
@@ -28,13 +29,13 @@ class OrgSelectionView extends StatelessWidget {
           }
           final List<String> userOrgIds = snapshot.data ?? [];
           return Scaffold(
-            appBar: AppBar(title: const Text('Account Selection')),
+            appBar: AppBar(title: const Text('Organization Selection')),
             body: Column(
               children: [
                 const Center(child: Text('Select an Organization')),
                 Expanded(
                   child: userOrgIds.isNotEmpty
-                      ? CustomLayoutBuilder(
+                      ? SmallLayoutBuilder(
                           childWidget: ListView.builder(
                             physics: const BouncingScrollPhysics(),
                             itemCount: userOrgIds.length + 1,
@@ -48,6 +49,16 @@ class OrgSelectionView extends StatelessWidget {
                                       Navigator.pushNamed(
                                           context, OrgCreateView.routeName);
                                     },
+                                    style: ElevatedButton.styleFrom(
+                                        backgroundColor: theme
+                                            .colorScheme.surface
+                                            .withOpacity(0.95),
+                                        side: BorderSide(
+                                          color: theme.colorScheme.primary
+                                              .withOpacity(0.5),
+                                          width: 1.5,
+                                        ),
+                                        padding: const EdgeInsets.all(16.0)),
                                     child:
                                         const Text('Create New Organization'),
                                   ),
@@ -68,6 +79,15 @@ class OrgSelectionView extends StatelessWidget {
                                 Navigator.pushNamed(
                                     context, OrgCreateView.routeName);
                               },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor:
+                                    theme.colorScheme.surface.withOpacity(0.95),
+                                side: BorderSide(
+                                  color: theme.colorScheme.primary
+                                      .withOpacity(0.5),
+                                  width: 1.5,
+                                ),
+                              ),
                               child: const Text('Create New Organization'),
                             ),
                           ],

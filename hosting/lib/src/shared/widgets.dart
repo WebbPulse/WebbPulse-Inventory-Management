@@ -15,10 +15,51 @@ import 'providers/authentication_change_notifier.dart';
 import '../apps/authed/views/org_selection_view.dart';
 
 import '../apps/authed/views/profile_settings_view.dart';
-import '../apps/authed/views/user_settings_view.dart';
-import '../apps/authed/views/device_checkout_view.dart';
-import '../apps/authed/views/org_device_list_view.dart';
-import '../apps/authed/views/org_member_list_view.dart';
+import '../apps/authed/views/org_selected/device_checkout_view.dart';
+import '../apps/authed/views/org_selected/org_device_list_view.dart';
+import '../apps/authed/views/org_selected/org_member_list_view.dart';
+import '../apps/authed/views/org_selected/org_settings_view.dart';
+
+class OrgNameAppBar extends StatelessWidget implements PreferredSizeWidget {
+  final String titleSuffix;
+  final List<Widget> actions;
+  final Widget? leading;
+
+  const OrgNameAppBar({
+    super.key,
+    this.titleSuffix = '',
+    this.actions = const [],
+    this.leading,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer2<OrgSelectorChangeNotifier, FirestoreReadService>(
+      builder: (context, orgSelectorProvider, firestoreService, child) {
+        return StreamBuilder(
+          stream: firestoreService.getOrgDocument(orgSelectorProvider.orgId),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return const Text('Error loading organization');
+            }
+            final String orgName = snapshot.data?['orgName'] ?? '';
+
+            return AppBar(
+              title: Text('$orgName $titleSuffix'),
+              actions: actions,
+              leading: leading,
+            );
+          },
+        );
+      },
+    );
+  }
+
+  @override
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+}
 
 class AuthedDrawer extends StatelessWidget {
   const AuthedDrawer({super.key});
@@ -54,19 +95,19 @@ class AuthedDrawer extends StatelessWidget {
             },
           ),
           ListTile(
-            title: const Text('Settings'),
-            onTap: () {
-              Navigator.pushNamed(context, UserSettingsView.routeName);
-            },
-          ),
-          ListTile(
             title: const Text('Profile'),
             onTap: () {
               Navigator.pushNamed(context, ProfileSettingsView.routeName);
             },
           ),
           ListTile(
-            title: const Text('Organizations'),
+            title: const Text('Organization Settings'),
+            onTap: () {
+              Navigator.pushNamed(context, OrgSettingsView.routeName);
+            },
+          ),
+          ListTile(
+            title: const Text('Organization List'),
             onTap: () {
               Navigator.pushNamed(context, OrgSelectionView.routeName);
             },
@@ -154,33 +195,41 @@ class CustomCard extends StatelessWidget {
       );
 }
 
-class CustomLayoutBuilder extends StatelessWidget {
-  const CustomLayoutBuilder({super.key, required this.childWidget});
+class SmallLayoutBuilder extends StatelessWidget {
+  const SmallLayoutBuilder({super.key, required this.childWidget});
   final Widget childWidget;
 
   @override
-  Widget build(BuildContext context) => ConstrainedBox(
-        constraints: BoxConstraints(
-          maxHeight: MediaQuery.of(context).size.height,
+  Widget build(BuildContext context) {
+    final appBarHeight = Scaffold.of(context).appBarMaxHeight ?? 0.0;
+    final topPadding = MediaQuery.of(context).padding.top;
+    final availableHeight =
+        MediaQuery.of(context).size.height - appBarHeight - topPadding;
+
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        maxHeight: availableHeight,
+      ),
+      child: Center(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            double widthFactor;
+            if (constraints.maxWidth < 600) {
+              widthFactor = 0.9; // 90% of the width for narrow screens
+            } else if (constraints.maxWidth < 1200) {
+              widthFactor = 0.5; // 50% of the width for medium screens
+            } else {
+              widthFactor = 0.2; // 20% of the width for large screens
+            }
+            return SizedBox(
+              width: constraints.maxWidth * widthFactor,
+              child: childWidget,
+            );
+          },
         ),
-        child: Center(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              double widthFactor;
-              if (constraints.maxWidth < 600) {
-                widthFactor = 0.9; // 90% of the width for narrow screens
-              } else if (constraints.maxWidth < 1200) {
-                widthFactor = 0.5; // 70% of the width for medium screens
-              } else {
-                widthFactor = 0.2; // 50% of the width for large screens
-              }
-              return SizedBox(
-                  width: constraints.maxWidth * widthFactor,
-                  child: childWidget);
-            },
-          ),
-        ),
-      );
+      ),
+    );
+  }
 }
 
 class DeviceList extends StatelessWidget {
@@ -520,9 +569,16 @@ class DeviceCheckoutButtonState extends State<DeviceCheckoutButton> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return ElevatedButton.icon(
       onPressed: _isLoading ? null : _onSubmit,
-      style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(16.0)),
+      style: ElevatedButton.styleFrom(
+          backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
+          side: BorderSide(
+            color: theme.colorScheme.primary.withOpacity(0.5),
+            width: 1.5,
+          ),
+          padding: const EdgeInsets.all(16.0)),
       icon: _isLoading
           ? const CircularProgressIndicator()
           : const Icon(Icons.login),

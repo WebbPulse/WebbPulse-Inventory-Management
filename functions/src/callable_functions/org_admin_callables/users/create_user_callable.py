@@ -1,4 +1,4 @@
-from src.shared import auth, https_fn, POSTcorsrules, allowed_domains, Any, UserNotFoundError, check_user_is_org_admin, check_user_is_authed, check_user_token_current
+from src.shared import auth, https_fn, POSTcorsrules, allowed_domains, Any, UserNotFoundError, check_user_is_org_admin, check_user_is_authed, check_user_token_current, check_user_is_email_verified
 from src.helper_functions.users.create_global_user_profile import create_global_user_profile
 from src.helper_functions.users.add_user_to_organization import add_user_to_organization
 from src.helper_functions.users.update_user_organizations import update_user_organizations
@@ -12,6 +12,7 @@ def create_user_callable(req: https_fn.CallableRequest) -> Any:
         org_id = req.data["orgId"]
         
         check_user_is_authed(req)
+        check_user_is_email_verified(req)
         check_user_token_current(req)
         check_user_is_org_admin(req, org_id)
 

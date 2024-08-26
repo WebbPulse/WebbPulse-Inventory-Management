@@ -36,6 +36,15 @@ def check_user_is_authed(req: https_fn.CallableRequest):
                 code=https_fn.FunctionsErrorCode.FAILED_PRECONDITION,
                 message="The function must be called while authenticated."
             )
+
+def check_user_is_email_verified(req: https_fn.CallableRequest):
+    # Check if the user's email is verified
+    if not req.auth.token.get('email_verified'):
+        raise https_fn.HttpsError(
+            code=https_fn.FunctionsErrorCode.PERMISSION_DENIED,
+            message="The function must be called with a verified email."
+        )
+    
 def check_user_is_org_member(req: https_fn.CallableRequest, org_id: str):
         # Check for the member role
         if req.auth.token.get(f"org_member_{org_id}") is None:

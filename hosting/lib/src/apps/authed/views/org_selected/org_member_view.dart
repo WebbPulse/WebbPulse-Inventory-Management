@@ -78,20 +78,21 @@ class OrgMemberView extends StatelessWidget {
                                         fontWeight: FontWeight.bold),
                               ),
                               const SizedBox(height: 16),
-                              if (orgMemberData['orgMemberPhotoURL'] != null)
+                              if (orgMemberData['orgMemberPhotoURL'] != '' &&
+                                  orgMemberData['orgMemberPhotoURL'] != null)
+                                ProfileAvatar(
+                                    photoUrl:
+                                        orgMemberData['orgMemberPhotoURL'])
+                              else
                                 CircleAvatar(
                                   radius: 75,
-                                  backgroundImage: NetworkImage(
-                                      orgMemberData['orgMemberPhotoURL']!),
-                                )
-                              else
-                                const CircleAvatar(
-                                  radius: 75,
-                                  backgroundColor: Colors.grey,
+                                  backgroundColor:
+                                      Theme.of(context).colorScheme.onSecondary,
                                   child: Icon(
                                     Icons.person,
                                     size: 50,
-                                    color: Colors.white,
+                                    color:
+                                        Theme.of(context).colorScheme.secondary,
                                   ),
                                 ),
                               const SizedBox(height: 16),
@@ -248,6 +249,45 @@ class UserRoleDropdownButtonState extends State<UserRoleDropdownButton> {
           }).toList(),
         ),
       ),
+    );
+  }
+}
+
+class ProfileAvatar extends StatefulWidget {
+  final String? photoUrl;
+
+  const ProfileAvatar({super.key, this.photoUrl});
+
+  @override
+  ProfileAvatarState createState() => ProfileAvatarState();
+}
+
+class ProfileAvatarState extends State<ProfileAvatar> {
+  bool _hasError = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return CircleAvatar(
+      radius: 75,
+      backgroundColor:
+          _hasError ? Theme.of(context).colorScheme.onSecondary : null,
+      backgroundImage: !_hasError && widget.photoUrl != null
+          ? NetworkImage(widget.photoUrl!)
+          : null,
+      onBackgroundImageError: !_hasError
+          ? (exception, stackTrace) {
+              setState(() {
+                _hasError = true;
+              });
+            }
+          : null,
+      child: _hasError
+          ? Icon(
+              Icons.person,
+              size: 50,
+              color: Theme.of(context).colorScheme.secondary,
+            )
+          : null,
     );
   }
 }
