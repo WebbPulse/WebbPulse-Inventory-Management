@@ -42,12 +42,17 @@ class ProfileSettingsView extends StatelessWidget {
 
               return ProfileScreen(
                 avatar: hasPhoto
-                    ? CircleAvatar(
-                        radius: 75,
-                        backgroundImage:
-                            NetworkImage(userDocument['userPhotoURL']),
+                    ? ProfileAvatar(
+                        photoUrl: userDocument['userPhotoURL'],
                       )
-                    : null,
+                    : CircleAvatar(
+                        radius: 75,
+                        child: Icon(
+                          Icons.person,
+                          size: 50,
+                          color: Theme.of(context).colorScheme.secondary,
+                        ),
+                      ),
                 actions: [
                   DisplayNameChangedAction(
                     (context, user, userDisplayName) async {

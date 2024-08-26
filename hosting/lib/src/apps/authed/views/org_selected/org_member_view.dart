@@ -16,152 +16,199 @@ class OrgMemberView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer3<OrgSelectorChangeNotifier, OrgMemberSelectorChangeNotifier,
             FirestoreReadService>(
-        builder: (context, orgSelectorProvider, orgMemberSelectorProvider,
+        builder: (context, orgSelectorChangeNotifier, orgMemberSelectorProvider,
             firestoreService, child) {
-      return Scaffold(
-        appBar: AppBar(
-          title: const Text('Manage User'),
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () {
-              /// Clear the selected org member
-              orgMemberSelectorProvider.clearSelectedOrgMember();
-              Navigator.pop(context);
-            },
-          ),
-        ),
-        body: orgSelectorProvider.orgId.isNotEmpty &&
-                orgMemberSelectorProvider.orgMemberId.isNotEmpty
-            ? StreamBuilder<DocumentSnapshot?>(
-                stream: firestoreService.getOrgMemberDocument(
-                    orgSelectorProvider.orgId,
-                    orgMemberSelectorProvider.orgMemberId),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  } else if (snapshot.hasError) {
-                    return const Center(child: Text('Error loading user data'));
-                  }
-                  if (!snapshot.hasData || !snapshot.data!.exists) {
-                    return const Center(child: Text('User not found'));
-                  }
-                  final DocumentSnapshot orgMemberData = snapshot.data!;
-                  return LayoutBuilder(builder: (context, constraints) {
-                    double containerWidth;
+      return AuthClaimChecker(
+        builder: (context, userClaims) {
+          return Scaffold(
+            appBar: AppBar(
+              title: const Text('Manage User'),
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () {
+                  /// Clear the selected org member
+                  orgMemberSelectorProvider.clearSelectedOrgMember();
+                  Navigator.pop(context);
+                },
+              ),
+            ),
+            body: orgSelectorChangeNotifier.orgId.isNotEmpty &&
+                    orgMemberSelectorProvider.orgMemberId.isNotEmpty
+                ? StreamBuilder<DocumentSnapshot?>(
+                    stream: firestoreService.getOrgMemberDocument(
+                        orgSelectorChangeNotifier.orgId,
+                        orgMemberSelectorProvider.orgMemberId),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      } else if (snapshot.hasError) {
+                        return const Center(
+                            child: Text('Error loading user data'));
+                      }
+                      if (!snapshot.hasData || !snapshot.data!.exists) {
+                        return const Center(child: Text('User not found'));
+                      }
+                      final DocumentSnapshot orgMemberData = snapshot.data!;
+                      return LayoutBuilder(builder: (context, constraints) {
+                        double containerWidth;
 
-                    if (constraints.maxWidth < 600) {
-                      // Mobile width (under 600px)
-                      containerWidth = MediaQuery.of(context).size.width * 0.35;
-                    } else {
-                      // Larger screen width (over 600px)
-                      containerWidth = MediaQuery.of(context).size.width * 0.2;
-                    }
-                    return Row(
-                      children: [
-                        // Right-side column pane
-                        Container(
-                          width: containerWidth,
-                          color: Theme.of(context).colorScheme.secondary,
-                          padding: const EdgeInsets.all(8.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Text(
-                                '${orgMemberData['orgMemberDisplayName']}',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleLarge
-                                    ?.copyWith(
+                        if (constraints.maxWidth < 600) {
+                          // Mobile width (under 600px)
+                          containerWidth =
+                              MediaQuery.of(context).size.width * 0.35;
+                        } else {
+                          // Larger screen width (over 600px)
+                          containerWidth =
+                              MediaQuery.of(context).size.width * 0.2;
+                        }
+                        return Row(
+                          children: [
+                            // Right-side column pane
+                            Container(
+                              width: containerWidth,
+                              color: Theme.of(context).colorScheme.secondary,
+                              padding: const EdgeInsets.all(8.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    '${orgMemberData['orgMemberDisplayName']}',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleLarge
+                                        ?.copyWith(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .onSecondary,
+                                            fontWeight: FontWeight.bold),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  if (orgMemberData['orgMemberPhotoURL'] !=
+                                          '' &&
+                                      orgMemberData['orgMemberPhotoURL'] !=
+                                          null)
+                                    ProfileAvatar(
+                                        photoUrl:
+                                            orgMemberData['orgMemberPhotoURL'])
+                                  else
+                                    CircleAvatar(
+                                      radius: 75,
+                                      backgroundColor: Theme.of(context)
+                                          .colorScheme
+                                          .onSecondary,
+                                      child: Icon(
+                                        Icons.person,
+                                        size: 50,
                                         color: Theme.of(context)
                                             .colorScheme
-                                            .onSecondary,
-                                        fontWeight: FontWeight.bold),
-                              ),
-                              const SizedBox(height: 16),
-                              if (orgMemberData['orgMemberPhotoURL'] != '' &&
-                                  orgMemberData['orgMemberPhotoURL'] != null)
-                                ProfileAvatar(
-                                    photoUrl:
-                                        orgMemberData['orgMemberPhotoURL'])
-                              else
-                                CircleAvatar(
-                                  radius: 75,
-                                  backgroundColor:
-                                      Theme.of(context).colorScheme.onSecondary,
-                                  child: Icon(
-                                    Icons.person,
-                                    size: 50,
-                                    color:
-                                        Theme.of(context).colorScheme.secondary,
-                                  ),
-                                ),
-                              const SizedBox(height: 16),
-                              UserRoleDropdownButton(
-                                  orgMemberData: orgMemberData),
-                            ],
-                          ),
-                        ),
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Checked Out Devices',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleLarge
-                                      ?.copyWith(fontWeight: FontWeight.bold),
-                                ),
-                                StreamBuilder<List<DocumentSnapshot>>(
-                                  stream: firestoreService
-                                      .getOrgMemberDevicesDocuments(
-                                          orgSelectorProvider.orgId,
-                                          orgMemberSelectorProvider
-                                              .orgMemberId),
-                                  builder: (context, snapshot) {
-                                    if (snapshot.connectionState ==
-                                        ConnectionState.waiting) {
-                                      return const Center(
-                                          child: CircularProgressIndicator());
-                                    } else if (snapshot.hasError) {
-                                      return const Center(
-                                          child: Text('Error loading devices'));
-                                    }
-
-                                    // Handle case where snapshot.data might be null or empty
-                                    if (!snapshot.hasData ||
-                                        snapshot.data!.isEmpty) {
-                                      return const Center(
-                                          child: Text('No devices found'));
-                                    }
-
-                                    final List<DocumentSnapshot> devicesDocs =
-                                        snapshot.data!;
-
-                                    return Expanded(
-                                      // Ensure FutureBuilder's content gets proper layout constraints
-                                      child: DeviceList(
-                                        devicesDocs: devicesDocs,
+                                            .secondary,
                                       ),
-                                    );
-                                  },
-                                ),
-                              ],
+                                    ),
+                                  const SizedBox(height: 16),
+                                  if (userClaims[
+                                          'org_admin_${orgSelectorChangeNotifier.orgId}'] ==
+                                      true)
+                                    UserRoleDropdownButton(
+                                        orgMemberData: orgMemberData)
+                                  else
+                                    UserRoleCard(orgMemberData: orgMemberData),
+                                ],
+                              ),
                             ),
-                          ),
-                        ),
-                      ],
-                    );
-                  });
-                },
-              )
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Checked Out Devices',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleLarge
+                                          ?.copyWith(
+                                              fontWeight: FontWeight.bold),
+                                    ),
+                                    StreamBuilder<List<DocumentSnapshot>>(
+                                      stream: firestoreService
+                                          .getOrgMemberDevicesDocuments(
+                                              orgSelectorChangeNotifier.orgId,
+                                              orgMemberSelectorProvider
+                                                  .orgMemberId),
+                                      builder: (context, snapshot) {
+                                        if (snapshot.connectionState ==
+                                            ConnectionState.waiting) {
+                                          return const Center(
+                                              child:
+                                                  CircularProgressIndicator());
+                                        } else if (snapshot.hasError) {
+                                          return const Center(
+                                              child: Text(
+                                                  'Error loading devices'));
+                                        }
 
-            /// If the orgId or orgMemberId is empty due to pressing the back button, show a loading screen.
-            : const Center(child: CircularProgressIndicator()),
+                                        // Handle case where snapshot.data might be null or empty
+                                        if (!snapshot.hasData ||
+                                            snapshot.data!.isEmpty) {
+                                          return const Center(
+                                              child: Text('No devices found'));
+                                        }
+
+                                        final List<DocumentSnapshot>
+                                            devicesDocs = snapshot.data!;
+
+                                        return Expanded(
+                                          // Ensure FutureBuilder's content gets proper layout constraints
+                                          child: DeviceList(
+                                            devicesDocs: devicesDocs,
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      });
+                    },
+                  )
+
+                /// If the orgId or orgMemberId is empty due to pressing the back button, show a loading screen.
+                : const Center(child: CircularProgressIndicator()),
+          );
+        },
       );
     });
+  }
+}
+
+class UserRoleCard extends StatelessWidget {
+  final DocumentSnapshot orgMemberData;
+
+  const UserRoleCard({required this.orgMemberData, super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            Text(
+              orgMemberData['orgMemberRole'] == 'admin'
+                  ? 'Org Admin'
+                  : ' Org Member',
+              style: Theme.of(context)
+                  .textTheme
+                  .labelSmall
+                  ?.copyWith(fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 
@@ -176,18 +223,17 @@ class UserRoleDropdownButton extends StatefulWidget {
 
 class UserRoleDropdownButtonState extends State<UserRoleDropdownButton> {
   String? selectedValue;
-  List<String> items = ['admin', 'member'];
-  var _isLoading = false;
+  bool _isLoading = false;
+
+  final List<Map<String, String>> items = [
+    {'value': 'admin', 'display': 'Org Admin'},
+    {'value': 'member', 'display': 'Org Member'},
+  ];
 
   @override
   void initState() {
     super.initState();
     selectedValue = widget.orgMemberData['orgMemberRole'];
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
   }
 
   void _onChanged() async {
@@ -241,53 +287,15 @@ class UserRoleDropdownButtonState extends State<UserRoleDropdownButton> {
             });
             _isLoading ? null : _onChanged();
           },
-          items: items.map<DropdownMenuItem<String>>((String value) {
+          items:
+              items.map<DropdownMenuItem<String>>((Map<String, String> item) {
             return DropdownMenuItem<String>(
-              value: value,
-              child: Text(value),
+              value: item['value'],
+              child: Text(item['display']!),
             );
           }).toList(),
         ),
       ),
-    );
-  }
-}
-
-class ProfileAvatar extends StatefulWidget {
-  final String? photoUrl;
-
-  const ProfileAvatar({super.key, this.photoUrl});
-
-  @override
-  ProfileAvatarState createState() => ProfileAvatarState();
-}
-
-class ProfileAvatarState extends State<ProfileAvatar> {
-  bool _hasError = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return CircleAvatar(
-      radius: 75,
-      backgroundColor:
-          _hasError ? Theme.of(context).colorScheme.onSecondary : null,
-      backgroundImage: !_hasError && widget.photoUrl != null
-          ? NetworkImage(widget.photoUrl!)
-          : null,
-      onBackgroundImageError: !_hasError
-          ? (exception, stackTrace) {
-              setState(() {
-                _hasError = true;
-              });
-            }
-          : null,
-      child: _hasError
-          ? Icon(
-              Icons.person,
-              size: 50,
-              color: Theme.of(context).colorScheme.secondary,
-            )
-          : null,
     );
   }
 }

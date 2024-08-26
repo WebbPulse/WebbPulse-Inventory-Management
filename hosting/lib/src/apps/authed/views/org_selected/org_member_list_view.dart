@@ -20,99 +20,124 @@ class OrgMemberListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     ThemeData theme = Theme.of(context);
-    return Scaffold(
-      appBar: OrgNameAppBar(
-        titleSuffix: 'Users',
-        actions: [
-          ElevatedButton(
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return const AddUserAlertDialog();
-                },
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
-              side: BorderSide(
-                color: theme.colorScheme.primary.withOpacity(0.5),
-                width: 1.5,
-              ),
-              padding: const EdgeInsets.all(16.0),
-            ),
-            child: const Text('Add New User'),
-          )
-        ],
-      ),
-      drawer: const AuthedDrawer(),
-      body: Consumer2<OrgSelectorChangeNotifier, FirestoreReadService>(
-        builder: (context, orgSelectorProvider, firestoreService, child) {
-          return StreamBuilder<List<DocumentSnapshot>>(
-            stream: firestoreService
-                .getOrgMembersDocuments(orgSelectorProvider.orgId),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              } else if (snapshot.hasError) {
-                return const Center(child: Text('Error loading users'));
-              }
-              final List<DocumentSnapshot> orgMemberDocs = snapshot.data!;
-
-              return Column(
-                children: [
-                  SearchTextField(searchQuery: _searchQuery),
-                  const Center(child: Text('User List')),
-                  Expanded(
-                    child: ValueListenableBuilder<String>(
-                      valueListenable: _searchQuery,
-                      builder: (context, query, child) {
-                        final lowerCaseQuery =
-                            query.toLowerCase(); // Convert query to lowercase
-                        final filteredMemberDocs = orgMemberDocs.where((doc) {
-                          final data = doc.data() as Map<String, dynamic>;
-                          final orgMemberEmail = (data['orgMemberEmail'] ?? '')
-                              .toString()
-                              .toLowerCase();
-                          final orgMemberDisplayName =
-                              (data['orgMemberDisplayName'] ?? '')
-                                  .toString()
-                                  .toLowerCase();
-                          final orgMemberRole = (data['orgMemberRole'] ?? '')
-                              .toString()
-                              .toLowerCase();
-
-                          return orgMemberEmail.contains(lowerCaseQuery) ||
-                              orgMemberDisplayName.contains(lowerCaseQuery) ||
-                              orgMemberRole.contains(lowerCaseQuery);
-                        }).toList();
-
-                        return filteredMemberDocs.isNotEmpty
-                            ? SizedBox(
-                                width: MediaQuery.of(context).size.width * 0.95,
-                                child: ListView.builder(
-                                  physics: const BouncingScrollPhysics(),
-                                  itemCount: filteredMemberDocs.length,
-                                  itemBuilder: (context, index) {
-                                    Map<String, dynamic> userData =
-                                        filteredMemberDocs[index].data()
-                                            as Map<String, dynamic>;
-                                    return UserCard(
-                                      userData: userData,
-                                    );
-                                  },
-                                ),
-                              )
-                            : const Center(child: Text('No users found'));
+    return Consumer<OrgSelectorChangeNotifier>(
+      builder: (context, orgSelectorChangeNotifier, child) {
+        return AuthClaimChecker(
+          builder: (context, userClaims) {
+            return Scaffold(
+              appBar: OrgNameAppBar(
+                titleSuffix: 'Users',
+                actions: [
+                  if (userClaims[
+                          'org_admin_${orgSelectorChangeNotifier.orgId}'] ==
+                      true)
+                    ElevatedButton(
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return const AddUserAlertDialog();
+                          },
+                        );
                       },
-                    ),
-                  ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            theme.colorScheme.surface.withOpacity(0.95),
+                        side: BorderSide(
+                          color: theme.colorScheme.primary.withOpacity(0.5),
+                          width: 1.5,
+                        ),
+                        padding: const EdgeInsets.all(16.0),
+                      ),
+                      child: const Text('Add New User'),
+                    )
                 ],
-              );
-            },
-          );
-        },
-      ),
+              ),
+              drawer: const AuthedDrawer(),
+              body: Consumer<FirestoreReadService>(
+                builder: (context, firestoreService, child) {
+                  return StreamBuilder<List<DocumentSnapshot>>(
+                    stream: firestoreService.getOrgMembersDocuments(
+                        orgSelectorChangeNotifier.orgId),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      } else if (snapshot.hasError) {
+                        return const Center(child: Text('Error loading users'));
+                      }
+                      final List<DocumentSnapshot> orgMemberDocs =
+                          snapshot.data!;
+
+                      return Column(
+                        children: [
+                          SearchTextField(searchQuery: _searchQuery),
+                          const Center(child: Text('User List')),
+                          Expanded(
+                            child: ValueListenableBuilder<String>(
+                              valueListenable: _searchQuery,
+                              builder: (context, query, child) {
+                                final lowerCaseQuery = query
+                                    .toLowerCase(); // Convert query to lowercase
+                                final filteredMemberDocs =
+                                    orgMemberDocs.where((doc) {
+                                  final data =
+                                      doc.data() as Map<String, dynamic>;
+                                  final orgMemberEmail =
+                                      (data['orgMemberEmail'] ?? '')
+                                          .toString()
+                                          .toLowerCase();
+                                  final orgMemberDisplayName =
+                                      (data['orgMemberDisplayName'] ?? '')
+                                          .toString()
+                                          .toLowerCase();
+                                  final orgMemberRole =
+                                      (data['orgMemberRole'] == 'admin'
+                                              ? 'Org Admin'
+                                              : ' Org Member')
+                                          .toString()
+                                          .toLowerCase();
+
+                                  return orgMemberEmail
+                                          .contains(lowerCaseQuery) ||
+                                      orgMemberDisplayName
+                                          .contains(lowerCaseQuery) ||
+                                      orgMemberRole.contains(lowerCaseQuery);
+                                }).toList();
+
+                                return filteredMemberDocs.isNotEmpty
+                                    ? SizedBox(
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                                0.95,
+                                        child: ListView.builder(
+                                          physics:
+                                              const BouncingScrollPhysics(),
+                                          itemCount: filteredMemberDocs.length,
+                                          itemBuilder: (context, index) {
+                                            Map<String, dynamic> userData =
+                                                filteredMemberDocs[index].data()
+                                                    as Map<String, dynamic>;
+                                            return UserCard(
+                                              userData: userData,
+                                            );
+                                          },
+                                        ),
+                                      )
+                                    : const Center(
+                                        child: Text('No users found'));
+                              },
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                },
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }
@@ -300,7 +325,8 @@ class UserCard extends StatelessWidget {
                   Text('Role: ',
                       style: theme.textTheme.labelSmall
                           ?.copyWith(fontWeight: FontWeight.bold)),
-                  Text(orgMemberRole, style: theme.textTheme.labelSmall),
+                  Text(orgMemberRole == 'admin' ? 'Org Admin' : 'Org Member',
+                      style: theme.textTheme.labelSmall),
                 ],
               ),
             ]),
