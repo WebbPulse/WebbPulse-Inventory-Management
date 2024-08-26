@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter/scheduler.dart';
 
 import 'providers/firestore_read_service.dart';
 import 'providers/device_checkout_service.dart';
@@ -19,6 +20,116 @@ import '../apps/authed/views/org_selected/device_checkout_view.dart';
 import '../apps/authed/views/org_selected/org_device_list_view.dart';
 import '../apps/authed/views/org_selected/org_member_list_view.dart';
 import '../apps/authed/views/org_selected/org_settings_view.dart';
+
+import 'package:firebase_auth/firebase_auth.dart';
+
+class ProfileAvatar extends StatefulWidget {
+  final String? photoUrl;
+
+  const ProfileAvatar({super.key, this.photoUrl});
+
+  @override
+  ProfileAvatarState createState() => ProfileAvatarState();
+}
+
+class ProfileAvatarState extends State<ProfileAvatar> {
+  bool _hasError = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return CircleAvatar(
+      radius: 75,
+      backgroundColor:
+          _hasError ? Theme.of(context).colorScheme.onSecondary : null,
+      backgroundImage: !_hasError && widget.photoUrl != null
+          ? NetworkImage(widget.photoUrl!)
+          : null,
+      onBackgroundImageError: !_hasError
+          ? (exception, stackTrace) {
+              // Schedule the setState to happen after the current frame
+              SchedulerBinding.instance.addPostFrameCallback((_) {
+                if (mounted) {
+                  setState(() {
+                    _hasError = true;
+                  });
+                }
+              });
+            }
+          : null,
+      child: _hasError
+          ? Icon(
+              Icons.person,
+              size: 50,
+              color: Theme.of(context).colorScheme.secondary,
+            )
+          : null,
+    );
+  }
+}
+
+class AuthClaimChecker extends StatelessWidget {
+  final Widget Function(BuildContext context, Map<String, dynamic> claims)
+      builder;
+
+  const AuthClaimChecker({Key? key, required this.builder}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<AuthenticationChangeNotifier>(
+      builder: (context, authenticationChangeNotifier, child) {
+        final user = authenticationChangeNotifier.user;
+
+        if (user == null) {
+          return const Center(child: Text('User not signed in'));
+        }
+
+        return FutureBuilder<IdTokenResult>(
+          future: user.getIdTokenResult(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return const Center(child: Text('Error loading user data'));
+            } else if (!snapshot.hasData) {
+              return const Center(child: Text('No token data available'));
+            }
+
+            final claims = snapshot.data!.claims;
+
+            return builder(context, claims!);
+          },
+        );
+      },
+    );
+  }
+}
+
+class OrgDocumentStreamBuilder extends StatelessWidget {
+  final Widget Function(BuildContext context, DocumentSnapshot orgDocument)
+      builder;
+
+  const OrgDocumentStreamBuilder({super.key, required this.builder});
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer2<FirestoreReadService, OrgSelectorChangeNotifier>(builder:
+        (context, firestoreReadService, orgSelectorChangeNotifier, child) {
+      return StreamBuilder<DocumentSnapshot>(
+        stream: firestoreReadService
+            .getOrgDocument(orgSelectorChangeNotifier.orgId),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting ||
+              snapshot.data == null) {
+            return CircularProgressIndicator();
+          }
+          DocumentSnapshot orgDocument = snapshot.data!;
+
+          return builder(context, orgDocument);
+        },
+      );
+    });
+  }
+}
 
 class OrgNameAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String titleSuffix;
@@ -34,24 +145,14 @@ class OrgNameAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<OrgSelectorChangeNotifier, FirestoreReadService>(
-      builder: (context, orgSelectorProvider, firestoreService, child) {
-        return StreamBuilder(
-          stream: firestoreService.getOrgDocument(orgSelectorProvider.orgId),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            } else if (snapshot.hasError) {
-              return const Text('Error loading organization');
-            }
-            final String orgName = snapshot.data?['orgName'] ?? '';
+    return OrgDocumentStreamBuilder(
+      builder: (context, orgDocument) {
+        final String orgName = orgDocument['orgName'] ?? '';
 
-            return AppBar(
-              title: Text('$orgName $titleSuffix'),
-              actions: actions,
-              leading: leading,
-            );
-          },
+        return AppBar(
+          title: Text('$orgName $titleSuffix'),
+          actions: actions,
+          leading: leading,
         );
       },
     );

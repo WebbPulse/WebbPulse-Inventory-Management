@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../../../../shared/providers/org_selector_change_notifier.dart';
 import '../../../../shared/providers/authentication_change_notifier.dart';
 import '../../../../shared/providers/device_checkout_service.dart';
@@ -12,15 +13,37 @@ class DeviceCheckoutView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      appBar: OrgNameAppBar(
-        titleSuffix: 'Device Checkout',
-      ),
-      drawer: AuthedDrawer(),
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: CheckoutForm(),
-      ),
+    return OrgDocumentStreamBuilder(
+      builder: (context, orgDocument) {
+        return Scaffold(
+          appBar: const OrgNameAppBar(
+            titleSuffix: 'Device Checkout',
+          ),
+          drawer: const AuthedDrawer(),
+          body: Stack(
+            children: [
+              if (orgDocument['orgBackgroundImageURL'] != null &&
+                  orgDocument['orgBackgroundImageURL'] != '')
+                Positioned.fill(
+                  child: Image.network(
+                    orgDocument['orgBackgroundImageURL'],
+                    fit: BoxFit.cover,
+                  ),
+                ),
+
+              // Main content with padding
+              const SafeArea(
+                child: SizedBox.expand(
+                  child: Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: CheckoutForm(),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
