@@ -179,12 +179,6 @@ class AuthedDrawer extends StatelessWidget {
               child: const Text('Menu'),
             ),
             ListTile(
-              title: const Text('Organization List'),
-              onTap: () {
-                Navigator.pushNamed(context, OrgSelectionView.routeName);
-              },
-            ),
-            ListTile(
               title: const Text('Checkout'),
               onTap: () {
                 Navigator.pushNamed(context, DeviceCheckoutView.routeName);
@@ -217,6 +211,12 @@ class AuthedDrawer extends StatelessWidget {
                   Navigator.pushNamed(context, OrgSettingsView.routeName);
                 },
               ),
+            ListTile(
+              title: const Text('My Organizations'),
+              onTap: () {
+                Navigator.pushNamed(context, OrgSelectionView.routeName);
+              },
+            ),
           ],
         ),
       );

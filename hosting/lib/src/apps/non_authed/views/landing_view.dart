@@ -17,7 +17,7 @@ class LandingView extends StatelessWidget {
           // Background image
           Positioned.fill(
             child: Image.asset(
-              'boxes.jpg', // Your image asset path
+              'assets/boxes.jpg', // Your image asset path
               fit: BoxFit.cover,
             ),
           ),
