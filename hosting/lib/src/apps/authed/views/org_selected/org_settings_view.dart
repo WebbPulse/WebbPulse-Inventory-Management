@@ -1,6 +1,7 @@
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:webbcheck/src/apps/authed/views/org_selection_view.dart';
 
 import '../../../../shared/providers/firestore_read_service.dart';
 import '../../../../shared/providers/org_selector_change_notifier.dart';
@@ -215,7 +216,18 @@ class OrgSettingsView extends StatelessWidget {
                                         // Delete Org Button with Distinct Color
                                         ElevatedButton.icon(
                                           onPressed: () {
-                                            // Placeholder for delete logic
+                                            final firebaseFunctions =
+                                                Provider.of<FirebaseFunctions>(
+                                                    context,
+                                                    listen: false);
+                                            firebaseFunctions
+                                                .httpsCallable(
+                                                    'delete_org_callable')
+                                                .call({
+                                              'orgId': orgDocument.id,
+                                            });
+                                            Navigator.pushNamed(context,
+                                                OrgSelectionView.routeName);
                                           },
                                           icon: const Icon(Icons.delete),
                                           label:

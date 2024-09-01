@@ -23,7 +23,7 @@ def update_org_name_callable(req: https_fn.CallableRequest) -> Any:
                 code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
                 message='The function must be called with the following arguments: orgId, orgName'
             )
-        # Update organization background image
+        # Update organization name
         org_ref = db.collection('organizations').document(org_id)
         org_ref.update({
             'orgName': org_name,
