@@ -95,7 +95,20 @@ class OrgSettingsView extends StatelessWidget {
                                                 // Trigger logic to submit the new organization name
                                                 final newName =
                                                     _controller.text;
-                                                // Implement your logic here, e.g., update the name in Firestore
+                                                if (newName.isNotEmpty) {
+                                                  final firebaseFunctions =
+                                                      Provider.of<
+                                                              FirebaseFunctions>(
+                                                          context,
+                                                          listen: false);
+                                                  firebaseFunctions
+                                                      .httpsCallable(
+                                                          'update_org_name_callable')
+                                                      .call({
+                                                    'orgId': orgDocument.id,
+                                                    'orgName': newName,
+                                                  });
+                                                }
                                                 print(
                                                     'New Organization Name: $newName');
                                               },
