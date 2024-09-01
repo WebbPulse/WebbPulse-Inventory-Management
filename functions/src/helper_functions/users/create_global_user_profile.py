@@ -14,5 +14,5 @@ def create_global_user_profile(user):
             'mostRecentTokenRevokeTime': 0
         })
     except Exception as e:
-        raise https_fn.HttpsError(code=https_fn.FunctionsErrorCode.UNKNOWN, message=f"Unknown Error creating user profile: {str(e)}")
+        raise https_fn.HttpsError(code=https_fn.FunctionsErrorCode.UNAVAILABLE, message=f"Unknown Error creating user profile: {str(e)}")
     
