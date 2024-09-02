@@ -14,10 +14,13 @@ def update_user_roles(org_member_id, org_member_role, org_id, revoke_tokens):
     # Prepare the claims to update
     if org_member_role == "admin":
         custom_claims[f'org_admin_{org_id}'] = True
-        custom_claims[f'org_member_{org_id}'] = True
+        custom_claims.pop(f'org_member_{org_id}', None)
     elif org_member_role == "member":
         custom_claims.pop(f'org_admin_{org_id}', None)  # Remove the admin claim if it exists
         custom_claims[f'org_member_{org_id}'] = True
+    elif org_member_role == "none":
+        custom_claims.pop(f'org_admin_{org_id}', None)
+        custom_claims.pop(f'org_member_{org_id}', None)
     else:
         raise https_fn.HttpsError(
             code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,

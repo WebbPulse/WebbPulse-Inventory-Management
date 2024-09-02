@@ -19,87 +19,77 @@ class OrgSelectionView extends StatelessWidget {
     ThemeData theme = Theme.of(context);
     return Consumer2<AuthenticationChangeNotifier, FirestoreReadService>(
       builder: (context, authProvider, firestoreService, child) =>
-          StreamBuilder<List<String>>(
-        stream: firestoreService.getUserOrgsIds(authProvider.user!.uid),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: const CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return const Text('Error loading organizations');
-          }
-          final List<String> userOrgIds = snapshot.data ?? [];
-          return Scaffold(
-            body: Column(
-              children: [
-                SizedBox(
-                  height: 16,
-                ),
-                const Center(child: Text('Select an Organization')),
-                Expanded(
-                  child: userOrgIds.isNotEmpty
-                      ? SmallLayoutBuilder(
-                          childWidget: ListView.builder(
-                            physics: const BouncingScrollPhysics(),
-                            itemCount: userOrgIds.length + 1,
-                            itemBuilder: (context, index) {
-                              if (index == userOrgIds.length) {
-                                return Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 8.0),
-                                  child: ElevatedButton(
-                                    onPressed: () {
-                                      Navigator.pushNamed(
-                                          context, OrgCreateView.routeName);
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                        backgroundColor: theme
-                                            .colorScheme.surface
-                                            .withOpacity(0.95),
-                                        side: BorderSide(
-                                          color: theme.colorScheme.primary
-                                              .withOpacity(0.5),
-                                          width: 1.5,
-                                        ),
-                                        padding: const EdgeInsets.all(16.0)),
-                                    child:
-                                        const Text('Create New Organization'),
-                                  ),
-                                );
-                              }
-                              final orgId = userOrgIds[index];
-                              return OrgCard(
-                                orgId: orgId,
-                              );
-                            },
-                          ),
-                        )
-                      : Column(
-                          children: [
-                            const Text('No organizations found'),
-                            ElevatedButton(
-                              onPressed: () {
-                                Navigator.pushNamed(
-                                    context, OrgCreateView.routeName);
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor:
-                                    theme.colorScheme.surface.withOpacity(0.95),
-                                side: BorderSide(
-                                  color: theme.colorScheme.primary
-                                      .withOpacity(0.5),
-                                  width: 1.5,
+          AuthClaimChecker(builder: (context, userClaims) {
+        final List<String> userOrgIds = extractOrgIdsFromClaims(userClaims);
+        return Scaffold(
+          body: Column(
+            children: [
+              SizedBox(
+                height: 16,
+              ),
+              const Center(child: Text('Select an Organization')),
+              Expanded(
+                child: userOrgIds.isNotEmpty
+                    ? SmallLayoutBuilder(
+                        childWidget: ListView.builder(
+                          physics: const BouncingScrollPhysics(),
+                          itemCount: userOrgIds.length + 1,
+                          itemBuilder: (context, index) {
+                            if (index == userOrgIds.length) {
+                              return Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 8.0),
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    Navigator.pushNamed(
+                                        context, OrgCreateView.routeName);
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                      backgroundColor: theme.colorScheme.surface
+                                          .withOpacity(0.95),
+                                      side: BorderSide(
+                                        color: theme.colorScheme.primary
+                                            .withOpacity(0.5),
+                                        width: 1.5,
+                                      ),
+                                      padding: const EdgeInsets.all(16.0)),
+                                  child: const Text('Create New Organization'),
                                 ),
-                              ),
-                              child: const Text('Create New Organization'),
-                            ),
-                          ],
+                              );
+                            }
+                            final orgId = userOrgIds[index];
+                            return OrgCard(
+                              orgId: orgId,
+                            );
+                          },
                         ),
-                ),
-              ],
-            ),
-          );
-        },
-      ),
+                      )
+                    : Column(
+                        children: [
+                          const Text('No organizations found'),
+                          ElevatedButton(
+                            onPressed: () {
+                              Navigator.pushNamed(
+                                  context, OrgCreateView.routeName);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor:
+                                  theme.colorScheme.surface.withOpacity(0.95),
+                              side: BorderSide(
+                                color:
+                                    theme.colorScheme.primary.withOpacity(0.5),
+                                width: 1.5,
+                              ),
+                            ),
+                            child: const Text('Create New Organization'),
+                          ),
+                        ],
+                      ),
+              ),
+            ],
+          ),
+        );
+      }),
     );
   }
 }
@@ -143,4 +133,21 @@ class OrgCard extends StatelessWidget {
       },
     );
   }
+}
+
+List<String> extractOrgIdsFromClaims(Map<String, dynamic> claims) {
+  final RegExp orgIdPattern = RegExp(r'^org_(member|admin)_(\w+)$');
+  List<String> orgIds = [];
+
+  claims.forEach((key, value) {
+    final match = orgIdPattern.firstMatch(key);
+    if (match != null) {
+      final orgId = match.group(2);
+      if (orgId != null) {
+        orgIds.add(orgId);
+      }
+    }
+  });
+
+  return orgIds;
 }

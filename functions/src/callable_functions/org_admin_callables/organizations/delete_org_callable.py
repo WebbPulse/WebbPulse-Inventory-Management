@@ -1,4 +1,5 @@
 from src.shared import https_fn, POSTcorsrules, Any, db, check_user_is_org_admin, check_user_is_authed, check_user_token_current, check_user_is_email_verified, firestore
+from src.helper_functions.users.update_user_roles import update_user_roles
 
 @https_fn.on_call(cors=POSTcorsrules)
 def delete_org_callable(req: https_fn.CallableRequest) -> Any:
@@ -20,28 +21,28 @@ def delete_org_callable(req: https_fn.CallableRequest) -> Any:
         
 
         #delete organization from global user profiles
-
+        
+        #Delete from the current user profile first
+        uid = req.auth.uid
+        update_user_roles(uid, 'none', org_id, True)
+        
+        #Delete from all other user profiles
         # Reference to the organization's members collection
         members_ref = db.collection('organizations').document(org_id).collection('members')
-
         # Get all members
         members = members_ref.stream()
-
         # Perform actions on each user ID in the global users collection
         for member in members:
-            user_id = member.id
-            # Perform your action here, for example:
-            user_ref = db.collection('users').document(user_id)
-            user_data = user_ref.get().to_dict()
-            if user_data:
-                # Example action: Update a field, remove a specific claim, etc.
-                user_ref.update({"userOrgIds": firestore.ArrayRemove([org_id])})
-                # You can add any other actions here as needed
-
+            uid = member.id
+            update_user_roles(uid, 'none', org_id, True)
+            
+                
         # Delete organization after processing all users
         org_ref = db.collection('organizations').document(org_id)
-        org_ref.delete()
-        
+        org_ref.set({
+            'orgDeleted': True
+        }, merge=True)
+
         return {"response": f"Organization deleted: {org_id}"}
     
     except https_fn.HttpsError as e:
