@@ -7,7 +7,6 @@ def create_global_user_profile_callable(req: https_fn.CallableRequest) -> Any:
     # Create the user in Firebase Auth
     try: 
         check_user_is_authed(req)
-        check_user_token_current(req)
         
         
         # Check if the user document already exists in Firestore
