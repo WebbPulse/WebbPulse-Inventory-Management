@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
+import 'package:webbcheck/src/shared/providers/authentication_change_notifier.dart';
 import 'package:webbcheck/src/shared/providers/firestore_read_service.dart';
 import 'package:webbcheck/src/shared/providers/org_member_selector_change_notifier.dart';
 import 'package:webbcheck/src/shared/providers/org_selector_change_notifier.dart';
@@ -14,10 +15,19 @@ class OrgMemberView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer3<OrgSelectorChangeNotifier, OrgMemberSelectorChangeNotifier,
-            FirestoreReadService>(
-        builder: (context, orgSelectorChangeNotifier, orgMemberSelectorProvider,
-            firestoreService, child) {
+    return Consumer5<
+            OrgSelectorChangeNotifier,
+            OrgMemberSelectorChangeNotifier,
+            FirestoreReadService,
+            FirebaseFunctions,
+            AuthenticationChangeNotifier>(
+        builder: (context,
+            orgSelectorChangeNotifier,
+            orgMemberSelectorProvider,
+            firestoreService,
+            firebaseFunctions,
+            authenticationChangeNotifier,
+            child) {
       return AuthClaimChecker(
         builder: (context, userClaims) {
           return Scaffold(
@@ -59,7 +69,7 @@ class OrgMemberView extends StatelessWidget {
                         } else {
                           // Larger screen width (over 600px)
                           containerWidth =
-                              MediaQuery.of(context).size.width * 0.2;
+                              MediaQuery.of(context).size.width * 0.25;
                         }
                         return Row(
                           children: [
@@ -108,8 +118,45 @@ class OrgMemberView extends StatelessWidget {
                                   if (userClaims[
                                           'org_admin_${orgSelectorChangeNotifier.orgId}'] ==
                                       true)
-                                    UserRoleDropdownButton(
-                                        orgMemberData: orgMemberData)
+                                    Column(
+                                      children: [
+                                        UserRoleDropdownButton(
+                                            orgMemberData: orgMemberData),
+                                        const SizedBox(height: 16),
+                                        ElevatedButton.icon(
+                                          onPressed: () {
+                                            firebaseFunctions
+                                                .httpsCallable(
+                                                    'delete_org_member_callable')
+                                                .call({
+                                              'orgId': orgSelectorChangeNotifier
+                                                  .orgId,
+                                              'orgMemberId': orgMemberData.id,
+                                            });
+                                            if (orgMemberData['orgMemberUid'] ==
+                                                userClaims['uid']) {
+                                              authenticationChangeNotifier
+                                                  .signOutUser();
+                                            }
+                                          },
+                                          icon: const Icon(Icons.delete),
+                                          label: Wrap(children: [
+                                            Text(
+                                              'Remove User',
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .labelSmall
+                                                  ?.copyWith(
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                            ),
+                                          ]),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.red,
+                                          ),
+                                        ),
+                                      ],
+                                    )
                                   else
                                     UserRoleCard(orgMemberData: orgMemberData),
                                 ],
