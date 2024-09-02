@@ -83,10 +83,15 @@ class AuthedApp extends StatelessWidget {
                       );
                     }
 
-                    if (routeSettings.name == OrgCreateView.routeName) {
-                      return MaterialPageRoute<void>(
-                        builder: (context) => const OrgCreateView(),
-                      );
+                    switch (routeSettings.name) {
+                      case ProfileSettingsView.routeName:
+                        return MaterialPageRoute<void>(
+                          builder: (context) => const ProfileSettingsView(),
+                        );
+                      case OrgCreateView.routeName:
+                        return MaterialPageRoute<void>(
+                          builder: (context) => const OrgCreateView(),
+                        );
                     }
 
                     if (orgSelectorProvider.orgId.isEmpty) {
@@ -102,10 +107,6 @@ class AuthedApp extends StatelessWidget {
                     }
 
                     switch (routeSettings.name) {
-                      case ProfileSettingsView.routeName:
-                        return MaterialPageRoute<void>(
-                          builder: (context) => const ProfileSettingsView(),
-                        );
                       case OrgDeviceListView.routeName:
                         return MaterialPageRoute<void>(
                           builder: (context) => const OrgDeviceListView(),
