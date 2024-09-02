@@ -23,7 +23,7 @@ class OrgSelectionView extends StatelessWidget {
         stream: firestoreService.getUserOrgsIds(authProvider.user!.uid),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(child: const CircularProgressIndicator());
           } else if (snapshot.hasError) {
             return const Text('Error loading organizations');
           }

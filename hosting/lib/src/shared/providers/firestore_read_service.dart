@@ -134,12 +134,18 @@ class FirestoreReadService {
     }
   }
 
-  Future<bool> doesGlobalUserExistInFirestore(String uid) async {
+  Stream<bool> doesGlobalUserExistInFirestore(String uid) {
     try {
-      final querySnapshot = await _db.collection('users').doc(uid).get();
-      return querySnapshot.exists;
+      return _db
+          .collection('usersMetadata')
+          .doc(uid)
+          .snapshots()
+          .map((docSnapshot) {
+        return docSnapshot.exists;
+      });
     } catch (e) {
-      return false;
+      // In case of an error, return a stream that emits `false`
+      return Stream.value(false);
     }
   }
 }
