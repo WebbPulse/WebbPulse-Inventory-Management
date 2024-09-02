@@ -11,6 +11,9 @@ def create_organization_callable(req: https_fn.CallableRequest) -> Any:
         org_member_display_name = req.auth.token.get("name", "")
         org_member_email = req.auth.token.get("email", "")
         
+        if org_member_display_name == "":
+            org_member_display_name = org_member_email
+
         # Check if the user is authenticated
         check_user_is_authed(req)
         check_user_is_email_verified(req)
