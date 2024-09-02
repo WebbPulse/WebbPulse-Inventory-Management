@@ -299,7 +299,10 @@ class UserCard extends StatelessWidget {
         String orgMemberEmail =
             userData['orgMemberEmail'] ?? 'Email Loading...';
         String orgMemberRole = userData['orgMemberRole'] ?? 'Role Loading...';
-
+        bool orgMemberDeleted = userData['orgMemberDeleted'] ?? false;
+        if (orgMemberDeleted) {
+          return const SizedBox.shrink();
+        }
         return CustomCard(
             theme: theme,
             customCardLeading:

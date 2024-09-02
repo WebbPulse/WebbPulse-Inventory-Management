@@ -389,7 +389,6 @@ class DeviceList extends StatelessWidget {
 
                               return DeviceCard(
                                 deviceData: deviceData,
-                                orgId: orgSelectorProvider.orgId,
                               );
                             },
                           ),
@@ -457,22 +456,27 @@ class SerialSearchTextFieldState extends State<SerialSearchTextField> {
 class DeviceCard extends StatelessWidget {
   const DeviceCard({
     super.key,
-    required this.orgId,
     required this.deviceData,
   });
 
   final Map<String, dynamic> deviceData;
-  final String orgId;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final String deviceId = deviceData['deviceId'];
     final String deviceSerialNumber = deviceData['deviceSerialNumber'];
-    return Consumer2<FirestoreReadService, DeviceCheckoutService>(
-      builder: (context, firestoreService, deviceCheckoutService, child) {
+    final bool deviceDeleted = deviceData['deviceDeleted'] ?? false;
+    if (deviceDeleted) {
+      return const SizedBox.shrink();
+    }
+    return Consumer3<FirestoreReadService, DeviceCheckoutService,
+        OrgSelectorChangeNotifier>(
+      builder: (context, firestoreService, deviceCheckoutService,
+          orgSelectorChangeNotifier, child) {
         return StreamBuilder(
-          stream: firestoreService.getOrgDeviceDocument(deviceId, orgId),
+          stream: firestoreService.getOrgDeviceDocument(
+              deviceId, orgSelectorChangeNotifier.orgId),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
@@ -483,8 +487,8 @@ class DeviceCard extends StatelessWidget {
             final orgMemberId = deviceData['deviceCheckedOutBy'];
 
             return StreamBuilder<DocumentSnapshot?>(
-                stream:
-                    firestoreService.getOrgMemberDocument(orgId, orgMemberId),
+                stream: firestoreService.getOrgMemberDocument(
+                    orgSelectorChangeNotifier.orgId, orgMemberId),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
