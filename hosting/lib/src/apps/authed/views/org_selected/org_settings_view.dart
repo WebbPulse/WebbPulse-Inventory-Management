@@ -215,20 +215,20 @@ class OrgSettingsView extends StatelessWidget {
                                         const SizedBox(height: 20),
                                         // Delete Org Button with Distinct Color
                                         ElevatedButton.icon(
-                                          onPressed: () {
-                                            Navigator.pop(context);
-                                            Navigator.pushNamed(context,
-                                                OrgSelectionView.routeName);
+                                          onPressed: () async {
                                             final firebaseFunctions =
                                                 Provider.of<FirebaseFunctions>(
                                                     context,
                                                     listen: false);
-                                            firebaseFunctions
+                                            await firebaseFunctions
                                                 .httpsCallable(
                                                     'delete_org_callable')
                                                 .call({
                                               'orgId': orgDocument.id,
                                             });
+                                            Navigator.pop(context);
+                                            Navigator.pushNamed(context,
+                                                OrgSelectionView.routeName);
                                           },
                                           icon: const Icon(Icons.delete),
                                           label:
