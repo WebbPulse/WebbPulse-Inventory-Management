@@ -1,7 +1,6 @@
 from src.shared import auth, https_fn, POSTcorsrules, allowed_domains, Any, UserNotFoundError, check_user_is_org_admin, check_user_is_authed, check_user_token_current, check_user_is_email_verified
 from src.helper_functions.users.create_global_user_profile import create_global_user_profile
 from src.helper_functions.users.add_user_to_organization import add_user_to_organization
-from src.helper_functions.users.update_user_organizations import update_user_organizations
 
 
 @https_fn.on_call(cors=POSTcorsrules)
@@ -47,12 +46,10 @@ def create_user_callable(req: https_fn.CallableRequest) -> Any:
 
         if user_exists_in_auth():   
             add_user_to_organization(user.uid, org_id, user.display_name, user_email)
-            update_user_organizations(user.uid, org_id)
             response_message = f"User {user_email} added to organization."
         else:
             create_global_user_profile(user)
             add_user_to_organization(user.uid, org_id, user.display_name, user_email)
-            update_user_organizations(user.uid, org_id)
             response_message = f"User {user_email} created and added to organization."
 
         return {"response": response_message,
