@@ -1,7 +1,7 @@
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:webbcheck/src/apps/authed/views/org_selection_view.dart';
+import 'package:webbcheck/src/shared/providers/authentication_change_notifier.dart';
 
 import '../../../../shared/providers/firestore_read_service.dart';
 import '../../../../shared/providers/org_selector_change_notifier.dart';
@@ -32,10 +32,13 @@ class OrgSettingsView extends StatelessWidget {
               ),
             SafeArea(
               child: SizedBox.expand(
-                child:
-                    Consumer2<OrgSelectorChangeNotifier, FirestoreReadService>(
-                  builder:
-                      (context, orgSelectorProvider, firestoreService, child) {
+                child: Consumer4<
+                    OrgSelectorChangeNotifier,
+                    FirestoreReadService,
+                    AuthenticationChangeNotifier,
+                    FirebaseFunctions>(
+                  builder: (context, orgSelectorProvider, firestoreService,
+                      authenticationChangeNotifier, firebaseFunctions, child) {
                     // Assuming you get the organization name from your provider
                     final currentOrgName = orgDocument['orgName'] as String;
                     final TextEditingController controller =
@@ -212,20 +215,15 @@ class OrgSettingsView extends StatelessWidget {
                                         const SizedBox(height: 20),
                                         // Delete Org Button with Distinct Color
                                         ElevatedButton.icon(
-                                          onPressed: () async {
-                                            final firebaseFunctions =
-                                                Provider.of<FirebaseFunctions>(
-                                                    context,
-                                                    listen: false);
-                                            await firebaseFunctions
+                                          onPressed: () {
+                                            firebaseFunctions
                                                 .httpsCallable(
                                                     'delete_org_callable')
                                                 .call({
                                               'orgId': orgDocument.id,
                                             });
-                                            Navigator.pop(context);
-                                            Navigator.pushNamed(context,
-                                                OrgSelectionView.routeName);
+                                            authenticationChangeNotifier
+                                                .signOutUser();
                                           },
                                           icon: const Icon(Icons.delete),
                                           label:

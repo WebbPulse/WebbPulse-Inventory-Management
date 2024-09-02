@@ -116,7 +116,10 @@ class OrgCard extends StatelessWidget {
               return const Text('Error loading organizations');
             }
             final String orgName = snapshot.data?['orgName'] ?? '';
-
+            final bool orgDeleted = snapshot.data?['orgDeleted'] ?? false;
+            if (orgDeleted) {
+              return const SizedBox.shrink();
+            }
             return CustomCard(
               theme: theme,
               customCardLeading:
