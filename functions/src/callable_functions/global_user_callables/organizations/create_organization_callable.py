@@ -1,6 +1,5 @@
 from src.shared import POSTcorsrules, db, firestore, https_fn, Any, check_user_is_authed, check_user_token_current, check_user_is_email_verified
 from src.helper_functions.users.add_user_to_organization import add_user_to_organization
-from src.helper_functions.users.update_user_organizations import update_user_organizations
 from src.helper_functions.users.update_user_roles import update_user_roles
 
 @https_fn.on_call(cors=POSTcorsrules)
@@ -32,10 +31,9 @@ def create_organization_callable(req: https_fn.CallableRequest) -> Any:
             'createdAt': firestore.SERVER_TIMESTAMP,
             'orgName': org_name,
             'orgBackgroundImageURL': "",
+            'orgDeleted': False,
         })
 
-        # Update user organizations and add user to the organization
-        update_user_organizations(uid, org_id)
         add_user_to_organization(uid, org_id, org_member_display_name, org_member_email)
         update_user_roles(uid, "admin", org_id, False)
 

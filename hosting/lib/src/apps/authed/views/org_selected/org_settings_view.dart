@@ -38,7 +38,7 @@ class OrgSettingsView extends StatelessWidget {
                       (context, orgSelectorProvider, firestoreService, child) {
                     // Assuming you get the organization name from your provider
                     final currentOrgName = orgDocument['orgName'] as String;
-                    final TextEditingController _controller =
+                    final TextEditingController controller =
                         TextEditingController(text: currentOrgName);
 
                     return SingleChildScrollView(
@@ -85,17 +85,16 @@ class OrgSettingsView extends StatelessWidget {
                                         const SizedBox(height: 40),
                                         // Change Org Name TextField with Submit Button
                                         TextField(
-                                          controller: _controller,
+                                          controller: controller,
                                           decoration: InputDecoration(
                                             labelText: 'Organization Name',
-                                            border: OutlineInputBorder(),
+                                            border: const OutlineInputBorder(),
                                             prefixIcon: const Icon(Icons.edit),
                                             suffixIcon: IconButton(
                                               icon: const Icon(Icons.check),
                                               onPressed: () {
                                                 // Trigger logic to submit the new organization name
-                                                final newName =
-                                                    _controller.text;
+                                                final newName = controller.text;
                                                 if (newName.isNotEmpty) {
                                                   final firebaseFunctions =
                                                       Provider.of<
@@ -110,8 +109,6 @@ class OrgSettingsView extends StatelessWidget {
                                                     'orgName': newName,
                                                   });
                                                 }
-                                                print(
-                                                    'New Organization Name: $newName');
                                               },
                                             ),
                                           ),
@@ -124,14 +121,14 @@ class OrgSettingsView extends StatelessWidget {
                                               context: context,
                                               builder: (context) {
                                                 final TextEditingController
-                                                    _urlController =
+                                                    urlController =
                                                     TextEditingController();
 
                                                 return AlertDialog(
                                                   title: const Text(
                                                       'Change Organization Image URL'),
                                                   content: TextField(
-                                                    controller: _urlController,
+                                                    controller: urlController,
                                                     decoration:
                                                         const InputDecoration(
                                                       labelText: 'Image URL',
@@ -172,7 +169,7 @@ class OrgSettingsView extends StatelessWidget {
                                                                 context,
                                                                 listen: false);
                                                         final newImageUrl =
-                                                            _urlController.text;
+                                                            urlController.text;
                                                         if (newImageUrl
                                                             .isNotEmpty) {
                                                           firebaseFunctions
