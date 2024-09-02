@@ -71,7 +71,7 @@ class AuthClaimChecker extends StatelessWidget {
   final Widget Function(BuildContext context, Map<String, dynamic> claims)
       builder;
 
-  const AuthClaimChecker({Key? key, required this.builder}) : super(key: key);
+  const AuthClaimChecker({super.key, required this.builder});
 
   @override
   Widget build(BuildContext context) {
@@ -120,7 +120,7 @@ class OrgDocumentStreamBuilder extends StatelessWidget {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting ||
               snapshot.data == null) {
-            return CircularProgressIndicator();
+            return const CircularProgressIndicator();
           }
           DocumentSnapshot orgDocument = snapshot.data!;
 

@@ -55,18 +55,19 @@ class AuthedApp extends StatelessWidget {
           FirestoreReadService>(
         builder: (context, orgSelectorProvider, settingsProvider, authProvider,
             orgMemberSelectorProvider, firestoreReadService, child) {
-          return FutureBuilder<bool>(
-              future: firestoreReadService
+          return StreamBuilder<bool>(
+              stream: firestoreReadService
                   .doesGlobalUserExistInFirestore(authProvider.user!.uid),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const CircularProgressIndicator();
                 } else if (snapshot.hasError) {
-                  return const Text('Error checking user exists');
+                  return const CircularProgressIndicator();
                 } else if (snapshot.data == false) {
                   firebaseFunctions
                       .httpsCallable('create_global_user_profile_callable')
                       .call({});
+                  return const CircularProgressIndicator();
                 }
 
                 return MaterialApp(
