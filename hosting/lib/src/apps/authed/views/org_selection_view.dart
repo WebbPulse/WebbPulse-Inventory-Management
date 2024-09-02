@@ -33,9 +33,11 @@ class OrgSelectionView extends StatelessWidget {
                     ? SmallLayoutBuilder(
                         childWidget: ListView.builder(
                           physics: const BouncingScrollPhysics(),
-                          itemCount: userOrgIds.length + 1,
+                          itemCount: userOrgIds.length +
+                              (userOrgIds.length < 10 ? 1 : 0),
                           itemBuilder: (context, index) {
-                            if (index == userOrgIds.length) {
+                            if (index == userOrgIds.length &&
+                                userOrgIds.length < 10) {
                               return Padding(
                                 padding:
                                     const EdgeInsets.symmetric(vertical: 8.0),
@@ -45,14 +47,15 @@ class OrgSelectionView extends StatelessWidget {
                                         context, OrgCreateView.routeName);
                                   },
                                   style: ElevatedButton.styleFrom(
-                                      backgroundColor: theme.colorScheme.surface
-                                          .withOpacity(0.95),
-                                      side: BorderSide(
-                                        color: theme.colorScheme.primary
-                                            .withOpacity(0.5),
-                                        width: 1.5,
-                                      ),
-                                      padding: const EdgeInsets.all(16.0)),
+                                    backgroundColor: theme.colorScheme.surface
+                                        .withOpacity(0.95),
+                                    side: BorderSide(
+                                      color: theme.colorScheme.primary
+                                          .withOpacity(0.5),
+                                      width: 1.5,
+                                    ),
+                                    padding: const EdgeInsets.all(16.0),
+                                  ),
                                   child: const Text('Create New Organization'),
                                 ),
                               );

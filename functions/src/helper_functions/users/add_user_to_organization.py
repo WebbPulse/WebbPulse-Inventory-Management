@@ -9,7 +9,8 @@ def add_user_to_organization(uid, org_id, org_member_display_name, org_member_em
             'orgMemberDisplayName': org_member_display_name,
             'orgMemberEmail': org_member_email,
             'orgMemberPhotoURL': "",
-            'orgMemberRole': "member"
+            'orgMemberRole': "member",
+            'orgMemberDeleted': False,
         })
         update_user_roles(uid, "member", org_id, False)
     except Exception as e:

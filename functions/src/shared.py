@@ -62,3 +62,17 @@ def check_user_is_org_admin(req: https_fn.CallableRequest, org_id: str):
         if req.auth.token.get(f"org_admin_{org_id}") is None:
             raise https_fn.HttpsError(code=https_fn.FunctionsErrorCode.PERMISSION_DENIED,
                                       message=f"Unauthorized access. User is not an admin of the organization.")
+        
+def check_user_is_at_global_org_limit(req: https_fn.CallableRequest, userEmail:str):
+    # Check if the user is at the global organization limit
+    user = auth.get_user_by_email(userEmail)
+    custom_claims = user.custom_claims or {}
+    org_admin_claims = [claim for claim in custom_claims.keys() if claim.startswith("org_admin_")]
+    org_member_claims = [claim for claim in custom_claims.keys() if claim.startswith("org_member_")]
+    org_count = len(org_admin_claims) + len(org_member_claims)
+    
+    if org_count >= 10:
+        raise https_fn.HttpsError(
+            code=https_fn.FunctionsErrorCode.FAILED_PRECONDITION,
+            message="The user is at the global organization limit."
+        )
