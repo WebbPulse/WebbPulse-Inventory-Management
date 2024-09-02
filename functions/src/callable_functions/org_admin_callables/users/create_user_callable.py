@@ -1,4 +1,4 @@
-from src.shared import auth, https_fn, POSTcorsrules, allowed_domains, Any, UserNotFoundError, check_user_is_org_admin, check_user_is_authed, check_user_token_current, check_user_is_email_verified
+from src.shared import auth, https_fn, POSTcorsrules, allowed_domains, Any, UserNotFoundError, check_user_is_org_admin, check_user_is_authed, check_user_token_current, check_user_is_email_verified, check_user_is_at_global_org_limit
 from src.helper_functions.users.create_global_user_profile import create_global_user_profile
 from src.helper_functions.users.add_user_to_organization import add_user_to_organization
 
@@ -14,6 +14,7 @@ def create_user_callable(req: https_fn.CallableRequest) -> Any:
         check_user_is_email_verified(req)
         check_user_token_current(req)
         check_user_is_org_admin(req, org_id)
+        
 
         # Checking attribute.
         if not user_email or not org_id:
@@ -43,7 +44,10 @@ def create_user_callable(req: https_fn.CallableRequest) -> Any:
                     disabled=False
                 )
                 return False
-
+        
+        # Check if the user is at the global organization limit, if so throw an exception and stop execution
+        check_user_is_at_global_org_limit(req, user_email)
+        #if note proceed to the rest of the logic
         if user_exists_in_auth():   
             add_user_to_organization(user.uid, org_id, user.display_name, user_email)
             response_message = f"User {user_email} added to organization."
