@@ -28,6 +28,7 @@ def create_device_callable(req: https_fn.CallableRequest) -> Any:
             'isDeviceCheckedOut': False,
             'deviceCheckedOutBy': '',
             'deviceCheckedOutAt': None,
+            'deviceDeleted': False,
         })
 
         return {"response": f"Device {serial} created"}

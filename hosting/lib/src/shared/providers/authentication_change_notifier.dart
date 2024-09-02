@@ -29,6 +29,8 @@ class AuthenticationChangeNotifier extends ChangeNotifier {
     FirebaseAuth.instance.authStateChanges().listen((user) {
       /// user IS logged in
       if (user != null) {
+        /// get the user's new token
+        user.getIdToken(true);
         _user = user;
         _userLoggedIn = true;
         _userWasLoggedIn = true;

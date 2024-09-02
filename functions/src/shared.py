@@ -59,6 +59,6 @@ def check_user_is_org_member(req: https_fn.CallableRequest, org_id: str):
 
 def check_user_is_org_admin(req: https_fn.CallableRequest, org_id: str):
         # Check for the admin role
-        if req.auth.token.get(f"org_member_{org_id}") is None:
+        if req.auth.token.get(f"org_admin_{org_id}") is None:
             raise https_fn.HttpsError(code=https_fn.FunctionsErrorCode.PERMISSION_DENIED,
                                       message=f"Unauthorized access. User is not an admin of the organization.")

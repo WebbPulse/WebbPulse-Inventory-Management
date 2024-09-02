@@ -20,7 +20,6 @@ class OrgSelectionView extends StatelessWidget {
     return Consumer2<AuthenticationChangeNotifier, FirestoreReadService>(
       builder: (context, authProvider, firestoreService, child) =>
           AuthClaimChecker(builder: (context, userClaims) {
-        print(userClaims);
         final List<String> userOrgIds = extractOrgIdsFromClaims(userClaims);
         return Scaffold(
           body: Column(

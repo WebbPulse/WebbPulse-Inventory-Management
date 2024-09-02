@@ -9,6 +9,7 @@ def create_global_user_profile(user):
             'uid': user.uid,
             'userDisplayName': user.email,
             'userPhotoURL': "",
+            'userDeleted': False,
         })
         db.collection('usersMetadata').document(user.uid).set({
             'mostRecentTokenRevokeTime': 0
