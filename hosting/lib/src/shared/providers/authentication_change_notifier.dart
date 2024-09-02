@@ -27,14 +27,8 @@ class AuthenticationChangeNotifier extends ChangeNotifier {
     ]);
 
     FirebaseAuth.instance.authStateChanges().listen((user) {
-      /// user IS NOT logged and
-      /// WAS logged in previously
-      if (user == null && _userWasLoggedIn) {
-        _userLoggedIn = false;
-      }
-
       /// user IS logged in
-      else if (user != null) {
+      if (user != null) {
         _user = user;
         _userLoggedIn = true;
         _userWasLoggedIn = true;

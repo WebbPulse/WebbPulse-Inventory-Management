@@ -27,9 +27,6 @@ from src.callable_functions.global_user_callables.organizations.create_organizat
 from src.callable_functions.global_user_callables.global_user_profile.update_global_user_display_name_callable import update_global_user_display_name_callable
 from src.callable_functions.global_user_callables.global_user_profile.update_global_user_photo_url_callable import update_global_user_photo_url_callable
 
-#blocking functions
-from src.blocking_functions.create_user_ui import create_user_ui
-
 #firestore triggered functions
 from src.firestore_triggered_functions.monitor_for_user_changes import monitor_for_user_changes
 

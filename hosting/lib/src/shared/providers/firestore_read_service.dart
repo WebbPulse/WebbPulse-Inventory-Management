@@ -133,4 +133,13 @@ class FirestoreReadService {
       return Stream.error('Failed to get user');
     }
   }
+
+  Future<bool> doesGlobalUserExistInFirestore(String uid) async {
+    try {
+      final querySnapshot = await _db.collection('users').doc(uid).get();
+      return querySnapshot.exists;
+    } catch (e) {
+      return false;
+    }
+  }
 }

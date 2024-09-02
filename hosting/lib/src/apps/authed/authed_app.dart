@@ -47,77 +47,96 @@ class AuthedApp extends StatelessWidget {
         Provider<FirebaseFunctions>.value(value: firebaseFunctions),
         Provider<DeviceCheckoutService>(create: (_) => deviceCheckoutService),
       ],
-      child: Consumer4<OrgSelectorChangeNotifier, SettingsChangeNotifier,
-          AuthenticationChangeNotifier, OrgMemberSelectorChangeNotifier>(
+      child: Consumer5<
+          OrgSelectorChangeNotifier,
+          SettingsChangeNotifier,
+          AuthenticationChangeNotifier,
+          OrgMemberSelectorChangeNotifier,
+          FirestoreReadService>(
         builder: (context, orgSelectorProvider, settingsProvider, authProvider,
-            orgMemberSelectorProvider, child) {
-          return MaterialApp(
-            restorationScopeId: 'authedapp',
-            title: 'WebbPulse Inventory Management',
-            theme: ThemeData(),
-            darkTheme: ThemeData.dark(),
-            themeMode: settingsProvider.themeMode,
-            onGenerateRoute: (RouteSettings routeSettings) {
-              if (authProvider.user!.emailVerified == false) {
-                return MaterialPageRoute<void>(
-                  builder: (context) => const VerifyEmailView(),
-                );
-              }
+            orgMemberSelectorProvider, firestoreReadService, child) {
+          return FutureBuilder<bool>(
+              future: firestoreReadService
+                  .doesGlobalUserExistInFirestore(authProvider.user!.uid),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const CircularProgressIndicator();
+                } else if (snapshot.hasError) {
+                  return const Text('Error checking user exists');
+                } else if (snapshot.data == false) {
+                  firebaseFunctions
+                      .httpsCallable('create_global_user_profile_callable')
+                      .call({});
+                }
 
-              if (routeSettings.name == OrgCreateView.routeName) {
-                return MaterialPageRoute<void>(
-                  builder: (context) => const OrgCreateView(),
-                );
-              }
+                return MaterialApp(
+                  restorationScopeId: 'authedapp',
+                  title: 'WebbPulse Inventory Management',
+                  theme: ThemeData(),
+                  darkTheme: ThemeData.dark(),
+                  themeMode: settingsProvider.themeMode,
+                  onGenerateRoute: (RouteSettings routeSettings) {
+                    if (authProvider.user!.emailVerified == false) {
+                      return MaterialPageRoute<void>(
+                        builder: (context) => const VerifyEmailView(),
+                      );
+                    }
 
-              if (orgSelectorProvider.orgId.isEmpty) {
-                return MaterialPageRoute<void>(
-                  builder: (context) => const OrgSelectionView(),
-                );
-              }
+                    if (routeSettings.name == OrgCreateView.routeName) {
+                      return MaterialPageRoute<void>(
+                        builder: (context) => const OrgCreateView(),
+                      );
+                    }
 
-              if (orgMemberSelectorProvider.orgMemberId.isNotEmpty) {
-                return MaterialPageRoute<void>(
-                  builder: (context) => const OrgMemberView(),
-                );
-              }
+                    if (orgSelectorProvider.orgId.isEmpty) {
+                      return MaterialPageRoute<void>(
+                        builder: (context) => const OrgSelectionView(),
+                      );
+                    }
 
-              switch (routeSettings.name) {
-                case ProfileSettingsView.routeName:
-                  return MaterialPageRoute<void>(
-                    builder: (context) => const ProfileSettingsView(),
-                  );
-                case OrgDeviceListView.routeName:
-                  return MaterialPageRoute<void>(
-                    builder: (context) => const OrgDeviceListView(),
-                  );
-                case DeviceCheckoutView.routeName:
-                  return MaterialPageRoute<void>(
-                    builder: (context) => const DeviceCheckoutView(),
-                  );
-                case OrgMemberListView.routeName:
-                  return MaterialPageRoute<void>(
-                    builder: (context) => OrgMemberListView(),
-                  );
-                case OrgSelectionView.routeName:
-                  return MaterialPageRoute<void>(
-                    builder: (context) => const OrgSelectionView(),
-                  );
-                case OrgMemberView.routeName:
-                  return MaterialPageRoute<void>(
-                    builder: (context) => const OrgMemberView(),
-                  );
-                case OrgSettingsView.routeName:
-                  return MaterialPageRoute<void>(
-                    builder: (context) => const OrgSettingsView(),
-                  );
-                default:
-                  return MaterialPageRoute<void>(
-                    builder: (context) => const DeviceCheckoutView(),
-                  );
-              }
-            },
-          );
+                    if (orgMemberSelectorProvider.orgMemberId.isNotEmpty) {
+                      return MaterialPageRoute<void>(
+                        builder: (context) => const OrgMemberView(),
+                      );
+                    }
+
+                    switch (routeSettings.name) {
+                      case ProfileSettingsView.routeName:
+                        return MaterialPageRoute<void>(
+                          builder: (context) => const ProfileSettingsView(),
+                        );
+                      case OrgDeviceListView.routeName:
+                        return MaterialPageRoute<void>(
+                          builder: (context) => const OrgDeviceListView(),
+                        );
+                      case DeviceCheckoutView.routeName:
+                        return MaterialPageRoute<void>(
+                          builder: (context) => const DeviceCheckoutView(),
+                        );
+                      case OrgMemberListView.routeName:
+                        return MaterialPageRoute<void>(
+                          builder: (context) => OrgMemberListView(),
+                        );
+                      case OrgSelectionView.routeName:
+                        return MaterialPageRoute<void>(
+                          builder: (context) => const OrgSelectionView(),
+                        );
+                      case OrgMemberView.routeName:
+                        return MaterialPageRoute<void>(
+                          builder: (context) => const OrgMemberView(),
+                        );
+                      case OrgSettingsView.routeName:
+                        return MaterialPageRoute<void>(
+                          builder: (context) => const OrgSettingsView(),
+                        );
+                      default:
+                        return MaterialPageRoute<void>(
+                          builder: (context) => const DeviceCheckoutView(),
+                        );
+                    }
+                  },
+                );
+              });
         },
       ),
     );
