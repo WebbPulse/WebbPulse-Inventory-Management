@@ -71,7 +71,6 @@ class OrgMemberListView extends StatelessWidget {
                       return Column(
                         children: [
                           SearchTextField(searchQuery: _searchQuery),
-                          const Center(child: Text('User List')),
                           Expanded(
                             child: ValueListenableBuilder<String>(
                               valueListenable: _searchQuery,

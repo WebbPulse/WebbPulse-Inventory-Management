@@ -169,6 +169,8 @@ class AuthedDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AuthClaimChecker(builder: (context, userClaims) {
+      final orgId = Provider.of<OrgSelectorChangeNotifier>(context).orgId;
+
       return Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
@@ -179,39 +181,40 @@ class AuthedDrawer extends StatelessWidget {
               ),
               child: const Text('Menu'),
             ),
-            ListTile(
-              title: const Text('Checkout'),
-              onTap: () {
-                Navigator.pushNamed(context, DeviceCheckoutView.routeName);
-              },
-            ),
-            ListTile(
-              title: const Text('Devices'),
-              onTap: () {
-                Navigator.pushNamed(context, OrgDeviceListView.routeName);
-              },
-            ),
-            ListTile(
-              title: const Text('Users'),
-              onTap: () {
-                Navigator.pushNamed(context, OrgMemberListView.routeName);
-              },
-            ),
+            // Only show these items if orgId is not empty
+            if (orgId.isNotEmpty) ...[
+              if (userClaims['org_admin_$orgId'] == true)
+                ListTile(
+                  title: const Text('Organization Settings'),
+                  onTap: () {
+                    Navigator.pushNamed(context, OrgSettingsView.routeName);
+                  },
+                ),
+              ListTile(
+                title: const Text('Checkout'),
+                onTap: () {
+                  Navigator.pushNamed(context, DeviceCheckoutView.routeName);
+                },
+              ),
+              ListTile(
+                title: const Text('Devices'),
+                onTap: () {
+                  Navigator.pushNamed(context, OrgDeviceListView.routeName);
+                },
+              ),
+              ListTile(
+                title: const Text('Users'),
+                onTap: () {
+                  Navigator.pushNamed(context, OrgMemberListView.routeName);
+                },
+              ),
+            ],
             ListTile(
               title: const Text('Profile'),
               onTap: () {
                 Navigator.pushNamed(context, ProfileSettingsView.routeName);
               },
             ),
-            if (userClaims[
-                    'org_admin_${Provider.of<OrgSelectorChangeNotifier>(context).orgId}'] ==
-                true)
-              ListTile(
-                title: const Text('Organization Settings'),
-                onTap: () {
-                  Navigator.pushNamed(context, OrgSettingsView.routeName);
-                },
-              ),
             ListTile(
               title: const Text('My Organizations'),
               onTap: () {
@@ -322,7 +325,7 @@ class SmallLayoutBuilder extends StatelessWidget {
           builder: (context, constraints) {
             double widthFactor;
             if (constraints.maxWidth < 600) {
-              widthFactor = 0.9; // 90% of the width for narrow screens
+              widthFactor = 0.95; // 90% of the width for narrow screens
             } else if (constraints.maxWidth < 1200) {
               widthFactor = 0.5; // 50% of the width for medium screens
             } else {
@@ -516,9 +519,16 @@ class DeviceCard extends StatelessWidget {
                                   ],
                                 ),
                                 const SizedBox(height: 8),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
+                                Wrap(
+                                  alignment: WrapAlignment.start,
+                                  runSpacing: 8,
                                   children: [
+                                    DeviceCheckoutButton(
+                                      deviceSerialNumber: deviceSerialNumber,
+                                      isDeviceCheckedOut:
+                                          deviceData['isDeviceCheckedOut'],
+                                    ),
+                                    const SizedBox(width: 8),
                                     ElevatedButton.icon(
                                       onPressed: () {
                                         firebaseFunctions
@@ -538,12 +548,6 @@ class DeviceCard extends StatelessWidget {
                                         backgroundColor: Colors.red,
                                         padding: const EdgeInsets.all(16.0),
                                       ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    DeviceCheckoutButton(
-                                      deviceSerialNumber: deviceSerialNumber,
-                                      isDeviceCheckedOut:
-                                          deviceData['isDeviceCheckedOut'],
                                     ),
                                   ],
                                 ),
@@ -577,6 +581,12 @@ class DeviceCard extends StatelessWidget {
                               children: [
                                 Row(
                                   children: [
+                                    DeviceCheckoutButton(
+                                      deviceSerialNumber: deviceSerialNumber,
+                                      isDeviceCheckedOut:
+                                          deviceData['isDeviceCheckedOut'],
+                                    ),
+                                    const SizedBox(width: 8),
                                     ElevatedButton.icon(
                                       onPressed: () {
                                         firebaseFunctions
@@ -596,12 +606,6 @@ class DeviceCard extends StatelessWidget {
                                         backgroundColor: Colors.red,
                                         padding: const EdgeInsets.all(16.0),
                                       ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    DeviceCheckoutButton(
-                                      deviceSerialNumber: deviceSerialNumber,
-                                      isDeviceCheckedOut:
-                                          deviceData['isDeviceCheckedOut'],
                                     ),
                                   ],
                                 ),
@@ -664,9 +668,16 @@ class DeviceCard extends StatelessWidget {
                                 ],
                               ),
                               const SizedBox(height: 8),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
+                              Wrap(
+                                alignment: WrapAlignment.start,
+                                runSpacing: 8,
                                 children: [
+                                  DeviceCheckoutButton(
+                                    deviceSerialNumber: deviceSerialNumber,
+                                    isDeviceCheckedOut:
+                                        deviceData['isDeviceCheckedOut'],
+                                  ),
+                                  const SizedBox(width: 8),
                                   ElevatedButton.icon(
                                     onPressed: () {
                                       firebaseFunctions
@@ -686,12 +697,6 @@ class DeviceCard extends StatelessWidget {
                                       backgroundColor: Colors.red,
                                       padding: const EdgeInsets.all(16.0),
                                     ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  DeviceCheckoutButton(
-                                    deviceSerialNumber: deviceSerialNumber,
-                                    isDeviceCheckedOut:
-                                        deviceData['isDeviceCheckedOut'],
                                   ),
                                 ],
                               ),
@@ -745,6 +750,12 @@ class DeviceCard extends StatelessWidget {
                             children: [
                               Row(
                                 children: [
+                                  DeviceCheckoutButton(
+                                    deviceSerialNumber: deviceSerialNumber,
+                                    isDeviceCheckedOut:
+                                        deviceData['isDeviceCheckedOut'],
+                                  ),
+                                  const SizedBox(width: 8),
                                   ElevatedButton.icon(
                                     onPressed: () {
                                       firebaseFunctions
@@ -764,12 +775,6 @@ class DeviceCard extends StatelessWidget {
                                       backgroundColor: Colors.red,
                                       padding: const EdgeInsets.all(16.0),
                                     ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  DeviceCheckoutButton(
-                                    deviceSerialNumber: deviceSerialNumber,
-                                    isDeviceCheckedOut:
-                                        deviceData['isDeviceCheckedOut'],
                                   ),
                                 ],
                               ),
