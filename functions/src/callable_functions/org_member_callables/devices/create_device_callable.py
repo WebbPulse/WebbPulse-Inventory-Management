@@ -16,20 +16,35 @@ def create_device_callable(req: https_fn.CallableRequest) -> Any:
         if not serial or not org_id:
             raise https_fn.HttpsError(
                 code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
-                message='The function must be called with  valid "serial" and "org_id" arguments.'
+                message='The function must be called with valid "serial" and "org_id" arguments.'
             )
 
-        # Create the device in Firestore
-        device_ref = db.collection('organizations').document(org_id).collection('devices').document()
-        device_ref.set({
-            'deviceId': device_ref.id,
-            'deviceSerialNumber': serial,
-            'createdAt': firestore.SERVER_TIMESTAMP,
-            'isDeviceCheckedOut': False,
-            'deviceCheckedOutBy': '',
-            'deviceCheckedOutAt': None,
-            'deviceDeleted': False,
-        })
+        # Check if a device with the same serial number already exists
+        existing_device_query = db.collection('organizations').document(org_id).collection('devices').where('deviceSerialNumber', '==', serial).limit(1).get()
+        if existing_device_query:
+            device_ref = existing_device_query[0].reference
+            device_ref.set({
+                'deviceId': device_ref.id,
+                'deviceSerialNumber': serial,
+                'createdAt': firestore.SERVER_TIMESTAMP,
+                'isDeviceCheckedOut': False,
+                'deviceCheckedOutBy': '',
+                'deviceCheckedOutAt': None,
+                'deviceDeleted': False,
+            }, merge=True)
+
+        else:
+            # Create the device in Firestore
+            device_ref = db.collection('organizations').document(org_id).collection('devices').document()
+            device_ref.set({
+                'deviceId': device_ref.id,
+                'deviceSerialNumber': serial,
+                'createdAt': firestore.SERVER_TIMESTAMP,
+                'isDeviceCheckedOut': False,
+                'deviceCheckedOutBy': '',
+                'deviceCheckedOutAt': None,
+                'deviceDeleted': False,
+            })
 
         return {"response": f"Device {serial} created"}
     except https_fn.HttpsError as e:
@@ -39,5 +54,5 @@ def create_device_callable(req: https_fn.CallableRequest) -> Any:
         # Handle any other exceptions
         raise https_fn.HttpsError(
             code=https_fn.FunctionsErrorCode.UNKNOWN,
-            message=f"Error creating organization: {str(e)}"
+            message=f"Error creating device: {str(e)}"
         )
