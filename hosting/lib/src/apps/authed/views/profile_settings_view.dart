@@ -54,6 +54,11 @@ class ProfileSettingsView extends StatelessWidget {
                         ),
                       ),
                 actions: [
+                  AccountDeletedAction((context, user) async {
+                    await firebaseFunctions
+                        .httpsCallable('delete_global_user_callable')
+                        .call();
+                  }),
                   DisplayNameChangedAction(
                     (context, user, userDisplayName) async {
                       await firebaseFunctions
@@ -97,7 +102,6 @@ class ProfileSettingsView extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   ElevatedButton(
-                    child: const Text('Change Profile Picture'),
                     onPressed: () {
                       showDialog(
                           context: context,
@@ -114,6 +118,7 @@ class ProfileSettingsView extends StatelessWidget {
                       ),
                       padding: const EdgeInsets.all(16.0),
                     ),
+                    child: const Text('Change Profile Picture'),
                   ),
                 ],
               );
