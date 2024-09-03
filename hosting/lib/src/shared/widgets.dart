@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
@@ -470,10 +471,10 @@ class DeviceCard extends StatelessWidget {
     if (deviceDeleted) {
       return const SizedBox.shrink();
     }
-    return Consumer3<FirestoreReadService, DeviceCheckoutService,
-        OrgSelectorChangeNotifier>(
+    return Consumer4<FirestoreReadService, DeviceCheckoutService,
+        OrgSelectorChangeNotifier, FirebaseFunctions>(
       builder: (context, firestoreService, deviceCheckoutService,
-          orgSelectorChangeNotifier, child) {
+          orgSelectorChangeNotifier, firebaseFunctions, child) {
         return StreamBuilder(
           stream: firestoreService.getOrgDeviceDocument(
               deviceId, orgSelectorChangeNotifier.orgId),
@@ -497,27 +498,121 @@ class DeviceCard extends StatelessWidget {
                   } else if (!snapshot.hasData ||
                       snapshot.data == null ||
                       snapshot.data!.data() == null) {
-                    return CustomCard(
-                      theme: theme,
-                      customCardLeading: Icon(Icons.devices,
-                          color: theme.colorScheme.secondary),
-                      customCardTitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Wrap(
+                    return LayoutBuilder(builder: (context, constraints) {
+                      if (constraints.maxWidth < 400) {
+                        return CustomCard(
+                          theme: theme,
+                          customCardLeading: null,
+                          customCardTitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(deviceSerialNumber,
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.bold)),
+                                Icon(Icons.devices,
+                                    color: theme.colorScheme.secondary),
+                                Wrap(
+                                  children: [
+                                    Text(deviceSerialNumber,
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.bold)),
+                                  ],
+                                ),
+                                SizedBox(height: 8),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    ElevatedButton.icon(
+                                      onPressed: () {
+                                        firebaseFunctions
+                                            .httpsCallable(
+                                                'delete_device_callable')
+                                            .call({
+                                          'orgId':
+                                              orgSelectorChangeNotifier.orgId,
+                                          'deviceId': deviceId,
+                                        });
+                                      },
+                                      icon: const Icon(Icons.delete),
+                                      label: Wrap(children: [
+                                        Text('Delete Device'),
+                                      ]),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.red,
+                                        padding: const EdgeInsets.all(16.0),
+                                      ),
+                                    ),
+                                    SizedBox(width: 8),
+                                    DeviceCheckoutButton(
+                                      deviceSerialNumber: deviceSerialNumber,
+                                      isDeviceCheckedOut:
+                                          deviceData['isDeviceCheckedOut'],
+                                    ),
+                                  ],
+                                ),
+                              ]),
+                          customCardTrailing: null,
+                          onTapAction: () {},
+                        );
+                      }
+                      return CustomCard(
+                        theme: theme,
+                        customCardLeading: Icon(Icons.devices,
+                            color: theme.colorScheme.secondary),
+                        customCardTitle: Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Wrap(
+                                    children: [
+                                      Text(deviceSerialNumber,
+                                          style: const TextStyle(
+                                              fontWeight: FontWeight.bold)),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Row(
+                                  children: [
+                                    ElevatedButton.icon(
+                                      onPressed: () {
+                                        firebaseFunctions
+                                            .httpsCallable(
+                                                'delete_device_callable')
+                                            .call({
+                                          'orgId':
+                                              orgSelectorChangeNotifier.orgId,
+                                          'deviceId': deviceId,
+                                        });
+                                      },
+                                      icon: const Icon(Icons.delete),
+                                      label: Wrap(children: [
+                                        Text('Delete Device'),
+                                      ]),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.red,
+                                        padding: const EdgeInsets.all(16.0),
+                                      ),
+                                    ),
+                                    SizedBox(width: 8),
+                                    DeviceCheckoutButton(
+                                      deviceSerialNumber: deviceSerialNumber,
+                                      isDeviceCheckedOut:
+                                          deviceData['isDeviceCheckedOut'],
+                                    ),
+                                  ],
+                                ),
                               ],
                             ),
-                          ]),
-                      customCardTrailing: DeviceCheckoutButton(
-                        deviceSerialNumber: deviceSerialNumber,
-                        isDeviceCheckedOut: deviceData['isDeviceCheckedOut'],
-                      ),
-                      onTapAction: () {},
-                    );
+                          ],
+                        ),
+                        customCardTrailing: null,
+                        onTapAction: () {},
+                      );
+                    });
                   }
 
                   Map<String, dynamic> orgMemberData =
@@ -568,9 +663,31 @@ class DeviceCard extends StatelessWidget {
                                       style: theme.textTheme.labelSmall),
                                 ],
                               ),
+                              SizedBox(height: 8),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 children: [
+                                  ElevatedButton.icon(
+                                    onPressed: () {
+                                      firebaseFunctions
+                                          .httpsCallable(
+                                              'delete_device_callable')
+                                          .call({
+                                        'orgId':
+                                            orgSelectorChangeNotifier.orgId,
+                                        'deviceId': deviceId,
+                                      });
+                                    },
+                                    icon: const Icon(Icons.delete),
+                                    label: Wrap(children: [
+                                      Text('Delete Device'),
+                                    ]),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.red,
+                                      padding: const EdgeInsets.all(16.0),
+                                    ),
+                                  ),
+                                  SizedBox(width: 8),
                                   DeviceCheckoutButton(
                                     deviceSerialNumber: deviceSerialNumber,
                                     isDeviceCheckedOut:
@@ -587,39 +704,80 @@ class DeviceCard extends StatelessWidget {
                       theme: theme,
                       customCardLeading: Icon(Icons.devices,
                           color: theme.colorScheme.secondary),
-                      customCardTitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Wrap(
-                              children: [
-                                Text(deviceSerialNumber,
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.bold)),
-                              ],
-                            ),
-                            Wrap(
-                              children: [
-                                Text('Checked Out By: ',
-                                    style: theme.textTheme.labelSmall?.copyWith(
-                                        fontWeight: FontWeight.bold)),
-                                Text(orgMemberData['orgMemberDisplayName'],
-                                    style: theme.textTheme.labelSmall),
-                              ],
-                            ),
-                            Wrap(
-                              children: [
-                                Text('Checked Out On: ',
-                                    style: theme.textTheme.labelSmall?.copyWith(
-                                        fontWeight: FontWeight.bold)),
-                                Text(deviceCheckedOutAtFormatted,
-                                    style: theme.textTheme.labelSmall),
-                              ],
-                            )
-                          ]),
-                      customCardTrailing: DeviceCheckoutButton(
-                        deviceSerialNumber: deviceSerialNumber,
-                        isDeviceCheckedOut: deviceData['isDeviceCheckedOut'],
+                      customCardTitle: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Wrap(
+                                    children: [
+                                      Text(deviceSerialNumber,
+                                          style: const TextStyle(
+                                              fontWeight: FontWeight.bold)),
+                                    ],
+                                  ),
+                                  Wrap(
+                                    children: [
+                                      Text('Checked Out By: ',
+                                          style: theme.textTheme.labelSmall
+                                              ?.copyWith(
+                                                  fontWeight: FontWeight.bold)),
+                                      Text(
+                                          orgMemberData['orgMemberDisplayName'],
+                                          style: theme.textTheme.labelSmall),
+                                    ],
+                                  ),
+                                  Wrap(
+                                    children: [
+                                      Text('Checked Out On: ',
+                                          style: theme.textTheme.labelSmall
+                                              ?.copyWith(
+                                                  fontWeight: FontWeight.bold)),
+                                      Text(deviceCheckedOutAtFormatted,
+                                          style: theme.textTheme.labelSmall),
+                                    ],
+                                  )
+                                ]),
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Row(
+                                children: [
+                                  ElevatedButton.icon(
+                                    onPressed: () {
+                                      firebaseFunctions
+                                          .httpsCallable(
+                                              'delete_device_callable')
+                                          .call({
+                                        'orgId':
+                                            orgSelectorChangeNotifier.orgId,
+                                        'deviceId': deviceId,
+                                      });
+                                    },
+                                    icon: const Icon(Icons.delete),
+                                    label: Wrap(children: [
+                                      Text('Delete Device'),
+                                    ]),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.red,
+                                      padding: const EdgeInsets.all(16.0),
+                                    ),
+                                  ),
+                                  SizedBox(width: 8),
+                                  DeviceCheckoutButton(
+                                    deviceSerialNumber: deviceSerialNumber,
+                                    isDeviceCheckedOut:
+                                        deviceData['isDeviceCheckedOut'],
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
+                      customCardTrailing: null,
                       onTapAction: () {},
                     );
                   });

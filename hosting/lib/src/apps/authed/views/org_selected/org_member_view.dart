@@ -59,6 +59,9 @@ class OrgMemberView extends StatelessWidget {
                         return const Center(child: Text('User not found'));
                       }
                       final DocumentSnapshot orgMemberData = snapshot.data!;
+                      if (orgMemberData['orgMemberDeleted'] == true) {
+                        return const Center(child: Text('User not found'));
+                      }
                       return LayoutBuilder(builder: (context, constraints) {
                         double containerWidth;
 
@@ -142,7 +145,7 @@ class OrgMemberView extends StatelessWidget {
                                           icon: const Icon(Icons.delete),
                                           label: Wrap(children: [
                                             Text(
-                                              'Remove User',
+                                              'Delete User',
                                               style: Theme.of(context)
                                                   .textTheme
                                                   .labelSmall

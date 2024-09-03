@@ -14,10 +14,10 @@ def delete_org_member_callable(req: https_fn.CallableRequest) -> Any:
         check_user_is_org_admin(req, org_id)
         
         # Checking attribute.
-        if not org_id:
+        if not org_id or not org_member_id:
             raise https_fn.HttpsError(
                 code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
-                message='The function must be called with the following arguments: orgId'
+                message='The function must be called with the following arguments: orgId, orgMemberId'
             )
         
 
