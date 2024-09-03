@@ -515,7 +515,7 @@ class DeviceCard extends StatelessWidget {
                                             fontWeight: FontWeight.bold)),
                                   ],
                                 ),
-                                SizedBox(height: 8),
+                                const SizedBox(height: 8),
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   children: [
@@ -531,7 +531,7 @@ class DeviceCard extends StatelessWidget {
                                         });
                                       },
                                       icon: const Icon(Icons.delete),
-                                      label: Wrap(children: [
+                                      label: const Wrap(children: [
                                         Text('Delete Device'),
                                       ]),
                                       style: ElevatedButton.styleFrom(
@@ -539,7 +539,7 @@ class DeviceCard extends StatelessWidget {
                                         padding: const EdgeInsets.all(16.0),
                                       ),
                                     ),
-                                    SizedBox(width: 8),
+                                    const SizedBox(width: 8),
                                     DeviceCheckoutButton(
                                       deviceSerialNumber: deviceSerialNumber,
                                       isDeviceCheckedOut:
@@ -589,7 +589,7 @@ class DeviceCard extends StatelessWidget {
                                         });
                                       },
                                       icon: const Icon(Icons.delete),
-                                      label: Wrap(children: [
+                                      label: const Wrap(children: [
                                         Text('Delete Device'),
                                       ]),
                                       style: ElevatedButton.styleFrom(
@@ -597,7 +597,7 @@ class DeviceCard extends StatelessWidget {
                                         padding: const EdgeInsets.all(16.0),
                                       ),
                                     ),
-                                    SizedBox(width: 8),
+                                    const SizedBox(width: 8),
                                     DeviceCheckoutButton(
                                       deviceSerialNumber: deviceSerialNumber,
                                       isDeviceCheckedOut:
@@ -663,7 +663,7 @@ class DeviceCard extends StatelessWidget {
                                       style: theme.textTheme.labelSmall),
                                 ],
                               ),
-                              SizedBox(height: 8),
+                              const SizedBox(height: 8),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 children: [
@@ -679,7 +679,7 @@ class DeviceCard extends StatelessWidget {
                                       });
                                     },
                                     icon: const Icon(Icons.delete),
-                                    label: Wrap(children: [
+                                    label: const Wrap(children: [
                                       Text('Delete Device'),
                                     ]),
                                     style: ElevatedButton.styleFrom(
@@ -687,7 +687,7 @@ class DeviceCard extends StatelessWidget {
                                       padding: const EdgeInsets.all(16.0),
                                     ),
                                   ),
-                                  SizedBox(width: 8),
+                                  const SizedBox(width: 8),
                                   DeviceCheckoutButton(
                                     deviceSerialNumber: deviceSerialNumber,
                                     isDeviceCheckedOut:
@@ -757,7 +757,7 @@ class DeviceCard extends StatelessWidget {
                                       });
                                     },
                                     icon: const Icon(Icons.delete),
-                                    label: Wrap(children: [
+                                    label: const Wrap(children: [
                                       Text('Delete Device'),
                                     ]),
                                     style: ElevatedButton.styleFrom(
@@ -765,7 +765,7 @@ class DeviceCard extends StatelessWidget {
                                       padding: const EdgeInsets.all(16.0),
                                     ),
                                   ),
-                                  SizedBox(width: 8),
+                                  const SizedBox(width: 8),
                                   DeviceCheckoutButton(
                                     deviceSerialNumber: deviceSerialNumber,
                                     isDeviceCheckedOut:

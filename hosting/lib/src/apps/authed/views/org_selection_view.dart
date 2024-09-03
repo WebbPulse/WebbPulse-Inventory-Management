@@ -24,7 +24,7 @@ class OrgSelectionView extends StatelessWidget {
         return Scaffold(
           body: Column(
             children: [
-              SizedBox(
+              const SizedBox(
                 height: 16,
               ),
               const Center(child: Text('Select an Organization')),
