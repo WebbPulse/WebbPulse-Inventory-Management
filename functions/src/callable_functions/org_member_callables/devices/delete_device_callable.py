@@ -2,7 +2,7 @@ from src.shared import https_fn, POSTcorsrules, Any, db, check_user_is_org_membe
 
 
 @https_fn.on_call(cors=POSTcorsrules)
-def delete_org_member_callable(req: https_fn.CallableRequest) -> Any:
+def delete_device_callable(req: https_fn.CallableRequest) -> Any:
     try:
         # Extract parameters
         org_id = req.data["orgId"]
