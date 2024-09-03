@@ -130,38 +130,8 @@ class OrgMemberView extends StatelessWidget {
                                         UserRoleDropdownButton(
                                             orgMemberData: orgMemberData),
                                         const SizedBox(height: 8),
-                                        ElevatedButton.icon(
-                                          onPressed: () {
-                                            firebaseFunctions
-                                                .httpsCallable(
-                                                    'delete_org_member_callable')
-                                                .call({
-                                              'orgId': orgSelectorChangeNotifier
-                                                  .orgId,
-                                              'orgMemberId': orgMemberData.id,
-                                            });
-                                            if (orgMemberData['orgMemberUid'] ==
-                                                userClaims['uid']) {
-                                              authenticationChangeNotifier
-                                                  .signOutUser();
-                                            }
-                                          },
-                                          icon: const Icon(Icons.delete),
-                                          label: Wrap(children: [
-                                            Text(
-                                              'Delete User',
-                                              style: Theme.of(context)
-                                                  .textTheme
-                                                  .labelSmall
-                                                  ?.copyWith(
-                                                      fontWeight:
-                                                          FontWeight.bold),
-                                            ),
-                                          ]),
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: Colors.red,
-                                          ),
-                                        ),
+                                        DeleteUserButton(
+                                            orgMemberData: orgMemberData),
                                       ],
                                     )
                                   else
@@ -233,6 +203,94 @@ class OrgMemberView extends StatelessWidget {
                 : const Center(child: CircularProgressIndicator()),
           );
         },
+      );
+    });
+  }
+}
+
+class DeleteUserButton extends StatefulWidget {
+  const DeleteUserButton({
+    super.key,
+    required this.orgMemberData,
+  });
+
+  final DocumentSnapshot<Object?> orgMemberData;
+
+  @override
+  State<DeleteUserButton> createState() => _DeleteUserButtonState();
+}
+
+class _DeleteUserButtonState extends State<DeleteUserButton> {
+  var _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  void _onPressed() async {
+    final orgSelectorProvider =
+        Provider.of<OrgSelectorChangeNotifier>(context, listen: false);
+    final firebaseFunctions =
+        Provider.of<FirebaseFunctions>(context, listen: false);
+    final authenticationChangeNotifier =
+        Provider.of<AuthenticationChangeNotifier>(context, listen: false);
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      String orgMemberId = widget.orgMemberData['orgMemberId'];
+      await firebaseFunctions.httpsCallable('delete_org_member_callable').call({
+        'orgId': orgSelectorProvider.orgId,
+        'orgMemberId': widget.orgMemberData.id,
+      });
+      if (orgMemberId == authenticationChangeNotifier.user?.uid) {
+        authenticationChangeNotifier.signOutUser();
+      }
+      AsyncContextHelpers.showSnackBarIfMounted(
+          context, 'User deleted successfully');
+    } catch (e) {
+      await AsyncContextHelpers.showSnackBarIfMounted(
+          context, 'Failed to delete user: $e');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer3<FirebaseFunctions, OrgSelectorChangeNotifier,
+            AuthenticationChangeNotifier>(
+        builder: (context, firebaseFunctions, orgSelectorChangeNotifier,
+            authenticationChangeNotifier, child) {
+      return ElevatedButton.icon(
+        onPressed: _isLoading ? null : _onPressed,
+        icon: _isLoading
+            ? const CircularProgressIndicator()
+            : const Icon(Icons.delete),
+        label: Wrap(children: [
+          Text(
+            'Delete User',
+            style: Theme.of(context)
+                .textTheme
+                .labelSmall
+                ?.copyWith(fontWeight: FontWeight.bold),
+          ),
+        ]),
+        style: ElevatedButton.styleFrom(
+          disabledBackgroundColor: Colors.red,
+          backgroundColor: Colors.red,
+          padding: const EdgeInsets.all(16.0),
+        ),
       );
     });
   }

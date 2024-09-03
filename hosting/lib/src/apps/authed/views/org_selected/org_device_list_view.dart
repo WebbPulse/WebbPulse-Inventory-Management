@@ -20,8 +20,8 @@ class OrgDeviceListView extends StatelessWidget {
       drawer: const AuthedDrawer(),
       body: Consumer2<OrgSelectorChangeNotifier, FirestoreReadService>(
         builder: (context, orgSelectorProvider, firestoreService, child) {
-          return FutureBuilder<List<DocumentSnapshot>>(
-            future: firestoreService
+          return StreamBuilder<List<DocumentSnapshot>>(
+            stream: firestoreService
                 .getOrgDevicesDocuments(orgSelectorProvider.orgId),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {

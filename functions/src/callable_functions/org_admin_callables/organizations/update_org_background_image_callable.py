@@ -17,11 +17,11 @@ def update_org_background_image_callable(req: https_fn.CallableRequest) -> Any:
         check_user_is_org_admin(req, org_id)
         
         # Checking attribute.
-        if not org_id  or not org_background_image_url:
+        if not org_id:
             # Throwing an HttpsError so that the client gets the error details.
             raise https_fn.HttpsError(
                 code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
-                message='The function must be called with the following arguments: orgId, orgBackgroundImageURL'
+                message='The function must be called with the following arguments: orgId'
             )
         # Update organization background image
         org_ref = db.collection('organizations').document(org_id)
