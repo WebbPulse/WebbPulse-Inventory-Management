@@ -34,10 +34,7 @@ class DeviceCheckoutView extends StatelessWidget {
               // Main content with padding
               const SafeArea(
                 child: SizedBox.expand(
-                  child: Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: CheckoutForm(),
-                  ),
+                  child: CheckoutForm(),
                 ),
               ),
             ],
@@ -99,64 +96,60 @@ class CheckoutFormState extends State<CheckoutForm> {
   Widget build(BuildContext context) {
     ThemeData theme = Theme.of(context);
     return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Center(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              // Set maximum width constraints based on screen size
-              double maxWidth;
-              if (constraints.maxWidth < 600) {
-                maxWidth = constraints.maxWidth * 0.9;
-              } else if (constraints.maxWidth < 1200) {
-                maxWidth = constraints.maxWidth * 0.6;
-              } else {
-                maxWidth = constraints.maxWidth * 0.4;
-              }
+      child: Center(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            // Set maximum width constraints based on screen size
+            double maxWidth;
+            if (constraints.maxWidth < 600) {
+              maxWidth = constraints.maxWidth * 0.95;
+            } else if (constraints.maxWidth < 1200) {
+              maxWidth = constraints.maxWidth * 0.6;
+            } else {
+              maxWidth = constraints.maxWidth * 0.4;
+            }
 
-              return ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxWidth: maxWidth,
+            return ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: maxWidth,
+              ),
+              child: Card(
+                elevation: 4.0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                child: Card(
-                  elevation: 4.0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      children: [
-                        TextField(
-                          controller: _controller,
-                          decoration: const InputDecoration(
-                            labelText: 'Serial Number',
-                          ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    children: [
+                      TextField(
+                        controller: _controller,
+                        decoration: const InputDecoration(
+                          labelText: 'Serial Number',
                         ),
-                        const SizedBox(height: 16.0),
-                        ElevatedButton.icon(
-                          onPressed: _isLoading ? null : _onSubmit,
-                          style: ElevatedButton.styleFrom(
-                              backgroundColor:
-                                  theme.colorScheme.surface.withOpacity(0.95),
-                              side: BorderSide(
-                                color:
-                                    theme.colorScheme.primary.withOpacity(0.5),
-                                width: 1.5,
-                              ),
-                              padding: const EdgeInsets.all(16.0)),
-                          icon: _isLoading
-                              ? const CircularProgressIndicator()
-                              : const Icon(Icons.login),
-                          label: const Text('Checkout Serial Number'),
-                        ),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(height: 16.0),
+                      ElevatedButton.icon(
+                        onPressed: _isLoading ? null : _onSubmit,
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                                theme.colorScheme.surface.withOpacity(0.95),
+                            side: BorderSide(
+                              color: theme.colorScheme.primary.withOpacity(0.5),
+                              width: 1.5,
+                            ),
+                            padding: const EdgeInsets.all(16.0)),
+                        icon: _isLoading
+                            ? const CircularProgressIndicator()
+                            : const Icon(Icons.login),
+                        label: const Text('Checkout Serial Number'),
+                      ),
+                    ],
                   ),
                 ),
-              );
-            },
-          ),
+              ),
+            );
+          },
         ),
       ),
     );

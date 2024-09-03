@@ -69,10 +69,14 @@ class OrgMemberView extends StatelessWidget {
                           // Mobile width (under 600px)
                           containerWidth =
                               MediaQuery.of(context).size.width * 0.35;
+                        } else if (constraints.maxWidth < 1200) {
+                          // Tablet width (under 1200px)
+                          containerWidth =
+                              MediaQuery.of(context).size.width * 0.25;
                         } else {
                           // Larger screen width (over 600px)
                           containerWidth =
-                              MediaQuery.of(context).size.width * 0.25;
+                              MediaQuery.of(context).size.width * 0.15;
                         }
                         return Row(
                           children: [
@@ -125,7 +129,7 @@ class OrgMemberView extends StatelessWidget {
                                       children: [
                                         UserRoleDropdownButton(
                                             orgMemberData: orgMemberData),
-                                        const SizedBox(height: 16),
+                                        const SizedBox(height: 8),
                                         ElevatedButton.icon(
                                           onPressed: () {
                                             firebaseFunctions

@@ -6,6 +6,7 @@ import '../../../shared/widgets.dart';
 import '../../../shared/providers/org_selector_change_notifier.dart';
 import '../../../shared/providers/authentication_change_notifier.dart';
 import 'org_selected/device_checkout_view.dart';
+import 'profile_settings_view.dart';
 
 class OrgSelectionView extends StatelessWidget {
   const OrgSelectionView({
@@ -22,75 +23,101 @@ class OrgSelectionView extends StatelessWidget {
           AuthClaimChecker(builder: (context, userClaims) {
         final List<String> userOrgIds = extractOrgIdsFromClaims(userClaims);
         return Scaffold(
-          body: Column(
-            children: [
-              const SizedBox(
-                height: 16,
-              ),
-              const Center(child: Text('Select an Organization')),
-              Expanded(
-                child: userOrgIds.isNotEmpty
-                    ? SmallLayoutBuilder(
-                        childWidget: ListView.builder(
-                          physics: const BouncingScrollPhysics(),
-                          itemCount: userOrgIds.length +
-                              (userOrgIds.length < 10 ? 1 : 0),
-                          itemBuilder: (context, index) {
-                            if (index == userOrgIds.length &&
-                                userOrgIds.length < 10) {
-                              return Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 8.0),
-                                child: ElevatedButton(
-                                  onPressed: () {
-                                    Navigator.pushNamed(
-                                        context, OrgCreateView.routeName);
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: theme.colorScheme.surface
-                                        .withOpacity(0.95),
-                                    side: BorderSide(
-                                      color: theme.colorScheme.primary
-                                          .withOpacity(0.5),
-                                      width: 1.5,
-                                    ),
-                                    padding: const EdgeInsets.all(16.0),
-                                  ),
-                                  child: const Text('Create New Organization'),
-                                ),
-                              );
-                            }
-                            final orgId = userOrgIds[index];
-                            return OrgCard(
-                              orgId: orgId,
-                            );
-                          },
-                        ),
-                      )
-                    : Column(
-                        children: [
-                          const Text('No organizations found'),
-                          ElevatedButton(
-                            onPressed: () {
-                              Navigator.pushNamed(
-                                  context, OrgCreateView.routeName);
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor:
-                                  theme.colorScheme.surface.withOpacity(0.95),
-                              side: BorderSide(
-                                color:
-                                    theme.colorScheme.primary.withOpacity(0.5),
-                                width: 1.5,
-                              ),
-                            ),
-                            child: const Text('Create New Organization'),
-                          ),
-                        ],
+          appBar: AppBar(
+            automaticallyImplyLeading: false,
+            title: const Text('My Organizations'),
+            actions: [
+              if (Provider.of<OrgSelectorChangeNotifier>(context).orgId == '')
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.person),
+                  label: const Text('Profile'),
+                  onPressed: () {
+                    Navigator.pushNamed(context, ProfileSettingsView.routeName);
+                  },
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor:
+                          theme.colorScheme.surface.withOpacity(0.95),
+                      side: BorderSide(
+                        color: theme.colorScheme.primary.withOpacity(0.5),
+                        width: 1.5,
                       ),
-              ),
+                      padding: const EdgeInsets.all(16.0)),
+                ),
             ],
           ),
+          body: LayoutBuilder(builder: (context, constraints) {
+            return Column(
+              children: [
+                if (constraints.maxWidth > 600)
+                  Text(
+                    'Select an Organization',
+                    style: theme.textTheme.headlineSmall,
+                  ),
+                Expanded(
+                  child: userOrgIds.isNotEmpty
+                      ? SmallLayoutBuilder(
+                          childWidget: ListView.builder(
+                            physics: const BouncingScrollPhysics(),
+                            itemCount: userOrgIds.length +
+                                (userOrgIds.length < 10 ? 1 : 0),
+                            itemBuilder: (context, index) {
+                              if (index == userOrgIds.length &&
+                                  userOrgIds.length < 10) {
+                                return Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 8.0),
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      Navigator.pushNamed(
+                                          context, OrgCreateView.routeName);
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: theme.colorScheme.surface
+                                          .withOpacity(0.95),
+                                      side: BorderSide(
+                                        color: theme.colorScheme.primary
+                                            .withOpacity(0.5),
+                                        width: 1.5,
+                                      ),
+                                      padding: const EdgeInsets.all(16.0),
+                                    ),
+                                    child:
+                                        const Text('Create New Organization'),
+                                  ),
+                                );
+                              }
+                              final orgId = userOrgIds[index];
+                              return OrgCard(
+                                orgId: orgId,
+                              );
+                            },
+                          ),
+                        )
+                      : Column(
+                          children: [
+                            const Text('No organizations found'),
+                            ElevatedButton(
+                              onPressed: () {
+                                Navigator.pushNamed(
+                                    context, OrgCreateView.routeName);
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor:
+                                    theme.colorScheme.surface.withOpacity(0.95),
+                                side: BorderSide(
+                                  color: theme.colorScheme.primary
+                                      .withOpacity(0.5),
+                                  width: 1.5,
+                                ),
+                              ),
+                              child: const Text('Create New Organization'),
+                            ),
+                          ],
+                        ),
+                ),
+              ],
+            );
+          }),
         );
       }),
     );
