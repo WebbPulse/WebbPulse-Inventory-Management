@@ -69,15 +69,14 @@ class FirestoreReadService {
     }
   }
 
-  Future<List<DocumentSnapshot>> getOrgDevicesDocuments(String orgId) async {
-    try {
-      CollectionReference collectionRef =
-          _db.collection('organizations').doc(orgId).collection('devices');
-      QuerySnapshot querySnapshot = await collectionRef.get();
+  Stream<List<DocumentSnapshot>> getOrgDevicesDocuments(String orgId) {
+    CollectionReference collectionRef =
+        _db.collection('organizations').doc(orgId).collection('devices');
+    return collectionRef.snapshots().map((querySnapshot) {
       return querySnapshot.docs;
-    } catch (e) {
+    }).handleError((error) {
       return <DocumentSnapshot>[]; // Return an empty list in case of error
-    }
+    });
   }
 
   Stream<List<DocumentSnapshot>> getOrgMemberDevicesDocuments(

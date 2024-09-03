@@ -157,37 +157,36 @@ class ChangeProfilePictureAlertDialogState
     final userPhotoURL = _userPhotoURLController.text;
     final firebaseFunctions =
         Provider.of<FirebaseFunctions>(context, listen: false);
-    if (userPhotoURL.isNotEmpty) {
+
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      await firebaseFunctions
+          .httpsCallable('update_global_user_photo_url_callable')
+          .call(
+        {
+          'userPhotoURL': userPhotoURL,
+        },
+      );
+
+      /// insert async function here
+      AsyncContextHelpers.showSnackBarIfMounted(
+          context, 'Profile picture changed successfully');
+      AsyncContextHelpers.popContextIfMounted(context);
+    } catch (e) {
+      await AsyncContextHelpers.showSnackBarIfMounted(
+          context, 'Failed to change profile picture: $e');
+    } finally {
       setState(() {
-        _isLoading = true;
+        _isLoading = false;
       });
-
-      try {
-        await firebaseFunctions
-            .httpsCallable('update_global_user_photo_url_callable')
-            .call(
-          {
-            'userPhotoURL': userPhotoURL,
-          },
-        );
-
-        /// insert async function here
-        AsyncContextHelpers.showSnackBarIfMounted(
-            context, 'Profile picture changed successfully');
-        AsyncContextHelpers.popContextIfMounted(context);
-      } catch (e) {
-        await AsyncContextHelpers.showSnackBarIfMounted(
-            context, 'Failed to change profile picture: $e');
-      } finally {
-        setState(() {
-          _isLoading = false;
-        });
-      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return AlertDialog(
       title: const Text('Change Profile Picture'),
       content: SingleChildScrollView(
@@ -214,9 +213,15 @@ class ChangeProfilePictureAlertDialogState
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
+                side: BorderSide(
+                  color: theme.colorScheme.primary.withOpacity(0.5),
+                  width: 1.5,
+                ),
+                padding: const EdgeInsets.all(16.0),
+              ),
               onPressed: _isLoading ? null : _onSubmit,
-              style:
-                  ElevatedButton.styleFrom(padding: const EdgeInsets.all(16.0)),
               icon: _isLoading
                   ? const CircularProgressIndicator()
                   : const Icon(Icons.photo),
@@ -227,8 +232,14 @@ class ChangeProfilePictureAlertDialogState
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              style:
-                  ElevatedButton.styleFrom(padding: const EdgeInsets.all(16.0)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
+                side: BorderSide(
+                  color: theme.colorScheme.primary.withOpacity(0.5),
+                  width: 1.5,
+                ),
+                padding: const EdgeInsets.all(16.0),
+              ),
               icon: const Icon(Icons.arrow_back),
               label: const Text('Go Back'),
             ),

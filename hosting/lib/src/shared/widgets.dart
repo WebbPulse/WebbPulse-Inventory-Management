@@ -8,6 +8,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:webbcheck/src/shared/helpers/async_context_helpers.dart';
 
 import 'providers/firestore_read_service.dart';
 import 'providers/device_checkout_service.dart';
@@ -529,26 +530,7 @@ class DeviceCard extends StatelessWidget {
                                           deviceData['isDeviceCheckedOut'],
                                     ),
                                     const SizedBox(width: 8),
-                                    ElevatedButton.icon(
-                                      onPressed: () {
-                                        firebaseFunctions
-                                            .httpsCallable(
-                                                'delete_device_callable')
-                                            .call({
-                                          'orgId':
-                                              orgSelectorChangeNotifier.orgId,
-                                          'deviceId': deviceId,
-                                        });
-                                      },
-                                      icon: const Icon(Icons.delete),
-                                      label: const Wrap(children: [
-                                        Text('Delete Device'),
-                                      ]),
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.red,
-                                        padding: const EdgeInsets.all(16.0),
-                                      ),
-                                    ),
+                                    DeleteDeviceButton(deviceData: deviceData),
                                   ],
                                 ),
                               ]),
@@ -587,26 +569,7 @@ class DeviceCard extends StatelessWidget {
                                           deviceData['isDeviceCheckedOut'],
                                     ),
                                     const SizedBox(width: 8),
-                                    ElevatedButton.icon(
-                                      onPressed: () {
-                                        firebaseFunctions
-                                            .httpsCallable(
-                                                'delete_device_callable')
-                                            .call({
-                                          'orgId':
-                                              orgSelectorChangeNotifier.orgId,
-                                          'deviceId': deviceId,
-                                        });
-                                      },
-                                      icon: const Icon(Icons.delete),
-                                      label: const Wrap(children: [
-                                        Text('Delete Device'),
-                                      ]),
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.red,
-                                        padding: const EdgeInsets.all(16.0),
-                                      ),
-                                    ),
+                                    DeleteDeviceButton(deviceData: deviceData),
                                   ],
                                 ),
                               ],
@@ -678,26 +641,7 @@ class DeviceCard extends StatelessWidget {
                                         deviceData['isDeviceCheckedOut'],
                                   ),
                                   const SizedBox(width: 8),
-                                  ElevatedButton.icon(
-                                    onPressed: () {
-                                      firebaseFunctions
-                                          .httpsCallable(
-                                              'delete_device_callable')
-                                          .call({
-                                        'orgId':
-                                            orgSelectorChangeNotifier.orgId,
-                                        'deviceId': deviceId,
-                                      });
-                                    },
-                                    icon: const Icon(Icons.delete),
-                                    label: const Wrap(children: [
-                                      Text('Delete Device'),
-                                    ]),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.red,
-                                      padding: const EdgeInsets.all(16.0),
-                                    ),
-                                  ),
+                                  DeleteDeviceButton(deviceData: deviceData),
                                 ],
                               ),
                             ]),
@@ -756,26 +700,7 @@ class DeviceCard extends StatelessWidget {
                                         deviceData['isDeviceCheckedOut'],
                                   ),
                                   const SizedBox(width: 8),
-                                  ElevatedButton.icon(
-                                    onPressed: () {
-                                      firebaseFunctions
-                                          .httpsCallable(
-                                              'delete_device_callable')
-                                          .call({
-                                        'orgId':
-                                            orgSelectorChangeNotifier.orgId,
-                                        'deviceId': deviceId,
-                                      });
-                                    },
-                                    icon: const Icon(Icons.delete),
-                                    label: const Wrap(children: [
-                                      Text('Delete Device'),
-                                    ]),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.red,
-                                      padding: const EdgeInsets.all(16.0),
-                                    ),
-                                  ),
+                                  DeleteDeviceButton(deviceData: deviceData),
                                 ],
                               ),
                             ],
@@ -857,5 +782,88 @@ class DeviceCheckoutButtonState extends State<DeviceCheckoutButton> {
           : const Icon(Icons.login),
       label: Text(widget.isDeviceCheckedOut ? 'Check In' : 'Check Out'),
     );
+  }
+}
+
+class DeleteDeviceButton extends StatefulWidget {
+  const DeleteDeviceButton({
+    super.key,
+    required this.deviceData,
+  });
+
+  final Map<String, dynamic> deviceData;
+
+  @override
+  State<DeleteDeviceButton> createState() => _DeleteDeviceButtonState();
+}
+
+class _DeleteDeviceButtonState extends State<DeleteDeviceButton> {
+  var _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  void _onPressed() async {
+    final orgSelectorProvider =
+        Provider.of<OrgSelectorChangeNotifier>(context, listen: false);
+    final firebaseFunctions =
+        Provider.of<FirebaseFunctions>(context, listen: false);
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      String deviceId = widget.deviceData['deviceId'];
+      await firebaseFunctions.httpsCallable('delete_device_callable').call({
+        'orgId': orgSelectorProvider.orgId,
+        'deviceId': deviceId,
+      });
+      AsyncContextHelpers.showSnackBarIfMounted(
+          context, 'Device deleted successfully');
+    } catch (e) {
+      await AsyncContextHelpers.showSnackBarIfMounted(
+          context, 'Failed to delete device: $e');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer3<FirebaseFunctions, OrgSelectorChangeNotifier,
+            AuthenticationChangeNotifier>(
+        builder: (context, firebaseFunctions, orgSelectorChangeNotifier,
+            authenticationChangeNotifier, child) {
+      return ElevatedButton.icon(
+        onPressed: _isLoading ? null : _onPressed,
+        icon: _isLoading
+            ? const CircularProgressIndicator()
+            : const Icon(Icons.delete),
+        label: Wrap(children: [
+          Text(
+            'Delete Device',
+            style: Theme.of(context)
+                .textTheme
+                .labelSmall
+                ?.copyWith(fontWeight: FontWeight.bold),
+          ),
+        ]),
+        style: ElevatedButton.styleFrom(
+          disabledBackgroundColor: Colors.red,
+          backgroundColor: Colors.red,
+          padding: const EdgeInsets.all(16.0),
+        ),
+      );
+    });
   }
 }

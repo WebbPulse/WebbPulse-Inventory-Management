@@ -15,11 +15,7 @@ def update_global_user_photo_url_callable(req: https_fn.CallableRequest) -> Any:
         check_user_is_email_verified(req)
         check_user_token_current(req)
         
-        # Checking attribute.
-        if not user_photo_url:
-            # Throwing an HttpsError so that the client gets the error details.
-            raise https_fn.HttpsError(code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
-                                message='The function must be called with one argument: "userPhotoURL".')
+        
 
         try:
             db.collection('users').document(uid).update({
