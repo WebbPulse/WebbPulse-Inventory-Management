@@ -282,33 +282,28 @@ class OrgImageEditorAlertDialogState extends State<OrgImageEditorAlertDialog> {
     final theme = Theme.of(context);
     return AlertDialog(
       title: const Text('Change Organization Image URL'),
-      content: TextField(
-        controller: urlController,
-        decoration: const InputDecoration(
-          labelText: 'Image URL',
-          border: OutlineInputBorder(),
+      content: SizedBox(
+        height: 120,
+        child: Column(
+          children: [
+            const Text(
+              'Please enter the URL of the new image for the organization background:',
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: urlController,
+              decoration: const InputDecoration(
+                labelText: 'Image URL',
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
         ),
       ),
       actions: <Widget>[
         Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
-                side: BorderSide(
-                  color: theme.colorScheme.primary.withOpacity(0.5),
-                  width: 1.5,
-                ),
-                padding: const EdgeInsets.all(16.0),
-              ),
-              onPressed: _isLoading ? null : _onSubmit,
-              icon: _isLoading
-                  ? const CircularProgressIndicator()
-                  : const Icon(Icons.photo),
-              label: const Text('Change Organization Image'),
-            ),
-            const SizedBox(height: 16.0),
             ElevatedButton.icon(
               onPressed: () {
                 Navigator.of(context).pop();
@@ -324,6 +319,24 @@ class OrgImageEditorAlertDialogState extends State<OrgImageEditorAlertDialog> {
               icon: const Icon(Icons.arrow_back),
               label: const Text('Go Back'),
             ),
+            const SizedBox(height: 16.0),
+            ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
+                side: BorderSide(
+                  color: theme.colorScheme.primary.withOpacity(0.5),
+                  width: 1.5,
+                ),
+                padding: const EdgeInsets.all(16.0),
+              ),
+              onPressed: _isLoading ? null : _onSubmit,
+              icon: _isLoading
+                  ? const CircularProgressIndicator()
+                  : const Icon(Icons.photo),
+              label: const Text('Change Organization Image'),
+            ),
+            
+            
           ],
         ),
       ],
@@ -378,18 +391,6 @@ class DeleteOrgAlertDialogState extends State<DeleteOrgAlertDialog> {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             ElevatedButton.icon(
-              onPressed: _isLoading ? null : _onSubmit,
-              icon: _isLoading
-                  ? const CircularProgressIndicator()
-                  : const Icon(Icons.delete),
-              label: const Text('Delete Organization'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                padding: const EdgeInsets.all(16.0),
-              ),
-            ),
-            const SizedBox(height: 16.0),
-            ElevatedButton.icon(
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -404,6 +405,20 @@ class DeleteOrgAlertDialogState extends State<DeleteOrgAlertDialog> {
                 padding: const EdgeInsets.all(16.0),
               ),
             ),
+            const SizedBox(height: 16.0),
+            ElevatedButton.icon(
+              onPressed: _isLoading ? null : _onSubmit,
+              icon: _isLoading
+                  ? const CircularProgressIndicator()
+                  : const Icon(Icons.delete),
+              label: const Text('Delete Organization'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                padding: const EdgeInsets.all(16.0),
+              ),
+            ),
+            
+            
           ],
         ),
       ],
