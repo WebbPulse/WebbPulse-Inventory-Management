@@ -213,22 +213,6 @@ class ChangeProfilePictureAlertDialogState
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
-                side: BorderSide(
-                  color: theme.colorScheme.primary.withOpacity(0.5),
-                  width: 1.5,
-                ),
-                padding: const EdgeInsets.all(16.0),
-              ),
-              onPressed: _isLoading ? null : _onSubmit,
-              icon: _isLoading
-                  ? const CircularProgressIndicator()
-                  : const Icon(Icons.photo),
-              label: const Text('Change Profile Picture'),
-            ),
-            const SizedBox(height: 16.0),
-            ElevatedButton.icon(
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -243,6 +227,24 @@ class ChangeProfilePictureAlertDialogState
               icon: const Icon(Icons.arrow_back),
               label: const Text('Go Back'),
             ),
+            const SizedBox(height: 16.0),
+            ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
+                side: BorderSide(
+                  color: theme.colorScheme.primary.withOpacity(0.5),
+                  width: 1.5,
+                ),
+                padding: const EdgeInsets.all(16.0),
+              ),
+              onPressed: _isLoading ? null : _onSubmit,
+              icon: _isLoading
+                  ? const CircularProgressIndicator()
+                  : const Icon(Icons.photo),
+              label: const Text('Change Profile Picture'),
+            ),
+            
+            
           ],
         ),
       ],

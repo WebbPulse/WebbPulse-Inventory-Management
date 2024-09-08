@@ -31,7 +31,7 @@ class OrgMemberListView extends StatelessWidget {
                   if (userClaims[
                           'org_admin_${orgSelectorChangeNotifier.orgId}'] ==
                       true)
-                    ElevatedButton(
+                    ElevatedButton.icon(
                       onPressed: () {
                         showDialog(
                           context: context,
@@ -49,7 +49,8 @@ class OrgMemberListView extends StatelessWidget {
                         ),
                         padding: const EdgeInsets.all(16.0),
                       ),
-                      child: const Text('Add New User'),
+                      label: const Text('Add New User'),
+                      icon: const Icon(Icons.person_add),
                     )
                 ],
               ),
@@ -248,17 +249,43 @@ class AddUserAlertDialogState extends State<AddUserAlertDialog> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(
-                controller: _userCreationEmailController,
-                decoration: const InputDecoration(
-                  labelText: 'Email',
-                ),
+              Column(
+                children: [
+                  const Text(
+                    'Add a new user to this organization',
+                    
+                  ),
+                  TextField(
+                    controller: _userCreationEmailController,
+                    decoration: const InputDecoration(
+                      labelText: 'Email',
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
         ),
       ),
       actions: <Widget>[
+        Column(
+          children:[
+        ElevatedButton.icon(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
+                side: BorderSide(
+                  color: theme.colorScheme.primary.withOpacity(0.5),
+                  width: 1.5,
+                ),
+                padding: const EdgeInsets.all(16.0),
+              ),
+              icon: const Icon(Icons.arrow_back),
+              label: const Text('Go Back'),
+            ),
+        const SizedBox(height: 16.0),
         ElevatedButton.icon(
           onPressed: _isLoading ? null : _onSubmit,
           style: ElevatedButton.styleFrom(
@@ -271,9 +298,10 @@ class AddUserAlertDialogState extends State<AddUserAlertDialog> {
           ),
           icon: _isLoading
               ? const CircularProgressIndicator()
-              : const Icon(Icons.add),
+              : const Icon(Icons.person_add),
           label: const Text('Add User'),
         ),
+    ]),
       ],
     );
   }
