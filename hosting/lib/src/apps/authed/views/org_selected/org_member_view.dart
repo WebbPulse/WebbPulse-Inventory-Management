@@ -99,6 +99,18 @@ class OrgMemberView extends StatelessWidget {
                                                 .onSecondary,
                                             fontWeight: FontWeight.bold),
                                   ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    '${orgMemberData['orgMemberEmail']}',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium
+                                        ?.copyWith(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .onSecondary,
+                                            fontWeight: FontWeight.bold),
+                                  ),
                                   const SizedBox(height: 16),
                                   if (orgMemberData['orgMemberPhotoURL'] !=
                                           '' &&
@@ -340,6 +352,7 @@ class UserRoleDropdownButtonState extends State<UserRoleDropdownButton> {
   final List<Map<String, String>> items = [
     {'value': 'admin', 'display': 'Org Admin'},
     {'value': 'member', 'display': 'Org Member'},
+    {'value': 'deskstation', 'display': 'Desk Station'},
   ];
 
   @override

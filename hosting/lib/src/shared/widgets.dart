@@ -741,7 +741,7 @@ class DeviceCheckoutButtonState extends State<DeviceCheckoutButton> {
     super.dispose();
   }
 
-  void _onSubmit() async {
+  void _onSubmit(bool checkOut) async {
     setState(() => _isLoading = true);
     final deviceCheckoutService =
         Provider.of<DeviceCheckoutService>(context, listen: false);
@@ -757,6 +757,7 @@ class DeviceCheckoutButtonState extends State<DeviceCheckoutButton> {
         widget.deviceSerialNumber,
         orgId,
         deviceCheckedOutBy,
+        checkOut,  // Pass the checkout state (true for checkout, false for check-in)
       );
     } catch (e) {
       // Handle error if needed
@@ -767,23 +768,26 @@ class DeviceCheckoutButtonState extends State<DeviceCheckoutButton> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    ThemeData theme = Theme.of(context);
     return ElevatedButton.icon(
-      onPressed: _isLoading ? null : _onSubmit,
-      style: ElevatedButton.styleFrom(
-          backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
-          side: BorderSide(
-            color: theme.colorScheme.primary.withOpacity(0.5),
-            width: 1.5,
-          ),
-          padding: const EdgeInsets.all(16.0)),
+      onPressed: _isLoading
+          ? null
+          : () => _onSubmit(!widget.isDeviceCheckedOut),  // Pass true for checkout, false for check-in
       icon: _isLoading
           ? const CircularProgressIndicator()
-          : const Icon(Icons.login),
-      label: Text(widget.isDeviceCheckedOut ? 'Check In' : 'Check Out'),
-    );
+          : Icon(widget.isDeviceCheckedOut ? Icons.logout : Icons.login),
+      label: Text(widget.isDeviceCheckedOut ? 'Check-in Device' : 'Check-out Device'),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
+        side: BorderSide(
+          color: theme.colorScheme.primary.withOpacity(0.5),
+          width: 1.5,
+        ),
+        padding: const EdgeInsets.all(16.0),
+    ));
   }
 }
+
 
 class DeleteDeviceButton extends StatefulWidget {
   const DeleteDeviceButton({
@@ -865,5 +869,128 @@ class _DeleteDeviceButtonState extends State<DeleteDeviceButton> {
         ),
       );
     });
+  }
+}
+
+class AddDeviceAlertDialog extends StatefulWidget {
+  const AddDeviceAlertDialog({super.key});
+
+  @override
+  AddDeviceAlertDialogState createState() => AddDeviceAlertDialogState();
+}
+
+class AddDeviceAlertDialogState extends State<AddDeviceAlertDialog> {
+  late TextEditingController _deviceSerialNumberController;
+  var _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _deviceSerialNumberController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _deviceSerialNumberController.dispose();
+    super.dispose();
+  }
+
+  void _onSubmit() async {
+    final deviceSerialNumber = _deviceSerialNumberController.text;
+    final orgSelectorProvider =
+        Provider.of<OrgSelectorChangeNotifier>(context, listen: false);
+    final firebaseFunctions =
+        Provider.of<FirebaseFunctions>(context, listen: false);
+    if (deviceSerialNumber.isNotEmpty) {
+      setState(() {
+        _isLoading = true;
+      });
+
+      try {
+        await firebaseFunctions.httpsCallable('create_device_callable').call({
+          "deviceSerialNumber": deviceSerialNumber,
+          "orgId": orgSelectorProvider.orgId,
+        });
+        AsyncContextHelpers.showSnackBarIfMounted(
+            context, 'Device created successfully');
+        AsyncContextHelpers.popContextIfMounted(context);
+      } catch (e) {
+        await AsyncContextHelpers.showSnackBarIfMounted(
+            context, 'Failed to create Device: $e');
+      } finally {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    ThemeData theme = Theme.of(context);
+    return AlertDialog(
+      title: const Text('Add New Device'),
+      content: SingleChildScrollView(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 500),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Column(
+                children: [
+                  const Text(
+                    'Add a new device to this organization',
+                    
+                  ),
+                  TextField(
+                    controller: _deviceSerialNumberController,
+                    decoration: const InputDecoration(
+                      labelText: 'Device Serial Number',
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+      actions: <Widget>[
+        Column(
+          children:[
+        
+        ElevatedButton.icon(
+          onPressed: _isLoading ? null : _onSubmit,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
+            side: BorderSide(
+              color: theme.colorScheme.primary.withOpacity(0.5),
+              width: 1.5,
+            ),
+            padding: const EdgeInsets.all(16.0),
+          ),
+          icon: _isLoading
+              ? const CircularProgressIndicator()
+              : const Icon(Icons.add),
+          label: const Text('Add Device'),
+        ),
+        const SizedBox(height: 16.0),
+        ElevatedButton.icon(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
+                side: BorderSide(
+                  color: theme.colorScheme.primary.withOpacity(0.5),
+                  width: 1.5,
+                ),
+                padding: const EdgeInsets.all(16.0),
+              ),
+              icon: const Icon(Icons.arrow_back),
+              label: const Text('Go Back'),
+            ),
+    ]),
+      ],
+    );
   }
 }

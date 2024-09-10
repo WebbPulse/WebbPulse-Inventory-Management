@@ -13,9 +13,33 @@ class OrgDeviceListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    ThemeData theme = Theme.of(context);
     return Scaffold(
-      appBar: const OrgNameAppBar(
+      appBar: OrgNameAppBar(
         titleSuffix: 'Devices',
+        actions: [
+          ElevatedButton.icon(
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return const AddDeviceAlertDialog();
+                          },
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            theme.colorScheme.surface.withOpacity(0.95),
+                        side: BorderSide(
+                          color: theme.colorScheme.primary.withOpacity(0.5),
+                          width: 1.5,
+                        ),
+                        padding: const EdgeInsets.all(16.0),
+                      ),
+                      label: const Text('Add New Device'),
+                      icon: const Icon(Icons.add),
+                    )
+        ],
       ),
       drawer: const AuthedDrawer(),
       body: Consumer2<OrgSelectorChangeNotifier, FirestoreReadService>(

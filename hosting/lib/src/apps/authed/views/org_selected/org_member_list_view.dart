@@ -270,22 +270,7 @@ class AddUserAlertDialogState extends State<AddUserAlertDialog> {
       actions: <Widget>[
         Column(
           children:[
-        ElevatedButton.icon(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
-                side: BorderSide(
-                  color: theme.colorScheme.primary.withOpacity(0.5),
-                  width: 1.5,
-                ),
-                padding: const EdgeInsets.all(16.0),
-              ),
-              icon: const Icon(Icons.arrow_back),
-              label: const Text('Go Back'),
-            ),
-        const SizedBox(height: 16.0),
+        
         ElevatedButton.icon(
           onPressed: _isLoading ? null : _onSubmit,
           style: ElevatedButton.styleFrom(
@@ -301,6 +286,22 @@ class AddUserAlertDialogState extends State<AddUserAlertDialog> {
               : const Icon(Icons.person_add),
           label: const Text('Add User'),
         ),
+        const SizedBox(height: 16.0),
+        ElevatedButton.icon(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
+                side: BorderSide(
+                  color: theme.colorScheme.primary.withOpacity(0.5),
+                  width: 1.5,
+                ),
+                padding: const EdgeInsets.all(16.0),
+              ),
+              icon: const Icon(Icons.arrow_back),
+              label: const Text('Go Back'),
+            ),
     ]),
       ],
     );
