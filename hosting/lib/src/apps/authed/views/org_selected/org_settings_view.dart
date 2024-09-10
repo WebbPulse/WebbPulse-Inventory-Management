@@ -152,7 +152,7 @@ class OrgSettingsView extends StatelessWidget {
 class OrgNameEditor extends StatefulWidget {
   final dynamic orgDocument;
 
-  const OrgNameEditor({required this.orgDocument});
+  const OrgNameEditor({super.key, required this.orgDocument});
 
   @override
   _OrgNameEditorState createState() => _OrgNameEditorState();

@@ -49,19 +49,30 @@ def check_user_is_org_member(req: https_fn.CallableRequest, org_id: str):
     # Check if the user has either the member or admin role for the specified organization
     is_member = req.auth.token.get(f"org_member_{org_id}")
     is_admin = req.auth.token.get(f"org_admin_{org_id}")
+    is_deskstation = req.auth.token.get(f"org_deskstation_{org_id}")
 
-    if is_member is None and is_admin is None:
+    if is_member is None and is_admin is None and is_deskstation is None:
         raise https_fn.HttpsError(
             code=https_fn.FunctionsErrorCode.PERMISSION_DENIED,
             message="Unauthorized access. User is not a member or admin of the organization."
         )
     
-
 def check_user_is_org_admin(req: https_fn.CallableRequest, org_id: str):
         # Check for the admin role
         if req.auth.token.get(f"org_admin_{org_id}") is None:
             raise https_fn.HttpsError(code=https_fn.FunctionsErrorCode.PERMISSION_DENIED,
                                       message=f"Unauthorized access. User is not an admin of the organization.")
+        
+def check_user_is_org_deskstation_or_higher(req: https_fn.CallableRequest, org_id: str):
+    # Check for the deskstation role
+    is_deskstation = req.auth.token.get(f"org_deskstation_{org_id}")
+    is_admin = req.auth.token.get(f"org_admin_{org_id}")
+
+    if is_deskstation is None and is_admin is None:
+        raise https_fn.HttpsError(
+            code=https_fn.FunctionsErrorCode.PERMISSION_DENIED,
+            message="Unauthorized access. User is not a deskstation of the organization."
+        )
         
 def check_user_is_at_global_org_limit(req: https_fn.CallableRequest, userEmail:str):
     # Check if the user is at the global organization limit

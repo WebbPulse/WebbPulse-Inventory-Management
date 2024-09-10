@@ -1,9 +1,12 @@
 // device_checkout_service.dart
 
 import 'package:flutter/material.dart';
+import 'package:webbcheck/src/shared/providers/authentication_change_notifier.dart';
 import 'firestore_read_service.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import '../helpers/async_context_helpers.dart';
+import 'package:provider/provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class DeviceCheckoutService {
   final FirestoreReadService firestoreService;
@@ -16,10 +19,33 @@ class DeviceCheckoutService {
     String deviceSerialNumber,
     String orgId,
     String deviceCheckedOutBy,
+    bool checkOut,
   ) async {
     if (deviceSerialNumber.isNotEmpty) {
       try {
-        ///if device does not exist in firestore, create it and check it out
+        // Get the authentication and org selector change notifiers
+        final authenticationChangeNotifier =
+            Provider.of<AuthenticationChangeNotifier>(context, listen: false);
+
+        // If the device is not checked out by the current user, check the user's claims to see if they have permission to check out devices for other users in the organization
+        if (deviceCheckedOutBy != authenticationChangeNotifier.user!.uid) {
+          // Await the user ID token result so we can check the user's claims
+          IdTokenResult userIdTokenResult =
+              await authenticationChangeNotifier.user!.getIdTokenResult();
+          final userClaims = userIdTokenResult.claims;
+
+          if (userClaims!['org_admin_$orgId'] == false &&
+              userClaims['org_deskstation_$orgId'] == false) {
+            await AsyncContextHelpers.showSnackBarIfMounted(
+                context,
+                'You do not have permission to check out devices for other users in this organization');
+            return;
+          }
+        }
+
+
+
+                // If device does not exist in Firestore, create it and check it out
         if (!await firestoreService.doesDeviceExistInFirestore(
             deviceSerialNumber, orgId)) {
           await firebaseFunctions.httpsCallable('create_device_callable').call({
@@ -33,49 +59,49 @@ class DeviceCheckoutService {
               .call({
             "deviceSerialNumber": deviceSerialNumber,
             "orgId": orgId,
-            "isDeviceCheckedOut": true,
-            "deviceCheckedOutBy": deviceCheckedOutBy,
+            "isDeviceCheckedOut": checkOut,
+            "deviceCheckedOutBy": checkOut ? deviceCheckedOutBy : '',
           });
 
-          await AsyncContextHelpers.showSnackBarIfMounted(
-              context, 'Device added to organization and checked out!');
+          // Update the SnackBar message based on the checkOut boolean value
+          String snackBarMessage = checkOut
+              ? 'Device added to organization and checked out!'
+              : 'Device added to organization and checked in!';
+
+          await AsyncContextHelpers.showSnackBarIfMounted(context, snackBarMessage);
         } else {
-          ///if device exists, check it in/out
+          // If device exists, handle check-in/check-out based on current state
           bool isDeviceCheckedOut = await firestoreService
               .isDeviceCheckedOutInFirestore(deviceSerialNumber, orgId);
 
-          if (isDeviceCheckedOut) {
-            ///if device is checked out, check it in
-            await firebaseFunctions
-                .httpsCallable('update_device_checkout_status_callable')
-                .call({
-              "deviceSerialNumber": deviceSerialNumber,
-              "orgId": orgId,
-              "isDeviceCheckedOut": false,
-              "deviceCheckedOutBy": '',
-            });
+          if (checkOut && isDeviceCheckedOut) {
+            // If trying to check out but it's already checked out
+            await AsyncContextHelpers.showSnackBarIfMounted(
+                context, 'Device is already checked out!');
+          } else if (!checkOut && !isDeviceCheckedOut) {
+            // If trying to check in but it's already checked in
+            await AsyncContextHelpers.showSnackBarIfMounted(
+                context, 'Device is already checked in!');
           } else {
-            ///if device is checked in, check it out
-
+            // Update the checkout status
             await firebaseFunctions
                 .httpsCallable('update_device_checkout_status_callable')
                 .call({
               "deviceSerialNumber": deviceSerialNumber,
               "orgId": orgId,
-              "isDeviceCheckedOut": true,
-              "deviceCheckedOutBy": deviceCheckedOutBy,
+              "isDeviceCheckedOut": checkOut,
+              "deviceCheckedOutBy": checkOut ? deviceCheckedOutBy : '',
             });
-          }
 
-          ///ensure context is mounted before showing snackbar
-          await AsyncContextHelpers.showSnackBarIfMounted(
-              context,
-              isDeviceCheckedOut
-                  ? 'Device checked in!'
-                  : 'Device checked out!');
+            await AsyncContextHelpers.showSnackBarIfMounted(
+                context,
+                checkOut
+                    ? 'Device checked out successfully!'
+                    : 'Device checked in successfully!');
+          }
         }
       } catch (e) {
-        ///ensure context is mounted before showing snackbar
+        // Ensure context is mounted before showing snackbar
         await AsyncContextHelpers.showSnackBarIfMounted(
             context, 'Failed to check in/out device: $e');
       }
