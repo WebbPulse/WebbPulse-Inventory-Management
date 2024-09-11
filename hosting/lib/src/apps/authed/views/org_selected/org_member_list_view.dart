@@ -56,9 +56,9 @@ class OrgMemberListView extends StatelessWidget {
               ),
               drawer: const AuthedDrawer(),
               body: Consumer<FirestoreReadService>(
-                builder: (context, firestoreService, child) {
+                builder: (context, firestoreReadService, child) {
                   return StreamBuilder<List<DocumentSnapshot>>(
-                    stream: firestoreService.getOrgMembersDocuments(
+                    stream: firestoreReadService.getOrgMembersDocuments(
                         orgSelectorChangeNotifier.orgId),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {

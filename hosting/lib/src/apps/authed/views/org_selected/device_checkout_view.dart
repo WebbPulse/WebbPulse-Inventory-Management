@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:webbcheck/src/shared/providers/firestore_read_service.dart';
 
 import '../../../../shared/providers/org_selector_change_notifier.dart';
 import '../../../../shared/providers/authentication_change_notifier.dart';
@@ -145,16 +147,48 @@ class CheckoutFormState extends State<CheckoutForm> {
       ThemeData theme = Theme.of(context);
       return AlertDialog(
         title: Text(checkOut ? 'Confirm Check-out User' : 'Confirm Check-in User'),
-        content: SingleChildScrollView(
-          child: ListBody(
-            children: <Widget>[
-              Text(
-                checkOut
-                    ? 'Select the user to check-out this device.'
-                    : 'Select the user to check-in this device.',
-              ),
-            ],
+        content: Consumer2<FirestoreReadService, OrgSelectorChangeNotifier>(
+          builder: (context, firestoreReadService, orgSelectorChangeNotifier, child) {
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                        checkOut
+                            ? 'Select the user to check-out this device.'
+                            : 'Select the user to check-in this device.',
+                      ),
+                StreamBuilder<List<DocumentSnapshot>>(
+                  stream: firestoreReadService.getOrgMembersDocuments(
+                        orgSelectorChangeNotifier.orgId),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                    } else if (snapshot.hasError) {
+                        return const Center(child: Text('Error loading users'));
+                    }
+                    final List<DocumentSnapshot> orgMemberDocs =
+                          snapshot.data!;
+
+                    return SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          for (var orgMemberDoc in orgMemberDocs)
+                            ListTile(
+                              title: Text(orgMemberDoc['orgMemberDisplayName']),
+                              subtitle: Text(orgMemberDoc['orgMemberEmail']),
+                              onTap: () {
+                                Navigator.of(context).pop(orgMemberDoc.id);
+                              },
+                            ),
+                        ],
+                      ),
+                    );
+                  }
           ),
+              ],
+            );
+          }
         ),
         actions: <Widget>[
           // Checkout Button
@@ -166,6 +200,8 @@ class CheckoutFormState extends State<CheckoutForm> {
                     /////DO THIS LATER!!!!!!!!!!!!!!!!!!!1
                     
                     final deviceCheckedOutBy =
+                        ///replave this checked out by logic
+                        
                         Provider.of<AuthenticationChangeNotifier>(context, listen: false)
                             .user!
                             .uid;
