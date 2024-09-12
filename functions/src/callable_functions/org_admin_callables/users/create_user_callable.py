@@ -32,32 +32,23 @@ def create_user_callable(req: https_fn.CallableRequest) -> Any:
 
         # Check if the user is at the global organization limit
         check_user_is_at_global_org_limit(req, user_email)
-        
-        # Check if the user already exists in Firebase Auth
-        user, user_was_created = None, False
-        try:
-            user = auth.get_user_by_email(user_email)
-        except auth.UserNotFoundError:
-            # User does not exist, create the user
-            user = auth.create_user(
+
+        # Attempt to retrieve user by email
+        user_record = auth.get_user_by_email(user_email) if user_exists(user_email) else None
+        user_was_created = False
+
+        if not user_record:
+            # If user does not exist, create a new user
+            user_record = auth.create_user(
                 email=user_email,
                 email_verified=False,
                 disabled=False
             )
             user_was_created = True
-        except Exception as e:
-            # Handle any other unexpected errors
-            raise https_fn.HttpsError(
-                code=https_fn.FunctionsErrorCode.UNKNOWN,
-                message=f"Error retrieving or creating user: {str(e)}"
-            )
+            create_global_user_profile(user_record)
 
-        # If the user was newly created, create a global user profile
-        if user_was_created:
-            create_global_user_profile(user)
-
-        # Add the user to the organization
-        add_user_to_organization(user.uid, org_id, user.display_name, user_email)
+        # Add user to the organization
+        add_user_to_organization(user_record.uid, org_id, user_record.display_name, user_email)
 
         # Return response indicating the operation success
         response_message = f"User {user_email} {'created and ' if user_was_created else ''}added to organization."
@@ -72,5 +63,16 @@ def create_user_callable(req: https_fn.CallableRequest) -> Any:
             code=https_fn.FunctionsErrorCode.UNKNOWN,
             message=f"Error creating user: {str(e)}"
         )
+
+def user_exists(user_email: str) -> bool:
+    """
+    Helper function to check if a user exists without raising an exception.
+    Returns True if the user exists, False otherwise.
+    """
+    try:
+        auth.get_user_by_email(user_email)
+        return True
+    except auth.UserNotFoundError:
+        return False
 
 
