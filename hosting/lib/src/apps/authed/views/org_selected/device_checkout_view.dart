@@ -23,26 +23,25 @@ class DeviceCheckoutView extends StatelessWidget {
             titleSuffix: 'Device Checkout',
             actions: [
               ElevatedButton.icon(
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return const AddDeviceAlertDialog();
-                          },
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            theme.colorScheme.surface.withOpacity(0.95),
-                        side: BorderSide(
-                          color: theme.colorScheme.primary.withOpacity(0.5),
-                          width: 1.5,
-                        ),
-                        padding: const EdgeInsets.all(16.0),
-                      ),
-                      label: const Text('Add New Device'),
-                      icon: const Icon(Icons.add),
-                    )
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return const AddDeviceAlertDialog();
+                    },
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
+                  side: BorderSide(
+                    color: theme.colorScheme.primary.withOpacity(0.5),
+                    width: 1.5,
+                  ),
+                  padding: const EdgeInsets.all(16.0),
+                ),
+                label: const Text('Add New Device'),
+                icon: const Icon(Icons.add),
+              )
             ],
           ),
           drawer: const AuthedDrawer(),
@@ -81,17 +80,28 @@ class CheckoutForm extends StatefulWidget {
 class CheckoutFormState extends State<CheckoutForm> {
   var _isLoading = false;
   late TextEditingController _deviceSerialController;
+  late TextEditingController _userSearchController;
+  String _searchQuery = '';
 
   @override
   void initState() {
     super.initState();
     _deviceSerialController = TextEditingController();
+    _userSearchController = TextEditingController();
+    _userSearchController.addListener(_onSearchChanged);
   }
 
   @override
   void dispose() {
     _deviceSerialController.dispose();
+    _userSearchController.dispose();
     super.dispose();
+  }
+
+  void _onSearchChanged() {
+    setState(() {
+      _searchQuery = _userSearchController.text;
+    });
   }
 
   Future<void> _onSubmit(bool checkOut) async {
@@ -119,7 +129,8 @@ class CheckoutFormState extends State<CheckoutForm> {
     }
   }
 
-  Future<void> _onSubmitAdminAndDeskstation(bool checkOut, String deviceCheckedOutBy) async {
+  Future<void> _onSubmitAdminAndDeskstation(
+      bool checkOut, String deviceCheckedOutBy) async {
     setState(() => _isLoading = true);
     final orgId =
         Provider.of<OrgSelectorChangeNotifier>(context, listen: false).orgId;
@@ -141,218 +152,241 @@ class CheckoutFormState extends State<CheckoutForm> {
   }
 
   Future<void> _showAdminDialog(bool checkOut, String orgId) async {
-  return showDialog<void>(
-    context: context,
-    builder: (BuildContext context) {
-      ThemeData theme = Theme.of(context);
-      return AlertDialog(
-        title: Text(checkOut ? 'Confirm Check-out User' : 'Confirm Check-in User'),
-        content: Consumer2<FirestoreReadService, OrgSelectorChangeNotifier>(
-          builder: (context, firestoreReadService, orgSelectorChangeNotifier, child) {
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                        checkOut
-                            ? 'Select the user to check-out this device.'
-                            : 'Select the user to check-in this device.',
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        ThemeData theme = Theme.of(context);
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return AlertDialog(
+              title: Text(checkOut
+                  ? 'Confirm Check-out User'
+                  : 'Confirm Check-in User'),
+              content:
+                  Consumer2<FirestoreReadService, OrgSelectorChangeNotifier>(
+                      builder: (context, firestoreReadService,
+                          orgSelectorChangeNotifier, child) {
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      checkOut
+                          ? 'Select the user to check-out this device.'
+                          : 'Select the user to check-in this device.',
+                    ),
+                    TextField(
+                      controller: _userSearchController,
+                      decoration: const InputDecoration(
+                        labelText: 'Search User',
+                        prefixIcon: Icon(Icons.search),
                       ),
-                StreamBuilder<List<DocumentSnapshot>>(
-                  stream: firestoreReadService.getOrgMembersDocuments(
-                        orgSelectorChangeNotifier.orgId),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(child: CircularProgressIndicator());
-                    } else if (snapshot.hasError) {
-                        return const Center(child: Text('Error loading users'));
-                    }
-                    final List<DocumentSnapshot> orgMemberDocs =
-                          snapshot.data!;
+                      onChanged: (value) {
+                        setState(() {
+                          _searchQuery = value;
+                        });
+                      },
+                    ),
+                    StreamBuilder<List<DocumentSnapshot>>(
+                        stream: firestoreReadService.getOrgMembersDocuments(
+                            orgSelectorChangeNotifier.orgId),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Center(
+                                child: CircularProgressIndicator());
+                          } else if (snapshot.hasError) {
+                            return const Center(
+                                child: Text('Error loading users'));
+                          }
+                          final List<DocumentSnapshot> orgMemberDocs =
+                              snapshot.data!;
 
-                    return SingleChildScrollView(
-                      child: Column(
-                        children: [
-                          for (var orgMemberDoc in orgMemberDocs)
-                            ListTile(
-                              title: Text(orgMemberDoc['orgMemberDisplayName']),
-                              subtitle: Text(orgMemberDoc['orgMemberEmail']),
-                              onTap: () {
-                                Navigator.of(context).pop(orgMemberDoc.id);
-                              },
-                            ),
-                        ],
-                      ),
-                    );
-                  }
-          ),
+                          // Filter the list based on the search query
+                          final filteredDocs = orgMemberDocs.where((doc) {
+                            final name = doc['orgMemberDisplayName']
+                                .toString()
+                                .toLowerCase();
+                            return name.contains(_searchQuery.toLowerCase());
+                          }).toList();
+
+                          if (filteredDocs.isNotEmpty) {
+                            return Container(
+                              constraints: const BoxConstraints(
+                                maxHeight: 200,
+                              ),
+                              child: SingleChildScrollView(
+                                child: Column(
+                                  children: filteredDocs.map((orgMemberDoc) {
+                                    return ListTile(
+                                      title: Text(
+                                          orgMemberDoc['orgMemberDisplayName']),
+                                      subtitle:
+                                          Text(orgMemberDoc['orgMemberEmail']),
+                                      onTap: () {
+                                        _onSubmitAdminAndDeskstation(
+                                          checkOut,
+                                          orgMemberDoc.id,
+                                        );
+                                        Navigator.of(context).pop();
+                                      },
+                                    );
+                                  }).toList(),
+                                ),
+                              ),
+                            );
+                          } else {
+                            return const Column(
+                              children: [
+                                SizedBox(
+                                  height: 16,
+                                ),
+                                Center(
+                                  child: Text('No users found.'),
+                                ),
+                              ],
+                            );
+                          }
+                        }),
+                  ],
+                );
+              }),
+              actions: <Widget>[
+                ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor:
+                        theme.colorScheme.surface.withOpacity(0.95),
+                    side: BorderSide(
+                      color: theme.colorScheme.primary.withOpacity(0.5),
+                      width: 1.5,
+                    ),
+                    padding: const EdgeInsets.all(16.0),
+                  ),
+                  icon: const Icon(Icons.arrow_back),
+                  label: const Text('Go Back'),
+                ),
               ],
             );
-          }
-        ),
-        actions: <Widget>[
-          // Checkout Button
-          ElevatedButton.icon(
-            onPressed: _isLoading
-                ? null
-                : () {
-                    
-                    /////DO THIS LATER!!!!!!!!!!!!!!!!!!!1
-                    
-                    final deviceCheckedOutBy =
-                        ///replave this checked out by logic
-                        
-                        Provider.of<AuthenticationChangeNotifier>(context, listen: false)
-                            .user!
-                            .uid;
-                    _onSubmitAdminAndDeskstation(checkOut, deviceCheckedOutBy);
-                    Navigator.of(context).pop(); // Close dialog after action
-                  },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
-              side: BorderSide(
-                color: theme.colorScheme.primary.withOpacity(0.5),
-                width: 1.5,
-              ),
-              padding: const EdgeInsets.all(16.0),
-            ),
-            icon: _isLoading
-                ? const CircularProgressIndicator()
-                : const Icon(Icons.logout),
-            label: Text(checkOut ? 'Confirm Check-out Serial Number' : 'Confirm Check-in Serial Number',),
-          ),
-          const SizedBox(width: 8.0, height: 8.0),
-          ElevatedButton.icon(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
-                side: BorderSide(
-                  color: theme.colorScheme.primary.withOpacity(0.5),
-                  width: 1.5,
-                ),
-                padding: const EdgeInsets.all(16.0),
-              ),
-              icon: const Icon(Icons.arrow_back),
-              label: const Text('Go Back'),
-            ),
-        ],
-      );
-    },
-  );
-}
+          },
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     ThemeData theme = Theme.of(context);
-    return AuthClaimChecker(
-      builder: (context, userClaims) {
-        final orgId = Provider.of<OrgSelectorChangeNotifier>(context, listen: false).orgId;
-        // Safely check if the roles exist and their values are true
-        bool isAdminOrDeskstation = (userClaims['org_admin_$orgId'] == true) ||
-                                  (userClaims['org_deskstation_$orgId'] == true);
+    return AuthClaimChecker(builder: (context, userClaims) {
+      final orgId =
+          Provider.of<OrgSelectorChangeNotifier>(context, listen: false).orgId;
+      // Safely check if the roles exist and their values are true
+      bool isAdminOrDeskstation = (userClaims['org_admin_$orgId'] == true) ||
+          (userClaims['org_deskstation_$orgId'] == true);
 
-        return SingleChildScrollView(
-          child: Center(
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                // Set maximum width constraints based on screen size
-                double maxWidth;
-                if (constraints.maxWidth < 600) {
-                  maxWidth = constraints.maxWidth * 0.95;
-                } else if (constraints.maxWidth < 1200) {
-                  maxWidth = constraints.maxWidth * 0.6;
-                } else {
-                  maxWidth = constraints.maxWidth * 0.4;
-                }
-        
-                return ConstrainedBox(
-                  constraints: BoxConstraints(
-                    maxWidth: maxWidth,
+      return SingleChildScrollView(
+        child: Center(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              // Set maximum width constraints based on screen size
+              double maxWidth;
+              if (constraints.maxWidth < 600) {
+                maxWidth = constraints.maxWidth * 0.95;
+              } else if (constraints.maxWidth < 1200) {
+                maxWidth = constraints.maxWidth * 0.6;
+              } else {
+                maxWidth = constraints.maxWidth * 0.4;
+              }
+
+              return ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: maxWidth,
+                ),
+                child: Card(
+                  elevation: 4.0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Card(
-                    elevation: 4.0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        children: [
-                          TextField(
-                            controller: _deviceSerialController,
-                            decoration: const InputDecoration(
-                              labelText: 'Serial Number',
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      children: [
+                        TextField(
+                          controller: _deviceSerialController,
+                          decoration: const InputDecoration(
+                            labelText: 'Serial Number',
+                          ),
+                        ),
+                        const SizedBox(height: 16.0),
+                        Wrap(
+                          spacing: 8.0,
+                          runSpacing: 8.0,
+                          children: [
+                            // Checkout Button
+                            ElevatedButton.icon(
+                              onPressed: _isLoading
+                                  ? null
+                                  : () {
+                                      if (isAdminOrDeskstation) {
+                                        _showAdminDialog(true, orgId);
+                                      } else {
+                                        _onSubmit(true);
+                                      }
+                                    },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor:
+                                    theme.colorScheme.surface.withOpacity(0.95),
+                                side: BorderSide(
+                                  color: theme.colorScheme.primary
+                                      .withOpacity(0.5),
+                                  width: 1.5,
+                                ),
+                                padding: const EdgeInsets.all(16.0),
+                              ),
+                              icon: _isLoading
+                                  ? const CircularProgressIndicator()
+                                  : const Icon(Icons.logout),
+                              label: const Text('Check-out Serial Number'),
                             ),
-                          ),
-                          const SizedBox(height: 16.0),
-        
-                          Wrap(
-                            spacing: 8.0,
-                            runSpacing: 8.0,
-                            children: [
-                              // Checkout Button
-                              ElevatedButton.icon(
-                                onPressed: _isLoading
-                                    ? null
-                                    : () {
-                                        if (isAdminOrDeskstation) {
-                                          _showAdminDialog(true, orgId);
-                                        } else {
-                                          _onSubmit(true);
-                                        }
-                                      },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
-                                  side: BorderSide(
-                                    color: theme.colorScheme.primary.withOpacity(0.5),
-                                    width: 1.5,
-                                  ),
-                                  padding: const EdgeInsets.all(16.0),
+                            // Check-in Button
+                            ElevatedButton.icon(
+                              onPressed: _isLoading
+                                  ? null
+                                  : () {
+                                      if (isAdminOrDeskstation) {
+                                        _showAdminDialog(false, orgId);
+                                      } else {
+                                        _onSubmit(false);
+                                      }
+                                    },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor:
+                                    theme.colorScheme.surface.withOpacity(0.95),
+                                side: BorderSide(
+                                  color: theme.colorScheme.secondary
+                                      .withOpacity(0.5),
+                                  width: 1.5,
                                 ),
-                                icon: _isLoading
-                                    ? const CircularProgressIndicator()
-                                    : const Icon(Icons.logout),
-                                label: const Text('Check-out Serial Number'),
+                                padding: const EdgeInsets.all(16.0),
                               ),
-                              // Check-in Button
-                              ElevatedButton.icon(
-                                onPressed: _isLoading
-                                    ? null
-                                    : () {
-                                        if (isAdminOrDeskstation) {
-                                          _showAdminDialog(false, orgId);
-                                        } else {
-                                          _onSubmit(false);
-                                        }
-                                      },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
-                                  side: BorderSide(
-                                    color: theme.colorScheme.secondary.withOpacity(0.5),
-                                    width: 1.5,
-                                  ),
-                                  padding: const EdgeInsets.all(16.0),
-                                ),
-                                icon: _isLoading
-                                    ? const CircularProgressIndicator()
-                                    : const Icon(Icons.login),
-                                label: const Text('Check-in Serial Number'),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
+                              icon: _isLoading
+                                  ? const CircularProgressIndicator()
+                                  : const Icon(Icons.login),
+                              label: const Text('Check-in Serial Number'),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
-                );
-              },
-            ),
+                ),
+              );
+            },
           ),
-        );
-      }
-    );
+        ),
+      );
+    });
   }
 }
-

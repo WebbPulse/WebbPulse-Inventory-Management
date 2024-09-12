@@ -1,7 +1,11 @@
 from src.shared import db, firestore, https_fn, auth
 from src.helper_functions.users.update_user_roles import update_user_roles
+
 def add_user_to_organization(uid, org_id, org_member_display_name, org_member_email):
     try:
+        # Use org_member_email if org_member_display_name is empty or None
+        org_member_display_name = org_member_display_name or org_member_email
+
         org_member_ref = db.collection('organizations').document(org_id).collection('members').document(uid)
         org_member_ref.set({
             'orgMemberId': uid,
@@ -12,6 +16,9 @@ def add_user_to_organization(uid, org_id, org_member_display_name, org_member_em
             'orgMemberRole': "member",
             'orgMemberDeleted': False,
         })
+
+        # Update user roles after adding to the organization
         update_user_roles(uid, "member", org_id, False)
+        
     except Exception as e:
         raise https_fn.HttpsError(code=https_fn.FunctionsErrorCode.UNKNOWN, message=f"Unknown Error adding user to organization: {str(e)}")

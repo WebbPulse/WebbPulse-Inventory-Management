@@ -36,16 +36,13 @@ class DeviceCheckoutService {
 
           if (userClaims!['org_admin_$orgId'] == false &&
               userClaims['org_deskstation_$orgId'] == false) {
-            await AsyncContextHelpers.showSnackBarIfMounted(
-                context,
+            await AsyncContextHelpers.showSnackBarIfMounted(context,
                 'You do not have permission to check out devices for other users in this organization');
             return;
           }
         }
 
-
-
-                // If device does not exist in Firestore, create it and check it out
+        // If device does not exist in Firestore, create it and check it out
         if (!await firestoreService.doesDeviceExistInFirestore(
             deviceSerialNumber, orgId)) {
           await firebaseFunctions.httpsCallable('create_device_callable').call({
@@ -68,7 +65,8 @@ class DeviceCheckoutService {
               ? 'Device added to organization and checked out!'
               : 'Device added to organization and checked in!';
 
-          await AsyncContextHelpers.showSnackBarIfMounted(context, snackBarMessage);
+          await AsyncContextHelpers.showSnackBarIfMounted(
+              context, snackBarMessage);
         } else {
           // If device exists, handle check-in/check-out based on current state
           bool isDeviceCheckedOut = await firestoreService

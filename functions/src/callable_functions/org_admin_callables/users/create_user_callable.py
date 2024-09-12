@@ -1,68 +1,74 @@
-from src.shared import auth, https_fn, POSTcorsrules, allowed_domains, Any, check_user_is_org_admin, check_user_is_authed, check_user_token_current, check_user_is_email_verified, check_user_is_at_global_org_limit
+from src.shared import auth, https_fn, POSTcorsrules, allowed_domains, Any, UserNotFoundError, check_user_is_org_admin, check_user_is_authed, check_user_token_current, check_user_is_email_verified, check_user_is_at_global_org_limit, check_user_already_belongs_to_org
 from src.helper_functions.users.create_global_user_profile import create_global_user_profile
 from src.helper_functions.users.add_user_to_organization import add_user_to_organization
 
 
 @https_fn.on_call(cors=POSTcorsrules)
 def create_user_callable(req: https_fn.CallableRequest) -> Any:
-    # Create the user in Firebase Auth
-    try: 
-        user_email = req.data["userEmail"]
-        org_id = req.data["orgId"]
+    try:
+        # Extract required data from the request
+        user_email = req.data.get("userEmail")
+        org_id = req.data.get("orgId")
         
+        # Validate required fields
+        if not user_email or not org_id:
+            raise https_fn.HttpsError(
+                code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
+                message='The function must be called with "userEmail" and "orgId".'
+            )
+
+        # Run authentication and authorization checks
         check_user_is_authed(req)
         check_user_is_email_verified(req)
         check_user_token_current(req)
         check_user_is_org_admin(req, org_id)
-        
 
-        # Checking attribute.
-        if not user_email or not org_id:
-            # Throwing an HttpsError so that the client gets the error details.
-            raise https_fn.HttpsError(code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
-                                      message='The function must be called with two arguments: "userEmail" and "orgId".')
-
+        # Validate email domain
         if user_email.split("@")[1] not in allowed_domains:
-            raise https_fn.HttpsError(code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
-                                      message='Unauthorized email for new user')
+            raise https_fn.HttpsError(
+                code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
+                message='Unauthorized email for new user'
+            )
 
-        user = None
-        response_message = ""
+        
+        # Check if the user already exists in Firebase Auth
+        user, user_was_created = None, False
+        try:
+            user = auth.get_user_by_email(user_email)
+        except UserNotFoundError:
+            # User does not exist, create the user
+            user = auth.create_user(
+                email=user_email,
+                email_verified=False,
+                disabled=False
+            )
+            user_was_created = True
 
-        def user_exists_in_auth():
-            nonlocal user
-            try:
-                # User exists
-                user = auth.get_user_by_email(user_email)
-                return True
-                    
-            except auth.UserNotFoundError:
-                # Create the user in Firebase Auth
-                user = auth.create_user(
-                    email=user_email,
-                    email_verified=False,
-                    disabled=False
-                )
-                return False
-        
-        # Check if the user is at the global organization limit, if so throw an exception and stop execution
-        check_user_is_at_global_org_limit(req, user_email)
-        
-        #if not proceed to the rest of the logic
-        user_was_created = not user_exists_in_auth() 
+        # If the user was newly created, create a global user profile
         if user_was_created:
             create_global_user_profile(user)
-        add_user_to_organization(user.uid, org_id, user.display_name, user_email)
-        response_message = f"User {user_email} {'created and' if user_was_created else ''} added to organization."
 
+        # Check if the user is at the global organization limit
+        check_user_is_at_global_org_limit(user.uid)
+
+        #check if user already belongs to the organization
+        check_user_already_belongs_to_org(user.uid, org_id)
+        
+        # Add the user to the organization
+        add_user_to_organization(user.uid, org_id, user.display_name, user_email)
+
+        # Return response indicating the operation success
+        response_message = f"User {user_email} {'created and ' if user_was_created else ''}added to organization."
         return {"response": response_message}
-    
+
     except https_fn.HttpsError as e:
         # Re-raise known HttpsErrors
         raise e
     except Exception as e:
-        # Handle any other exceptions
+        # Catch any unexpected errors and return a generic error message
         raise https_fn.HttpsError(
             code=https_fn.FunctionsErrorCode.UNKNOWN,
             message=f"Error creating user: {str(e)}"
         )
+
+

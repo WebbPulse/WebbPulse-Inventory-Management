@@ -15,10 +15,10 @@ def update_device_checkout_status_callable(req: https_fn.CallableRequest) -> Any
         check_user_is_org_member(req, org_id)
 
         # Check if the serial, org_id, and isCheckedOut are provided and valid
-        if device_serial_number or org_id or is_device_checked_out or device_checked_out_by is None:
+        if device_serial_number or org_id or is_device_checked_out is None:
             raise https_fn.HttpsError(
                 code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
-                message='The function must be called with valid "serial", "org_id", and "isCheckedOut" arguments.'
+                message='The function must be called with valid deviceSerialNumber, orgId, and isDeviceCheckedOut parameters.'
             )
 
         if device_checked_out_by != req.auth.uid:

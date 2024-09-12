@@ -74,16 +74,31 @@ def check_user_is_org_deskstation_or_higher(req: https_fn.CallableRequest, org_i
             message="Unauthorized access. User is not a deskstation of the organization."
         )
         
-def check_user_is_at_global_org_limit(req: https_fn.CallableRequest, userEmail:str):
+def check_user_is_at_global_org_limit(uid:str):
     # Check if the user is at the global organization limit
-    user = auth.get_user_by_email(userEmail)
+    user = auth.get_user(uid)
     custom_claims = user.custom_claims or {}
     org_admin_claims = [claim for claim in custom_claims.keys() if claim.startswith("org_admin_")]
     org_member_claims = [claim for claim in custom_claims.keys() if claim.startswith("org_member_")]
-    org_count = len(org_admin_claims) + len(org_member_claims)
+    org_deskstation_claims = [claim for claim in custom_claims.keys() if claim.startswith("org_deskstation_")]
+    org_count = len(org_admin_claims) + len(org_member_claims) + len(org_deskstation_claims)
     
     if org_count >= 10:
         raise https_fn.HttpsError(
             code=https_fn.FunctionsErrorCode.FAILED_PRECONDITION,
             message="The user is at the global organization limit."
+        )
+
+def check_user_already_belongs_to_org(uid: str, org_id: str):
+    # Check if the user already belongs to the organization
+    user = auth.get_user(uid)
+    custom_claims = user.custom_claims or {}
+    org_admin_claims = [claim for claim in custom_claims.keys() if claim.startswith("org_admin_")]
+    org_member_claims = [claim for claim in custom_claims.keys() if claim.startswith("org_member_")]
+    org_deskstation_claims = [claim for claim in custom_claims.keys() if claim.startswith("org_deskstation_")]
+    
+    if f"org_admin_{org_id}" in org_admin_claims or f"org_member_{org_id}" in org_member_claims or f"org_deskstation_{org_id}" in org_deskstation_claims:
+        raise https_fn.HttpsError(
+            code=https_fn.FunctionsErrorCode.ALREADY_EXISTS,
+            message="User already belongs to the organization."
         )
