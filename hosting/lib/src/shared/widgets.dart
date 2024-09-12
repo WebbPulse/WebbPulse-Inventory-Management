@@ -171,6 +171,8 @@ class AuthedDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     return AuthClaimChecker(builder: (context, userClaims) {
       final orgId = Provider.of<OrgSelectorChangeNotifier>(context).orgId;
+      final authenticationChangeNotifier =
+          Provider.of<AuthenticationChangeNotifier>(context);
 
       return Drawer(
         child: ListView(
@@ -186,40 +188,54 @@ class AuthedDrawer extends StatelessWidget {
             if (orgId.isNotEmpty) ...[
               if (userClaims['org_admin_$orgId'] == true)
                 ListTile(
+                  leading: Icon(Icons.settings),
                   title: const Text('Organization Settings'),
                   onTap: () {
                     Navigator.pushNamed(context, OrgSettingsView.routeName);
                   },
                 ),
               ListTile(
+                leading: Icon(Icons.check_box),
                 title: const Text('Checkout'),
                 onTap: () {
                   Navigator.pushNamed(context, DeviceCheckoutView.routeName);
                 },
               ),
               ListTile(
+                leading: Icon(Icons.devices),
                 title: const Text('Devices'),
                 onTap: () {
                   Navigator.pushNamed(context, OrgDeviceListView.routeName);
                 },
               ),
               ListTile(
+                leading: Icon(Icons.people),
                 title: const Text('Users'),
                 onTap: () {
                   Navigator.pushNamed(context, OrgMemberListView.routeName);
                 },
               ),
             ],
+            if (userClaims['org_deskstation_$orgId'] != true)
+              ListTile(
+                leading: Icon(Icons.person),
+                title: const Text('Profile'),
+                onTap: () {
+                  Navigator.pushNamed(context, ProfileSettingsView.routeName);
+                },
+              ),
             ListTile(
-              title: const Text('Profile'),
-              onTap: () {
-                Navigator.pushNamed(context, ProfileSettingsView.routeName);
-              },
-            ),
-            ListTile(
+              leading: Icon(Icons.home),
               title: const Text('My Organizations'),
               onTap: () {
                 Navigator.pushNamed(context, OrgSelectionView.routeName);
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.logout),
+              title: const Text('Sign Out'),
+              onTap: () {
+                authenticationChangeNotifier.signOutUser();
               },
             ),
           ],
@@ -735,10 +751,25 @@ class DeviceCheckoutButton extends StatefulWidget {
 
 class DeviceCheckoutButtonState extends State<DeviceCheckoutButton> {
   var _isLoading = false;
+  late TextEditingController _userSearchController;
+  String _searchQuery = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _userSearchController = TextEditingController();
+    _userSearchController.addListener(_onSearchChanged);
+  }
 
   @override
   void dispose() {
     super.dispose();
+  }
+
+  void _onSearchChanged() {
+    setState(() {
+      _searchQuery = _userSearchController.text;
+    });
   }
 
   void _onSubmit(bool checkOut) async {
@@ -757,7 +788,7 @@ class DeviceCheckoutButtonState extends State<DeviceCheckoutButton> {
         widget.deviceSerialNumber,
         orgId,
         deviceCheckedOutBy,
-        checkOut,  // Pass the checkout state (true for checkout, false for check-in)
+        checkOut, // Pass the checkout state (true for checkout, false for check-in)
       );
     } catch (e) {
       // Handle error if needed
@@ -766,28 +797,190 @@ class DeviceCheckoutButtonState extends State<DeviceCheckoutButton> {
     }
   }
 
+  Future<void> _onSubmitAdminAndDeskstation(
+      bool checkOut, String deviceCheckedOutBy) async {
+    setState(() => _isLoading = true);
+    final orgId =
+        Provider.of<OrgSelectorChangeNotifier>(context, listen: false).orgId;
+    final deviceCheckoutService =
+        Provider.of<DeviceCheckoutService>(context, listen: false);
+    try {
+      await deviceCheckoutService.handleDeviceCheckout(
+        context,
+        widget.deviceSerialNumber,
+        orgId,
+        deviceCheckedOutBy,
+        checkOut, // Pass the boolean for checkout or check-in
+      );
+    } catch (e) {
+      // Handle error if needed
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _showAdminDialog(bool checkOut, String orgId) async {
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        ThemeData theme = Theme.of(context);
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return AlertDialog(
+              title: Text(checkOut
+                  ? 'Confirm Check-out User'
+                  : 'Confirm Check-in User'),
+              content:
+                  Consumer2<FirestoreReadService, OrgSelectorChangeNotifier>(
+                      builder: (context, firestoreReadService,
+                          orgSelectorChangeNotifier, child) {
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      checkOut
+                          ? 'Select the user to check-out this device.'
+                          : 'Select the user to check-in this device.',
+                    ),
+                    TextField(
+                      controller: _userSearchController,
+                      decoration: const InputDecoration(
+                        labelText: 'Search User',
+                        prefixIcon: Icon(Icons.search),
+                      ),
+                      onChanged: (value) {
+                        setState(() {
+                          _searchQuery = value;
+                        });
+                      },
+                    ),
+                    StreamBuilder<List<DocumentSnapshot>>(
+                        stream: firestoreReadService.getOrgMembersDocuments(
+                            orgSelectorChangeNotifier.orgId),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Center(
+                                child: CircularProgressIndicator());
+                          } else if (snapshot.hasError) {
+                            return const Center(
+                                child: Text('Error loading users'));
+                          }
+                          final List<DocumentSnapshot> orgMemberDocs =
+                              snapshot.data!;
+
+                          // Filter the list based on the search query
+                          final filteredDocs = orgMemberDocs.where((doc) {
+                            final name = doc['orgMemberDisplayName']
+                                .toString()
+                                .toLowerCase();
+                            return name.contains(_searchQuery.toLowerCase());
+                          }).toList();
+
+                          if (filteredDocs.isNotEmpty) {
+                            return Container(
+                              constraints: const BoxConstraints(
+                                maxHeight: 200,
+                              ),
+                              child: SingleChildScrollView(
+                                child: Column(
+                                  children: filteredDocs.map((orgMemberDoc) {
+                                    return ListTile(
+                                      title: Text(
+                                          orgMemberDoc['orgMemberDisplayName']),
+                                      subtitle:
+                                          Text(orgMemberDoc['orgMemberEmail']),
+                                      onTap: () {
+                                        _onSubmitAdminAndDeskstation(
+                                          checkOut,
+                                          orgMemberDoc.id,
+                                        );
+                                        Navigator.of(context).pop();
+                                      },
+                                    );
+                                  }).toList(),
+                                ),
+                              ),
+                            );
+                          } else {
+                            return const Column(
+                              children: [
+                                SizedBox(
+                                  height: 16,
+                                ),
+                                Center(
+                                  child: Text('No users found.'),
+                                ),
+                              ],
+                            );
+                          }
+                        }),
+                  ],
+                );
+              }),
+              actions: <Widget>[
+                ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor:
+                        theme.colorScheme.surface.withOpacity(0.95),
+                    side: BorderSide(
+                      color: theme.colorScheme.primary.withOpacity(0.5),
+                      width: 1.5,
+                    ),
+                    padding: const EdgeInsets.all(16.0),
+                  ),
+                  icon: const Icon(Icons.arrow_back),
+                  label: const Text('Go Back'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     ThemeData theme = Theme.of(context);
-    return ElevatedButton.icon(
-      onPressed: _isLoading
-          ? null
-          : () => _onSubmit(!widget.isDeviceCheckedOut),  // Pass true for checkout, false for check-in
-      icon: _isLoading
-          ? const CircularProgressIndicator()
-          : Icon(widget.isDeviceCheckedOut ? Icons.logout : Icons.login),
-      label: Text(widget.isDeviceCheckedOut ? 'Check-in Device' : 'Check-out Device'),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
-        side: BorderSide(
-          color: theme.colorScheme.primary.withOpacity(0.5),
-          width: 1.5,
-        ),
-        padding: const EdgeInsets.all(16.0),
-    ));
+    return AuthClaimChecker(builder: (context, userClaims) {
+      final orgId =
+          Provider.of<OrgSelectorChangeNotifier>(context, listen: false).orgId;
+      // Safely check if the roles exist and their values are true
+      bool isAdminOrDeskstation = (userClaims['org_admin_$orgId'] == true) ||
+          (userClaims['org_deskstation_$orgId'] == true);
+
+      return ElevatedButton.icon(
+          onPressed: _isLoading
+              ? null
+              : () {
+                  if (isAdminOrDeskstation && !widget.isDeviceCheckedOut) {
+                    _showAdminDialog(true, orgId);
+                  } else {
+                    _onSubmit(!widget.isDeviceCheckedOut);
+                  }
+                },
+          icon: _isLoading
+              ? const CircularProgressIndicator()
+              : Icon(widget.isDeviceCheckedOut ? Icons.logout : Icons.login),
+          label: Text(widget.isDeviceCheckedOut
+              ? 'Check-in Device'
+              : 'Check-out Device'),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
+            side: BorderSide(
+              color: theme.colorScheme.primary.withOpacity(0.5),
+              width: 1.5,
+            ),
+            padding: const EdgeInsets.all(16.0),
+          ));
+    });
   }
 }
-
 
 class DeleteDeviceButton extends StatefulWidget {
   const DeleteDeviceButton({
@@ -940,7 +1133,6 @@ class AddDeviceAlertDialogState extends State<AddDeviceAlertDialog> {
                 children: [
                   const Text(
                     'Add a new device to this organization',
-                    
                   ),
                   TextField(
                     controller: _deviceSerialNumberController,
@@ -955,41 +1147,39 @@ class AddDeviceAlertDialogState extends State<AddDeviceAlertDialog> {
         ),
       ),
       actions: <Widget>[
-        Column(
-          children:[
-        
-        ElevatedButton.icon(
-          onPressed: _isLoading ? null : _onSubmit,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
-            side: BorderSide(
-              color: theme.colorScheme.primary.withOpacity(0.5),
-              width: 1.5,
-            ),
-            padding: const EdgeInsets.all(16.0),
-          ),
-          icon: _isLoading
-              ? const CircularProgressIndicator()
-              : const Icon(Icons.add),
-          label: const Text('Add Device'),
-        ),
-        const SizedBox(height: 16.0),
-        ElevatedButton.icon(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
-                side: BorderSide(
-                  color: theme.colorScheme.primary.withOpacity(0.5),
-                  width: 1.5,
-                ),
-                padding: const EdgeInsets.all(16.0),
+        Column(children: [
+          ElevatedButton.icon(
+            onPressed: _isLoading ? null : _onSubmit,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
+              side: BorderSide(
+                color: theme.colorScheme.primary.withOpacity(0.5),
+                width: 1.5,
               ),
-              icon: const Icon(Icons.arrow_back),
-              label: const Text('Go Back'),
+              padding: const EdgeInsets.all(16.0),
             ),
-    ]),
+            icon: _isLoading
+                ? const CircularProgressIndicator()
+                : const Icon(Icons.add),
+            label: const Text('Add Device'),
+          ),
+          const SizedBox(height: 16.0),
+          ElevatedButton.icon(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
+              side: BorderSide(
+                color: theme.colorScheme.primary.withOpacity(0.5),
+                width: 1.5,
+              ),
+              padding: const EdgeInsets.all(16.0),
+            ),
+            icon: const Icon(Icons.arrow_back),
+            label: const Text('Go Back'),
+          ),
+        ]),
       ],
     );
   }

@@ -19,7 +19,7 @@ def create_organization_callable(req: https_fn.CallableRequest) -> Any:
         check_user_is_email_verified(req)
         check_user_token_current(req)
         # Check if the user is at the global organization limit, if so, prevent the user from creating a new organization
-        check_user_is_at_global_org_limit(req, org_member_email)
+        check_user_is_at_global_org_limit(uid)
 
 
         # Check if the organization_creation_name is provided and valid

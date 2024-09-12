@@ -355,11 +355,7 @@ class CheckoutFormState extends State<CheckoutForm> {
                               onPressed: _isLoading
                                   ? null
                                   : () {
-                                      if (isAdminOrDeskstation) {
-                                        _showAdminDialog(false, orgId);
-                                      } else {
-                                        _onSubmit(false);
-                                      }
+                                      _onSubmit(false);
                                     },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor:
