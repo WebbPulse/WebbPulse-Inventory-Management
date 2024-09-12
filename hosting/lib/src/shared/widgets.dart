@@ -491,33 +491,131 @@ class DeviceCard extends StatelessWidget {
     if (deviceDeleted) {
       return const SizedBox.shrink();
     }
-    return Consumer4<FirestoreReadService, DeviceCheckoutService,
-        OrgSelectorChangeNotifier, FirebaseFunctions>(
-      builder: (context, firestoreService, deviceCheckoutService,
-          orgSelectorChangeNotifier, firebaseFunctions, child) {
-        return StreamBuilder(
-          stream: firestoreService.getOrgDeviceDocument(
-              deviceId, orgSelectorChangeNotifier.orgId),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            } else if (snapshot.hasError) {
-              return const Text('Error loading devices');
-            }
-            final deviceData = snapshot.data?.data() as Map<String, dynamic>;
-            final orgMemberId = deviceData['deviceCheckedOutBy'];
+    return AuthClaimChecker(builder: (context, userClaims) {
+      return Consumer4<FirestoreReadService, DeviceCheckoutService,
+          OrgSelectorChangeNotifier, FirebaseFunctions>(
+        builder: (context, firestoreService, deviceCheckoutService,
+            orgSelectorChangeNotifier, firebaseFunctions, child) {
+          return StreamBuilder(
+            stream: firestoreService.getOrgDeviceDocument(
+                deviceId, orgSelectorChangeNotifier.orgId),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              } else if (snapshot.hasError) {
+                return const Text('Error loading devices');
+              }
+              final deviceData = snapshot.data?.data() as Map<String, dynamic>;
+              final orgMemberId = deviceData['deviceCheckedOutBy'];
+              final orgId = orgSelectorChangeNotifier.orgId;
+              return StreamBuilder<DocumentSnapshot?>(
+                  stream: firestoreService.getOrgMemberDocument(
+                      orgSelectorChangeNotifier.orgId, orgMemberId),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    } else if (snapshot.hasError) {
+                      return const Text('Error loading org member data');
+                    } else if (!snapshot.hasData ||
+                        snapshot.data == null ||
+                        snapshot.data!.data() == null) {
+                      return LayoutBuilder(builder: (context, constraints) {
+                        if (constraints.maxWidth < 400) {
+                          return CustomCard(
+                            theme: theme,
+                            customCardLeading: null,
+                            customCardTitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Icon(Icons.devices,
+                                      color: theme.colorScheme.secondary),
+                                  Wrap(
+                                    children: [
+                                      Text(deviceSerialNumber,
+                                          style: const TextStyle(
+                                              fontWeight: FontWeight.bold)),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Wrap(
+                                    alignment: WrapAlignment.start,
+                                    runSpacing: 8,
+                                    children: [
+                                      DeviceCheckoutButton(
+                                        deviceSerialNumber: deviceSerialNumber,
+                                        isDeviceCheckedOut:
+                                            deviceData['isDeviceCheckedOut'],
+                                      ),
+                                      const SizedBox(width: 8),
+                                      if (userClaims['org_admin_$orgId'] ==
+                                          true)
+                                        DeleteDeviceButton(
+                                            deviceData: deviceData),
+                                    ],
+                                  ),
+                                ]),
+                            customCardTrailing: null,
+                            onTapAction: () {},
+                          );
+                        }
+                        return CustomCard(
+                          theme: theme,
+                          customCardLeading: Icon(Icons.devices,
+                              color: theme.colorScheme.secondary),
+                          customCardTitle: Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Wrap(
+                                      children: [
+                                        Text(deviceSerialNumber,
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.bold)),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Row(
+                                    children: [
+                                      DeviceCheckoutButton(
+                                        deviceSerialNumber: deviceSerialNumber,
+                                        isDeviceCheckedOut:
+                                            deviceData['isDeviceCheckedOut'],
+                                      ),
+                                      const SizedBox(width: 8),
+                                      if (userClaims['org_admin_$orgId'] ==
+                                          true)
+                                        DeleteDeviceButton(
+                                            deviceData: deviceData),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          customCardTrailing: null,
+                          onTapAction: () {},
+                        );
+                      });
+                    }
 
-            return StreamBuilder<DocumentSnapshot?>(
-                stream: firestoreService.getOrgMemberDocument(
-                    orgSelectorChangeNotifier.orgId, orgMemberId),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  } else if (snapshot.hasError) {
-                    return const Text('Error loading org member data');
-                  } else if (!snapshot.hasData ||
-                      snapshot.data == null ||
-                      snapshot.data!.data() == null) {
+                    Map<String, dynamic> orgMemberData =
+                        snapshot.data?.data() as Map<String, dynamic>;
+
+                    final Timestamp deviceCheckedOutAtTimestamp =
+                        deviceData['deviceCheckedOutAt'];
+                    final DateTime deviceCheckedOutAt =
+                        deviceCheckedOutAtTimestamp.toDate();
+                    final String deviceCheckedOutAtFormatted =
+                        DateFormat('yyyy-MM-dd kk:mm a')
+                            .format(deviceCheckedOutAt);
+
                     return LayoutBuilder(builder: (context, constraints) {
                       if (constraints.maxWidth < 400) {
                         return CustomCard(
@@ -535,6 +633,26 @@ class DeviceCard extends StatelessWidget {
                                             fontWeight: FontWeight.bold)),
                                   ],
                                 ),
+                                Wrap(
+                                  children: [
+                                    Text('Checked Out By: ',
+                                        style: theme.textTheme.labelSmall
+                                            ?.copyWith(
+                                                fontWeight: FontWeight.bold)),
+                                    Text(orgMemberData['orgMemberDisplayName'],
+                                        style: theme.textTheme.labelSmall),
+                                  ],
+                                ),
+                                Wrap(
+                                  children: [
+                                    Text('Checked Out On: ',
+                                        style: theme.textTheme.labelSmall
+                                            ?.copyWith(
+                                                fontWeight: FontWeight.bold)),
+                                    Text(deviceCheckedOutAtFormatted,
+                                        style: theme.textTheme.labelSmall),
+                                  ],
+                                ),
                                 const SizedBox(height: 8),
                                 Wrap(
                                   alignment: WrapAlignment.start,
@@ -546,7 +664,9 @@ class DeviceCard extends StatelessWidget {
                                           deviceData['isDeviceCheckedOut'],
                                     ),
                                     const SizedBox(width: 8),
-                                    DeleteDeviceButton(deviceData: deviceData),
+                                    if (userClaims['org_admin_$orgId'] == true)
+                                      DeleteDeviceButton(
+                                          deviceData: deviceData),
                                   ],
                                 ),
                               ]),
@@ -562,17 +682,40 @@ class DeviceCard extends StatelessWidget {
                           children: [
                             Expanded(
                               child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Wrap(
-                                    children: [
-                                      Text(deviceSerialNumber,
-                                          style: const TextStyle(
-                                              fontWeight: FontWeight.bold)),
-                                    ],
-                                  ),
-                                ],
-                              ),
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Wrap(
+                                      children: [
+                                        Text(deviceSerialNumber,
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.bold)),
+                                      ],
+                                    ),
+                                    Wrap(
+                                      children: [
+                                        Text('Checked Out By: ',
+                                            style: theme.textTheme.labelSmall
+                                                ?.copyWith(
+                                                    fontWeight:
+                                                        FontWeight.bold)),
+                                        Text(
+                                            orgMemberData[
+                                                'orgMemberDisplayName'],
+                                            style: theme.textTheme.labelSmall),
+                                      ],
+                                    ),
+                                    Wrap(
+                                      children: [
+                                        Text('Checked Out On: ',
+                                            style: theme.textTheme.labelSmall
+                                                ?.copyWith(
+                                                    fontWeight:
+                                                        FontWeight.bold)),
+                                        Text(deviceCheckedOutAtFormatted,
+                                            style: theme.textTheme.labelSmall),
+                                      ],
+                                    )
+                                  ]),
                             ),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.end,
@@ -585,7 +728,9 @@ class DeviceCard extends StatelessWidget {
                                           deviceData['isDeviceCheckedOut'],
                                     ),
                                     const SizedBox(width: 8),
-                                    DeleteDeviceButton(deviceData: deviceData),
+                                    if (userClaims['org_admin_$orgId'] == true)
+                                      DeleteDeviceButton(
+                                          deviceData: deviceData),
                                   ],
                                 ),
                               ],
@@ -596,142 +741,12 @@ class DeviceCard extends StatelessWidget {
                         onTapAction: () {},
                       );
                     });
-                  }
-
-                  Map<String, dynamic> orgMemberData =
-                      snapshot.data?.data() as Map<String, dynamic>;
-
-                  final Timestamp deviceCheckedOutAtTimestamp =
-                      deviceData['deviceCheckedOutAt'];
-                  final DateTime deviceCheckedOutAt =
-                      deviceCheckedOutAtTimestamp.toDate();
-                  final String deviceCheckedOutAtFormatted =
-                      DateFormat('yyyy-MM-dd kk:mm a')
-                          .format(deviceCheckedOutAt);
-
-                  return LayoutBuilder(builder: (context, constraints) {
-                    if (constraints.maxWidth < 400) {
-                      return CustomCard(
-                        theme: theme,
-                        customCardLeading: null,
-                        customCardTitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Icon(Icons.devices,
-                                  color: theme.colorScheme.secondary),
-                              Wrap(
-                                children: [
-                                  Text(deviceSerialNumber,
-                                      style: const TextStyle(
-                                          fontWeight: FontWeight.bold)),
-                                ],
-                              ),
-                              Wrap(
-                                children: [
-                                  Text('Checked Out By: ',
-                                      style: theme.textTheme.labelSmall
-                                          ?.copyWith(
-                                              fontWeight: FontWeight.bold)),
-                                  Text(orgMemberData['orgMemberDisplayName'],
-                                      style: theme.textTheme.labelSmall),
-                                ],
-                              ),
-                              Wrap(
-                                children: [
-                                  Text('Checked Out On: ',
-                                      style: theme.textTheme.labelSmall
-                                          ?.copyWith(
-                                              fontWeight: FontWeight.bold)),
-                                  Text(deviceCheckedOutAtFormatted,
-                                      style: theme.textTheme.labelSmall),
-                                ],
-                              ),
-                              const SizedBox(height: 8),
-                              Wrap(
-                                alignment: WrapAlignment.start,
-                                runSpacing: 8,
-                                children: [
-                                  DeviceCheckoutButton(
-                                    deviceSerialNumber: deviceSerialNumber,
-                                    isDeviceCheckedOut:
-                                        deviceData['isDeviceCheckedOut'],
-                                  ),
-                                  const SizedBox(width: 8),
-                                  DeleteDeviceButton(deviceData: deviceData),
-                                ],
-                              ),
-                            ]),
-                        customCardTrailing: null,
-                        onTapAction: () {},
-                      );
-                    }
-                    return CustomCard(
-                      theme: theme,
-                      customCardLeading: Icon(Icons.devices,
-                          color: theme.colorScheme.secondary),
-                      customCardTitle: Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Wrap(
-                                    children: [
-                                      Text(deviceSerialNumber,
-                                          style: const TextStyle(
-                                              fontWeight: FontWeight.bold)),
-                                    ],
-                                  ),
-                                  Wrap(
-                                    children: [
-                                      Text('Checked Out By: ',
-                                          style: theme.textTheme.labelSmall
-                                              ?.copyWith(
-                                                  fontWeight: FontWeight.bold)),
-                                      Text(
-                                          orgMemberData['orgMemberDisplayName'],
-                                          style: theme.textTheme.labelSmall),
-                                    ],
-                                  ),
-                                  Wrap(
-                                    children: [
-                                      Text('Checked Out On: ',
-                                          style: theme.textTheme.labelSmall
-                                              ?.copyWith(
-                                                  fontWeight: FontWeight.bold)),
-                                      Text(deviceCheckedOutAtFormatted,
-                                          style: theme.textTheme.labelSmall),
-                                    ],
-                                  )
-                                ]),
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Row(
-                                children: [
-                                  DeviceCheckoutButton(
-                                    deviceSerialNumber: deviceSerialNumber,
-                                    isDeviceCheckedOut:
-                                        deviceData['isDeviceCheckedOut'],
-                                  ),
-                                  const SizedBox(width: 8),
-                                  DeleteDeviceButton(deviceData: deviceData),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      customCardTrailing: null,
-                      onTapAction: () {},
-                    );
                   });
-                });
-          },
-        );
-      },
-    );
+            },
+          );
+        },
+      );
+    });
   }
 }
 

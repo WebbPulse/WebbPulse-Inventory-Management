@@ -348,7 +348,7 @@ class CheckoutFormState extends State<CheckoutForm> {
                               icon: _isLoading
                                   ? const CircularProgressIndicator()
                                   : const Icon(Icons.logout),
-                              label: const Text('Check-out Serial Number'),
+                              label: const Text('Check-out Device'),
                             ),
                             // Check-in Button
                             ElevatedButton.icon(
@@ -370,7 +370,7 @@ class CheckoutFormState extends State<CheckoutForm> {
                               icon: _isLoading
                                   ? const CircularProgressIndicator()
                                   : const Icon(Icons.login),
-                              label: const Text('Check-in Serial Number'),
+                              label: const Text('Check-in Device'),
                             ),
                           ],
                         ),
