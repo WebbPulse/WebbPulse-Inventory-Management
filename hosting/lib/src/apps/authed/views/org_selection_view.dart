@@ -6,7 +6,6 @@ import '../../../shared/widgets.dart';
 import '../../../shared/providers/org_selector_change_notifier.dart';
 import '../../../shared/providers/authentication_change_notifier.dart';
 import 'org_selected/device_checkout_view.dart';
-import 'profile_settings_view.dart';
 
 class OrgSelectionView extends StatelessWidget {
   const OrgSelectionView({
@@ -19,8 +18,9 @@ class OrgSelectionView extends StatelessWidget {
   Widget build(BuildContext context) {
     ThemeData theme = Theme.of(context);
     return Consumer2<AuthenticationChangeNotifier, FirestoreReadService>(
-      builder: (context, authProvider, firestoreService, child) =>
-          AuthClaimChecker(builder: (context, userClaims) {
+      builder:
+          (context, authenticationChangeNotifier, firestoreService, child) =>
+              AuthClaimChecker(builder: (context, userClaims) {
         final List<String> userOrgIds = extractOrgIdsFromClaims(userClaims);
         return Scaffold(
           appBar: AppBar(
@@ -29,10 +29,10 @@ class OrgSelectionView extends StatelessWidget {
             actions: [
               if (Provider.of<OrgSelectorChangeNotifier>(context).orgId == '')
                 ElevatedButton.icon(
-                  icon: const Icon(Icons.person),
-                  label: const Text('Profile'),
+                  icon: const Icon(Icons.logout),
+                  label: const Text('Sign Out'),
                   onPressed: () {
-                    Navigator.pushNamed(context, ProfileSettingsView.routeName);
+                    authenticationChangeNotifier.signOutUser();
                   },
                   style: ElevatedButton.styleFrom(
                       backgroundColor:
@@ -65,15 +65,16 @@ class OrgSelectionView extends StatelessWidget {
                                 if (index == userOrgIds.length &&
                                     userOrgIds.length < 10) {
                                   return Padding(
-                                    padding:
-                                        const EdgeInsets.symmetric(vertical: 8.0),
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 8.0),
                                     child: ElevatedButton(
                                       onPressed: () {
                                         Navigator.pushNamed(
                                             context, OrgCreateView.routeName);
                                       },
                                       style: ElevatedButton.styleFrom(
-                                        backgroundColor: theme.colorScheme.surface
+                                        backgroundColor: theme
+                                            .colorScheme.surface
                                             .withOpacity(0.95),
                                         side: BorderSide(
                                           color: theme.colorScheme.primary
@@ -103,8 +104,8 @@ class OrgSelectionView extends StatelessWidget {
                                       context, OrgCreateView.routeName);
                                 },
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor:
-                                      theme.colorScheme.surface.withOpacity(0.95),
+                                  backgroundColor: theme.colorScheme.surface
+                                      .withOpacity(0.95),
                                   side: BorderSide(
                                     color: theme.colorScheme.primary
                                         .withOpacity(0.5),
@@ -171,9 +172,8 @@ class OrgCard extends StatelessWidget {
 }
 
 List<String> extractOrgIdsFromClaims(Map<String, dynamic> claims) {
-  final RegExp orgIdPattern = RegExp(r'^org_(member|admin)_(\w+)$');
+  final RegExp orgIdPattern = RegExp(r'^org_(member|admin|deskstation)_(\w+)$');
   List<String> orgIds = [];
-
   claims.forEach((key, value) {
     final match = orgIdPattern.firstMatch(key);
     if (match != null) {

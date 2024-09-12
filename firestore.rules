@@ -19,7 +19,9 @@ service cloud.firestore {
     }
     // Function to check if the user has a custom auth claim for the organization
     function hasOrgMemberClaim(orgId) {
-      return request.auth.token["org_member_" + orgId] == true;
+      return request.auth.token["org_member_" + orgId] == true ||
+      request.auth.token["org_admin_" + orgId] == true ||
+      request.auth.token["org_deskstation_" + orgId] == true;
     }
 
     function isEmailVerified() {

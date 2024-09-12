@@ -243,8 +243,6 @@ class ChangeProfilePictureAlertDialogState
                   : const Icon(Icons.photo),
               label: const Text('Change Profile Picture'),
             ),
-            
-            
           ],
         ),
       ],
