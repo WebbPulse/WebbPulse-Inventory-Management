@@ -5,7 +5,7 @@ from src.helper_functions.users.add_user_to_organization import add_user_to_orga
 
 @https_fn.on_call(cors=POSTcorsrules)
 def create_user_callable(req: https_fn.CallableRequest) -> Any:
-    try: 
+    try:
         # Extract required data from the request
         user_email = req.data.get("userEmail")
         org_id = req.data.get("orgId")
@@ -45,6 +45,12 @@ def create_user_callable(req: https_fn.CallableRequest) -> Any:
                 disabled=False
             )
             user_was_created = True
+        except Exception as e:
+            # Handle any other unexpected errors
+            raise https_fn.HttpsError(
+                code=https_fn.FunctionsErrorCode.UNKNOWN,
+                message=f"Error retrieving or creating user: {str(e)}"
+            )
 
         # If the user was newly created, create a global user profile
         if user_was_created:
@@ -66,4 +72,5 @@ def create_user_callable(req: https_fn.CallableRequest) -> Any:
             code=https_fn.FunctionsErrorCode.UNKNOWN,
             message=f"Error creating user: {str(e)}"
         )
+
 
