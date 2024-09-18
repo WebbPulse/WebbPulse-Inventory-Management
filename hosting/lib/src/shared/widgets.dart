@@ -188,28 +188,28 @@ class AuthedDrawer extends StatelessWidget {
             if (orgId.isNotEmpty) ...[
               if (userClaims['org_admin_$orgId'] == true)
                 ListTile(
-                  leading: Icon(Icons.settings),
+                  leading: const Icon(Icons.settings),
                   title: const Text('Organization Settings'),
                   onTap: () {
                     Navigator.pushNamed(context, OrgSettingsView.routeName);
                   },
                 ),
               ListTile(
-                leading: Icon(Icons.check_box),
+                leading: const Icon(Icons.check_box),
                 title: const Text('Checkout'),
                 onTap: () {
                   Navigator.pushNamed(context, DeviceCheckoutView.routeName);
                 },
               ),
               ListTile(
-                leading: Icon(Icons.devices),
+                leading: const Icon(Icons.devices),
                 title: const Text('Devices'),
                 onTap: () {
                   Navigator.pushNamed(context, OrgDeviceListView.routeName);
                 },
               ),
               ListTile(
-                leading: Icon(Icons.people),
+                leading: const Icon(Icons.people),
                 title: const Text('Users'),
                 onTap: () {
                   Navigator.pushNamed(context, OrgMemberListView.routeName);
@@ -218,21 +218,21 @@ class AuthedDrawer extends StatelessWidget {
             ],
             if (userClaims['org_deskstation_$orgId'] != true)
               ListTile(
-                leading: Icon(Icons.person),
+                leading: const Icon(Icons.person),
                 title: const Text('Profile'),
                 onTap: () {
                   Navigator.pushNamed(context, ProfileSettingsView.routeName);
                 },
               ),
             ListTile(
-              leading: Icon(Icons.home),
+              leading: const Icon(Icons.home),
               title: const Text('My Organizations'),
               onTap: () {
                 Navigator.pushNamed(context, OrgSelectionView.routeName);
               },
             ),
             ListTile(
-              leading: Icon(Icons.logout),
+              leading: const Icon(Icons.logout),
               title: const Text('Sign Out'),
               onTap: () {
                 authenticationChangeNotifier.signOutUser();

@@ -221,7 +221,7 @@ class AddUserAlertDialogState extends State<AddUserAlertDialog> {
 
       try {
         await firebaseFunctions.httpsCallable('create_user_callable').call({
-          "userEmail": userCreationEmail,
+          "userEmails": [userCreationEmail],
           "orgId": orgSelectorProvider.orgId,
         });
         AsyncContextHelpers.showSnackBarIfMounted(
