@@ -3,7 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:csv/csv.dart';
 import 'dart:convert';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:io' as io;
@@ -201,7 +200,6 @@ class AddUserAlertDialog extends StatefulWidget {
 class AddUserAlertDialogState extends State<AddUserAlertDialog> {
   late TextEditingController _userCreationEmailController;
   var _isLoading = false;
-  List<String> csvEmails = [];
 
   @override
   void initState() {
@@ -275,23 +273,23 @@ class AddUserAlertDialogState extends State<AddUserAlertDialog> {
         }
       }
 
-      // Parse CSV content
-    List<List<dynamic>> rowsAsListOfValues = const CsvToListConverter().convert(content);
+    // Split the CSV content by line breaks
+    List<String> lines = content.split(RegExp(r'[\r\n]+'));
 
-    // Skip the first row, which is assumed to be the header
-    if (rowsAsListOfValues.isNotEmpty) {
-      rowsAsListOfValues = rowsAsListOfValues.sublist(1);
+    // Skip the first line (header) and process the remaining lines
+    if (lines.isNotEmpty) {
+      lines = lines.sublist(1);
     }
 
-    // Assuming each row contains a single email address in the first column
-    List<String> emails = rowsAsListOfValues.map((row) => row[0].toString().trim()).toList();
-
-    setState(() {
-      csvEmails = emails;
-    });
+    // Extract the emails, exclude empty lines
+    List<String> emails = lines
+        .map((line) => line.trim()) // Trim each line
+        .where((line) => line.isNotEmpty) // Exclude empty lines
+        .toList();
 
     // Submit emails if the list is not empty
     if (emails.isNotEmpty) {
+      
       await _submitEmails(emails);
     }
     } 
