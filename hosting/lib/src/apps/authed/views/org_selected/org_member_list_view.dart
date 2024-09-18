@@ -2,13 +2,19 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:webbcheck/src/apps/authed/views/org_selected/org_member_view.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:csv/csv.dart';
+import 'dart:convert';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:io' as io;
 
+import 'package:webbcheck/src/apps/authed/views/org_selected/org_member_view.dart';
 import '../../../../shared/providers/org_selector_change_notifier.dart';
 import '../../../../shared/providers/org_member_selector_change_notifier.dart';
 import '../../../../shared/providers/firestore_read_service.dart';
 import '../../../../shared/widgets.dart';
 import '../../../../shared/helpers/async_context_helpers.dart';
+
 
 class OrgMemberListView extends StatelessWidget {
   OrgMemberListView({super.key});
@@ -195,6 +201,7 @@ class AddUserAlertDialog extends StatefulWidget {
 class AddUserAlertDialogState extends State<AddUserAlertDialog> {
   late TextEditingController _userCreationEmailController;
   var _isLoading = false;
+  List<String> csvEmails = [];
 
   @override
   void initState() {
@@ -208,35 +215,91 @@ class AddUserAlertDialogState extends State<AddUserAlertDialog> {
     super.dispose();
   }
 
-  void _onSubmit() async {
-    final userCreationEmail = _userCreationEmailController.text;
+  Future<void> _submitEmails(List<String> emails) async {
     final orgSelectorProvider =
         Provider.of<OrgSelectorChangeNotifier>(context, listen: false);
     final firebaseFunctions =
         Provider.of<FirebaseFunctions>(context, listen: false);
-    if (userCreationEmail.isNotEmpty) {
-      setState(() {
-        _isLoading = true;
-      });
 
-      try {
-        await firebaseFunctions.httpsCallable('create_user_callable').call({
-          "userEmails": [userCreationEmail],
-          "orgId": orgSelectorProvider.orgId,
-        });
-        AsyncContextHelpers.showSnackBarIfMounted(
-            context, 'User created successfully');
-        AsyncContextHelpers.popContextIfMounted(context);
-      } catch (e) {
-        await AsyncContextHelpers.showSnackBarIfMounted(
-            context, 'Failed to create user: $e');
-      } finally {
-        setState(() {
-          _isLoading = false;
-        });
-      }
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      await firebaseFunctions.httpsCallable('create_users_callable').call({
+        "userEmails": emails,
+        "orgId": orgSelectorProvider.orgId,
+      });
+      AsyncContextHelpers.showSnackBarIfMounted(
+          context, 'Users from CSV added successfully');
+      AsyncContextHelpers.popContextIfMounted(context);
+    } catch (e) {
+      await AsyncContextHelpers.showSnackBarIfMounted(
+          context, 'Failed to add users from CSV: $e');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
+
+  void _onSubmitSingleEmail() async {
+    final userCreationEmail = _userCreationEmailController.text;
+    if (userCreationEmail.isNotEmpty) {
+      await _submitEmails([userCreationEmail]);
+    }
+  }
+
+
+  // Method to parse CSV file
+  void _onCsvFileSelected() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['csv'],
+    );
+
+    if (result != null) {
+      String content = '';
+
+      // Handle file content differently for web and mobile
+      if (kIsWeb) {
+        // Web: Use bytes
+        final file = result.files.first;
+        content = utf8.decode(file.bytes!);
+      } else {
+        // Mobile: Use file path
+        final path = result.files.single.path;
+        if (path != null) {
+          final file = io.File(path);
+          content = await file.readAsString();
+        }
+      }
+
+      // Parse CSV content
+    List<List<dynamic>> rowsAsListOfValues = const CsvToListConverter().convert(content);
+
+    // Skip the first row, which is assumed to be the header
+    if (rowsAsListOfValues.isNotEmpty) {
+      rowsAsListOfValues = rowsAsListOfValues.sublist(1);
+    }
+
+    // Assuming each row contains a single email address in the first column
+    List<String> emails = rowsAsListOfValues.map((row) => row[0].toString().trim()).toList();
+
+    setState(() {
+      csvEmails = emails;
+    });
+
+    // Submit emails if the list is not empty
+    if (emails.isNotEmpty) {
+      await _submitEmails(emails);
+    }
+    } 
+  }
+
+
+
+  
 
   @override
   Widget build(BuildContext context) {
@@ -249,19 +312,12 @@ class AddUserAlertDialogState extends State<AddUserAlertDialog> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Column(
-                children: [
-                  const Text(
-                    'Add a new user to this organization',
-                    
-                  ),
-                  TextField(
-                    controller: _userCreationEmailController,
-                    decoration: const InputDecoration(
-                      labelText: 'Email',
-                    ),
-                  ),
-                ],
+              const Text('Add a new user to this organization'),
+              TextField(
+                controller: _userCreationEmailController,
+                decoration: const InputDecoration(
+                  labelText: 'Email',
+                ),
               ),
             ],
           ),
@@ -269,25 +325,40 @@ class AddUserAlertDialogState extends State<AddUserAlertDialog> {
       ),
       actions: <Widget>[
         Column(
-          children:[
-        
-        ElevatedButton.icon(
-          onPressed: _isLoading ? null : _onSubmit,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
-            side: BorderSide(
-              color: theme.colorScheme.primary.withOpacity(0.5),
-              width: 1.5,
+          children: [
+            ElevatedButton.icon(
+              onPressed: _isLoading ? null : _onSubmitSingleEmail,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
+                side: BorderSide(
+                  color: theme.colorScheme.primary.withOpacity(0.5),
+                  width: 1.5,
+                ),
+                padding: const EdgeInsets.all(16.0),
+              ),
+              icon: _isLoading
+                  ? const CircularProgressIndicator()
+                  : const Icon(Icons.person_add),
+              label: const Text('Add User'),
             ),
-            padding: const EdgeInsets.all(16.0),
-          ),
-          icon: _isLoading
-              ? const CircularProgressIndicator()
-              : const Icon(Icons.person_add),
-          label: const Text('Add User'),
-        ),
-        const SizedBox(height: 16.0),
-        ElevatedButton.icon(
+            const SizedBox(height: 16.0),
+            ElevatedButton.icon(
+              onPressed: _isLoading ? null : _onCsvFileSelected,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
+                side: BorderSide(
+                  color: theme.colorScheme.primary.withOpacity(0.5),
+                  width: 1.5,
+                ),
+                padding: const EdgeInsets.all(16.0),
+              ),
+              icon: _isLoading
+                  ? const CircularProgressIndicator()
+                  : const Icon(Icons.upload_file),
+              label: const Text('Add Users from CSV'),
+            ),
+            const SizedBox(height: 16.0),
+            ElevatedButton.icon(
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -302,7 +373,8 @@ class AddUserAlertDialogState extends State<AddUserAlertDialog> {
               icon: const Icon(Icons.arrow_back),
               label: const Text('Go Back'),
             ),
-    ]),
+          ],
+        ),
       ],
     );
   }
