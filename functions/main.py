@@ -12,7 +12,7 @@ else:
 app = initialize_app(cred)
 
 #org admin callable functions
-from src.callable_functions.org_admin_callables.users.create_user_callable import create_user_callable
+from src.callable_functions.org_admin_callables.users.create_user_callable import create_users_callable
 from src.callable_functions.org_admin_callables.users.update_user_role_callable import update_user_role_callable
 from src.callable_functions.org_admin_callables.organizations.update_org_background_image_callable import update_org_background_image_callable
 from src.callable_functions.org_admin_callables.organizations.update_org_name_callable import update_org_name_callable
