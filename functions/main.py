@@ -20,7 +20,7 @@ from src.callable_functions.org_admin_callables.organizations.delete_org_callabl
 from src.callable_functions.org_admin_callables.users.delete_org_member_callable import delete_org_member_callable
 
 #org member callable functions
-from src.callable_functions.org_member_callables.devices.create_device_callable import create_device_callable
+from src.callable_functions.org_member_callables.devices.create_devices_callable import create_devices_callable
 from src.callable_functions.org_member_callables.devices.update_device_checkout_status_callable import update_device_checkout_status_callable
 from src.callable_functions.org_member_callables.devices.delete_device_callable import delete_device_callable
 #global user callable functions
