@@ -9,6 +9,13 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:webbcheck/src/shared/helpers/async_context_helpers.dart';
+import 'package:universal_html/html.dart' as html; // Universal web support
+import 'package:path_provider/path_provider.dart';
+import 'dart:io' as io;
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:permission_handler/permission_handler.dart';
+import 'dart:convert';
+import 'package:file_picker/file_picker.dart';
 
 import 'providers/firestore_read_service.dart';
 import 'providers/device_checkout_service.dart';
@@ -1090,6 +1097,8 @@ class AddDeviceAlertDialog extends StatefulWidget {
 class AddDeviceAlertDialogState extends State<AddDeviceAlertDialog> {
   late TextEditingController _deviceSerialNumberController;
   var _isLoading = false;
+  final String csvTemplate =
+      "Device Serial Number\nAAAA-AAAA-AAAA\nBBBB-BBBB-BBBB";
 
   @override
   void initState() {
@@ -1103,32 +1112,133 @@ class AddDeviceAlertDialogState extends State<AddDeviceAlertDialog> {
     super.dispose();
   }
 
-  void _onSubmit() async {
-    final deviceSerialNumber = _deviceSerialNumberController.text;
+  // Method to handle both Web and Mobile/Other platforms
+  Future<void> downloadCSV() async {
+    if (kIsWeb) {
+      // Web platform: Trigger CSV download using HTML anchor element
+      downloadCSVForWeb();
+    } else {
+      // Mobile/Desktop platform: Save CSV to file and notify user
+      await downloadCSVForMobile();
+    }
+  }
+
+  // Method to download CSV for Web using universal_html
+  void downloadCSVForWeb() {
+    // Create a Blob (binary large object) for the CSV content
+    final bytes = utf8.encode(csvTemplate); // CSV data as bytes
+    final blob = html.Blob([bytes], 'text/csv'); // Create a Blob of type CSV
+
+    // Create an anchor element and trigger the download
+    final url = html.Url.createObjectUrlFromBlob(blob);
+    html.AnchorElement(href: url)
+      ..setAttribute("download", "device_template.csv") // Specify the file name
+      ..click(); // Trigger the download
+    html.Url.revokeObjectUrl(url); // Revoke the URL to free up memory
+  }
+
+  // Method to download CSV for Mobile/Desktop platforms
+  Future<void> downloadCSVForMobile() async {
+    // Request storage permissions (only for Android/iOS)
+    var status = await Permission.storage.request();
+    if (status.isGranted) {
+      // Get the directory to save the file
+      final directory = await getExternalStorageDirectory();
+      if (directory != null) {
+        String filePath = '${directory.path}/user_template.csv';
+
+        // Write the CSV content to the file
+        io.File file = io.File(filePath);
+        await file.writeAsString(csvTemplate);
+
+        // Notify user that the file has been saved
+        AsyncContextHelpers.showSnackBarIfMounted(
+            context, 'CSV Template saved to $filePath');
+      } else {
+        AsyncContextHelpers.showSnackBarIfMounted(
+            context, 'Failed to get storage directory');
+      }
+    } else {
+      AsyncContextHelpers.showSnackBarIfMounted(context, 'Permission denied');
+    }
+  }
+
+  Future<void> _submitDeviceSerialNumbers(
+      List<String> deviceSerialNumbers) async {
     final orgSelectorProvider =
         Provider.of<OrgSelectorChangeNotifier>(context, listen: false);
     final firebaseFunctions =
         Provider.of<FirebaseFunctions>(context, listen: false);
-    if (deviceSerialNumber.isNotEmpty) {
-      setState(() {
-        _isLoading = true;
-      });
+    setState(() {
+      _isLoading = true;
+    });
 
-      try {
-        await firebaseFunctions.httpsCallable('create_device_callable').call({
-          "deviceSerialNumber": deviceSerialNumber,
-          "orgId": orgSelectorProvider.orgId,
-        });
-        AsyncContextHelpers.showSnackBarIfMounted(
-            context, 'Device created successfully');
-        AsyncContextHelpers.popContextIfMounted(context);
-      } catch (e) {
-        await AsyncContextHelpers.showSnackBarIfMounted(
-            context, 'Failed to create Device: $e');
-      } finally {
-        setState(() {
-          _isLoading = false;
-        });
+    try {
+      await firebaseFunctions.httpsCallable('create_device_callable').call({
+        "deviceSerialNumbers": deviceSerialNumbers,
+        "orgId": orgSelectorProvider.orgId,
+      });
+      AsyncContextHelpers.showSnackBarIfMounted(
+          context, 'Devices created successfully');
+      AsyncContextHelpers.popContextIfMounted(context);
+    } catch (e) {
+      await AsyncContextHelpers.showSnackBarIfMounted(
+          context, 'Failed to create Devices: $e');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _onSubmitSingleEmail() async {
+    final deviceSerialNumber = _deviceSerialNumberController.text;
+    if (deviceSerialNumber.isNotEmpty) {
+      await _submitDeviceSerialNumbers([deviceSerialNumber]);
+    }
+  }
+
+  // Method to parse CSV file
+  void _onCsvFileSelected() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['csv'],
+    );
+
+    if (result != null) {
+      String content = '';
+
+      // Handle file content differently for web and mobile
+      if (kIsWeb) {
+        // Web: Use bytes
+        final file = result.files.first;
+        content = utf8.decode(file.bytes!);
+      } else {
+        // Mobile: Use file path
+        final path = result.files.single.path;
+        if (path != null) {
+          final file = io.File(path);
+          content = await file.readAsString();
+        }
+      }
+
+      // Split the CSV content by line breaks
+      List<String> lines = content.split(RegExp(r'[\r\n]+'));
+
+      // Skip the first line (header) and process the remaining lines
+      if (lines.isNotEmpty) {
+        lines = lines.sublist(1);
+      }
+
+      // Extract the emails, exclude empty lines
+      List<String> deviceSerialNumbers = lines
+          .map((line) => line.trim()) // Trim each line
+          .where((line) => line.isNotEmpty) // Exclude empty lines
+          .toList();
+
+      // Submit emails if the list is not empty
+      if (deviceSerialNumbers.isNotEmpty) {
+        await _submitDeviceSerialNumbers(deviceSerialNumbers);
       }
     }
   }
@@ -1162,39 +1272,69 @@ class AddDeviceAlertDialogState extends State<AddDeviceAlertDialog> {
         ),
       ),
       actions: <Widget>[
-        Column(children: [
-          ElevatedButton.icon(
-            onPressed: _isLoading ? null : _onSubmit,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
-              side: BorderSide(
-                color: theme.colorScheme.primary.withOpacity(0.5),
-                width: 1.5,
-              ),
-              padding: const EdgeInsets.all(16.0),
+        ElevatedButton.icon(
+          onPressed: _isLoading ? null : _onSubmitSingleEmail,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
+            side: BorderSide(
+              color: theme.colorScheme.primary.withOpacity(0.5),
+              width: 1.5,
             ),
-            icon: _isLoading
-                ? const CircularProgressIndicator()
-                : const Icon(Icons.add),
-            label: const Text('Add Device'),
+            padding: const EdgeInsets.all(16.0),
           ),
-          const SizedBox(height: 16.0),
-          ElevatedButton.icon(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
-              side: BorderSide(
-                color: theme.colorScheme.primary.withOpacity(0.5),
-                width: 1.5,
-              ),
-              padding: const EdgeInsets.all(16.0),
+          icon: _isLoading
+              ? const CircularProgressIndicator()
+              : const Icon(Icons.add),
+          label: const Text('Add Device'),
+        ),
+        const SizedBox(height: 16.0),
+        ElevatedButton.icon(
+          onPressed: _isLoading ? null : _onCsvFileSelected,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
+            side: BorderSide(
+              color: theme.colorScheme.primary.withOpacity(0.5),
+              width: 1.5,
             ),
-            icon: const Icon(Icons.arrow_back),
-            label: const Text('Go Back'),
+            padding: const EdgeInsets.all(16.0),
           ),
-        ]),
+          icon: _isLoading
+              ? const CircularProgressIndicator()
+              : const Icon(Icons.upload_file),
+          label: const Text('Add Devices from CSV'),
+        ),
+        const SizedBox(height: 16.0),
+        ElevatedButton.icon(
+          onPressed: () async {
+            await downloadCSV();
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
+            side: BorderSide(
+              color: theme.colorScheme.primary.withOpacity(0.5),
+              width: 1.5,
+            ),
+            padding: const EdgeInsets.all(16.0),
+          ),
+          icon: const Icon(Icons.download),
+          label: const Text('Download CSV Template'),
+        ),
+        const SizedBox(height: 16.0),
+        ElevatedButton.icon(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
+            side: BorderSide(
+              color: theme.colorScheme.primary.withOpacity(0.5),
+              width: 1.5,
+            ),
+            padding: const EdgeInsets.all(16.0),
+          ),
+          icon: const Icon(Icons.arrow_back),
+          label: const Text('Go Back'),
+        ),
       ],
     );
   }

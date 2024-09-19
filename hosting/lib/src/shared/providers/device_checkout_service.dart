@@ -46,7 +46,7 @@ class DeviceCheckoutService {
         if (!await firestoreService.doesDeviceExistInFirestore(
             deviceSerialNumber, orgId)) {
           await firebaseFunctions.httpsCallable('create_device_callable').call({
-            "deviceSerialNumber": deviceSerialNumber,
+            "deviceSerialNumbers": [deviceSerialNumber],
             "orgId": orgId,
             "isDeviceCheckedOut": false,
           });

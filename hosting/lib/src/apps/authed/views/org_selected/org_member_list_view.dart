@@ -6,6 +6,9 @@ import 'package:file_picker/file_picker.dart';
 import 'dart:convert';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:io' as io;
+import 'package:permission_handler/permission_handler.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:universal_html/html.dart' as html; // Universal web support
 
 import 'package:webbcheck/src/apps/authed/views/org_selected/org_member_view.dart';
 import '../../../../shared/providers/org_selector_change_notifier.dart';
@@ -13,7 +16,6 @@ import '../../../../shared/providers/org_member_selector_change_notifier.dart';
 import '../../../../shared/providers/firestore_read_service.dart';
 import '../../../../shared/widgets.dart';
 import '../../../../shared/helpers/async_context_helpers.dart';
-
 
 class OrgMemberListView extends StatelessWidget {
   OrgMemberListView({super.key});
@@ -200,6 +202,7 @@ class AddUserAlertDialog extends StatefulWidget {
 class AddUserAlertDialogState extends State<AddUserAlertDialog> {
   late TextEditingController _userCreationEmailController;
   var _isLoading = false;
+  final String csvTemplate = "Email\njohndoe@example.com\njanedoe@example.com";
 
   @override
   void initState() {
@@ -211,6 +214,57 @@ class AddUserAlertDialogState extends State<AddUserAlertDialog> {
   void dispose() {
     _userCreationEmailController.dispose();
     super.dispose();
+  }
+
+  // Method to handle both Web and Mobile/Other platforms
+  Future<void> downloadCSV() async {
+    if (kIsWeb) {
+      // Web platform: Trigger CSV download using HTML anchor element
+      downloadCSVForWeb();
+    } else {
+      // Mobile/Desktop platform: Save CSV to file and notify user
+      await downloadCSVForMobile();
+    }
+  }
+
+  // Method to download CSV for Web using universal_html
+  void downloadCSVForWeb() {
+    // Create a Blob (binary large object) for the CSV content
+    final bytes = utf8.encode(csvTemplate); // CSV data as bytes
+    final blob = html.Blob([bytes], 'text/csv'); // Create a Blob of type CSV
+
+    // Create an anchor element and trigger the download
+    final url = html.Url.createObjectUrlFromBlob(blob);
+    html.AnchorElement(href: url)
+      ..setAttribute("download", "user_template.csv") // Specify the file name
+      ..click(); // Trigger the download
+    html.Url.revokeObjectUrl(url); // Revoke the URL to free up memory
+  }
+
+  // Method to download CSV for Mobile/Desktop platforms
+  Future<void> downloadCSVForMobile() async {
+    // Request storage permissions (only for Android/iOS)
+    var status = await Permission.storage.request();
+    if (status.isGranted) {
+      // Get the directory to save the file
+      final directory = await getExternalStorageDirectory();
+      if (directory != null) {
+        String filePath = '${directory.path}/user_template.csv';
+
+        // Write the CSV content to the file
+        io.File file = io.File(filePath);
+        await file.writeAsString(csvTemplate);
+
+        // Notify user that the file has been saved
+        AsyncContextHelpers.showSnackBarIfMounted(
+            context, 'CSV Template saved to $filePath');
+      } else {
+        AsyncContextHelpers.showSnackBarIfMounted(
+            context, 'Failed to get storage directory');
+      }
+    } else {
+      AsyncContextHelpers.showSnackBarIfMounted(context, 'Permission denied');
+    }
   }
 
   Future<void> _submitEmails(List<String> emails) async {
@@ -229,11 +283,11 @@ class AddUserAlertDialogState extends State<AddUserAlertDialog> {
         "orgId": orgSelectorProvider.orgId,
       });
       AsyncContextHelpers.showSnackBarIfMounted(
-          context, 'Users from CSV added successfully');
+          context, 'Users added successfully');
       AsyncContextHelpers.popContextIfMounted(context);
     } catch (e) {
       await AsyncContextHelpers.showSnackBarIfMounted(
-          context, 'Failed to add users from CSV: $e');
+          context, 'Failed to add users from: $e');
     } finally {
       setState(() {
         _isLoading = false;
@@ -247,7 +301,6 @@ class AddUserAlertDialogState extends State<AddUserAlertDialog> {
       await _submitEmails([userCreationEmail]);
     }
   }
-
 
   // Method to parse CSV file
   void _onCsvFileSelected() async {
@@ -273,31 +326,26 @@ class AddUserAlertDialogState extends State<AddUserAlertDialog> {
         }
       }
 
-    // Split the CSV content by line breaks
-    List<String> lines = content.split(RegExp(r'[\r\n]+'));
+      // Split the CSV content by line breaks
+      List<String> lines = content.split(RegExp(r'[\r\n]+'));
 
-    // Skip the first line (header) and process the remaining lines
-    if (lines.isNotEmpty) {
-      lines = lines.sublist(1);
+      // Skip the first line (header) and process the remaining lines
+      if (lines.isNotEmpty) {
+        lines = lines.sublist(1);
+      }
+
+      // Extract the emails, exclude empty lines
+      List<String> emails = lines
+          .map((line) => line.trim()) // Trim each line
+          .where((line) => line.isNotEmpty) // Exclude empty lines
+          .toList();
+
+      // Submit emails if the list is not empty
+      if (emails.isNotEmpty) {
+        await _submitEmails(emails);
+      }
     }
-
-    // Extract the emails, exclude empty lines
-    List<String> emails = lines
-        .map((line) => line.trim()) // Trim each line
-        .where((line) => line.isNotEmpty) // Exclude empty lines
-        .toList();
-
-    // Submit emails if the list is not empty
-    if (emails.isNotEmpty) {
-      
-      await _submitEmails(emails);
-    }
-    } 
   }
-
-
-
-  
 
   @override
   Widget build(BuildContext context) {
@@ -322,56 +370,68 @@ class AddUserAlertDialogState extends State<AddUserAlertDialog> {
         ),
       ),
       actions: <Widget>[
-        Column(
-          children: [
-            ElevatedButton.icon(
-              onPressed: _isLoading ? null : _onSubmitSingleEmail,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
-                side: BorderSide(
-                  color: theme.colorScheme.primary.withOpacity(0.5),
-                  width: 1.5,
-                ),
-                padding: const EdgeInsets.all(16.0),
-              ),
-              icon: _isLoading
-                  ? const CircularProgressIndicator()
-                  : const Icon(Icons.person_add),
-              label: const Text('Add User'),
+        ElevatedButton.icon(
+          onPressed: _isLoading ? null : _onSubmitSingleEmail,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
+            side: BorderSide(
+              color: theme.colorScheme.primary.withOpacity(0.5),
+              width: 1.5,
             ),
-            const SizedBox(height: 16.0),
-            ElevatedButton.icon(
-              onPressed: _isLoading ? null : _onCsvFileSelected,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
-                side: BorderSide(
-                  color: theme.colorScheme.primary.withOpacity(0.5),
-                  width: 1.5,
-                ),
-                padding: const EdgeInsets.all(16.0),
-              ),
-              icon: _isLoading
-                  ? const CircularProgressIndicator()
-                  : const Icon(Icons.upload_file),
-              label: const Text('Add Users from CSV'),
+            padding: const EdgeInsets.all(16.0),
+          ),
+          icon: _isLoading
+              ? const CircularProgressIndicator()
+              : const Icon(Icons.person_add),
+          label: const Text('Add User'),
+        ),
+        const SizedBox(height: 16.0),
+        ElevatedButton.icon(
+          onPressed: _isLoading ? null : _onCsvFileSelected,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
+            side: BorderSide(
+              color: theme.colorScheme.primary.withOpacity(0.5),
+              width: 1.5,
             ),
-            const SizedBox(height: 16.0),
-            ElevatedButton.icon(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
-                side: BorderSide(
-                  color: theme.colorScheme.primary.withOpacity(0.5),
-                  width: 1.5,
-                ),
-                padding: const EdgeInsets.all(16.0),
-              ),
-              icon: const Icon(Icons.arrow_back),
-              label: const Text('Go Back'),
+            padding: const EdgeInsets.all(16.0),
+          ),
+          icon: _isLoading
+              ? const CircularProgressIndicator()
+              : const Icon(Icons.upload_file),
+          label: const Text('Add Users from CSV'),
+        ),
+        const SizedBox(height: 16.0),
+        ElevatedButton.icon(
+          onPressed: () async {
+            await downloadCSV();
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
+            side: BorderSide(
+              color: theme.colorScheme.primary.withOpacity(0.5),
+              width: 1.5,
             ),
-          ],
+            padding: const EdgeInsets.all(16.0),
+          ),
+          icon: const Icon(Icons.download),
+          label: const Text('Download CSV Template'),
+        ),
+        const SizedBox(height: 16.0),
+        ElevatedButton.icon(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
+            side: BorderSide(
+              color: theme.colorScheme.primary.withOpacity(0.5),
+              width: 1.5,
+            ),
+            padding: const EdgeInsets.all(16.0),
+          ),
+          icon: const Icon(Icons.arrow_back),
+          label: const Text('Go Back'),
         ),
       ],
     );
