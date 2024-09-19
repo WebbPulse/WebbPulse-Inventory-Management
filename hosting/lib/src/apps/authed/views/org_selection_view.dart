@@ -146,7 +146,7 @@ class OrgCard extends StatelessWidget {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
             } else if (snapshot.hasError) {
-              return const Text('Error loading organizations');
+              return Center(child: const Text('Error loading organizations'));
             }
             final String orgName = snapshot.data?['orgName'] ?? '';
             final bool orgDeleted = snapshot.data?['orgDeleted'] ?? false;
