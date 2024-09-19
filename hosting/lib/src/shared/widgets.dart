@@ -1174,7 +1174,7 @@ class AddDeviceAlertDialogState extends State<AddDeviceAlertDialog> {
     });
 
     try {
-      await firebaseFunctions.httpsCallable('create_device_callable').call({
+      await firebaseFunctions.httpsCallable('create_devices_callable').call({
         "deviceSerialNumbers": deviceSerialNumbers,
         "orgId": orgSelectorProvider.orgId,
       });
