@@ -1,4 +1,4 @@
-from src.shared import auth, https_fn, POSTcorsrules, allowed_domains, Any, UserNotFoundError, check_user_is_org_admin, check_user_is_authed, check_user_token_current, check_user_is_email_verified
+from src.shared import auth, https_fn, POSTcorsrules, Any, UserNotFoundError, check_user_is_org_admin, check_user_is_authed, check_user_token_current, check_user_is_email_verified
 from src.helper_functions.users.create_global_user_profile import create_global_user_profile
 from src.helper_functions.users.add_user_to_organization import add_user_to_organization
 
@@ -27,10 +27,6 @@ def create_users_callable(req: https_fn.CallableRequest) -> Any:
 
         # Loop through each email and attempt to create/add the user
         for user_email in user_emails:
-            # Validate email domain
-            if user_email.split("@")[1] not in allowed_domains:
-                response_messages.append(f'Unauthorized email: {user_email}')
-                continue
 
             # Check if the user already exists in Firebase Auth
             user, user_was_created = None, False

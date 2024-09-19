@@ -1,4 +1,4 @@
-from src.shared import https_fn, POSTcorsrules, Any, db, auth, check_user_is_org_admin, check_user_is_authed, check_user_token_current, check_user_is_email_verified, allowed_domains
+from src.shared import https_fn, POSTcorsrules, Any, db, auth, check_user_is_org_admin, check_user_is_authed, check_user_token_current, check_user_is_email_verified
 from src.helper_functions.users.update_user_roles import update_user_roles
 
 

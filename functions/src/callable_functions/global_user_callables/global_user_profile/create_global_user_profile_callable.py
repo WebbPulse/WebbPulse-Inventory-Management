@@ -1,4 +1,4 @@
-from src.shared import auth, https_fn, db, POSTcorsrules, allowed_domains, Any, UserNotFoundError, check_user_is_org_admin, check_user_is_authed, check_user_token_current, check_user_is_email_verified
+from src.shared import auth, https_fn, db, POSTcorsrules, Any, UserNotFoundError, check_user_is_org_admin, check_user_is_authed, check_user_token_current, check_user_is_email_verified
 from src.helper_functions.users.create_global_user_profile import create_global_user_profile
 
 
