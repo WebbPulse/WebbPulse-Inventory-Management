@@ -301,43 +301,36 @@ class OrgImageEditorAlertDialogState extends State<OrgImageEditorAlertDialog> {
         ),
       ),
       actions: <Widget>[
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            ElevatedButton.icon(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
-                side: BorderSide(
-                  color: theme.colorScheme.primary.withOpacity(0.5),
-                  width: 1.5,
-                ),
-                padding: const EdgeInsets.all(16.0),
-              ),
-              icon: const Icon(Icons.arrow_back),
-              label: const Text('Go Back'),
+        ElevatedButton.icon(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
+            side: BorderSide(
+              color: theme.colorScheme.primary.withOpacity(0.5),
+              width: 1.5,
             ),
-            const SizedBox(height: 16.0),
-            ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
-                side: BorderSide(
-                  color: theme.colorScheme.primary.withOpacity(0.5),
-                  width: 1.5,
-                ),
-                padding: const EdgeInsets.all(16.0),
-              ),
-              onPressed: _isLoading ? null : _onSubmit,
-              icon: _isLoading
-                  ? const CircularProgressIndicator()
-                  : const Icon(Icons.photo),
-              label: const Text('Change Organization Image'),
+            padding: const EdgeInsets.all(16.0),
+          ),
+          onPressed: _isLoading ? null : _onSubmit,
+          icon: _isLoading
+              ? const CircularProgressIndicator()
+              : const Icon(Icons.photo),
+          label: const Text('Change Organization Image'),
+        ),
+        const SizedBox(height: 16.0),
+        ElevatedButton.icon(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
+            side: BorderSide(
+              color: theme.colorScheme.primary.withOpacity(0.5),
+              width: 1.5,
             ),
-            
-            
-          ],
+            padding: const EdgeInsets.all(16.0),
+          ),
+          icon: const Icon(Icons.arrow_back),
+          label: const Text('Go Back'),
         ),
       ],
     );
@@ -387,39 +380,32 @@ class DeleteOrgAlertDialogState extends State<DeleteOrgAlertDialog> {
       content: const Text(
           'Are you sure you want to delete this organization? This action cannot be undone.'),
       actions: <Widget>[
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            ElevatedButton.icon(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              icon: const Icon(Icons.arrow_back),
-              label: const Text('Go Back'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
-                side: BorderSide(
-                  color: theme.colorScheme.primary.withOpacity(0.5),
-                  width: 1.5,
-                ),
-                padding: const EdgeInsets.all(16.0),
-              ),
+        ElevatedButton.icon(
+          onPressed: _isLoading ? null : _onSubmit,
+          icon: _isLoading
+              ? const CircularProgressIndicator()
+              : const Icon(Icons.delete),
+          label: const Text('Delete Organization'),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.red,
+            padding: const EdgeInsets.all(16.0),
+          ),
+        ),
+        const SizedBox(height: 16.0),
+        ElevatedButton.icon(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          icon: const Icon(Icons.arrow_back),
+          label: const Text('Go Back'),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
+            side: BorderSide(
+              color: theme.colorScheme.primary.withOpacity(0.5),
+              width: 1.5,
             ),
-            const SizedBox(height: 16.0),
-            ElevatedButton.icon(
-              onPressed: _isLoading ? null : _onSubmit,
-              icon: _isLoading
-                  ? const CircularProgressIndicator()
-                  : const Icon(Icons.delete),
-              label: const Text('Delete Organization'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                padding: const EdgeInsets.all(16.0),
-              ),
-            ),
-            
-            
-          ],
+            padding: const EdgeInsets.all(16.0),
+          ),
         ),
       ],
     );
