@@ -6,9 +6,12 @@ import 'package:webbcheck/src/shared/providers/authentication_change_notifier.da
 import 'package:webbcheck/src/shared/providers/firestore_read_service.dart';
 import 'package:webbcheck/src/shared/providers/org_member_selector_change_notifier.dart';
 import 'package:webbcheck/src/shared/providers/org_selector_change_notifier.dart';
-import 'package:webbcheck/src/shared/widgets.dart';
-import 'package:webbcheck/src/shared/helpers/async_context_helpers.dart';
+import 'package:webbcheck/src/shared/widgets/widgets.dart';
+import 'package:webbcheck/src/shared/widgets/device_widgets.dart';
+import 'package:webbcheck/src/shared/widgets/user_widgets.dart';
 
+/// OrgMemberView is the screen where an admin can manage a selected organization member.
+/// It displays the member's profile, roles, and their checked-out devices.
 class OrgMemberView extends StatelessWidget {
   const OrgMemberView({super.key});
   static const routeName = '/manage-user';
@@ -28,59 +31,69 @@ class OrgMemberView extends StatelessWidget {
             firebaseFunctions,
             authenticationChangeNotifier,
             child) {
+      // Checking the authentication state and user claims for authorization
       return AuthClaimChecker(
         builder: (context, userClaims) {
           return Scaffold(
             appBar: AppBar(
-              title: const Text('Manage User'),
+              title: const Text('Manage User'), // App bar title
               leading: IconButton(
-                icon: const Icon(Icons.arrow_back),
+                icon: const Icon(Icons.arrow_back), // Back button
                 onPressed: () {
-                  /// Clear the selected org member
+                  // Clear the selected organization member when the user navigates back
                   orgMemberSelectorProvider.clearSelectedOrgMember();
-                  Navigator.pop(context);
+                  Navigator.pop(context); // Navigate back
                 },
               ),
             ),
             body: orgSelectorChangeNotifier.orgId.isNotEmpty &&
                     orgMemberSelectorProvider.orgMemberId.isNotEmpty
+                // If organization and member are selected, load member's data
                 ? StreamBuilder<DocumentSnapshot?>(
                     stream: firestoreService.getOrgMemberDocument(
                         orgSelectorChangeNotifier.orgId,
                         orgMemberSelectorProvider.orgMemberId),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(child: CircularProgressIndicator());
+                        return const Center(
+                            child:
+                                CircularProgressIndicator()); // Show loading indicator
                       } else if (snapshot.hasError) {
                         return const Center(
-                            child: Text('Error loading user data'));
+                            child: Text(
+                                'Error loading user data')); // Show error message
                       }
                       if (!snapshot.hasData || !snapshot.data!.exists) {
-                        return const Center(child: Text('User not found'));
+                        return const Center(
+                            child: Text(
+                                'User not found')); // Show message if user not found
                       }
                       final DocumentSnapshot orgMemberData = snapshot.data!;
                       if (orgMemberData['orgMemberDeleted'] == true) {
-                        return const Center(child: Text('User not found'));
+                        return const Center(
+                            child: Text(
+                                'User not found')); // Handle deleted user case
                       }
+
+                      // Layout builder to adjust the view based on screen size
                       return LayoutBuilder(builder: (context, constraints) {
                         double containerWidth;
 
+                        // Adjust the width of the side column based on screen size
                         if (constraints.maxWidth < 600) {
-                          // Mobile width (under 600px)
-                          containerWidth =
-                              MediaQuery.of(context).size.width * 0.35;
+                          containerWidth = MediaQuery.of(context).size.width *
+                              0.35; // Mobile width
                         } else if (constraints.maxWidth < 1200) {
-                          // Tablet width (under 1200px)
-                          containerWidth =
-                              MediaQuery.of(context).size.width * 0.25;
+                          containerWidth = MediaQuery.of(context).size.width *
+                              0.25; // Tablet width
                         } else {
-                          // Larger screen width (over 600px)
-                          containerWidth =
-                              MediaQuery.of(context).size.width * 0.15;
+                          containerWidth = MediaQuery.of(context).size.width *
+                              0.15; // Larger screen width
                         }
+
                         return Row(
                           children: [
-                            // Right-side column pane
+                            // Right-side column for displaying user details
                             Container(
                               width: containerWidth,
                               color: Theme.of(context).colorScheme.secondary,
@@ -88,6 +101,7 @@ class OrgMemberView extends StatelessWidget {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
+                                  // Display user's name
                                   Text(
                                     '${orgMemberData['orgMemberDisplayName']}',
                                     style: Theme.of(context)
@@ -100,6 +114,7 @@ class OrgMemberView extends StatelessWidget {
                                             fontWeight: FontWeight.bold),
                                   ),
                                   const SizedBox(height: 8),
+                                  // Display user's email
                                   Text(
                                     '${orgMemberData['orgMemberEmail']}',
                                     style: Theme.of(context)
@@ -112,6 +127,7 @@ class OrgMemberView extends StatelessWidget {
                                             fontWeight: FontWeight.bold),
                                   ),
                                   const SizedBox(height: 16),
+                                  // Display user's profile picture or default avatar
                                   if (orgMemberData['orgMemberPhotoURL'] !=
                                           '' &&
                                       orgMemberData['orgMemberPhotoURL'] !=
@@ -134,6 +150,7 @@ class OrgMemberView extends StatelessWidget {
                                       ),
                                     ),
                                   const SizedBox(height: 16),
+                                  // If the user is an admin, display role management and delete options
                                   if (userClaims[
                                           'org_admin_${orgSelectorChangeNotifier.orgId}'] ==
                                       true)
@@ -147,16 +164,19 @@ class OrgMemberView extends StatelessWidget {
                                       ],
                                     )
                                   else
+                                    // Display current user's role if not an admin
                                     UserRoleCard(orgMemberData: orgMemberData),
                                 ],
                               ),
                             ),
+                            // Expanded section to show user's checked-out devices
                             Expanded(
                               child: Padding(
                                 padding: const EdgeInsets.all(16.0),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
+                                    // Section title for checked-out devices
                                     Text(
                                       'Checked Out Devices',
                                       style: Theme.of(context)
@@ -183,7 +203,7 @@ class OrgMemberView extends StatelessWidget {
                                                   'Error loading devices'));
                                         }
 
-                                        // Handle case where snapshot.data might be null or empty
+                                        // If there are no devices found
                                         if (!snapshot.hasData ||
                                             snapshot.data!.isEmpty) {
                                           return const Center(
@@ -194,10 +214,9 @@ class OrgMemberView extends StatelessWidget {
                                             devicesDocs = snapshot.data!;
 
                                         return Expanded(
-                                          // Ensure FutureBuilder's content gets proper layout constraints
+                                          // Display a list of checked-out devices
                                           child: DeviceList(
-                                            devicesDocs: devicesDocs,
-                                          ),
+                                              devicesDocs: devicesDocs),
                                         );
                                       },
                                     ),
@@ -210,9 +229,9 @@ class OrgMemberView extends StatelessWidget {
                       });
                     },
                   )
-
-                /// If the orgId or orgMemberId is empty due to pressing the back button, show a loading screen.
-                : const Center(child: CircularProgressIndicator()),
+                : const Center(
+                    child:
+                        CircularProgressIndicator()), // Show loading screen if no org or member is selected
           );
         },
       );
@@ -220,11 +239,9 @@ class OrgMemberView extends StatelessWidget {
   }
 }
 
+/// DeleteUserButton provides functionality to delete a user from an organization.
 class DeleteUserButton extends StatefulWidget {
-  const DeleteUserButton({
-    super.key,
-    required this.orgMemberData,
-  });
+  const DeleteUserButton({super.key, required this.orgMemberData});
 
   final DocumentSnapshot<Object?> orgMemberData;
 
@@ -245,6 +262,7 @@ class _DeleteUserButtonState extends State<DeleteUserButton> {
     super.dispose();
   }
 
+  /// Handles the process of deleting a user.
   void _onPressed() async {
     final orgSelectorProvider =
         Provider.of<OrgSelectorChangeNotifier>(context, listen: false);
@@ -263,6 +281,7 @@ class _DeleteUserButtonState extends State<DeleteUserButton> {
         'orgId': orgSelectorProvider.orgId,
         'orgMemberId': widget.orgMemberData.id,
       });
+      // Sign out the user if they delete themselves
       if (orgMemberId == authenticationChangeNotifier.user?.uid) {
         authenticationChangeNotifier.signOutUser();
       }
@@ -285,19 +304,22 @@ class _DeleteUserButtonState extends State<DeleteUserButton> {
         builder: (context, firebaseFunctions, orgSelectorChangeNotifier,
             authenticationChangeNotifier, child) {
       return ElevatedButton.icon(
-        onPressed: _isLoading ? null : _onPressed,
+        onPressed:
+            _isLoading ? null : _onPressed, // Disable button while loading
         icon: _isLoading
             ? const CircularProgressIndicator()
             : const Icon(Icons.delete),
-        label: Wrap(children: [
-          Text(
-            'Delete User',
-            style: Theme.of(context)
-                .textTheme
-                .labelSmall
-                ?.copyWith(fontWeight: FontWeight.bold),
-          ),
-        ]),
+        label: Wrap(
+          children: [
+            Text(
+              'Delete User',
+              style: Theme.of(context)
+                  .textTheme
+                  .labelSmall
+                  ?.copyWith(fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
         style: ElevatedButton.styleFrom(
           disabledBackgroundColor: Colors.red,
           backgroundColor: Colors.red,
@@ -308,6 +330,7 @@ class _DeleteUserButtonState extends State<DeleteUserButton> {
   }
 }
 
+/// UserRoleCard displays the current role of a user (e.g., Org Admin, Org Member).
 class UserRoleCard extends StatelessWidget {
   final DocumentSnapshot orgMemberData;
 
@@ -323,7 +346,7 @@ class UserRoleCard extends StatelessWidget {
             Text(
               orgMemberData['orgMemberRole'] == 'admin'
                   ? 'Org Admin'
-                  : ' Org Member',
+                  : 'Org Member',
               style: Theme.of(context)
                   .textTheme
                   .labelSmall
@@ -336,6 +359,7 @@ class UserRoleCard extends StatelessWidget {
   }
 }
 
+/// UserRoleDropdownButton allows admins to change the role of an organization member.
 class UserRoleDropdownButton extends StatefulWidget {
   final DocumentSnapshot orgMemberData;
 
@@ -358,9 +382,11 @@ class UserRoleDropdownButtonState extends State<UserRoleDropdownButton> {
   @override
   void initState() {
     super.initState();
-    selectedValue = widget.orgMemberData['orgMemberRole'];
+    selectedValue = widget
+        .orgMemberData['orgMemberRole']; // Initialize with current user role
   }
 
+  /// Handles updating the user's role.
   void _onChanged() async {
     final orgSelectorProvider =
         Provider.of<OrgSelectorChangeNotifier>(context, listen: false);
@@ -408,9 +434,11 @@ class UserRoleDropdownButtonState extends State<UserRoleDropdownButton> {
               : const Icon(Icons.arrow_drop_down),
           onChanged: (String? newValue) {
             setState(() {
-              selectedValue = newValue;
+              selectedValue = newValue; // Update selected value when changed
             });
-            _isLoading ? null : _onChanged();
+            _isLoading
+                ? null
+                : _onChanged(); // Only call _onChanged if not loading
           },
           items:
               items.map<DropdownMenuItem<String>>((Map<String, String> item) {
