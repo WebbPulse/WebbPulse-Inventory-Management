@@ -14,8 +14,10 @@ import 'package:webbcheck/src/apps/authed/views/org_selected/org_member_view.dar
 import '../../../../shared/providers/org_selector_change_notifier.dart';
 import '../../../../shared/providers/org_member_selector_change_notifier.dart';
 import '../../../../shared/providers/firestore_read_service.dart';
-import '../../../../shared/widgets.dart';
-import '../../../../shared/helpers/async_context_helpers.dart';
+import '../../../../shared/widgets/widgets.dart';
+import 'package:webbcheck/src/shared/widgets/user_widgets.dart';
+import 'package:webbcheck/src/shared/widgets/org_widgets.dart';
+
 
 class OrgMemberListView extends StatelessWidget {
   OrgMemberListView({super.key});

@@ -6,8 +6,9 @@ import 'package:webbcheck/src/shared/providers/authentication_change_notifier.da
 import 'package:webbcheck/src/shared/providers/firestore_read_service.dart';
 import 'package:webbcheck/src/shared/providers/org_member_selector_change_notifier.dart';
 import 'package:webbcheck/src/shared/providers/org_selector_change_notifier.dart';
-import 'package:webbcheck/src/shared/widgets.dart';
-import 'package:webbcheck/src/shared/helpers/async_context_helpers.dart';
+import 'package:webbcheck/src/shared/widgets/widgets.dart';
+import '../../../../shared/widgets/device_widgets.dart';
+import 'package:webbcheck/src/shared/widgets/user_widgets.dart';
 
 class OrgMemberView extends StatelessWidget {
   const OrgMemberView({super.key});

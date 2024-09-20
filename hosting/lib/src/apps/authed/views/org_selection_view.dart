@@ -2,10 +2,11 @@ import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import '../../../shared/providers/firestore_read_service.dart';
 import 'org_create_view.dart';
-import '../../../shared/widgets.dart';
+import '../../../shared/widgets/widgets.dart';
 import '../../../shared/providers/org_selector_change_notifier.dart';
 import '../../../shared/providers/authentication_change_notifier.dart';
 import 'org_selected/device_checkout_view.dart';
+import 'package:webbcheck/src/shared/widgets/user_widgets.dart';
 
 class OrgSelectionView extends StatelessWidget {
   const OrgSelectionView({

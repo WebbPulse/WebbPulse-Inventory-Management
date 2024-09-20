@@ -5,7 +5,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../shared/providers/firestore_read_service.dart';
 
 import '../../../../shared/providers/org_selector_change_notifier.dart';
-import '../../../../shared/widgets.dart';
+import 'package:webbcheck/src/shared/widgets/user_widgets.dart';
+import 'package:webbcheck/src/shared/widgets/org_widgets.dart';
+import '../../../../shared/widgets/device_widgets.dart';
 
 class OrgDeviceListView extends StatelessWidget {
   const OrgDeviceListView({super.key});

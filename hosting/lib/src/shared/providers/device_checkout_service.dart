@@ -2,11 +2,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:webbcheck/src/shared/providers/authentication_change_notifier.dart';
+
 import 'firestore_read_service.dart';
 import 'package:cloud_functions/cloud_functions.dart';
-import '../helpers/async_context_helpers.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:webbcheck/src/shared/widgets/widgets.dart';
 
 class DeviceCheckoutService {
   final FirestoreReadService firestoreService;

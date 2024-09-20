@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'register_view.dart';
 import 'signin_view.dart';
-import '../../../shared/widgets.dart';
+import '../../../shared/widgets/widgets.dart';
 
 class LandingView extends StatelessWidget {
   const LandingView({super.key});

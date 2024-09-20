@@ -1,27 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_functions/cloud_functions.dart';
-import 'package:webbcheck/src/apps/authed/views/org_selected/org_settings_view.dart';
+
 
 import 'package:webbcheck/src/shared/providers/authentication_change_notifier.dart';
-
 import 'package:webbcheck/src/shared/providers/settings_change_notifier.dart';
 import 'package:webbcheck/src/shared/providers/org_selector_change_notifier.dart';
 import 'package:webbcheck/src/shared/providers/org_member_selector_change_notifier.dart';
-
 import 'package:webbcheck/src/shared/providers/firestore_read_service.dart';
 import 'package:webbcheck/src/shared/providers/device_checkout_service.dart';
-import 'package:webbcheck/src/shared/helpers/async_context_helpers.dart';
 
 import 'views/profile_settings_view.dart';
 import 'views/org_selected/org_device_list_view.dart';
 import 'views/org_selected/device_checkout_view.dart';
 import 'views/org_selected/org_member_list_view.dart';
 import 'views/org_selected/org_member_view.dart';
-
+import 'package:webbcheck/src/apps/authed/views/org_selected/org_settings_view.dart';
 import 'views/org_create_view.dart';
 import 'views/org_selection_view.dart';
 import 'views/verify_email_view.dart';
+
+import 'package:webbcheck/src/shared/widgets/widgets.dart';
 
 class AuthedApp extends StatelessWidget {
   AuthedApp({

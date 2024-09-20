@@ -4,10 +4,10 @@ import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:webbcheck/src/shared/providers/authentication_change_notifier.dart';
 import 'package:webbcheck/src/shared/providers/firestore_read_service.dart';
-import 'package:webbcheck/src/shared/widgets.dart';
-import 'package:webbcheck/src/shared/helpers/async_context_helpers.dart';
+import 'package:webbcheck/src/shared/widgets/widgets.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:webbcheck/src/shared/providers/settings_change_notifier.dart';
+import 'package:webbcheck/src/shared/widgets/user_widgets.dart';
 
 class ProfileSettingsView extends StatelessWidget {
   const ProfileSettingsView({super.key});

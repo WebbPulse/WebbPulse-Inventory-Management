@@ -2,11 +2,13 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:webbcheck/src/shared/providers/authentication_change_notifier.dart';
-import 'package:webbcheck/src/shared/helpers/async_context_helpers.dart';
+
 
 import '../../../../shared/providers/firestore_read_service.dart';
 import '../../../../shared/providers/org_selector_change_notifier.dart';
-import '../../../../shared/widgets.dart';
+import '../../../../shared/widgets/widgets.dart';
+import 'package:webbcheck/src/shared/widgets/user_widgets.dart';
+import 'package:webbcheck/src/shared/widgets/org_widgets.dart';
 
 class OrgSettingsView extends StatelessWidget {
   const OrgSettingsView({super.key});
