@@ -1,46 +1,44 @@
 import 'package:flutter/material.dart';
-
 import '../non_provider_services/settings_service.dart';
 
-/// A class that many Widgets can interact with to read user settings, update
-/// user settings, or listen to user settings changes.
-///
-/// Controllers glue Data Services to Flutter Widgets. The SettingsController
-/// uses the SettingsService to store and retrieve user settings.
+/// A ChangeNotifier that manages the app's settings, such as the theme mode
 class SettingsChangeNotifier with ChangeNotifier {
+  /// Constructor to initialize the SettingsService
   SettingsChangeNotifier(this._settingsService);
 
-  // Make SettingsService a private variable so it is not used directly.
+  /// The service responsible for handling the app's settings (e.g., theme mode)
   final SettingsService _settingsService;
 
-  // Make ThemeMode a private variable so it is not updated directly without
-  // also persisting the changes with the SettingsService.
+  /// Private field to store the current theme mode
   late ThemeMode _themeMode;
 
-  // Allow Widgets to read the user's preferred ThemeMode.
+  /// Getter to access the current theme mode
   ThemeMode get themeMode => _themeMode;
 
-  /// Load the user's settings from the SettingsService. It may load from a
-  /// local database or the internet. The controller only knows it can load the
-  /// settings from the service.
+  /// Loads the theme mode from the settings service and notifies listeners
   Future<void> loadSettings() async {
-    _themeMode = await _settingsService.themeMode();
-
-    // Important! Inform listeners a change has occurred.
+    _themeMode =
+        await _settingsService.themeMode(); // Fetch the current theme mode
     notifyListeners();
+
+    /// Notify listeners that the theme mode has been loaded/updated
   }
 
-  /// Update and persist the ThemeMode based on the user's selection.
+  /// Updates the theme mode if it has changed and notifies listeners
   Future<void> updateThemeMode(ThemeMode? newThemeMode) async {
     if (newThemeMode == null) return;
 
-    // Do not perform any work if new and old ThemeMode are identical
+    /// Do nothing if the new theme mode is null
+
     if (newThemeMode == _themeMode) return;
 
-    // Otherwise, store the new ThemeMode in memory
+    /// Do nothing if the new theme mode is the same as the current one
     _themeMode = newThemeMode;
 
-    // Important! Inform listeners a change has occurred.
+    /// Update the theme mode
+
     notifyListeners();
+
+    /// Notify listeners that the theme mode has changed
   }
 }

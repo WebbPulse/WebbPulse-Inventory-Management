@@ -1,17 +1,14 @@
 import 'package:flutter/material.dart';
 
-/// A service that stores and retrieves user settings.
-///
-/// By default, this class does not persist user settings. If you'd like to
-/// persist the user settings locally, use the shared_preferences package. If
-/// you'd like to store settings on a web server, use the http package.
+/// A service class responsible for managing app settings, such as theme mode
 class SettingsService {
-  /// Loads the User's preferred ThemeMode from local or remote storage.
+  /// Simulates fetching the current theme mode from a data source
+  /// In this case, it always returns `ThemeMode.dark`
   Future<ThemeMode> themeMode() async => ThemeMode.dark;
 
-  /// Persists the user's preferred ThemeMode to local or remote storage.
+  /// Simulates updating the theme mode
+  /// Currently, this method does not perform any actual actions
   Future<void> updateThemeMode(ThemeMode theme) async {
-    // Use the shared_preferences package to persist settings locally or the
-    // http package to persist settings over the network.
+    // Logic to update the theme mode in persistent storage or backend can go here
   }
 }

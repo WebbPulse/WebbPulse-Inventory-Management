@@ -2,34 +2,39 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:webbcheck/src/shared/providers/firestore_read_service.dart';
+import 'package:webbcheck/src/shared/providers/org_selector_change_notifier.dart';
+import 'package:webbcheck/src/shared/providers/authentication_change_notifier.dart';
+import 'package:webbcheck/src/shared/providers/device_checkout_service.dart';
+import 'package:webbcheck/src/shared/widgets/user_widgets.dart'; // Custom user widgets
+import 'package:webbcheck/src/shared/widgets/org_widgets.dart'; // Custom organization widgets
+import 'package:webbcheck/src/shared/widgets/device_widgets.dart'; // Custom device-related widgets
 
-import '../../../../shared/providers/org_selector_change_notifier.dart';
-import '../../../../shared/providers/authentication_change_notifier.dart';
-import '../../../../shared/providers/device_checkout_service.dart';
-import 'package:webbcheck/src/shared/widgets/user_widgets.dart';
-import 'package:webbcheck/src/shared/widgets/org_widgets.dart';
-import '../../../../shared/widgets/device_widgets.dart';
-
+/// DeviceCheckoutView is the main view for handling device checkouts and check-ins
 class DeviceCheckoutView extends StatelessWidget {
   const DeviceCheckoutView({super.key});
 
+  // Route name for navigation
   static const routeName = '/checkout';
 
   @override
   Widget build(BuildContext context) {
-    ThemeData theme = Theme.of(context);
+    ThemeData theme = Theme.of(context); // Get the current theme
+
+    // OrgDocumentStreamBuilder provides a stream of the organization's document data
     return OrgDocumentStreamBuilder(
       builder: (context, orgDocument) {
         return Scaffold(
+          // AppBar showing the organization's name and "Device Checkout"
           appBar: OrgNameAppBar(
             titleSuffix: 'Device Checkout',
             actions: [
+              // Button to open the dialog for adding new devices
               ElevatedButton.icon(
                 onPressed: () {
                   showDialog(
                     context: context,
                     builder: (BuildContext context) {
-                      return const AddDeviceAlertDialog();
+                      return const AddDeviceAlertDialog(); // Add device dialog
                     },
                   );
                 },
@@ -46,22 +51,27 @@ class DeviceCheckoutView extends StatelessWidget {
               )
             ],
           ),
-          drawer: const AuthedDrawer(),
+          drawer:
+              const AuthedDrawer(), // Navigation drawer for authenticated users
+
+          // Body of the view showing background image and main content
           body: Stack(
             children: [
+              // Display background image if it exists in the organization document
               if (orgDocument['orgBackgroundImageURL'] != null &&
                   orgDocument['orgBackgroundImageURL'] != '')
                 Positioned.fill(
                   child: Image.network(
-                    orgDocument['orgBackgroundImageURL'],
+                    orgDocument[
+                        'orgBackgroundImageURL'], // Load background image
                     fit: BoxFit.cover,
                   ),
                 ),
 
-              // Main content with padding
+              // Main content (checkout form)
               const SafeArea(
                 child: SizedBox.expand(
-                  child: CheckoutForm(),
+                  child: CheckoutForm(), // Custom checkout form
                 ),
               ),
             ],
@@ -72,6 +82,7 @@ class DeviceCheckoutView extends StatelessWidget {
   }
 }
 
+/// CheckoutForm handles the form input and logic for device checkout and check-in
 class CheckoutForm extends StatefulWidget {
   const CheckoutForm({super.key});
 
@@ -80,57 +91,67 @@ class CheckoutForm extends StatefulWidget {
 }
 
 class CheckoutFormState extends State<CheckoutForm> {
-  var _isLoading = false;
-  late TextEditingController _deviceSerialController;
-  late TextEditingController _userSearchController;
-  String _searchQuery = '';
+  var _isLoading = false; // Loading indicator for async operations
+  late TextEditingController
+      _deviceSerialController; // Controller for the device serial input
+  late TextEditingController
+      _userSearchController; // Controller for user search input
+  String _searchQuery = ''; // Store the current search query
 
   @override
   void initState() {
     super.initState();
-    _deviceSerialController = TextEditingController();
-    _userSearchController = TextEditingController();
-    _userSearchController.addListener(_onSearchChanged);
+    _deviceSerialController =
+        TextEditingController(); // Initialize controller for device serial
+    _userSearchController =
+        TextEditingController(); // Initialize controller for user search
+    _userSearchController.addListener(
+        _onSearchChanged); // Listen to changes in the user search input
   }
 
   @override
   void dispose() {
-    _deviceSerialController.dispose();
+    _deviceSerialController
+        .dispose(); // Dispose controller when widget is destroyed
     _userSearchController.dispose();
     super.dispose();
   }
 
+  // Update the search query when the user types in the search field
   void _onSearchChanged() {
     setState(() {
       _searchQuery = _userSearchController.text;
     });
   }
 
+  // Function to handle device checkout or check-in
   Future<void> _onSubmit(bool checkOut) async {
-    setState(() => _isLoading = true);
-    final orgId =
-        Provider.of<OrgSelectorChangeNotifier>(context, listen: false).orgId;
-    final deviceCheckoutService =
-        Provider.of<DeviceCheckoutService>(context, listen: false);
+    setState(() => _isLoading = true); // Show loading indicator
+    final orgId = Provider.of<OrgSelectorChangeNotifier>(context, listen: false)
+        .orgId; // Get selected organization ID
+    final deviceCheckoutService = Provider.of<DeviceCheckoutService>(context,
+        listen: false); // Get device checkout service
     final deviceCheckedOutBy =
         Provider.of<AuthenticationChangeNotifier>(context, listen: false)
             .user!
-            .uid;
+            .uid; // Get current user's ID
     try {
+      // Call the service to handle device checkout or check-in
       await deviceCheckoutService.handleDeviceCheckout(
         context,
         _deviceSerialController.text,
         orgId,
         deviceCheckedOutBy,
-        checkOut, // Pass the boolean for checkout or check-in
+        checkOut, // Pass true for checkout, false for check-in
       );
     } catch (e) {
-      // Handle error if needed
+      // Handle any errors
     } finally {
-      setState(() => _isLoading = false);
+      setState(() => _isLoading = false); // Hide loading indicator
     }
   }
 
+  // Function to handle admin-specific checkout or check-in
   Future<void> _onSubmitAdminAndDeskstation(
       bool checkOut, String deviceCheckedOutBy) async {
     setState(() => _isLoading = true);
@@ -144,7 +165,7 @@ class CheckoutFormState extends State<CheckoutForm> {
         _deviceSerialController.text,
         orgId,
         deviceCheckedOutBy,
-        checkOut, // Pass the boolean for checkout or check-in
+        checkOut,
       );
     } catch (e) {
       // Handle error if needed
@@ -153,6 +174,7 @@ class CheckoutFormState extends State<CheckoutForm> {
     }
   }
 
+  // Show dialog for admins to select a user for device checkout or check-in
   Future<void> _showAdminDialog(bool checkOut, String orgId) async {
     return showDialog<void>(
       context: context,
@@ -177,6 +199,7 @@ class CheckoutFormState extends State<CheckoutForm> {
                           ? 'Select the user to check-out this device.'
                           : 'Select the user to check-in this device.',
                     ),
+                    // Search user field
                     TextField(
                       controller: _userSearchController,
                       decoration: const InputDecoration(
@@ -189,6 +212,7 @@ class CheckoutFormState extends State<CheckoutForm> {
                         });
                       },
                     ),
+                    // Stream of organization members to choose from
                     StreamBuilder<List<DocumentSnapshot>>(
                         stream: firestoreReadService.getOrgMembersDocuments(
                             orgSelectorChangeNotifier.orgId),
@@ -204,7 +228,7 @@ class CheckoutFormState extends State<CheckoutForm> {
                           final List<DocumentSnapshot> orgMemberDocs =
                               snapshot.data!;
 
-                          // Filter the list based on the search query
+                          // Filter the list of users based on the search query
                           final filteredDocs = orgMemberDocs.where((doc) {
                             final name = doc['orgMemberDisplayName']
                                 .toString()
@@ -212,6 +236,7 @@ class CheckoutFormState extends State<CheckoutForm> {
                             return name.contains(_searchQuery.toLowerCase());
                           }).toList();
 
+                          // Show the filtered list of users
                           if (filteredDocs.isNotEmpty) {
                             return Container(
                               constraints: const BoxConstraints(
@@ -240,12 +265,8 @@ class CheckoutFormState extends State<CheckoutForm> {
                           } else {
                             return const Column(
                               children: [
-                                SizedBox(
-                                  height: 16,
-                                ),
-                                Center(
-                                  child: Text('No users found.'),
-                                ),
+                                SizedBox(height: 16),
+                                Center(child: Text('No users found.')),
                               ],
                             );
                           }
@@ -280,14 +301,15 @@ class CheckoutFormState extends State<CheckoutForm> {
 
   @override
   Widget build(BuildContext context) {
-    ThemeData theme = Theme.of(context);
+    ThemeData theme = Theme.of(context); // Get the current theme
     return AuthClaimChecker(builder: (context, userClaims) {
       final orgId =
           Provider.of<OrgSelectorChangeNotifier>(context, listen: false).orgId;
-      // Safely check if the roles exist and their values are true
+      // Check if the user has admin or desk station role
       bool isAdminOrDeskstation = (userClaims['org_admin_$orgId'] == true) ||
           (userClaims['org_deskstation_$orgId'] == true);
 
+      // Main UI for the form, using a layout builder to adjust width constraints
       return SingleChildScrollView(
         child: Center(
           child: LayoutBuilder(
@@ -315,6 +337,7 @@ class CheckoutFormState extends State<CheckoutForm> {
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
                       children: [
+                        // Serial Number Input Field
                         TextField(
                           controller: _deviceSerialController,
                           decoration: const InputDecoration(
@@ -326,7 +349,7 @@ class CheckoutFormState extends State<CheckoutForm> {
                           spacing: 8.0,
                           runSpacing: 8.0,
                           children: [
-                            // Checkout Button
+                            // Check-out Button
                             ElevatedButton.icon(
                               onPressed: _isLoading
                                   ? null
