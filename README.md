@@ -1,6 +1,7 @@
 # WebbPulse Inventory Management
 
 A full stack program built in flutter using firebase to do simple tracking of device checkout status
+production code currently deployed and interactable at webbpulse.com
 
 # Living To-Do List:
 
