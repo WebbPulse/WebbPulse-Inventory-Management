@@ -1,13 +1,13 @@
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:webbcheck/src/shared/providers/authentication_change_notifier.dart';
+import 'package:webbpulse_inventory_management/src/shared/providers/authentication_change_notifier.dart';
 
-import 'package:webbcheck/src/shared/providers/firestore_read_service.dart';
-import 'package:webbcheck/src/shared/providers/org_selector_change_notifier.dart';
-import 'package:webbcheck/src/shared/widgets/widgets.dart';
-import 'package:webbcheck/src/shared/widgets/user_widgets.dart';
-import 'package:webbcheck/src/shared/widgets/org_widgets.dart';
+import 'package:webbpulse_inventory_management/src/shared/providers/firestore_read_service.dart';
+import 'package:webbpulse_inventory_management/src/shared/providers/org_selector_change_notifier.dart';
+import 'package:webbpulse_inventory_management/src/shared/widgets/widgets.dart';
+import 'package:webbpulse_inventory_management/src/shared/widgets/user_widgets.dart';
+import 'package:webbpulse_inventory_management/src/shared/widgets/org_widgets.dart';
 
 /// OrgSettingsView displays the settings page for the selected organization,
 /// allowing users to update the organization's name, background image, or delete the organization.

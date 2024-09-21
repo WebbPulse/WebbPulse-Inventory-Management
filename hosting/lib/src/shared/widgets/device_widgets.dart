@@ -16,8 +16,8 @@ import '../providers/org_selector_change_notifier.dart';
 import '../providers/firestore_read_service.dart';
 import '../providers/authentication_change_notifier.dart';
 
-import 'package:webbcheck/src/shared/widgets/widgets.dart';
-import 'package:webbcheck/src/shared/widgets/user_widgets.dart';
+import 'package:webbpulse_inventory_management/src/shared/widgets/widgets.dart';
+import 'package:webbpulse_inventory_management/src/shared/widgets/user_widgets.dart';
 
 /// Widget that displays a list of devices and allows filtering by serial number or status
 class DeviceList extends StatelessWidget {

@@ -1,4 +1,4 @@
-package com.webbpulse.checkout
+package com.webbpulse.inventory
 
 import io.flutter.embedding.android.FlutterActivity
 

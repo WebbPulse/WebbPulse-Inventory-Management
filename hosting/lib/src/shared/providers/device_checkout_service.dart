@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:webbcheck/src/shared/providers/authentication_change_notifier.dart';
+import 'package:webbpulse_inventory_management/src/shared/providers/authentication_change_notifier.dart';
 
 import 'firestore_read_service.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:webbcheck/src/shared/widgets/widgets.dart';
+import 'package:webbpulse_inventory_management/src/shared/widgets/widgets.dart';
 
 /// Service class for handling the check-in and check-out logic of devices
 class DeviceCheckoutService {

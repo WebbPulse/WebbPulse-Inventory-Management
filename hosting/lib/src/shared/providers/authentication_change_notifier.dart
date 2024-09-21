@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart'
     hide EmailAuthProvider, PhoneAuthProvider;
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
+import 'package:webbpulse_inventory_management/src/shared/authentication_provider_list.dart';
 
 /// A ChangeNotifier that manages authentication state
 class AuthenticationChangeNotifier extends ChangeNotifier {
@@ -39,9 +40,7 @@ class AuthenticationChangeNotifier extends ChangeNotifier {
   /// Initializes authentication and listens for changes in the user's authentication state
   Future<void> init() async {
     /// Configure the Firebase UI Auth to use email-based authentication
-    FirebaseUIAuth.configureProviders([
-      EmailAuthProvider(),
-    ]);
+    FirebaseUIAuth.configureProviders(authenticationProviderList);
 
     /// Listen for changes in the authentication state (e.g., login, logout)
     FirebaseAuth.instance.authStateChanges().listen((user) {

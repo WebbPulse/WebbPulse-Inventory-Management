@@ -1,12 +1,12 @@
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
-import 'package:webbcheck/src/shared/providers/firestore_read_service.dart';
+import 'package:webbpulse_inventory_management/src/shared/providers/firestore_read_service.dart';
 import 'org_create_view.dart';
-import 'package:webbcheck/src/shared/widgets/widgets.dart';
-import 'package:webbcheck/src/shared/providers/org_selector_change_notifier.dart';
-import 'package:webbcheck/src/shared/providers/authentication_change_notifier.dart';
+import 'package:webbpulse_inventory_management/src/shared/widgets/widgets.dart';
+import 'package:webbpulse_inventory_management/src/shared/providers/org_selector_change_notifier.dart';
+import 'package:webbpulse_inventory_management/src/shared/providers/authentication_change_notifier.dart';
 import 'org_selected/device_checkout_view.dart';
-import 'package:webbcheck/src/shared/widgets/user_widgets.dart';
+import 'package:webbpulse_inventory_management/src/shared/widgets/user_widgets.dart';
 
 /// OrgSelectionView provides the screen for selecting an organization.
 /// Users can choose an organization they are part of or create a new one.
@@ -173,8 +173,8 @@ class OrgCard extends StatelessWidget {
               return const Center(
                   child: CircularProgressIndicator()); // Show loading spinner
             } else if (snapshot.hasError) {
-              return Center(
-                  child: const Text(
+              return const Center(
+                  child: Text(
                       'Error loading organizations')); // Show error message
             }
 

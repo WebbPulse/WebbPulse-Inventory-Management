@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:webbcheck/src/apps/non_authed/views/landing_view.dart';
-import 'package:webbcheck/src/shared/providers/authentication_change_notifier.dart';
+import 'package:webbpulse_inventory_management/src/apps/non_authed/views/landing_view.dart';
+import 'package:webbpulse_inventory_management/src/shared/providers/authentication_change_notifier.dart';
 
 /// View displayed when the user's session has expired.
 /// It informs the user and provides an option to sign in again.

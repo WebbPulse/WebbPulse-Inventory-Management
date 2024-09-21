@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import 'package:webbcheck/src/shared/providers/firestore_read_service.dart';
-import 'package:webbcheck/src/shared/providers/org_selector_change_notifier.dart';
-import 'package:webbcheck/src/shared/widgets/user_widgets.dart'; // Importing user-related widgets
-import 'package:webbcheck/src/shared/widgets/org_widgets.dart'; // Importing organization-related widgets
-import 'package:webbcheck/src/shared/widgets/device_widgets.dart'; // Importing device-related widgets
+import 'package:webbpulse_inventory_management/src/shared/providers/firestore_read_service.dart';
+import 'package:webbpulse_inventory_management/src/shared/providers/org_selector_change_notifier.dart';
+import 'package:webbpulse_inventory_management/src/shared/widgets/user_widgets.dart'; // Importing user-related widgets
+import 'package:webbpulse_inventory_management/src/shared/widgets/org_widgets.dart'; // Importing organization-related widgets
+import 'package:webbpulse_inventory_management/src/shared/widgets/device_widgets.dart'; // Importing device-related widgets
 
 /// OrgDeviceListView displays a list of devices for a selected organization.
 /// It also provides functionality for adding new devices to the organization.
