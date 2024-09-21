@@ -51,6 +51,10 @@ program currently deployed and interactable at webbpulse.com
 - [x]  add csv template download
 - [ ]  sanitize user photo url submissions
 - [x]  limit members abilities to check in devices for other users
+- [x]  add google sign on support
+- [ ]  add apple sign on support
+- [ ]  deploy ios app
+- [ ]  deploy android app
 
 # Not super important
 
