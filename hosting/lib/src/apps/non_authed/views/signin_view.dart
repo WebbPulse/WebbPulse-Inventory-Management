@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+
 import 'package:firebase_ui_auth/firebase_ui_auth.dart'; // Firebase UI for authentication
 import 'package:provider/provider.dart';
+import 'package:webbpulse_inventory_management/src/shared/authentication_provider_list.dart';
 
-import 'package:webbcheck/src/shared/providers/authentication_change_notifier.dart';
-import 'package:webbcheck/src/apps/authed/views/org_selected/device_checkout_view.dart';
+import 'package:webbpulse_inventory_management/src/shared/providers/authentication_change_notifier.dart';
+import 'package:webbpulse_inventory_management/src/apps/authed/views/org_selected/device_checkout_view.dart';
 
 /// SignInView is the screen where users can sign in using Firebase UI.
 class SignInView extends StatelessWidget {
@@ -23,9 +25,7 @@ class SignInView extends StatelessWidget {
         child: Consumer<AuthenticationChangeNotifier>(
           builder: (context, authProvider, child) => SignInScreen(
             // Define the authentication providers (e.g., email-based authentication)
-            providers: [
-              EmailAuthProvider(), // Enable email/password sign-in
-            ],
+            providers: authenticationProviderList,
             // Define actions based on authentication state changes
             actions: [
               AuthStateChangeAction<SignedIn>((context, state) {

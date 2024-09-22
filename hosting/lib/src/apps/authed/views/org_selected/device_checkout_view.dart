@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:webbcheck/src/shared/providers/firestore_read_service.dart';
-import 'package:webbcheck/src/shared/providers/org_selector_change_notifier.dart';
-import 'package:webbcheck/src/shared/providers/authentication_change_notifier.dart';
-import 'package:webbcheck/src/shared/providers/device_checkout_service.dart';
-import 'package:webbcheck/src/shared/widgets/user_widgets.dart'; // Custom user widgets
-import 'package:webbcheck/src/shared/widgets/org_widgets.dart'; // Custom organization widgets
-import 'package:webbcheck/src/shared/widgets/device_widgets.dart'; // Custom device-related widgets
+import 'package:webbpulse_inventory_management/src/shared/providers/firestore_read_service.dart';
+import 'package:webbpulse_inventory_management/src/shared/providers/org_selector_change_notifier.dart';
+import 'package:webbpulse_inventory_management/src/shared/providers/authentication_change_notifier.dart';
+import 'package:webbpulse_inventory_management/src/shared/providers/device_checkout_service.dart';
+import 'package:webbpulse_inventory_management/src/shared/widgets/user_widgets.dart'; // Custom user widgets
+import 'package:webbpulse_inventory_management/src/shared/widgets/org_widgets.dart'; // Custom organization widgets
+import 'package:webbpulse_inventory_management/src/shared/widgets/device_widgets.dart'; // Custom device-related widgets
 
 /// DeviceCheckoutView is the main view for handling device checkouts and check-ins
 class DeviceCheckoutView extends StatelessWidget {

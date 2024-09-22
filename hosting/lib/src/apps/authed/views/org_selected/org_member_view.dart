@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
-import 'package:webbcheck/src/shared/providers/authentication_change_notifier.dart';
-import 'package:webbcheck/src/shared/providers/firestore_read_service.dart';
-import 'package:webbcheck/src/shared/providers/org_member_selector_change_notifier.dart';
-import 'package:webbcheck/src/shared/providers/org_selector_change_notifier.dart';
-import 'package:webbcheck/src/shared/widgets/widgets.dart';
-import 'package:webbcheck/src/shared/widgets/device_widgets.dart';
-import 'package:webbcheck/src/shared/widgets/user_widgets.dart';
+import 'package:webbpulse_inventory_management/src/shared/providers/authentication_change_notifier.dart';
+import 'package:webbpulse_inventory_management/src/shared/providers/firestore_read_service.dart';
+import 'package:webbpulse_inventory_management/src/shared/providers/org_member_selector_change_notifier.dart';
+import 'package:webbpulse_inventory_management/src/shared/providers/org_selector_change_notifier.dart';
+import 'package:webbpulse_inventory_management/src/shared/widgets/widgets.dart';
+import 'package:webbpulse_inventory_management/src/shared/widgets/device_widgets.dart';
+import 'package:webbpulse_inventory_management/src/shared/widgets/user_widgets.dart';
 
 /// OrgMemberView is the screen where an admin can manage a selected organization member.
 /// It displays the member's profile, roles, and their checked-out devices.
