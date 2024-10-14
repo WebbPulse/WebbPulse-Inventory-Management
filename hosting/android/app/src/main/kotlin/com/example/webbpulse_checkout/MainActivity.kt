@@ -1,4 +1,4 @@
-package com.webbpulse.inventory
+package com.webbpulse.inventory.android
 
 import io.flutter.embedding.android.FlutterActivity
 
