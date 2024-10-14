@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    package="com.webbpulse.inventory"
+    package="com.webbpulse.inventory.android"
     <application
         android:label="webbpulse_inventory_management"
         android:name="${applicationName}"

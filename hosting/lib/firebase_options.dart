@@ -70,7 +70,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '1096617861007',
     projectId: 'webbpulse-inventory-management',
     storageBucket: 'webbpulse-inventory-management.appspot.com',
-    iosBundleId: 'com.webbpulse.inventory',
+    iosBundleId: 'com.webbpulse.inventory.ios',
   );
 
 }
