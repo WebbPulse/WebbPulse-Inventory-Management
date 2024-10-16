@@ -48,17 +48,17 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions web = FirebaseOptions(
     apiKey: 'AIzaSyCfuCeuVvzNACjrdAcU9Du2alTChRPOwyE',
-    appId: '1:1096617861007:web:10521cc4508cf0659a75fa',
+    appId: '1:1096617861007:web:5d45f0a0d485927b9a75fa',
     messagingSenderId: '1096617861007',
     projectId: 'webbpulse-inventory-management',
     authDomain: 'webbpulse-inventory-management.firebaseapp.com',
     storageBucket: 'webbpulse-inventory-management.appspot.com',
-    measurementId: 'G-RY9KW16EHX',
+    measurementId: 'G-PXLKDFZPE6',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyA_p2XpMAoJJqiTM3PVUFKPKbITun6-XCI',
-    appId: '1:1096617861007:android:8292932c105fdee29a75fa',
+    appId: '1:1096617861007:android:e2ec1a741fb648169a75fa',
     messagingSenderId: '1096617861007',
     projectId: 'webbpulse-inventory-management',
     storageBucket: 'webbpulse-inventory-management.appspot.com',
@@ -66,10 +66,12 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyDkI9tUc19_jKU2ldIyxrPocUNiq0meBIk',
-    appId: '1:1096617861007:ios:e3021b69f66cd37d9a75fa',
+    appId: '1:1096617861007:ios:50c7a1ceaf0158b69a75fa',
     messagingSenderId: '1096617861007',
     projectId: 'webbpulse-inventory-management',
     storageBucket: 'webbpulse-inventory-management.appspot.com',
+    androidClientId: '1096617861007-1recvc2ffj1l9c2rnq46ficqjofl8oej.apps.googleusercontent.com',
+    iosClientId: '1096617861007-ftj0jm8nd2qro77q0v9blc49bbel52en.apps.googleusercontent.com',
     iosBundleId: 'com.webbpulse.inventory.ios',
   );
 
