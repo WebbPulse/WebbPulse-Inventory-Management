@@ -1,5 +1,5 @@
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
-import 'package:firebase_ui_oauth_google/firebase_ui_oauth_google.dart'; // Google OAuth provider
+// Google OAuth provider
 // Apple OAuth provider
 
 List<AuthProvider> authenticationProviderList = [
