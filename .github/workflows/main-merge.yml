@@ -34,7 +34,7 @@ jobs:
           flutter pub get
           cd ..
 
-      - name: Deploy Functions and Hosting
+      - name: Deploy Functions and Hosting and Firestore Rules
         env:
 
           FIREBASE_APPLICATION_CREDENTIALS: ${{ secrets.FIREBASE_APPLICATION_CREDENTIALS }}
