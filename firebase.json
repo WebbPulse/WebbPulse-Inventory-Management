@@ -34,7 +34,7 @@
       "android": {
         "default": {
           "projectId": "webbpulse-inventory-management",
-          "appId": "1:1096617861007:android:4dde651b745ab57d9a75fa",
+          "appId": "1:1096617861007:android:f3b83c36fe32290e9a75fa",
           "fileOutput": "android/app/google-services.json"
         }
       },
@@ -42,8 +42,8 @@
         "lib/firebase_options.dart": {
           "projectId": "webbpulse-inventory-management",
           "configurations": {
-            "android": "1:1096617861007:android:4dde651b745ab57d9a75fa",
-            "ios": "1:1096617861007:ios:f146be2b9c3b3d049a75fa",
+            "android": "1:1096617861007:android:f3b83c36fe32290e9a75fa",
+            "ios": "1:1096617861007:ios:94be2186aa341d329a75fa",
             "web": "1:1096617861007:web:b7d00eb71b0e024a9a75fa"
           }
         }

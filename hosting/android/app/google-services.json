@@ -7,18 +7,18 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1096617861007:android:8292932c105fdee29a75fa",
+        "mobilesdk_app_id": "1:1096617861007:android:e2ec1a741fb648169a75fa",
         "android_client_info": {
           "package_name": "com.webbpulse.inventory.android"
         }
       },
       "oauth_client": [
         {
-          "client_id": "1096617861007-1recvc2ffj1l9c2rnq46ficqjofl8oej.apps.googleusercontent.com",
+          "client_id": "1096617861007-ua38bd06arq2fpa4g62ff55k42bl87ii.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.webbpulse.inventory.android",
-            "certificate_hash": "cc8d789d463ff09c2940b206fab6ce8270f2b84c"
+            "certificate_hash": "5894815973622949dd356bcda8f7896d7bdff749"
           }
         },
         {
@@ -42,7 +42,7 @@
               "client_id": "1096617861007-blbcldik7dlphvm1rh0p7r6p5td1hehr.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.webbpulse.inventory.android"
+                "bundle_id": "com.webbpulse.inventory.ios"
               }
             }
           ]
