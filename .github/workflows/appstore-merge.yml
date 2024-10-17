@@ -25,7 +25,6 @@ jobs:
         run: |
           cd hosting 
           flutter pub get
-          cd ..
         
         
     #setup java for android build
@@ -38,14 +37,16 @@ jobs:
     #Setup Keystore for signing
       - name: Decode Keystore
         run: |
-          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > hosting/android/keystore.jks
+          cd hosting
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/keystore.jks
           
       - name: Create key.properties
         run: |
-          echo "storePassword=${{ secrets.KEYSTORE_PASSWORD }}" > hosting/android/key.properties
-          echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> hosting/android/key.properties
-          echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> hosting/android/key.properties
-          echo "keystore.jks" >> hosting/android/key.properties
+          cd hosting
+          echo "storePassword=${{ secrets.KEYSTORE_PASSWORD }}" > android/key.properties
+          echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> android/key.properties
+          echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> android/key.properties
+          echo "storeFile=keystore.jks" >> android/key.properties
 
       - name: Deploy Android App
         run: |
