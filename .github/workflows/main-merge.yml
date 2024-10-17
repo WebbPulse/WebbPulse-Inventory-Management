@@ -9,12 +9,19 @@ jobs:
   deploy:
     name: Build and Deploy
     runs-on: macos-latest
+    env: 
+        FIREBASE_APPLICATION_CREDENTIALS: ${{ secrets.FIREBASE_APPLICATION_CREDENTIALS }}
+        GOOGLE_APPLICATION_CREDENTIALS: gcp_key.json
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@main
+      
+      - name: Set up gcp key
+        run: |
+          echo "$FIREBASE_APPLICATION_CREDENTIALS" > gcp_key.json
 
       - name: Set up python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@main
         with:
           python-version: '3.12' 
       
@@ -30,19 +37,13 @@ jobs:
         run: |
           cd hosting 
           flutter pub get
-          cd ..
       
       - name: Deploy Web Hosting, Functions, and Firestore Rules
-        env:
-
-          FIREBASE_APPLICATION_CREDENTIALS: ${{ secrets.FIREBASE_APPLICATION_CREDENTIALS }}
         run: |
           python -m venv ./functions/venv 
           source ./functions/venv/bin/activate
           pip install -r ./functions/requirements.txt
           deactivate
-          echo "$FIREBASE_APPLICATION_CREDENTIALS" > ./functions/gcp_key.json
-          export GOOGLE_APPLICATION_CREDENTIALS=./functions/gcp_key.json
           firebase experiments:enable webframeworks
           firebase deploy --only hosting,functions,firestore:rules
         
