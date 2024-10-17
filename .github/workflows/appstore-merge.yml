@@ -54,5 +54,5 @@ jobs:
 
       - name: Status Check
         run: |
-          echo "Built succesfully
+          echo "Built succesfully!"
         
