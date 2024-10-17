@@ -1,0 +1,58 @@
+name: Deploy full project
+
+on:
+  push:
+    branches:
+      - appstore-deploy-testing
+
+jobs:
+  deploy:
+    name: Build and Deploy
+    runs-on: macos-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@main
+        
+        
+    #Setup flutter
+      - name: Set up Flutter
+        uses: subosito/flutter-action@main
+        with:
+          flutter-version: '3.24.3'
+          channel: 'stable'
+      
+      - name: Install flutter dependencies
+        run: |
+          cd hosting 
+          flutter pub get
+          cd ..
+        
+        
+    #setup java for android build
+      - name: Set Up Java
+        uses: actions/setup-java@v3.12.0
+        with:
+          distribution: 'oracle'
+          java-version: '17'
+
+    #Setup Keystore for signing
+      - name: Decode Keystore
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/keystore.jks
+          
+      - name: Create key.properties
+        run: |
+          echo "storePassword=${{ secrets.KEYSTORE_PASSWORD }}" > android/key.properties
+          echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> android/key.properties
+          echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> android/key.properties
+          echo "storeFile=keystore.jks" >> android/key.properties
+
+      - name: Deploy Android App
+        run: |
+            cd hosting
+            flutter build appbundle --release
+
+      - name: Status Check
+        run: |
+          echo "Built succesfully
+        
