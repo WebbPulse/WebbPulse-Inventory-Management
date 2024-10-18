@@ -35,7 +35,7 @@ jobs:
       
       - name: Install flutter dependencies
         run: |
-          cd hosting 
+          cd flutter 
           flutter pub get
       
       - name: Deploy Web Hosting, Functions, and Firestore Rules
