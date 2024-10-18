@@ -70,5 +70,5 @@ jobs:
           packageName: com.webbpulse.inventory.android
           releaseFiles: flutter/build/app/outputs/bundle/release/app-release.aab
           releaseName: cicd testing
-          track: qa
+          track: internal
           status: completed
