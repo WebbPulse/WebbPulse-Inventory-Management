@@ -70,7 +70,8 @@ jobs:
             -   name: Build IOS App
                 run: |
                     cd flutter
-                    flutter build ipa --build-number ${{ github.run_number }} 
+                    xcodebuild -workspace ios/Runner.xcworkspace -scheme Runner -sdk iphoneos -configuration Release archive -archivePath ../build/ios/archive/Runner.xcarchive
+                    xcodebuild -exportArchive -archivePath build/ios/archive/Runner.xcarchive-exportOptionsPlist ios/exportOptions.plist -exportPath ios/ipa
 
             -   name: verify the build
                 run: |
