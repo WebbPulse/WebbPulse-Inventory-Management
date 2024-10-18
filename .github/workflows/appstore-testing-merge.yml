@@ -3,7 +3,7 @@ name: Deploy on merge to appstore testing
 on:
   push:
     branches:
-      - main
+      - appstore-deploy-testing
 
 jobs:
     build_and_deploy_testflight_ios_app:
