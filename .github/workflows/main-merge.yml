@@ -56,8 +56,16 @@ jobs:
           firebase deploy --only hosting,functions,firestore:rules
 
 
-  build_and_deploy_android_app:
-    name: Build and Deploy Android App
+
+
+
+
+
+
+
+
+  build_and_deploy_internal_android_app:
+    name: Build and Deploy Internal Android App
     runs-on: macos-latest
     env:
         JAVA_VERSION: 17
