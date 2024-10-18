@@ -70,7 +70,7 @@ jobs:
             -   name: Build IOS App
                 run: |
                     cd flutter
-                    flutter build IPA --build-number ${{ github.run_number }} 
+                    flutter build ipa --build-number ${{ github.run_number }} 
 
             -   name: verify the build
                 run: |
