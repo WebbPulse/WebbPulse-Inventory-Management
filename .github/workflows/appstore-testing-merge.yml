@@ -41,7 +41,7 @@ jobs:
             
             -   name: Install CocoaPods dependencies
                 run: |
-                    cd ios
+                    cd flutter/ios
                     pod install
                     cd ..
             
