@@ -1,0 +1,69 @@
+name: Deploy full project
+
+on:
+  push:
+    branches:
+      - appstore-deploy-testing
+
+jobs:
+  build:
+    name: Build and Deploy
+    runs-on: macos-latest
+    env:
+        JAVA_VERSION: 17
+        FLUTTER_VERSION: 3.24.3
+        AAB_PATH: flutter/build/app/outputs/bundle/release/app-release.aab
+        FIREBASE_APPLICATION_CREDENTIALS: ${{ secrets.FIREBASE_APPLICATION_CREDENTIALS }}
+        GOOGLE_APPLICATION_CREDENTIALS: gcp_key.json
+    
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@main
+        
+      - name: Set up gcp key
+        run: |
+          echo "$FIREBASE_APPLICATION_CREDENTIALS" > gcp_key.json
+
+    #Setup flutter
+      - name: Set up Flutter
+        uses: subosito/flutter-action@main
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: 'stable'
+      
+      - name: Install flutter dependencies
+        run: |
+          cd flutter 
+          flutter pub get
+        
+        
+    #setup java for android build
+      - name: Set Up Java
+        uses: actions/setup-java@main
+        with:
+          distribution: 'oracle'
+          java-version: ${{ env.JAVA_VERSION }}
+
+    #Setup Keystore for signing
+      - name: Decode Keystore
+        run: |
+          cd flutter
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/keystore.jks
+          
+      - name: Create key.properties
+        run: |
+          cd flutter
+          echo "storePassword=${{ secrets.KEYSTORE_PASSWORD }}" > android/key.properties
+          echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> android/key.properties
+          echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> android/key.properties
+          echo "storeFile=keystore.jks" >> android/key.properties
+
+      - name: Deploy Android App
+        run: |
+            cd flutter
+            flutter build appbundle --release
+
+      - name: Status Check
+        run: |
+          echo "Built succesfully"
+        

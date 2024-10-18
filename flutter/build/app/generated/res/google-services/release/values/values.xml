@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="default_web_client_id" translatable="false">1096617861007-ek22rdfust1c288m6cl2fq8649i7albp.apps.googleusercontent.com</string>
+    <string name="gcm_defaultSenderId" translatable="false">1096617861007</string>
+    <string name="google_api_key" translatable="false">AIzaSyA_p2XpMAoJJqiTM3PVUFKPKbITun6-XCI</string>
+    <string name="google_app_id" translatable="false">1:1096617861007:android:e2ec1a741fb648169a75fa</string>
+    <string name="google_crash_reporting_api_key" translatable="false">AIzaSyA_p2XpMAoJJqiTM3PVUFKPKbITun6-XCI</string>
+    <string name="google_storage_bucket" translatable="false">webbpulse-inventory-management.appspot.com</string>
+    <string name="project_id" translatable="false">webbpulse-inventory-management</string>
+</resources>
