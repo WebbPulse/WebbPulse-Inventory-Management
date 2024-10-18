@@ -72,4 +72,3 @@ jobs:
           releaseName: cicd testing
           track: qa
           status: completed
-        
