@@ -1,10 +1,10 @@
 # The Firebase Admin SDK to access Cloud Firestore.
 from firebase_admin import initialize_app, credentials
-import os
 
 
 # Read the service account key from the file
-cred = credentials.Certificate(os.environ.get('FIREBASE_APPLICATION_CREDENTIALS'))
+cred = credentials.Certificate('../gcp_key.json')
+    
 app = initialize_app(cred)
 
 #org admin callable functions
