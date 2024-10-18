@@ -17,7 +17,7 @@
     }
   ],
   "hosting": {
-    "source": "hosting",
+    "source": "flutter",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "frameworksBackend": { "region": "us-central1" }
   },
