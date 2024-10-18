@@ -11,7 +11,7 @@ jobs:
     runs-on: macos-latest
     env: 
         FIREBASE_APPLICATION_CREDENTIALS: ${{ secrets.FIREBASE_APPLICATION_CREDENTIALS }}
-        GOOGLE_APPLICATION_CREDENTIALS: gcp_key.json
+        GOOGLE_APPLICATION_CREDENTIALS: ./gcp_key.json
     steps:
       - name: Checkout Repo
         uses: actions/checkout@main
