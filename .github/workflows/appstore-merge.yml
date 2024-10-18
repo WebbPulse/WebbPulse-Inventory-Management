@@ -61,9 +61,15 @@ jobs:
       - name: Deploy Android App
         run: |
             cd flutter
-            flutter build appbundle --release
+            flutter build appbundle --build-number ${{ github.run_number }}
 
-      - name: Status Check
-        run: |
-          echo "Built succesfully"
+      - name: Release app to internal track
+        uses: r0adkll/upload-google-play@master
+        with:
+          serviceAccountJsonPlainText: ${{ env.FIREBASE_APPLICATION_CREDENTIALS }}
+          packageName: com.webbpulse.inventory.android
+          releaseFiles: flutter/build/app/outputs/bundle/release/app-release.aab
+          releaseName: cicd testing
+          track: qa
+          status: completed
         
