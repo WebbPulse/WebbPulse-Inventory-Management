@@ -16,9 +16,10 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@main
       
-      - name: Set up gcp key
+      - name: Set up gcp key and do so again in the functions folder for static code analysis in containers
         run: |
-          echo "$FIREBASE_APPLICATION_CREDENTIALS" > ./gcp_key.json
+          echo "$FIREBASE_APPLICATION_CREDENTIALS" > gcp_key.json
+          echo "$FIREBASE_APPLICATION_CREDENTIALS" > functions/gcp_key.json
 
       - name: Set up python
         uses: actions/setup-python@main

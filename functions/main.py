@@ -3,7 +3,7 @@ from firebase_admin import initialize_app, credentials
 
 
 # Read the service account key from the file
-cred = credentials.Certificate('../gcp_key.json')
+cred = credentials.Certificate('./gcp_key.json')
     
 app = initialize_app(cred)
 
