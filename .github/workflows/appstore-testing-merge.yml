@@ -39,17 +39,13 @@ jobs:
                     restore-keys: |
                         ${{ runner.os }}-pods-
             
-            -   name: Install CocoaPods dependencies
-                run: |
-                    cd flutter/ios
-                    pod install
-                    cd ..
-            
             
             -   name: Install flutter dependencies
                 run: |
                     cd flutter 
                     flutter pub get
+                    cd ios
+                    pod install
             
             -   name: Install the Apple certificate and provisioning profile
                 env:
