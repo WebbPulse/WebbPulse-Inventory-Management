@@ -4,11 +4,7 @@ import os
 
 
 # Read the service account key from the file
-if os.environ.get('GOOGLE_APPLICATION_CREDENTIALS'):
-    cred = credentials.Certificate(os.environ.get('GOOGLE_APPLICATION_CREDENTIALS'))
-else:
-    cred = credentials.Certificate('../gcp_key.json')
-    
+cred = credentials.Certificate(os.environ.get('FIREBASE_APPLICATION_CREDENTIALS'))
 app = initialize_app(cred)
 
 #org admin callable functions
