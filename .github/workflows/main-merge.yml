@@ -155,7 +155,8 @@ jobs:
               run: |
                 cd flutter 
                 flutter pub get
-                flutter build ios --no-codesign
+                cd ios
+                pod install
             
             - name: Install the Apple certificate and provisioning profile
               env:
