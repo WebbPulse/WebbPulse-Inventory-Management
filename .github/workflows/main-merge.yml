@@ -130,13 +130,6 @@ jobs:
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: "stable"
-      - name: Cache CocoaPods
-        uses: actions/cache@v3
-        with:
-          path: flutter/ios/Pods
-          key: ${{ runner.os }}-pods-${{ hashFiles('ios/Podfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-pods-
 
       #Install Flutter dependencies
       - name: Install flutter dependencies
