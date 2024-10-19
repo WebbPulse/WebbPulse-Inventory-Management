@@ -17,6 +17,15 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@main
 
+      - name: Set Build Number
+        run: |
+          cd flutter
+          version_line=$(grep '^version: ' pubspec.yaml | cut -d '+' -f 1)
+          new_build_number=$(date +%Y%m%d%H%M%S)
+          new_version="${version_line}+${new_build_number}"
+          sed -i '' "s/^version: .*/version: $new_version/" pubspec.yaml
+          echo "New version: $new_version"
+
         #Set up gcp keys
       - name: Set up gcp keys
         run: |
@@ -52,7 +61,7 @@ jobs:
           deactivate
           firebase experiments:enable webframeworks
           firebase deploy --only hosting,functions,firestore:rules
-  build_and_deploy_internal_android_app:
+  build_and_deploy_android_app_internal:
     name: Build and Deploy Internal Android App
     runs-on: ubuntu-latest
     env:
@@ -65,6 +74,15 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@main
+
+      - name: Set Build Number
+        run: |
+          cd flutter
+          version_line=$(grep '^version: ' pubspec.yaml | cut -d '+' -f 1)
+          new_build_number=$(date +%Y%m%d%H%M%S)
+          new_version="${version_line}+${new_build_number}"
+          sed -i '' "s/^version: .*/version: $new_version/" pubspec.yaml
+          echo "New version: $new_version"
 
       - name: Set up gcp key
         run: |
@@ -114,7 +132,7 @@ jobs:
           track: internal
           status: draft # Set to 'completed' to release the app to the internal track, probably not going to work until the app is no longer considered a draft
 
-  build_and_deploy_testflight_ios_app:
+  build_and_deploy_ios_testflight_app:
     name: Build and Deploy Testflight IOS App
     runs-on: macos-latest
     env:
