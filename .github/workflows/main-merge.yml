@@ -21,7 +21,7 @@ jobs:
         run: |
           cd flutter
           # Extract the current version from pubspec.yaml without any existing build number
-          version_line=$(grep '^version: ' pubspec.yaml | cut -d '+' -f 1)
+          version_line=$(grep '^version: ' pubspec.yaml | cut -d ' ' -f 2)
           
           # Use the GitHub Actions run number as the build number
           new_build_number="${{ github.run_number }}"
@@ -38,6 +38,7 @@ jobs:
           
           # Output the new version for logging purposes
           echo "New version: $new_version"
+      
 
         #Set up gcp keys
       - name: Set up gcp keys
@@ -92,7 +93,7 @@ jobs:
         run: |
           cd flutter
           # Extract the current version from pubspec.yaml without any existing build number
-          version_line=$(grep '^version: ' pubspec.yaml | cut -d '+' -f 1)
+          version_line=$(grep '^version: ' pubspec.yaml | cut -d ' ' -f 2)
           
           # Use the GitHub Actions run number as the build number
           new_build_number="${{ github.run_number }}"
@@ -109,6 +110,7 @@ jobs:
           
           # Output the new version for logging purposes
           echo "New version: $new_version"
+      
 
       - name: Set up gcp key
         run: |
@@ -172,7 +174,7 @@ jobs:
         run: |
           cd flutter
           # Extract the current version from pubspec.yaml without any existing build number
-          version_line=$(grep '^version: ' pubspec.yaml | cut -d '+' -f 1)
+          version_line=$(grep '^version: ' pubspec.yaml | cut -d ' ' -f 2)
           
           # Use the GitHub Actions run number as the build number
           new_build_number="${{ github.run_number }}"
@@ -189,6 +191,7 @@ jobs:
           
           # Output the new version for logging purposes
           echo "New version: $new_version"
+      
 
       #Setup flutter
       - name: Set up Flutter
