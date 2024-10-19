@@ -83,4 +83,5 @@ jobs:
                     APPLE_ID: ${{ secrets.APPLE_ID }}
                     APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
                 run: |
-                    xcrun altool --upload-app -f path/to/your_app.ipa -t ios -u "$APPLE_ID" -p "$APPLE_APP_PASSWORD"
+                    cd flutter
+                    xcrun altool --upload-app -f ipa/webbpulse_inventory_management.ipa -t ios -u "$APPLE_ID" -p "$APPLE_APP_PASSWORD"
