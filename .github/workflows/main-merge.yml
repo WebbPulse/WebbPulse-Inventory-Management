@@ -124,13 +124,22 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@main
 
+      - name: Set Build Number
+        run: |
+          cd flutter
+          version_line=$(grep '^version: ' pubspec.yaml | cut -d '+' -f 1)
+          new_build_number=$(date +%Y%m%d%H%M%S)
+          new_version="${version_line}+${new_build_number}"
+          sed -i '' "s/^version: .*/version: $new_version/" pubspec.yaml
+          echo "New version: $new_version"
+
       #Setup flutter
       - name: Set up Flutter
         uses: subosito/flutter-action@main
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: "stable"
-
+      
       #Install Flutter dependencies
       - name: Install flutter dependencies
         run: |
