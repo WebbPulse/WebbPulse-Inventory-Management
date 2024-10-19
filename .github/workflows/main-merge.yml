@@ -8,7 +8,7 @@ on:
 jobs:
   build_and_deploy_backend_and_web:
     name: Build and Deploy Backend and Web
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     env:
       FIREBASE_APPLICATION_CREDENTIALS: ${{ secrets.FIREBASE_APPLICATION_CREDENTIALS }}
       GOOGLE_APPLICATION_CREDENTIALS: ./gcp_key.json
@@ -54,7 +54,7 @@ jobs:
           firebase deploy --only hosting,functions,firestore:rules
   build_and_deploy_internal_android_app:
     name: Build and Deploy Internal Android App
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     env:
       JAVA_VERSION: 17
       FLUTTER_VERSION: 3.24.3
@@ -103,7 +103,7 @@ jobs:
       - name: Build Android App
         run: |
           cd flutter
-          flutter build appbundle --build-number ${{ github.run_number }}
+          flutter build appbundle
       - name: Release app to internal track
         uses: r0adkll/upload-google-play@master
         with:
@@ -130,13 +130,6 @@ jobs:
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: "stable"
-      - name: Cache CocoaPods
-        uses: actions/cache@v3
-        with:
-          path: flutter/ios/Pods
-          key: ${{ runner.os }}-pods-${{ hashFiles('ios/Podfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-pods-
 
       #Install Flutter dependencies
       - name: Install flutter dependencies
