@@ -23,7 +23,14 @@ jobs:
           version_line=$(grep '^version: ' pubspec.yaml | cut -d '+' -f 1)
           new_build_number=$(date +%Y%m%d%H%M%S)
           new_version="${version_line}+${new_build_number}"
-          sed -i '' "s/^version: .*/version: $new_version/" pubspec.yaml
+      
+          # Use different sed command depending on the OS
+          if [[ "$RUNNER_OS" == "macOS" ]]; then
+            sed -i '' "s/^version: .*/version: $new_version/" pubspec.yaml
+          else
+            sed -i "s/^version: .*/version: $new_version/" pubspec.yaml
+          fi
+      
           echo "New version: $new_version"
 
         #Set up gcp keys
@@ -81,7 +88,14 @@ jobs:
           version_line=$(grep '^version: ' pubspec.yaml | cut -d '+' -f 1)
           new_build_number=$(date +%Y%m%d%H%M%S)
           new_version="${version_line}+${new_build_number}"
-          sed -i '' "s/^version: .*/version: $new_version/" pubspec.yaml
+      
+          # Use different sed command depending on the OS
+          if [[ "$RUNNER_OS" == "macOS" ]]; then
+            sed -i '' "s/^version: .*/version: $new_version/" pubspec.yaml
+          else
+            sed -i "s/^version: .*/version: $new_version/" pubspec.yaml
+          fi
+      
           echo "New version: $new_version"
 
       - name: Set up gcp key
@@ -148,7 +162,14 @@ jobs:
           version_line=$(grep '^version: ' pubspec.yaml | cut -d '+' -f 1)
           new_build_number=$(date +%Y%m%d%H%M%S)
           new_version="${version_line}+${new_build_number}"
-          sed -i '' "s/^version: .*/version: $new_version/" pubspec.yaml
+      
+          # Use different sed command depending on the OS
+          if [[ "$RUNNER_OS" == "macOS" ]]; then
+            sed -i '' "s/^version: .*/version: $new_version/" pubspec.yaml
+          else
+            sed -i "s/^version: .*/version: $new_version/" pubspec.yaml
+          fi
+      
           echo "New version: $new_version"
 
       #Setup flutter
