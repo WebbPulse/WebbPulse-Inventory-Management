@@ -156,7 +156,7 @@ jobs:
           serviceAccountJsonPlainText: ${{ env.FIREBASE_APPLICATION_CREDENTIALS }}
           packageName: com.webbpulse.inventory.android
           releaseFiles: flutter/build/app/outputs/bundle/release/app-release.aab
-          releaseName: Testing Build ${{ github.run_number }}
+          releaseName: Build ${{ github.run_number }}
           track: internal
           status: draft # Set to 'completed' to release the app to the internal track, probably not going to work until the app is no longer considered a draft
 

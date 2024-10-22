@@ -212,7 +212,7 @@ class DeviceCard extends StatelessWidget {
                         snapshot.data!.data() == null) {
                       // If no member data is available, show a basic device card layout
                       return LayoutBuilder(builder: (context, constraints) {
-                        if (constraints.maxWidth < 400) {
+                        if (constraints.maxWidth < 600) {
                           return CustomCard(
                             theme: theme,
                             customCardLeading: null,
@@ -317,7 +317,7 @@ class DeviceCard extends StatelessWidget {
 
                     // Display the full device card with member and check-out details
                     return LayoutBuilder(builder: (context, constraints) {
-                      if (constraints.maxWidth < 400) {
+                      if (constraints.maxWidth < 600) {
                         return CustomCard(
                           theme: theme,
                           customCardLeading: null,
