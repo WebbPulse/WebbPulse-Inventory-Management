@@ -19,6 +19,13 @@ class AuthenticationChangeNotifier extends ChangeNotifier {
     /// Notify listeners of changes in the authentication state
   }
 
+   void setUserEmailVerified(bool value) {
+    _userEmailVerified = value;
+    notifyListeners();
+
+    /// Notify listeners of changes in the authentication state
+  }
+
   /// Private field to store the currently logged-in user (or null if no user is logged in)
   User? _user;
 
@@ -30,6 +37,10 @@ class AuthenticationChangeNotifier extends ChangeNotifier {
 
   /// Public getter to check if the user has been logged in before
   bool get userWasLoggedIn => _userWasLoggedIn;
+
+  bool _userEmailVerified = false;
+
+  bool get userEmailVerified => _userEmailVerified;
 
   /// Private field to track if the user is currently logged in
   bool _userLoggedIn = false;
@@ -57,6 +68,9 @@ class AuthenticationChangeNotifier extends ChangeNotifier {
 
         /// Also mark that the user has been logged in previously
         _userWasLoggedIn = true;
+
+        /// Check if the user's email is verified
+        _userEmailVerified = user.emailVerified;
       }
 
       /// If the user is not logged in
