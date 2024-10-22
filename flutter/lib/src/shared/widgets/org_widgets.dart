@@ -62,8 +62,12 @@ class OrgNameAppBar extends StatelessWidget implements PreferredSizeWidget {
             ''; // Get organization name from the document
 
         return AppBar(
-          title: Text(
-              '$orgName $titleSuffix'), // Display the organization name with the title suffix
+          title: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+                '$orgName $titleSuffix'
+                ),
+          ), // Display the organization name with the title suffix
           actions: actions, // Set the AppBar actions
           leading: leading, // Set the leading widget if provided
         );

@@ -26,7 +26,7 @@ class DeviceCheckoutView extends StatelessWidget {
         return Scaffold(
           // AppBar showing the organization's name and "Device Checkout"
           appBar: OrgNameAppBar(
-            titleSuffix: 'Device Checkout',
+            titleSuffix: 'Checkout',
             actions: [
               // Button to open the dialog for adding new devices
               ElevatedButton.icon(
