@@ -18,6 +18,7 @@ import 'package:webbpulse_inventory_management/src/apps/authed/views/org_selecte
 import 'views/org_create_view.dart';
 import 'views/org_selection_view.dart';
 import 'views/verify_email_view.dart';
+import 'views/email_not_verified_view.dart';
 
 import 'package:webbpulse_inventory_management/src/shared/widgets/widgets.dart';
 
@@ -93,10 +94,17 @@ class AuthedApp extends StatelessWidget {
                 // Define route generation logic
                 onGenerateRoute: (RouteSettings routeSettings) {
                   // Redirect to VerifyEmailView if user's email is not verified
-                  if (authProvider.user!.emailVerified == false) {
-                    return MaterialPageRoute<void>(
-                      builder: (context) => const VerifyEmailView(),
-                    );
+                  if (authProvider.userEmailVerified == false) {
+                    if (routeSettings.name == VerifyEmailView.routeName) {
+                      return MaterialPageRoute<void>(
+                        builder: (context) => const VerifyEmailView(),
+                      );
+                    }
+                    else {
+                      return MaterialPageRoute<void>(
+                        builder: (context) => const EmailNotVerifiedView(),
+                      );
+                    }
                   }
 
                   // Define route handling for different views

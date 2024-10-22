@@ -60,7 +60,7 @@ class CreateOrganizationFormState extends State<CreateOrganizationForm> {
         _controller.text; // Get the organization name from the input
     final firebaseFunctions = Provider.of<FirebaseFunctions>(context,
         listen: false); // Access Firebase Functions
-    final firebaseAuth = Provider.of<AuthenticationChangeNotifier>(context,
+    final authenticationChangeNotifier = Provider.of<AuthenticationChangeNotifier>(context,
         listen: false); // Access Firebase Auth
 
     if (orgName.isNotEmpty) {
@@ -74,7 +74,7 @@ class CreateOrganizationFormState extends State<CreateOrganizationForm> {
         });
 
         /// Refresh the user's ID token to get the roles for the newly created organization
-        await firebaseAuth.user!.getIdToken(true);
+        await authenticationChangeNotifier.user!.getIdToken(true);
 
         AsyncContextHelpers.showSnackBarIfMounted(
             context, 'Organization created!'); // Show success message

@@ -72,7 +72,7 @@ class LandingView extends StatelessWidget {
                           CustomCard(
                             theme:
                                 theme, // Pass the theme for consistent styling
-                            customCardLeading: Icon(Icons.login,
+                            customCardLeading: Icon(Icons.person_add,
                                 color: theme.colorScheme
                                     .secondary), // Leading icon for the card
                             customCardTitle: const Text(

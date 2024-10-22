@@ -69,9 +69,19 @@ class DeviceCheckoutView extends StatelessWidget {
                 ),
 
               // Main content (checkout form)
-              const SafeArea(
+              SafeArea(
                 child: SizedBox.expand(
-                  child: CheckoutForm(), // Custom checkout form
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      // check to see if using desktop. If so center the Custom checkout form
+                      if (constraints.maxWidth < 600) {
+                       return CheckoutForm(); 
+                      }
+                      else {
+                        return Center(child: CheckoutForm());
+                      }
+                    }
+                  ), 
                 ),
               ),
             ],
