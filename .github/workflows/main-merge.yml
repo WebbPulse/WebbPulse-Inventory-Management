@@ -204,6 +204,7 @@ jobs:
       - name: Install flutter dependencies
         run: |
           cd flutter 
+          flutter clean
           flutter pub get
           flutter build ios --no-codesign #fake run to fetch dependancies and update xcode configs
       - name: Install the Apple certificate and provisioning profile
