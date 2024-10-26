@@ -9,6 +9,7 @@ import 'package:webbpulse_inventory_management/src/shared/widgets/user_widgets.d
 import 'package:webbpulse_inventory_management/src/shared/widgets/org_widgets.dart'; // Custom organization widgets
 import 'package:webbpulse_inventory_management/src/shared/widgets/device_widgets.dart'; // Custom device-related widgets
 
+
 /// DeviceCheckoutView is the main view for handling device checkouts and check-ins
 class DeviceCheckoutView extends StatelessWidget {
   const DeviceCheckoutView({super.key});
@@ -19,6 +20,7 @@ class DeviceCheckoutView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     ThemeData theme = Theme.of(context); // Get the current theme
+
 
     // OrgDocumentStreamBuilder provides a stream of the organization's document data
     return OrgDocumentStreamBuilder(
@@ -71,7 +73,11 @@ class DeviceCheckoutView extends StatelessWidget {
               // Main content (checkout form)
               SafeArea(
                 child: SizedBox.expand(
-                  child: CheckoutForm(),
+                  child: isIPad vv // replace later
+                    ? const Center(
+                        child: CheckoutForm(),
+                      )
+                    : const CheckoutForm(),
                 ),
               ),
             ],
