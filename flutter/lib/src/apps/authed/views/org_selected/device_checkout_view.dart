@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -52,8 +53,9 @@ class DeviceCheckoutView extends StatelessWidget {
           drawer: const AuthedDrawer(),
           body: LayoutBuilder(
             builder: (context, constraints) {
+              
               // Calculate isIPad based on the width constraints
-              final bool isIPad = Platform.isIOS && constraints.maxWidth >= 600;
+              final bool isIPad = !kIsWeb && Platform.isIOS && constraints.maxWidth >= 600;
     
               return Stack(
                 children: [
