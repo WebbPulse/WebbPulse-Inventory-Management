@@ -5,10 +5,11 @@ import 'package:webbpulse_inventory_management/src/shared/providers/firestore_re
 import 'package:webbpulse_inventory_management/src/shared/providers/org_selector_change_notifier.dart';
 import 'package:webbpulse_inventory_management/src/shared/providers/authentication_change_notifier.dart';
 import 'package:webbpulse_inventory_management/src/shared/providers/device_checkout_service.dart';
+import 'package:webbpulse_inventory_management/src/shared/providers/platform_change_notifier.dart';
 import 'package:webbpulse_inventory_management/src/shared/widgets/user_widgets.dart'; // Custom user widgets
 import 'package:webbpulse_inventory_management/src/shared/widgets/org_widgets.dart'; // Custom organization widgets
 import 'package:webbpulse_inventory_management/src/shared/widgets/device_widgets.dart'; // Custom device-related widgets
-
+import 'dart:io';
 
 /// DeviceCheckoutView is the main view for handling device checkouts and check-ins
 class DeviceCheckoutView extends StatelessWidget {
@@ -20,71 +21,74 @@ class DeviceCheckoutView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     ThemeData theme = Theme.of(context); // Get the current theme
-
+    final bool isIPad =
+        Platform.isIOS && MediaQuery.of(context).size.shortestSide >= 600;
 
     // OrgDocumentStreamBuilder provides a stream of the organization's document data
-    return OrgDocumentStreamBuilder(
-      builder: (context, orgDocument) {
-        return Scaffold(
-          // AppBar showing the organization's name and "Device Checkout"
-          appBar: OrgNameAppBar(
-            titleSuffix: 'Checkout',
-            actions: [
-              // Button to open the dialog for adding new devices
-              ElevatedButton.icon(
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return const AddDeviceAlertDialog(); // Add device dialog
-                    },
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
-                  side: BorderSide(
-                    color: theme.colorScheme.primary.withOpacity(0.5),
-                    width: 1.5,
+    return Consumer<PlatformChangeNotifier>(
+        builder: (context, platformChangeNotifier, child) {
+      return OrgDocumentStreamBuilder(
+        builder: (context, orgDocument) {
+          return Scaffold(
+            // AppBar showing the organization's name and "Device Checkout"
+            appBar: OrgNameAppBar(
+              titleSuffix: 'Checkout',
+              actions: [
+                // Button to open the dialog for adding new devices
+                ElevatedButton.icon(
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return const AddDeviceAlertDialog(); // Add device dialog
+                      },
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor:
+                        theme.colorScheme.surface.withOpacity(0.95),
+                    side: BorderSide(
+                      color: theme.colorScheme.primary.withOpacity(0.5),
+                      width: 1.5,
+                    ),
+                    padding: const EdgeInsets.all(16.0),
                   ),
-                  padding: const EdgeInsets.all(16.0),
-                ),
-                label: const Text('Add New Device'),
-                icon: const Icon(Icons.add),
-              )
-            ],
-          ),
-          drawer:
-              const AuthedDrawer(), // Navigation drawer for authenticated users
+                  label: const Text('Add New Device'),
+                  icon: const Icon(Icons.add),
+                )
+              ],
+            ),
+            drawer:
+                const AuthedDrawer(), // Navigation drawer for authenticated users
 
-          // Body of the view showing background image and main content
-          body: Stack(
-            children: [
-              // Display background image if it exists in the organization document
-              if (orgDocument['orgBackgroundImageURL'] != null &&
-                  orgDocument['orgBackgroundImageURL'] != '')
-                Positioned.fill(
-                  child: Image.network(
-                    orgDocument[
-                        'orgBackgroundImageURL'], // Load background image
-                    fit: BoxFit.cover,
+            // Body of the view showing background image and main content
+            body: Stack(
+              children: [
+                // Display background image if it exists in the organization document
+                if (orgDocument['orgBackgroundImageURL'] != null &&
+                    orgDocument['orgBackgroundImageURL'] != '')
+                  Positioned.fill(
+                    child: Image.network(
+                      orgDocument[
+                          'orgBackgroundImageURL'], // Load background image
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+
+                // Main content (checkout form)
+                SafeArea(
+                  child: SizedBox.expand(
+                    child: isIPad
+                        ? const Center(child: CheckoutForm())
+                        : const CheckoutForm(),
                   ),
                 ),
-
-              // Main content (checkout form)
-              SafeArea(
-                child: SizedBox.expand(
-                  child: isIPad vv // replace later
-                    ? const Center(
-                        child: CheckoutForm(),
-                      )
-                    : const CheckoutForm(),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
+              ],
+            ),
+          );
+        },
+      );
+    });
   }
 }
 
