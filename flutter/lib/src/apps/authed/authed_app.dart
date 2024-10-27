@@ -8,7 +8,6 @@ import 'package:webbpulse_inventory_management/src/shared/providers/org_selector
 import 'package:webbpulse_inventory_management/src/shared/providers/org_member_selector_change_notifier.dart';
 import 'package:webbpulse_inventory_management/src/shared/providers/firestore_read_service.dart';
 import 'package:webbpulse_inventory_management/src/shared/providers/device_checkout_service.dart';
-import 'package:webbpulse_inventory_management/src/shared/providers/platform_change_notifier.dart';
 
 import 'views/profile_settings_view.dart';
 import 'views/org_selected/org_device_list_view.dart';
@@ -50,8 +49,6 @@ class AuthedApp extends StatelessWidget {
         ChangeNotifierProvider<OrgMemberSelectorChangeNotifier>(
             create: (_) =>
                 OrgMemberSelectorChangeNotifier()), // Manages organization member selection
-        ChangeNotifierProvider<PlatformChangeNotifier>(
-            create: (_) => PlatformChangeNotifier()),
         Provider<FirestoreReadService>(
             create: (_) => firestoreService), // Provides Firestore read service
         Provider<FirebaseFunctions>.value(
