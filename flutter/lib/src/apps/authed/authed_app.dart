@@ -99,8 +99,7 @@ class AuthedApp extends StatelessWidget {
                       return MaterialPageRoute<void>(
                         builder: (context) => const VerifyEmailView(),
                       );
-                    }
-                    else {
+                    } else {
                       return MaterialPageRoute<void>(
                         builder: (context) => const EmailNotVerifiedView(),
                       );

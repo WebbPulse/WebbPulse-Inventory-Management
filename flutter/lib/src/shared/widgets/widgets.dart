@@ -98,39 +98,24 @@ class SmallLayoutBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final appBarHeight = Scaffold.of(context).appBarMaxHeight ??
-        0.0; // Get the height of the app bar, if present
-    final topPadding = MediaQuery.of(context)
-        .padding
-        .top; // Get the top padding (e.g., status bar height)
-    final availableHeight = MediaQuery.of(context).size.height -
-        appBarHeight -
-        topPadding; // Calculate available height
-
-    return ConstrainedBox(
-      constraints: BoxConstraints(
-        maxHeight: availableHeight, // Constrain the height to available space
-      ),
-      child: Center(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            double
-                widthFactor; // Factor to control the width based on screen size
-            if (constraints.maxWidth < 600) {
-              widthFactor = 0.95; // 95% width for narrow screens
-            } else if (constraints.maxWidth < 1200) {
-              widthFactor = 0.5; // 50% width for medium screens
-            } else {
-              widthFactor = 0.2; // 20% width for large screens
-            }
-            return SizedBox(
-              width: constraints.maxWidth *
-                  widthFactor, // Adjust width based on screen size
-              child:
-                  childWidget, // Display the child widget with adjusted width
-            );
-          },
-        ),
+    return Center(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          double
+              widthFactor; // Factor to control the width based on screen size
+          if (constraints.maxWidth < 600) {
+            widthFactor = 0.95; // 95% width for narrow screens
+          } else if (constraints.maxWidth < 1200) {
+            widthFactor = 0.5; // 50% width for medium screens
+          } else {
+            widthFactor = 0.2; // 20% width for large screens
+          }
+          return SizedBox(
+            width: constraints.maxWidth *
+                widthFactor, // Adjust width based on screen size
+            child: childWidget, // Display the child widget with adjusted width
+          );
+        },
       ),
     );
   }

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -8,38 +9,36 @@ import 'package:webbpulse_inventory_management/src/shared/providers/device_check
 import 'package:webbpulse_inventory_management/src/shared/widgets/user_widgets.dart'; // Custom user widgets
 import 'package:webbpulse_inventory_management/src/shared/widgets/org_widgets.dart'; // Custom organization widgets
 import 'package:webbpulse_inventory_management/src/shared/widgets/device_widgets.dart'; // Custom device-related widgets
+import 'dart:io';
 
 /// DeviceCheckoutView is the main view for handling device checkouts and check-ins
 class DeviceCheckoutView extends StatelessWidget {
   const DeviceCheckoutView({super.key});
 
-  // Route name for navigation
   static const routeName = '/checkout';
 
   @override
   Widget build(BuildContext context) {
-    ThemeData theme = Theme.of(context); // Get the current theme
+    ThemeData theme = Theme.of(context);
 
-    // OrgDocumentStreamBuilder provides a stream of the organization's document data
     return OrgDocumentStreamBuilder(
       builder: (context, orgDocument) {
         return Scaffold(
-          // AppBar showing the organization's name and "Device Checkout"
           appBar: OrgNameAppBar(
             titleSuffix: 'Checkout',
             actions: [
-              // Button to open the dialog for adding new devices
               ElevatedButton.icon(
                 onPressed: () {
                   showDialog(
                     context: context,
                     builder: (BuildContext context) {
-                      return const AddDeviceAlertDialog(); // Add device dialog
+                      return const AddDeviceAlertDialog();
                     },
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
+                  backgroundColor:
+                      theme.colorScheme.surface.withOpacity(0.95),
                   side: BorderSide(
                     color: theme.colorScheme.primary.withOpacity(0.5),
                     width: 1.5,
@@ -51,36 +50,41 @@ class DeviceCheckoutView extends StatelessWidget {
               )
             ],
           ),
-          drawer:
-              const AuthedDrawer(), // Navigation drawer for authenticated users
-
-          // Body of the view showing background image and main content
-          body: Stack(
-            children: [
-              // Display background image if it exists in the organization document
-              if (orgDocument['orgBackgroundImageURL'] != null &&
-                  orgDocument['orgBackgroundImageURL'] != '')
-                Positioned.fill(
-                  child: Image.network(
-                    orgDocument[
-                        'orgBackgroundImageURL'], // Load background image
-                    fit: BoxFit.cover,
+          drawer: const AuthedDrawer(),
+          body: LayoutBuilder(
+            builder: (context, constraints) {
+              
+              // Calculate isIPad based on the width constraints
+              final bool isIPad = !kIsWeb && Platform.isIOS && constraints.maxWidth >= 600;
+    
+              return Stack(
+                children: [
+                  if (orgDocument['orgBackgroundImageURL'] != null &&
+                      orgDocument['orgBackgroundImageURL'] != '')
+                    Positioned.fill(
+                      child: Image.network(
+                        orgDocument['orgBackgroundImageURL'],
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  SafeArea(
+                    child: SizedBox.expand(
+                      child: isIPad
+                          ? const Center(child: CheckoutForm())
+                          : const CheckoutForm(),
+                    ),
                   ),
-                ),
-
-              // Main content (checkout form)
-              SafeArea(
-                child: SizedBox.expand(
-                  child: CheckoutForm(),
-                ),
-              ),
-            ],
+                ],
+              );
+            },
           ),
         );
       },
     );
   }
 }
+
+
 
 /// CheckoutForm handles the form input and logic for device checkout and check-in
 class CheckoutForm extends StatefulWidget {

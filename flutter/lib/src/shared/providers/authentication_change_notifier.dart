@@ -28,23 +28,19 @@ class AuthenticationChangeNotifier extends ChangeNotifier {
 
   /// Private field to store the currently logged-in user (or null if no user is logged in)
   User? _user;
-
   /// Public getter to access the current user
   User? get user => _user;
 
   /// Private field to track if the user has been logged in previously
   bool _userWasLoggedIn = false;
-
   /// Public getter to check if the user has been logged in before
   bool get userWasLoggedIn => _userWasLoggedIn;
 
   bool _userEmailVerified = false;
-
   bool get userEmailVerified => _userEmailVerified;
 
   /// Private field to track if the user is currently logged in
   bool _userLoggedIn = false;
-
   /// Public getter to check if the user is currently logged in
   bool get userLoggedIn => _userLoggedIn;
 
