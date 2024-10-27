@@ -67,22 +67,24 @@ class DeviceList extends StatelessWidget {
 
                   // Display the filtered devices
                   return filteredDevices.isNotEmpty
-                      ? SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.95,
-                          child: ListView.builder(
-                            physics: const BouncingScrollPhysics(),
-                            itemCount: filteredDevices.length,
-                            itemBuilder: (context, index) {
-                              Map<String, dynamic> deviceData =
-                                  filteredDevices[index].data()
-                                      as Map<String, dynamic>;
+                      ? LayoutBuilder(builder: (context, constraints) {
+                          return SizedBox(
+                            width: constraints.maxWidth * 0.95,
+                            child: ListView.builder(
+                              physics: const BouncingScrollPhysics(),
+                              itemCount: filteredDevices.length,
+                              itemBuilder: (context, index) {
+                                Map<String, dynamic> deviceData =
+                                    filteredDevices[index].data()
+                                        as Map<String, dynamic>;
 
-                              return DeviceCard(
-                                deviceData: deviceData,
-                              );
-                            },
-                          ),
-                        )
+                                return DeviceCard(
+                                  deviceData: deviceData,
+                                );
+                              },
+                            ),
+                          );
+                        })
                       : const Center(child: Text('No devices found'));
                 },
               ),

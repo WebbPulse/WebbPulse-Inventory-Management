@@ -29,84 +29,85 @@ class LandingView extends StatelessWidget {
           ),
           // Centered content with constrained size
           Center(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(context)
-                    .size
-                    .height, // Constrain the height to screen size
-              ),
-              child: Center(
-                // SmallLayoutBuilder adjusts layout based on screen size
-                child: SmallLayoutBuilder(
-                  childWidget: Card(
-                    color: theme.colorScheme
-                        .onPrimary, // Set the card's background color
-                    margin: const EdgeInsets.symmetric(
-                        vertical: 8.0), // Vertical margin around the card
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16.0,
-                          vertical: 8.0), // Padding inside the card
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment
-                            .center, // Center the content vertically
-                        mainAxisSize:
-                            MainAxisSize.min, // Shrink to fit the content
-                        children: [
-                          // Title card displaying the app name
-                          Card(
-                            margin: const EdgeInsets.symmetric(vertical: 8.0),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 16.0,
-                                  vertical:
-                                      8.0), // Padding inside the title card
-                              child: Text(
-                                'WebbPulse Inventory Management', // App name displayed as title
-                                style: theme.textTheme
-                                    .titleLarge, // Use theme's large text style
+            child: LayoutBuilder(builder: (context, constraints) {
+              return ConstrainedBox(
+                constraints: BoxConstraints(
+                    maxHeight: constraints
+                        .maxHeight // Constrain the height to screen size
+                    ),
+                child: Center(
+                  // SmallLayoutBuilder adjusts layout based on screen size
+                  child: SmallLayoutBuilder(
+                    childWidget: Card(
+                      color: theme.colorScheme
+                          .onPrimary, // Set the card's background color
+                      margin: const EdgeInsets.symmetric(
+                          vertical: 8.0), // Vertical margin around the card
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16.0,
+                            vertical: 8.0), // Padding inside the card
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment
+                              .center, // Center the content vertically
+                          mainAxisSize:
+                              MainAxisSize.min, // Shrink to fit the content
+                          children: [
+                            // Title card displaying the app name
+                            Card(
+                              margin: const EdgeInsets.symmetric(vertical: 8.0),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 16.0,
+                                    vertical:
+                                        8.0), // Padding inside the title card
+                                child: Text(
+                                  'WebbPulse Inventory Management', // App name displayed as title
+                                  style: theme.textTheme
+                                      .titleLarge, // Use theme's large text style
+                                ),
                               ),
                             ),
-                          ),
-                          // CustomCard for Register option
-                          CustomCard(
-                            theme:
-                                theme, // Pass the theme for consistent styling
-                            customCardLeading: Icon(Icons.person_add,
-                                color: theme.colorScheme
-                                    .secondary), // Leading icon for the card
-                            customCardTitle: const Text(
-                                'Register'), // Title text for the card
-                            customCardTrailing: null, // No trailing widget
-                            onTapAction: () {
-                              // Navigate to the RegisterView when the card is tapped
-                              Navigator.pushNamed(
-                                  context, RegisterView.routeName);
-                            },
-                          ),
-                          // CustomCard for Sign In option
-                          CustomCard(
-                            theme:
-                                theme, // Pass the theme for consistent styling
-                            customCardLeading: Icon(Icons.login,
-                                color: theme.colorScheme
-                                    .secondary), // Leading icon for the card
-                            customCardTitle: const Text(
-                                'Sign In'), // Title text for the card
-                            customCardTrailing: null, // No trailing widget
-                            onTapAction: () {
-                              // Navigate to the SignInView when the card is tapped
-                              Navigator.pushNamed(
-                                  context, SignInView.routeName);
-                            },
-                          ),
-                        ],
+                            // CustomCard for Register option
+                            CustomCard(
+                              theme:
+                                  theme, // Pass the theme for consistent styling
+                              customCardLeading: Icon(Icons.person_add,
+                                  color: theme.colorScheme
+                                      .secondary), // Leading icon for the card
+                              customCardTitle: const Text(
+                                  'Register'), // Title text for the card
+                              customCardTrailing: null, // No trailing widget
+                              onTapAction: () {
+                                // Navigate to the RegisterView when the card is tapped
+                                Navigator.pushNamed(
+                                    context, RegisterView.routeName);
+                              },
+                            ),
+                            // CustomCard for Sign In option
+                            CustomCard(
+                              theme:
+                                  theme, // Pass the theme for consistent styling
+                              customCardLeading: Icon(Icons.login,
+                                  color: theme.colorScheme
+                                      .secondary), // Leading icon for the card
+                              customCardTitle: const Text(
+                                  'Sign In'), // Title text for the card
+                              customCardTrailing: null, // No trailing widget
+                              onTapAction: () {
+                                // Navigate to the SignInView when the card is tapped
+                                Navigator.pushNamed(
+                                    context, SignInView.routeName);
+                              },
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            ),
+              );
+            }),
           ),
         ],
       ),

@@ -81,13 +81,13 @@ class OrgMemberView extends StatelessWidget {
 
                         // Adjust the width of the side column based on screen size
                         if (constraints.maxWidth < 600) {
-                          containerWidth = MediaQuery.of(context).size.width *
-                              0.35; // Mobile width
+                          containerWidth =
+                              constraints.maxWidth * 0.35; // Mobile width
                         } else if (constraints.maxWidth < 1200) {
-                          containerWidth = MediaQuery.of(context).size.width *
-                              0.25; // Tablet width
+                          containerWidth =
+                              constraints.maxWidth * 0.25; // Tablet width
                         } else {
-                          containerWidth = MediaQuery.of(context).size.width *
+                          containerWidth = constraints.maxWidth *
                               0.15; // Larger screen width
                         }
 

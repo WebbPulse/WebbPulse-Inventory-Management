@@ -126,24 +126,27 @@ class OrgMemberListView extends StatelessWidget {
 
                                 // Display filtered list of users or a message if no users are found
                                 return filteredMemberDocs.isNotEmpty
-                                    ? SizedBox(
-                                        width:
-                                            MediaQuery.of(context).size.width *
-                                                0.95,
-                                        child: ListView.builder(
-                                          physics:
-                                              const BouncingScrollPhysics(),
-                                          itemCount: filteredMemberDocs.length,
-                                          itemBuilder: (context, index) {
-                                            Map<String, dynamic> userData =
-                                                filteredMemberDocs[index].data()
-                                                    as Map<String, dynamic>;
-                                            return UserCard(
-                                                userData:
-                                                    userData); // Display each user in a card
-                                          },
-                                        ),
-                                      )
+                                    ? LayoutBuilder(
+                                        builder: (context, constraints) {
+                                        return SizedBox(
+                                          width: constraints.maxWidth * 0.95,
+                                          child: ListView.builder(
+                                            physics:
+                                                const BouncingScrollPhysics(),
+                                            itemCount:
+                                                filteredMemberDocs.length,
+                                            itemBuilder: (context, index) {
+                                              Map<String, dynamic> userData =
+                                                  filteredMemberDocs[index]
+                                                          .data()
+                                                      as Map<String, dynamic>;
+                                              return UserCard(
+                                                  userData:
+                                                      userData); // Display each user in a card
+                                            },
+                                          ),
+                                        );
+                                      })
                                     : const Center(
                                         child: Text(
                                             'No users found')); // Show message if no users match

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart'; 
+import 'package:provider/provider.dart';
 import 'package:webbpulse_inventory_management/src/apps/authed/views/verify_email_view.dart';
 import 'package:webbpulse_inventory_management/src/shared/widgets/widgets.dart';
 import 'package:webbpulse_inventory_management/src/shared/providers/authentication_change_notifier.dart';
 
-/// EmailNotVerifiedView provides the screen for if a user is not currently email verified. 
+/// EmailNotVerifiedView provides the screen for if a user is not currently email verified.
 /// It offers options for users to either verify or log out.
 class EmailNotVerifiedView extends StatelessWidget {
   const EmailNotVerifiedView({super.key});
@@ -18,27 +18,22 @@ class EmailNotVerifiedView extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Consumer<AuthenticationChangeNotifier>(
-      builder:(context, authenticationChangeNotifier, child){ 
-        return Scaffold(
+        builder: (context, authenticationChangeNotifier, child) {
+      return Scaffold(
         body: Stack(
           children: [
             // Background image that fills the entire screen
             Positioned.fill(
               child: Image.asset(
                 'assets/boxes.jpg', // Path to your background image asset
-                fit:
-                    BoxFit.cover, // Ensures the image covers the whole background
+                fit: BoxFit
+                    .cover, // Ensures the image covers the whole background
               ),
             ),
             // Centered content with constrained size
             Center(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxHeight: MediaQuery.of(context)
-                      .size
-                      .height, // Constrain the height to screen size
-                ),
-                child: Center(
+              child: LayoutBuilder(builder: (context, constraints) {
+                return Center(
                   // SmallLayoutBuilder adjusts layout based on screen size
                   child: SmallLayoutBuilder(
                     childWidget: Card(
@@ -106,13 +101,12 @@ class EmailNotVerifiedView extends StatelessWidget {
                       ),
                     ),
                   ),
-                ),
-              ),
+                );
+              }),
             ),
           ],
         ),
       );
-      }
-    );
+    });
   }
 }
