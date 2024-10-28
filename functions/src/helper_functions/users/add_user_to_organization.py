@@ -1,7 +1,7 @@
-from src.shared import db, firestore, https_fn, auth
+from src.shared import db, firestore, https_fn, auth, send_email, Mail, Asm
 from src.helper_functions.users.update_user_roles import update_user_roles
 
-def add_user_to_organization(uid, org_id, org_member_display_name, org_member_email):
+def add_user_to_organization(uid, org_id, org_member_display_name, org_member_email, inviter_display_name):
     """
     Adds a user to an organization by creating a member record in the organization's 'members' subcollection in Firestore.
     The function assigns the user the role of 'member' and updates their roles in the system.
@@ -33,9 +33,36 @@ def add_user_to_organization(uid, org_id, org_member_display_name, org_member_em
         # Step 4: Update the user's roles after successfully adding them to the organization.
         # False indicates that the user's refresh token is not revoked immediately.
         update_user_roles(uid, "member", org_id, False)
+
+        # Step 5: Get the organization name to include in the email.
+
+        org_doc_ref = db.collection('organizations').document(org_id)
+        org_doc = org_doc_ref.get()
+        if org_doc.exists:
+            org_data = org_doc.to_dict()
+            org_name = org_data.get('orgName')
+        else:
+            org_name = "Organization"
+
+
+        # Step 6: Send an email to the user welcoming them to the organization.
+        message = Mail(
+            from_email='no-reply@webbpulse.com',
+            to_emails=org_member_email,
+            )
+        message.template_id = 'd-0d63e8080ff2402d9a34d3ebbd2d25ed'
+        message.dynamic_template_data =  { 
+            "inviterDisplayName": inviter_display_name,
+            "orgName": org_name
+        }
+        message.asm = Asm(
+            group_id=26999,
+            groups_to_display=[26999]
+        )
+        send_email(message)
         
     except Exception as e:
-        # Step 5: Handle any unexpected exceptions by raising an UNKNOWN error with details of the exception.
+        # Handle any unexpected exceptions by raising an UNKNOWN error with details of the exception.
         raise https_fn.HttpsError(
             code=https_fn.FunctionsErrorCode.UNKNOWN,
             message=f"Unknown Error adding user to organization: {str(e)}"

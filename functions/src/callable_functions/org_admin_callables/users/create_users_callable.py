@@ -1,4 +1,4 @@
-from src.shared import auth, https_fn, POSTcorsrules, Any, UserNotFoundError, check_user_is_org_admin, check_user_is_authed, check_user_token_current, check_user_is_email_verified
+from src.shared import auth, https_fn, POSTcorsrules, Any, UserNotFoundError, check_user_is_org_admin, check_user_is_authed, check_user_token_current, check_user_is_email_verified, db
 from src.helper_functions.users.create_global_user_profile import create_global_user_profile
 from src.helper_functions.users.add_user_to_organization import add_user_to_organization
 
@@ -31,11 +31,21 @@ def create_users_callable(req: https_fn.CallableRequest) -> Any:
 
         response_messages = []  # List to store response messages for each email.
 
-        # Step 4: Loop through each email in the list and process the user.
+        # Step 4: Get the inviter's display name.
+        inviter_doc_ref = db.collection('users').document(req.auth.uid)
+        inviter_doc = inviter_doc_ref.get()
+        if inviter_doc.exists:
+            inviter_user_data = inviter_doc.to_dict()
+            inviter_display_name = inviter_user_data.get('userDisplayName')
+        else:
+            inviter_display_name = "Admin"
+
+    
+        # Step 5: Loop through each email in the list and process the user.
         for user_email in user_emails:
             user, user_was_created = None, False  # Initialize variables.
 
-            # Step 5: Check if the user already exists in Firebase Auth.
+            # Step 6: Check if the user already exists in Firebase Auth.
             try:
                 user = auth.get_user_by_email(user_email)  # Try to get the user by their email.
             except UserNotFoundError:
@@ -47,28 +57,28 @@ def create_users_callable(req: https_fn.CallableRequest) -> Any:
                 )
                 user_was_created = True  # Set flag indicating the user was newly created.
 
-            # Step 6: If the user was created, create a global user profile.
+            # Step 7: If the user was created, create a global user profile.
             if user_was_created:
-                create_global_user_profile(user)
+                create_global_user_profile(user, inviter_display_name)
 
-            # Step 7: Check if the user has reached the global organization limit.
+            # Step 8: Check if the user has reached the global organization limit.
             if check_user_is_at_global_org_limit(user.uid):
                 response_messages.append(f"User {user_email} is at the global organization limit.")
                 continue  # Skip adding the user if the limit is reached.
 
-            # Step 8: Check if the user already belongs to the organization.
+            # Step 9: Check if the user already belongs to the organization.
             if check_user_already_belongs_to_org(user.uid, org_id):
                 response_messages.append(f"User {user_email} already belongs to the organization.")
                 continue  # Skip adding the user if they are already in the organization.
 
-            # Step 9: Add the user to the organization.
-            add_user_to_organization(user.uid, org_id, user.display_name, user_email)
+            # Step 10: Add the user to the organization.
+            add_user_to_organization(user.uid, org_id, user.display_name, user_email, inviter_display_name)
 
-            # Step 10: Generate a response message for this email.
+            # Step 11: Generate a response message for this email.
             response_message = f"User {user_email} {'created and ' if user_was_created else ''}added to organization."
             response_messages.append(response_message)
 
-        # Step 11: Return a response with messages for all processed emails.
+        # Step 12: Return a response with messages for all processed emails.
         return {"response": response_messages}
 
     except https_fn.HttpsError as e:

@@ -10,6 +10,7 @@ jobs:
     name: Build and Deploy Backend and Web
     runs-on: ubuntu-latest
     env:
+      SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
       FIREBASE_APPLICATION_CREDENTIALS: ${{ secrets.FIREBASE_APPLICATION_CREDENTIALS }}
       GOOGLE_APPLICATION_CREDENTIALS: ./gcp_key.json
       FLUTTER_VERSION: 3.24.3
