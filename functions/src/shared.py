@@ -169,14 +169,21 @@ def send_email(message: Mail):
     message (Mail): The email message to be sent.
     
     Raises:
-    no error handling
+    Exception: If there is an error sending the email.
     """
-    # Initialize SendGrid API client
-    sg = SendGridAPIClient(os.getenv("SENDGRID_API_KEY"))
-    
-    # Send the email
     try:
-        sg.send(message)
+        # Retrieve the SendGrid API key
+        sendgrid_api_key = os.getenv("SENDGRID_API_KEY")
+        if not sendgrid_api_key:
+            raise ValueError("SENDGRID_API_KEY environment variable is not set.")
+
+        # Initialize SendGrid API client
+        sg = SendGridAPIClient(sendgrid_api_key)
+        
+        # Send the email
+        response = sg.send(message)
+        print(f"Email sent successfully with status code: {response.status_code}")
+
     except Exception as e:
-        # Re-raise the exception to ensure it propagates.
+        # Provide detailed error information
         raise Exception(f"An error occurred while sending email: {str(e)}")
