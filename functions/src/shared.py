@@ -172,10 +172,12 @@ def send_email(message: Mail):
     Exception: If there is an error sending the email.
     """
     try:
-        # Retrieve the SendGrid API key
-        sendgrid_api_key = os.getenv("SENDGRID_API_KEY")
+        # Retrieve the SendGrid API key from a file
+        with open('./sendgrid_api_key.txt', 'r') as file:
+            sendgrid_api_key = file.read().strip()
+
         if not sendgrid_api_key:
-            raise ValueError("SENDGRID_API_KEY environment variable is not set.")
+            raise ValueError("SendGrid API key is not found in the file.")
 
         # Initialize SendGrid API client
         sg = SendGridAPIClient(sendgrid_api_key)

@@ -42,10 +42,11 @@ jobs:
       
 
         #Set up gcp keys
-      - name: Set up gcp keys
+      - name: Set up api keys
         run: |
           echo "$FIREBASE_APPLICATION_CREDENTIALS" > gcp_key.json
           echo "$FIREBASE_APPLICATION_CREDENTIALS" > functions/gcp_key.json
+          echo "$SENDGRID_API_KEY" > functions/sendgrid_api_key.txt
         #setup python
       - name: Set up python
         uses: actions/setup-python@main
