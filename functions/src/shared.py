@@ -176,8 +176,7 @@ def send_email(message: Mail):
     
     # Send the email
     try:
-        response = sg.send(message)
-        return response
+        sg.send(message)
     except Exception as e:
         # Re-raise the exception to ensure it propagates.
         raise Exception(f"An error occurred while sending email: {str(e)}")
