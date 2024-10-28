@@ -1,9 +1,11 @@
 from firebase_functions import options, https_fn, identity_fn, firestore_fn
 from firebase_admin import firestore, auth
 from firebase_admin.auth import UserNotFoundError
-import google.cloud.firestore as gcf
 from typing import Any
 import time
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail, Asm
+import os
 
 # Define CORS options for HTTP functions
 POSTcorsrules = options.CorsOptions(cors_origins="*", cors_methods=["get", "post"])
@@ -157,3 +159,24 @@ def check_user_is_at_global_org_limit(uid: str):
             code=https_fn.FunctionsErrorCode.FAILED_PRECONDITION,
             message="The user is at the global organization limit."
         )
+
+
+def send_email(message: Mail):
+    """
+    Sends an email using SendGrid.
+
+    Parameters:
+    message (Mail): The email message to be sent.
+    
+    Raises:
+    no error handling
+    """
+    # Initialize SendGrid API client
+    sg = SendGridAPIClient(os.environ.get("SENDGRID_API_KEY"))
+    
+    # Send the email
+    try:
+        response = sg.send(message)
+        return response
+    except Exception as e:
+        pass

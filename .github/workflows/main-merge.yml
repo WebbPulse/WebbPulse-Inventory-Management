@@ -10,6 +10,7 @@ jobs:
     name: Build and Deploy Backend and Web
     runs-on: ubuntu-latest
     env:
+      SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
       FIREBASE_APPLICATION_CREDENTIALS: ${{ secrets.FIREBASE_APPLICATION_CREDENTIALS }}
       GOOGLE_APPLICATION_CREDENTIALS: ./gcp_key.json
       FLUTTER_VERSION: 3.24.3
@@ -20,11 +21,25 @@ jobs:
       - name: Set Build Number
         run: |
           cd flutter
-          version_line=$(grep '^version: ' pubspec.yaml | cut -d '+' -f 1)
-          new_build_number=$(date +%Y%m%d%H%M%S)
+          # Extract the current version from pubspec.yaml without any existing build number
+          version_line=$(grep '^version: ' pubspec.yaml | cut -d ' ' -f 2)
+          
+          # Use the GitHub Actions run number as the build number
+          new_build_number="${{ github.run_number }}"
+          
+          # Construct the new version line
           new_version="${version_line}+${new_build_number}"
-          sed -i '' "s/^version: .*/version: $new_version/" pubspec.yaml
+          
+          # Update the pubspec.yaml with the new version line, handling macOS and Linux differences
+          if [[ "$RUNNER_OS" == "macOS" ]]; then
+            sed -i '' "s/^version: .*/version: $new_version/" pubspec.yaml
+          else
+            sed -i "s/^version: .*/version: $new_version/" pubspec.yaml
+          fi
+          
+          # Output the new version for logging purposes
           echo "New version: $new_version"
+      
 
         #Set up gcp keys
       - name: Set up gcp keys
@@ -78,11 +93,25 @@ jobs:
       - name: Set Build Number
         run: |
           cd flutter
-          version_line=$(grep '^version: ' pubspec.yaml | cut -d '+' -f 1)
-          new_build_number=$(date +%Y%m%d%H%M%S)
+          # Extract the current version from pubspec.yaml without any existing build number
+          version_line=$(grep '^version: ' pubspec.yaml | cut -d ' ' -f 2)
+          
+          # Use the GitHub Actions run number as the build number
+          new_build_number="${{ github.run_number }}"
+          
+          # Construct the new version line
           new_version="${version_line}+${new_build_number}"
-          sed -i '' "s/^version: .*/version: $new_version/" pubspec.yaml
+          
+          # Update the pubspec.yaml with the new version line, handling macOS and Linux differences
+          if [[ "$RUNNER_OS" == "macOS" ]]; then
+            sed -i '' "s/^version: .*/version: $new_version/" pubspec.yaml
+          else
+            sed -i "s/^version: .*/version: $new_version/" pubspec.yaml
+          fi
+          
+          # Output the new version for logging purposes
           echo "New version: $new_version"
+      
 
       - name: Set up gcp key
         run: |
@@ -145,11 +174,25 @@ jobs:
       - name: Set Build Number
         run: |
           cd flutter
-          version_line=$(grep '^version: ' pubspec.yaml | cut -d '+' -f 1)
-          new_build_number=$(date +%Y%m%d%H%M%S)
+          # Extract the current version from pubspec.yaml without any existing build number
+          version_line=$(grep '^version: ' pubspec.yaml | cut -d ' ' -f 2)
+          
+          # Use the GitHub Actions run number as the build number
+          new_build_number="${{ github.run_number }}"
+          
+          # Construct the new version line
           new_version="${version_line}+${new_build_number}"
-          sed -i '' "s/^version: .*/version: $new_version/" pubspec.yaml
+          
+          # Update the pubspec.yaml with the new version line, handling macOS and Linux differences
+          if [[ "$RUNNER_OS" == "macOS" ]]; then
+            sed -i '' "s/^version: .*/version: $new_version/" pubspec.yaml
+          else
+            sed -i "s/^version: .*/version: $new_version/" pubspec.yaml
+          fi
+          
+          # Output the new version for logging purposes
           echo "New version: $new_version"
+      
 
       #Setup flutter
       - name: Set up Flutter
