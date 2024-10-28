@@ -172,7 +172,7 @@ def send_email(message: Mail):
     no error handling
     """
     # Initialize SendGrid API client
-    sg = SendGridAPIClient(os.environ.get("SENDGRID_API_KEY"))
+    sg = SendGridAPIClient(os.getenv("SENDGRID_API_KEY"))
     
     # Send the email
     try:
