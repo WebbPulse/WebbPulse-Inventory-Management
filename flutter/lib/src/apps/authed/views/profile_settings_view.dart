@@ -189,7 +189,7 @@ class ChangeProfilePictureAlertDialogState
         'userPhotoURL': userPhotoURL,
       });
 
-      AsyncContextHelpers.showSnackBarIfMounted(
+      await AsyncContextHelpers.showSnackBarIfMounted(
           context, 'Profile picture changed successfully');
       AsyncContextHelpers.popContextIfMounted(context);
     } catch (e) {

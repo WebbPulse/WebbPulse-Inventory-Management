@@ -76,20 +76,20 @@ class CreateOrganizationFormState extends State<CreateOrganizationForm> {
         /// Refresh the user's ID token to get the roles for the newly created organization
         await authenticationChangeNotifier.user!.getIdToken(true);
 
-        AsyncContextHelpers.showSnackBarIfMounted(
+        await AsyncContextHelpers.showSnackBarIfMounted(
             context, 'Organization created!'); // Show success message
         Navigator.pushNamed(
             context,
             OrgSelectionView
                 .routeName); // Navigate back to the organization selection view
       } catch (e) {
-        AsyncContextHelpers.showSnackBarIfMounted(context,
+        await AsyncContextHelpers.showSnackBarIfMounted(context,
             'Failed to create organization: $e'); // Show error message on failure
       } finally {
         setState(() => _isLoading = false); // Reset loading state
       }
     } else {
-      AsyncContextHelpers.showSnackBar(context,
+      await AsyncContextHelpers.showSnackBarIfMounted(context,
           'Please enter an organization name'); // Show message if organization name is empty
     }
   }

@@ -204,7 +204,7 @@ class _OrgNameEditorState extends State<OrgNameEditor> {
         'orgName': newName,
       });
 
-      AsyncContextHelpers.showSnackBarIfMounted(
+      await AsyncContextHelpers.showSnackBarIfMounted(
           context, 'Org name changed successfully'); // Show success message
     } catch (e) {
       await AsyncContextHelpers.showSnackBarIfMounted(
@@ -281,7 +281,7 @@ class OrgImageEditorAlertDialogState extends State<OrgImageEditorAlertDialog> {
         'orgBackgroundImageURL': newOrgImageUrl,
       });
 
-      AsyncContextHelpers.showSnackBarIfMounted(context,
+      await AsyncContextHelpers.showSnackBarIfMounted(context,
           'Org background image changed successfully'); // Show success message
       AsyncContextHelpers.popContextIfMounted(context); // Close the dialog
     } catch (e) {

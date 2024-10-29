@@ -29,7 +29,7 @@ class AuthedApp extends StatelessWidget {
   AuthedApp({super.key});
 
   // Initialize helpers and services used throughout the app
-  final AsyncContextHelpers snackBarHelpers = AsyncContextHelpers();
+  final AsyncContextHelpers asyncContextHelpers = AsyncContextHelpers();
   final FirestoreReadService firestoreService = FirestoreReadService();
   final FirebaseFunctions firebaseFunctions = FirebaseFunctions.instance;
 
@@ -94,13 +94,13 @@ class AuthedApp extends StatelessWidget {
                     .themeMode, // Set theme mode based on user settings
                 // Define route generation logic
                 onGenerateRoute: (RouteSettings routeSettings) {
-                  if (authProvider.noPasswordConfigured == true) {
+                  
+                  // Handle routes for first time account setup views
+                  if (authProvider.noPasswordConfigured == true  || routeSettings.name == ConfigurePasswordView.routeName) {
                     return MaterialPageRoute<void>(
                       builder: (context) => const ConfigurePasswordView(),
                     );
                   }
-
-                  // Redirect to VerifyEmailView if user's email is not verified
                   if (authProvider.userEmailVerified == false) {
                     if (routeSettings.name == VerifyEmailView.routeName) {
                       return MaterialPageRoute<void>(
@@ -113,7 +113,7 @@ class AuthedApp extends StatelessWidget {
                     }
                   }
 
-                  // Define route handling for different views
+                  // Define route handling for non-organization-specific views
                   switch (routeSettings.name) {
                     case ProfileSettingsView.routeName:
                       return MaterialPageRoute<void>(
@@ -125,14 +125,15 @@ class AuthedApp extends StatelessWidget {
                       );
                   }
 
+                  
                   // If no organization is selected, show the OrgSelectionView
-                  if (orgSelectorProvider.orgId.isEmpty) {
+                  if (orgSelectorProvider.orgId.isEmpty || routeSettings.name==OrgSelectionView.routeName) {
                     return MaterialPageRoute<void>(
                       builder: (context) => const OrgSelectionView(),
                     );
                   }
 
-                  // If a specific organization member is selected, show the OrgMemberView
+                  // Provider dependant view, make sure you can only get there if you set the provider properly
                   if (orgMemberSelectorProvider.orgMemberId.isNotEmpty) {
                     return MaterialPageRoute<void>(
                       builder: (context) => const OrgMemberView(),
@@ -152,14 +153,6 @@ class AuthedApp extends StatelessWidget {
                     case OrgMemberListView.routeName:
                       return MaterialPageRoute<void>(
                         builder: (context) => OrgMemberListView(),
-                      );
-                    case OrgSelectionView.routeName:
-                      return MaterialPageRoute<void>(
-                        builder: (context) => const OrgSelectionView(),
-                      );
-                    case OrgMemberView.routeName:
-                      return MaterialPageRoute<void>(
-                        builder: (context) => const OrgMemberView(),
                       );
                     case OrgSettingsView.routeName:
                       return MaterialPageRoute<void>(

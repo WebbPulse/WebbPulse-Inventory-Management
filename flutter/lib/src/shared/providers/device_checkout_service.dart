@@ -117,7 +117,7 @@ class DeviceCheckoutService {
       }
     } else {
       /// If no serial number is provided, show a prompt to enter it
-      AsyncContextHelpers.showSnackBar(context, 'Please enter a serial number');
+      await AsyncContextHelpers.showSnackBarIfMounted(context, 'Please enter a serial number');
     }
   }
 }

@@ -1,11 +1,13 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:webbpulse_inventory_management/src/apps/authed/views/verify_email_view.dart';
-import 'package:webbpulse_inventory_management/src/shared/widgets/widgets.dart';
 import 'package:webbpulse_inventory_management/src/shared/providers/authentication_change_notifier.dart';
+import 'package:webbpulse_inventory_management/src/shared/widgets/widgets.dart';
+import 'package:webbpulse_inventory_management/src/apps/authed/views/org_selection_view.dart';
+import 'dart:io';
 
-/// EmailNotVerifiedView provides the screen for if a user is not currently email verified.
-/// It offers options for users to either verify or log out.
+
+
 class ConfigurePasswordView extends StatelessWidget {
   const ConfigurePasswordView({super.key});
 
@@ -15,98 +17,195 @@ class ConfigurePasswordView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Retrieve the current theme to style widgets accordingly
-    final theme = Theme.of(context);
 
     return Consumer<AuthenticationChangeNotifier>(
         builder: (context, authenticationChangeNotifier, child) {
-      return Scaffold(
-        body: Stack(
-          children: [
-            // Background image that fills the entire screen
-            Positioned.fill(
-              child: Image.asset(
-                'assets/boxes.jpg', // Path to your background image asset
-                fit: BoxFit
-                    .cover, // Ensures the image covers the whole background
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('Configure Password'),
+            actions: const [
+              
+            ],
+          ),
+          body: LayoutBuilder(
+            builder: (context, constraints) {
+              // Calculate isIPad based on the width constraints
+              final bool isIPad = !kIsWeb && Platform.isIOS && constraints.maxWidth >= 600;
+              return SafeArea(
+                child: SizedBox.expand(
+                  child: isIPad
+                      ? const Center(child: ConfigurePasswordForm())
+                      : const ConfigurePasswordForm(),
+                ),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// CheckoutForm handles the form input and logic for device checkout and check-in
+class ConfigurePasswordForm extends StatefulWidget {
+  const ConfigurePasswordForm({super.key});
+
+  @override
+  ConfigurePasswordFormState createState() => ConfigurePasswordFormState();
+}
+
+class ConfigurePasswordFormState extends State<ConfigurePasswordForm> {
+  var _isLoading = false; // Loading indicator for async operations
+  late TextEditingController
+      _newPasswordController; // Controller for the device serial input
+  late TextEditingController
+      _confirmPasswordController; // Controller for user search input
+  
+  @override
+  void initState() {
+    super.initState();
+    _newPasswordController =
+        TextEditingController(); // Initialize controller for device serial
+    _confirmPasswordController =
+        TextEditingController(); // Initialize controller for user search
+  }
+  @override
+  void dispose() {
+    _newPasswordController
+        .dispose(); // Dispose controller when widget is destroyed
+    _confirmPasswordController.dispose();
+    super.dispose();
+  }
+
+  // Function to handle device checkout or check-in
+  Future<void> _onSubmit(bool checkOut) async {
+    setState(() => _isLoading = true); // Show loading indicator
+    try {
+      String newPassword = _newPasswordController.text;
+      String confirmPassword = _confirmPasswordController.text;
+      AuthenticationChangeNotifier authenticationChangeNotifier = Provider.of<AuthenticationChangeNotifier>(context, listen: false);
+      if (newPassword != confirmPassword) {
+        // Show error message if passwords do not match
+        await AsyncContextHelpers.showSnackBarIfMounted(
+            context, 'Passwords do not match'); // Show success message
+        return;
+      }
+      if (newPassword.isEmpty || newPassword.length < 6) {
+      await AsyncContextHelpers.showSnackBarIfMounted(
+          context, 'Password must be at least 6 characters');
+      return;
+    }
+      await authenticationChangeNotifier.setNewPassword(newPassword);
+      Navigator.pushNamed(
+            context,
+            OrgSelectionView
+                .routeName); // Navigate to the organization selection view
+    } catch (e) {
+      // Show error message if an error occurs
+      await AsyncContextHelpers.showSnackBarIfMounted(
+          context, 'An error occurred: $e'); // Show error message
+    } finally {
+      setState(() => _isLoading = false); // Hide loading indicator
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    ThemeData theme = Theme.of(context); // Get the current theme
+    AuthenticationChangeNotifier authenticationChangeNotifier = Provider.of<AuthenticationChangeNotifier>(context, listen: false);
+    return SingleChildScrollView(
+      child: Center(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            // Set maximum width constraints based on screen size
+            double maxWidth;
+            if (constraints.maxWidth < 600) {
+              maxWidth = constraints.maxWidth * 0.95;
+            } else if (constraints.maxWidth < 1200) {
+              maxWidth = constraints.maxWidth * 0.6;
+            } else {
+              maxWidth = constraints.maxWidth * 0.4;
+            }
+
+            return ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: maxWidth,
               ),
-            ),
-            // Centered content with constrained size
-            Center(
-              child: LayoutBuilder(builder: (context, constraints) {
-                return Center(
-                  // SmallLayoutBuilder adjusts layout based on screen size
-                  child: SmallLayoutBuilder(
-                    childWidget: Card(
-                      color: theme.colorScheme
-                          .onPrimary, // Set the card's background color
-                      margin: const EdgeInsets.symmetric(
-                          vertical: 8.0), // Vertical margin around the card
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16.0,
-                            vertical: 8.0), // Padding inside the card
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment
-                              .center, // Center the content vertically
-                          mainAxisSize:
-                              MainAxisSize.min, // Shrink to fit the content
-                          children: [
-                            // Title card displaying the app name
-                            Card(
-                              margin: const EdgeInsets.symmetric(vertical: 8.0),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 16.0,
-                                    vertical:
-                                        8.0), // Padding inside the title card
-                                child: Text(
-                                  'Please Configure a Password', // heading text
-                                  style: theme.textTheme
-                                      .titleLarge, // Use theme's large text style
-                                ),
-                              ),
-                            ),
-                            // CustomCard for Register option
-                            CustomCard(
-                              theme:
-                                  theme, // Pass the theme for consistent styling
-                              customCardLeading: Icon(Icons.mail,
-                                  color: theme.colorScheme
-                                      .secondary), // Leading icon for the card
-                              customCardTitle: const Text(
-                                  'Verify Email'), // Title text for the card
-                              customCardTrailing: null, // No trailing widget
-                              onTapAction: () {
-                                // Navigate to the VerifyEmailView when the card is tapped
-                                Navigator.pushNamed(
-                                    context, VerifyEmailView.routeName);
-                              },
-                            ),
-                            CustomCard(
-                              theme:
-                                  theme, // Pass the theme for consistent styling
-                              customCardLeading: Icon(Icons.logout,
-                                  color: theme.colorScheme
-                                      .secondary), // Leading icon for the card
-                              customCardTitle: const Text(
-                                  'Sign Out'), // Title text for the card
-                              customCardTrailing: null, // No trailing widget
-                              onTapAction: () {
-                                // Sign out the user when the card is tapped
-                                authenticationChangeNotifier.signOutUser();
-                              },
-                            ),
-                          ],
+              child: Card(
+                elevation: 4.0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    children: [
+                      // Serial Number Input Field
+                      TextField(
+                        controller: _newPasswordController,
+                        decoration: const InputDecoration(
+                          labelText: 'New Password',
                         ),
                       ),
-                    ),
+                      TextField(
+                        controller: _confirmPasswordController,
+                        decoration: const InputDecoration(
+                          labelText: 'Confirm Password',
+                        ),
+                      ),
+                      const SizedBox(height: 16.0),
+                      Wrap(
+                        spacing: 8.0,
+                        runSpacing: 8.0,
+                        children: [
+                          // Check-out Button
+                          ElevatedButton.icon(
+                            onPressed: _isLoading
+                                ? null
+                                : () {
+                                      _onSubmit(true);
+                                  },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor:
+                                  theme.colorScheme.surface.withOpacity(0.95),
+                              side: BorderSide(
+                                color: theme.colorScheme.primary
+                                    .withOpacity(0.5),
+                                width: 1.5,
+                              ),
+                              padding: const EdgeInsets.all(16.0),
+                            ),
+                            icon: _isLoading
+                                ? const CircularProgressIndicator()
+                                : const Icon(Icons.check),
+                            label: const Text('Set New Password'),
+                          ),
+                          ElevatedButton.icon(
+                            onPressed: () {
+                            authenticationChangeNotifier.signOutUser();           
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor:
+                                  theme.colorScheme.surface.withOpacity(0.95),
+                              side: BorderSide(
+                                color: theme.colorScheme.primary.withOpacity(0.5),
+                                width: 1.5,
+                              ),
+                              padding: const EdgeInsets.all(16.0),
+                            ),
+                            label: const Text('Sign Out'),
+                            icon: const Icon(Icons.logout),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
-                );
-              }),
-            ),
-          ],
+                ),
+              ),
+            );
+          },
         ),
-      );
-    });
+      ),
+    );
   }
 }
