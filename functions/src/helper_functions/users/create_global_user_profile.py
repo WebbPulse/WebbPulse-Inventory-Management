@@ -1,4 +1,5 @@
 from src.shared import db, firestore, https_fn, send_email, Mail, Asm
+from src.helper_functions.users.generate_email_login_link import generate_email_login_link
 
 def create_global_user_profile(user, inviter_display_name):
     """
@@ -26,6 +27,8 @@ def create_global_user_profile(user, inviter_display_name):
         })
         
         
+        email_login_link = generate_email_login_link(user.email)
+
         # Step 3: Send a welcome email to the user.
         message = Mail(
             from_email='no-reply@webbpulse.com',
@@ -33,7 +36,8 @@ def create_global_user_profile(user, inviter_display_name):
             )
         message.template_id = 'd-e68eb082e7514f1bade6d7cca26a60f6'
         message.dynamic_template_data =  { 
-            "inviterDisplayName": inviter_display_name
+            "inviterDisplayName": inviter_display_name,
+            "buttonUrl": email_login_link
         }
         message.asm = Asm(
             group_id=26999,

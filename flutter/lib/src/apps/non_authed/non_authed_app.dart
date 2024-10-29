@@ -7,6 +7,7 @@ import 'views/landing_view.dart';
 import 'views/register_view.dart';
 import 'views/signin_view.dart';
 import 'views/forgot_password_view.dart';
+import 'views/custom_signin.dart';
 
 /// Main app widget for non-authenticated users
 /// Handles routing for login, registration, password reset, and session expiration views
@@ -54,6 +55,11 @@ class NonAuthedApp extends StatelessWidget {
               return MaterialPageRoute<void>(
                 builder: (context) => const ForgotPasswordView(),
               );
+            case CustomSignInView.routeName:
+              return MaterialPageRoute<void>(
+                builder: (context) => const CustomSignInView(),
+              );
+
             // Default route (Landing view)
             default:
               return MaterialPageRoute<void>(
