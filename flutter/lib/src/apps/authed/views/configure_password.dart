@@ -60,6 +60,8 @@ class ConfigurePasswordFormState extends State<ConfigurePasswordForm> {
       _newPasswordController; // Controller for the device serial input
   late TextEditingController
       _confirmPasswordController; // Controller for user search input
+  bool _newPasswordIsObscured = true;
+  bool _confirmPasswordIsObscured = true;
   
   @override
   void initState() {
@@ -143,15 +145,36 @@ class ConfigurePasswordFormState extends State<ConfigurePasswordForm> {
                       // Serial Number Input Field
                       TextField(
                         controller: _newPasswordController,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           labelText: 'New Password',
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _newPasswordIsObscured ? Icons.visibility : Icons.visibility_off,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _newPasswordIsObscured = !_newPasswordIsObscured;});
+                            },
+                          ),
                         ),
+                        obscureText: _newPasswordIsObscured,
+                        
                       ),
                       TextField(
                         controller: _confirmPasswordController,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           labelText: 'Confirm Password',
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _confirmPasswordIsObscured ? Icons.visibility : Icons.visibility_off,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _confirmPasswordIsObscured = !_confirmPasswordIsObscured;});
+                            },
+                          ),
                         ),
+                        obscureText: _confirmPasswordIsObscured,
                       ),
                       const SizedBox(height: 16.0),
                       Wrap(
