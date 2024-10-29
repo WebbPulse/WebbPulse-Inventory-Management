@@ -38,29 +38,27 @@ class NonAuthedApp extends StatelessWidget {
             );
           }
 
-          // Handle different routes based on route name
-          switch (routeSettings.name) {
-            // Route for the registration view
+          final uri = Uri.parse(routeSettings.name ?? '');
+
+          // Handle different routes based on route name and query parameters
+          switch (uri.path) {
             case RegisterView.routeName:
               return MaterialPageRoute<void>(
                 builder: (context) => const RegisterView(),
               );
-            // Route for the sign-in view
             case SignInView.routeName:
               return MaterialPageRoute<void>(
                 builder: (context) => const SignInView(),
               );
-            // Route for the forgot password view
             case ForgotPasswordView.routeName:
               return MaterialPageRoute<void>(
                 builder: (context) => const ForgotPasswordView(),
               );
             case CustomSignInView.routeName:
+              final token = uri.queryParameters['token'];
               return MaterialPageRoute<void>(
-                builder: (context) => const CustomSignInView(),
+                builder: (context) => CustomSignInView(token: token),
               );
-
-            // Default route (Landing view)
             default:
               return MaterialPageRoute<void>(
                 builder: (context) => const LandingView(),
