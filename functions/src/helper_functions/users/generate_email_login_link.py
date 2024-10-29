@@ -24,7 +24,7 @@ def generate_email_login_link(email):
         custom_token_url_safe = custom_token.decode("utf-8")
         
         # Construct a link with the token that your frontend can use
-        email_login_link = f"https://yourapp.com/custom-signin?token={custom_token_url_safe}"
+        email_login_link = f"https://webbpulse.com/#/custom-signin?token={custom_token_url_safe}"
         return email_login_link
     except Exception as e:
         # Handle any unexpected exceptions by raising an UNKNOWN error with details of the exception.
