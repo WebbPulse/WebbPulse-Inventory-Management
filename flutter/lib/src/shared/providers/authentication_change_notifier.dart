@@ -43,9 +43,38 @@ class AuthenticationChangeNotifier extends ChangeNotifier {
     try {
       await FirebaseAuth.instance.signInWithCustomToken(token);
       _noPasswordConfigured = true;
+      notifyListeners();
     } catch (e) {
       rethrow;
     }
+  }
+
+  Future<void> setNewPassword(String newPassword) async {
+  if (_user == null) {
+    throw FirebaseAuthException(
+      code: 'user-not-signed-in',
+      message: 'No user is currently signed in.',
+    );
+  }
+  
+  try {
+    await _user!.updatePassword(newPassword);
+    _noPasswordConfigured = false;
+    notifyListeners();
+  } on FirebaseAuthException catch (e) {
+    // Handle specific Firebase errors, e.g., reauthentication required
+    if (e.code == 'requires-recent-login') {
+      // Trigger reauthentication in the UI as needed
+      print('Reauthentication required');
+    }
+    rethrow; // Allows UI to handle specific error messages
+  }
+}
+
+
+  void setNoPasswordConfigured(bool value) {
+    _userLoggedIn = value;
+    notifyListeners();
   }
 
   void setUserWasLoggedIn(bool value) {

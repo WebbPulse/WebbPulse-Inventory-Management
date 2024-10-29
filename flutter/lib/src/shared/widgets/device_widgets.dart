@@ -772,7 +772,7 @@ class _DeleteDeviceButtonState extends State<DeleteDeviceButton> {
         'deviceId': deviceId, // Pass device ID
       });
       // Show success message when the device is deleted
-      AsyncContextHelpers.showSnackBarIfMounted(
+      await AsyncContextHelpers.showSnackBarIfMounted(
           context, 'Device deleted successfully');
     } catch (e) {
       // Show error message if the operation fails
@@ -885,14 +885,14 @@ class AddDeviceAlertDialogState extends State<AddDeviceAlertDialog> {
         await file.writeAsString(csvTemplate);
 
         // Notify user that the file has been saved
-        AsyncContextHelpers.showSnackBarIfMounted(
+        await AsyncContextHelpers.showSnackBarIfMounted(
             context, 'CSV Template saved to $filePath');
       } else {
-        AsyncContextHelpers.showSnackBarIfMounted(
+        await AsyncContextHelpers.showSnackBarIfMounted(
             context, 'Failed to get storage directory');
       }
     } else {
-      AsyncContextHelpers.showSnackBarIfMounted(context, 'Permission denied');
+      await AsyncContextHelpers.showSnackBarIfMounted(context, 'Permission denied');
     }
   }
 
@@ -912,7 +912,7 @@ class AddDeviceAlertDialogState extends State<AddDeviceAlertDialog> {
         "deviceSerialNumbers": deviceSerialNumbers, // List of serial numbers
         "orgId": orgSelectorProvider.orgId, // Organization ID
       });
-      AsyncContextHelpers.showSnackBarIfMounted(
+      await AsyncContextHelpers.showSnackBarIfMounted(
           context, 'Devices created successfully'); // Show success message
       AsyncContextHelpers.popContextIfMounted(context); // Close the dialog
     } catch (e) {

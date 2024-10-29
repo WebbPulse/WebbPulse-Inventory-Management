@@ -276,14 +276,14 @@ class AddUserAlertDialogState extends State<AddUserAlertDialog> {
         await file.writeAsString(csvTemplate); // Write the CSV content
 
         // Show message that the file has been saved
-        AsyncContextHelpers.showSnackBarIfMounted(
+        await AsyncContextHelpers.showSnackBarIfMounted(
             context, 'CSV Template saved to $filePath');
       } else {
-        AsyncContextHelpers.showSnackBarIfMounted(
+        await AsyncContextHelpers.showSnackBarIfMounted(
             context, 'Failed to get storage directory');
       }
     } else {
-      AsyncContextHelpers.showSnackBarIfMounted(context, 'Permission denied');
+      await AsyncContextHelpers.showSnackBarIfMounted(context, 'Permission denied');
     }
   }
 
@@ -303,7 +303,7 @@ class AddUserAlertDialogState extends State<AddUserAlertDialog> {
         "userEmails": emails,
         "orgId": orgSelectorProvider.orgId, // Pass organization ID and emails
       });
-      AsyncContextHelpers.showSnackBarIfMounted(
+      await AsyncContextHelpers.showSnackBarIfMounted(
           context, 'Users added successfully');
       AsyncContextHelpers.popContextIfMounted(
           context); // Close the dialog after submission

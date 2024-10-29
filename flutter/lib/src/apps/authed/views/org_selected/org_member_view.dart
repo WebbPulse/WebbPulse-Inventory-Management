@@ -285,7 +285,7 @@ class _DeleteUserButtonState extends State<DeleteUserButton> {
       if (orgMemberId == authenticationChangeNotifier.user?.uid) {
         authenticationChangeNotifier.signOutUser();
       }
-      AsyncContextHelpers.showSnackBarIfMounted(
+      await AsyncContextHelpers.showSnackBarIfMounted(
           context, 'User deleted successfully');
     } catch (e) {
       await AsyncContextHelpers.showSnackBarIfMounted(
@@ -404,7 +404,7 @@ class UserRoleDropdownButtonState extends State<UserRoleDropdownButton> {
         "orgId": orgSelectorProvider.orgId,
       });
 
-      AsyncContextHelpers.showSnackBarIfMounted(
+      await AsyncContextHelpers.showSnackBarIfMounted(
           context, 'User role updated successfully');
     } catch (e) {
       await AsyncContextHelpers.showSnackBarIfMounted(
