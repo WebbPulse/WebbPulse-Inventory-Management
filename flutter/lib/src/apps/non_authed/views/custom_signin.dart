@@ -3,19 +3,18 @@ import 'package:provider/provider.dart';
 import 'package:webbpulse_inventory_management/src/shared/providers/authentication_change_notifier.dart';
 
 class CustomSignInView extends StatelessWidget {
-  const CustomSignInView({super.key});
+  final String? token;
+
+  const CustomSignInView({super.key, this.token});
 
   static const routeName = '/custom-signin';
 
   @override
   Widget build(BuildContext context) {
-    final uri = Uri.base;
-    final token = uri.queryParameters['token'];
-
     if (token != null) {
       final authProvider =
           Provider.of<AuthenticationChangeNotifier>(context, listen: false);
-      authProvider.signInWithCustomToken(token);
+      authProvider.signInWithCustomToken(token!);
     }
 
     return Scaffold(
