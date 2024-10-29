@@ -13,11 +13,13 @@ class AuthenticationChangeNotifier extends ChangeNotifier {
   bool _userWasLoggedIn = false;
   bool _userEmailVerified = false;
   bool _userLoggedIn = false;
+  bool _noPasswordConfigured = false;
 
   User? get user => _user;
   bool get userWasLoggedIn => _userWasLoggedIn;
   bool get userEmailVerified => _userEmailVerified;
   bool get userLoggedIn => _userLoggedIn;
+  bool get noPasswordConfigured => _noPasswordConfigured;
 
   Future<void> init() async {
     FirebaseUIAuth.configureProviders(authenticationProviderList);
@@ -40,14 +42,8 @@ class AuthenticationChangeNotifier extends ChangeNotifier {
   Future<void> signInWithCustomToken(String token) async {
     try {
       await FirebaseAuth.instance.signInWithCustomToken(token);
-      _user = FirebaseAuth.instance.currentUser;
-      _userLoggedIn = true;
-      _userWasLoggedIn = true;
-      _userEmailVerified = _user?.emailVerified ?? false;
-      notifyListeners();
+      _noPasswordConfigured = true;
     } catch (e) {
-      // Handle sign-in error (e.g., show error message in UI)
-      print("Failed to sign in with custom token: $e");
       rethrow;
     }
   }
