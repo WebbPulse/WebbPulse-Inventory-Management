@@ -41,12 +41,26 @@ class AuthenticationChangeNotifier extends ChangeNotifier {
 
   Future<void> signInWithCustomToken(String token) async {
     try {
+      // Try signing in with the provided custom token
       await FirebaseAuth.instance.signInWithCustomToken(token);
-      _noPasswordConfigured = true;
       notifyListeners();
-    } catch (e) {
-      rethrow;
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'user-token-expired' || e.code == 'invalid-custom-token') {
+        // Handle token expiration or invalid token here
+        _authError = 'The provided token is invalid or has expired.';
+      } else {
+        _authError = 'An unexpected error occurred: ${e.message}';
+      }
+      notifyListeners();
     }
+  }
+
+  String? _authError;
+  String? get authError => _authError;
+
+  void clearError() {
+    _authError = null;
+    notifyListeners();
   }
 
   Future<void> setNewPassword(String newPassword) async {
