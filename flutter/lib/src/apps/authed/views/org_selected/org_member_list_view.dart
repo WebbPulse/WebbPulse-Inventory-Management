@@ -83,7 +83,6 @@ class OrgMemberList extends StatefulWidget {
 }
 
 class _OrgMemberListState extends State<OrgMemberList> {
-  final ValueNotifier<String> _searchQuery = ValueNotifier<String>('');
   String _sortCriteria = 'Display Name'; // Initialize sort criteria
   String _roleFilterCriteria = 'All'; // Initialize role filter criteria
 
