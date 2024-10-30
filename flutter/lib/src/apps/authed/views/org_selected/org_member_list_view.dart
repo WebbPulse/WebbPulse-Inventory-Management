@@ -21,15 +21,14 @@ import 'package:webbpulse_inventory_management/src/shared/widgets/org_widgets.da
 /// OrgMemberListView displays a list of members in the selected organization.
 /// It also includes functionality for searching, adding, and managing users.
 class OrgMemberListView extends StatelessWidget {
-  OrgMemberListView({super.key});
-
-  static const routeName = '/users'; // Route name for navigation
-  final ValueNotifier<String> _searchQuery =
-      ValueNotifier<String>(''); // Search query state
+  const OrgMemberListView({super.key});
+  static const routeName = '/users';
 
   @override
   Widget build(BuildContext context) {
-    ThemeData theme = Theme.of(context); // Getting the current theme
+    ThemeData theme = Theme.of(context);
+    final ValueNotifier<String> _searchQuery = ValueNotifier<String>(''); // Move searchQuery here
+    
     return Consumer<OrgSelectorChangeNotifier>(
       builder: (context, orgSelectorChangeNotifier, child) {
         return AuthClaimChecker(
@@ -38,13 +37,9 @@ class OrgMemberListView extends StatelessWidget {
               appBar: OrgNameAppBar(
                 titleSuffix: 'Users',
                 actions: [
-                  // Display the "Add New User" button only if the user is an organization admin
-                  if (userClaims[
-                          'org_admin_${orgSelectorChangeNotifier.orgId}'] ==
-                      true)
+                  if (userClaims['org_admin_${orgSelectorChangeNotifier.orgId}'] == true)
                     ElevatedButton.icon(
                       onPressed: () {
-                        // Show dialog to add a new user
                         showDialog(
                           context: context,
                           builder: (BuildContext context) {
@@ -53,8 +48,7 @@ class OrgMemberListView extends StatelessWidget {
                         );
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            theme.colorScheme.surface.withOpacity(0.95),
+                        backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
                         side: BorderSide(
                           color: theme.colorScheme.primary.withOpacity(0.5),
                           width: 1.5,
@@ -66,98 +60,9 @@ class OrgMemberListView extends StatelessWidget {
                     ),
                 ],
               ),
-              drawer: const AuthedDrawer(), // Drawer for navigation
-              body: Consumer<FirestoreReadService>(
-                builder: (context, firestoreReadService, child) {
-                  // StreamBuilder to get the list of organization members from Firestore
-                  return StreamBuilder<List<DocumentSnapshot>>(
-                    stream: firestoreReadService.getOrgMembersDocuments(
-                        orgSelectorChangeNotifier.orgId),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(
-                            child:
-                                CircularProgressIndicator()); // Show loading indicator
-                      } else if (snapshot.hasError) {
-                        return const Center(
-                            child: Text(
-                                'Error loading users')); // Show error if failed to load
-                      }
-
-                      final List<DocumentSnapshot> orgMemberDocs =
-                          snapshot.data!; // Retrieve the documents
-
-                      return Column(
-                        children: [
-                          // Search field for filtering users
-                          SearchTextField(searchQuery: _searchQuery),
-                          Expanded(
-                            child: ValueListenableBuilder<String>(
-                              valueListenable: _searchQuery,
-                              builder: (context, query, child) {
-                                final lowerCaseQuery = query
-                                    .toLowerCase(); // Convert search query to lowercase
-
-                                // Filter the user documents based on the search query
-                                final filteredMemberDocs =
-                                    orgMemberDocs.where((doc) {
-                                  final data =
-                                      doc.data() as Map<String, dynamic>;
-                                  final orgMemberEmail =
-                                      (data['orgMemberEmail'] ?? '')
-                                          .toString()
-                                          .toLowerCase();
-                                  final orgMemberDisplayName =
-                                      (data['orgMemberDisplayName'] ?? '')
-                                          .toString()
-                                          .toLowerCase();
-                                  final orgMemberRole =
-                                      (data['orgMemberRole'] == 'admin'
-                                              ? 'Org Admin'
-                                              : 'Org Member')
-                                          .toLowerCase();
-
-                                  return orgMemberEmail
-                                          .contains(lowerCaseQuery) ||
-                                      orgMemberDisplayName
-                                          .contains(lowerCaseQuery) ||
-                                      orgMemberRole.contains(lowerCaseQuery);
-                                }).toList();
-
-                                // Display filtered list of users or a message if no users are found
-                                return filteredMemberDocs.isNotEmpty
-                                    ? LayoutBuilder(
-                                        builder: (context, constraints) {
-                                        return SizedBox(
-                                          width: constraints.maxWidth * 0.95,
-                                          child: ListView.builder(
-                                            physics:
-                                                const BouncingScrollPhysics(),
-                                            itemCount:
-                                                filteredMemberDocs.length,
-                                            itemBuilder: (context, index) {
-                                              Map<String, dynamic> userData =
-                                                  filteredMemberDocs[index]
-                                                          .data()
-                                                      as Map<String, dynamic>;
-                                              return UserCard(
-                                                  userData:
-                                                      userData); // Display each user in a card
-                                            },
-                                          ),
-                                        );
-                                      })
-                                    : const Center(
-                                        child: Text(
-                                            'No users found')); // Show message if no users match
-                              },
-                            ),
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                },
+              drawer: const AuthedDrawer(),
+              body: OrgMemberList(
+                searchQuery: _searchQuery, // Pass searchQuery here
               ),
             );
           },
@@ -167,7 +72,176 @@ class OrgMemberListView extends StatelessWidget {
   }
 }
 
-/// SearchTextField provides a search input field for filtering users in the list.
+
+class OrgMemberList extends StatefulWidget {
+  final ValueNotifier<String> searchQuery;
+
+  const OrgMemberList({super.key, required this.searchQuery});
+
+  @override
+  State<OrgMemberList> createState() => _OrgMemberListState();
+}
+
+class _OrgMemberListState extends State<OrgMemberList> {
+  final ValueNotifier<String> _searchQuery = ValueNotifier<String>('');
+  String _sortCriteria = 'Display Name'; // Initialize sort criteria
+  String _roleFilterCriteria = 'All'; // Initialize role filter criteria
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer2<FirestoreReadService, OrgSelectorChangeNotifier>(
+      builder: (context, firestoreReadService, orgSelectorChangeNotifier, child) {
+        return StreamBuilder<List<DocumentSnapshot>>(
+          stream: firestoreReadService.getOrgMembersDocuments(orgSelectorChangeNotifier.orgId),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return const Center(child: Text('Error loading users'));
+            }
+
+            final List<DocumentSnapshot> orgMemberDocs = snapshot.data!;
+
+            return Column(
+              children: [
+                // Search Field
+                SearchTextField(searchQuery: widget.searchQuery),
+
+                // Sort Dropdown
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      const Text('Sort by:'),
+                      const SizedBox(width: 16.0),
+                      DropdownButton<String>(
+                        value: _sortCriteria,
+                        items: <String>['Display Name', 'Email', 'Role'].map((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(value),
+                          );
+                        }).toList(),
+                        onChanged: (String? newValue) {
+                          if (newValue != null) {
+                            setState(() {
+                              _sortCriteria = newValue; // Update sort criteria
+                            });
+                          }
+                        },
+                      ),
+                      const SizedBox(width: 16.0),
+                      const Text('Filter by Role:'),
+                      const SizedBox(width: 16.0),
+                      DropdownButton<String>(
+                        value: _roleFilterCriteria,
+                        items: <String>['All', 'Org Member', 'Admin', 'Deskstation'].map((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(value),
+                          );
+                        }).toList(),
+                        onChanged: (String? newValue) {
+                          if (newValue != null) {
+                            setState(() {
+                              _roleFilterCriteria = newValue; // Update sort criteria
+                            });
+                          }
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Filtered and Sorted List
+                Expanded(
+                  child: ValueListenableBuilder<String>(
+                    valueListenable: widget.searchQuery,
+                    builder: (context, query, child) {
+                      final lowerCaseQuery = query.toLowerCase();
+
+                      final filteredMemberDocs = orgMemberDocs.where((doc) {
+                        final data = doc.data() as Map<String, dynamic>;
+                        final orgMemberEmail = (data['orgMemberEmail'] ?? '').toString().toLowerCase();
+                        final orgMemberDisplayName = (data['orgMemberDisplayName'] ?? '').toString().toLowerCase();
+                        final orgMemberRole = (data['orgMemberRole'] == 'admin' ? 'Org Admin' : 'Org Member').toLowerCase();
+
+                        return orgMemberEmail.contains(lowerCaseQuery) ||
+                            orgMemberDisplayName.contains(lowerCaseQuery) ||
+                            orgMemberRole.contains(lowerCaseQuery);
+                      }).toList();
+                      
+                      filteredMemberDocs.retainWhere((doc) {
+                        final data = doc.data() as Map<String, dynamic>;
+                        final orgMemberRole = (data['orgMemberRole'] == 'admin' ? 'Org Admin' : 'Org Member').toLowerCase();
+
+                        if (_roleFilterCriteria == 'All') {
+                          return true;
+                        }
+                        else if (_roleFilterCriteria == 'Org Member') {
+                          return orgMemberRole == 'org member';
+                        }
+                        else if (_roleFilterCriteria == 'Admin') {
+                          return orgMemberRole == 'org admin';
+                        }
+                        else {
+                          return orgMemberRole == 'deskstation';
+                        }
+                      });
+
+                      // Sort based on the selected criteria
+                      filteredMemberDocs.sort((a, b) {
+                        final orgMemberDataA = a.data() as Map<String, dynamic>;
+                        final orgMemberDataB = b.data() as Map<String, dynamic>;
+
+                        if (_sortCriteria == 'Email') {
+                          return (orgMemberDataA['orgMemberEmail'] ?? '').toString().toLowerCase()
+                              .compareTo((orgMemberDataB['orgMemberEmail'] ?? '').toString().toLowerCase());
+                        }
+                        else if (_sortCriteria == 'Role') {
+                          return (orgMemberDataA['orgMemberRole'] ?? '').toString().toLowerCase()
+                              .compareTo((orgMemberDataB['orgMemberRole'] ?? '').toString().toLowerCase());
+                        }
+                        else {
+                          return (orgMemberDataA['orgMemberDisplayName'] ?? '').toString().toLowerCase()
+                              .compareTo((orgMemberDataB['orgMemberDisplayName'] ?? '').toString().toLowerCase());
+                        }
+                      });
+
+                      return filteredMemberDocs.isNotEmpty
+                          ? LayoutBuilder(
+                              builder: (context, constraints) {
+                                return SizedBox(
+                                  width: constraints.maxWidth * 0.95,
+                                  child: ListView.builder(
+                                    physics: const BouncingScrollPhysics(),
+                                    itemCount: filteredMemberDocs.length,
+                                    itemBuilder: (context, index) {
+                                      Map<String, dynamic> userData =
+                                          filteredMemberDocs[index].data() as Map<String, dynamic>;
+                                      return UserCard(userData: userData);
+                                    },
+                                  ),
+                                );
+                              },
+                            )
+                          : const Center(child: Text('No users found'));
+                    },
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+
+
+
 class SearchTextField extends StatefulWidget {
   final ValueNotifier<String> searchQuery;
 
@@ -178,12 +252,31 @@ class SearchTextField extends StatefulWidget {
 }
 
 class SearchTextFieldState extends State<SearchTextField> {
-  final TextEditingController _searchController = TextEditingController();
+  late TextEditingController _searchController;
+  late VoidCallback _listener;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize the controller with the current value of searchQuery
+    _searchController = TextEditingController(text: widget.searchQuery.value);
+
+    // Define the listener to synchronize the controller text with searchQuery
+    _listener = () {
+      if (_searchController.text != widget.searchQuery.value) {
+        _searchController.text = widget.searchQuery.value;
+      }
+    };
+
+    // Attach the listener to searchQuery
+    widget.searchQuery.addListener(_listener);
+  }
 
   @override
   void dispose() {
-    _searchController
-        .dispose(); // Dispose the controller when the widget is removed
+    // Remove the listener before disposing of the controller
+    widget.searchQuery.removeListener(_listener);
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -194,10 +287,10 @@ class SearchTextFieldState extends State<SearchTextField> {
       child: TextField(
         controller: _searchController,
         decoration: InputDecoration(
-          labelText: 'Search by Email or Display Name',
+          labelText: 'Search Users',
           border: const OutlineInputBorder(),
           suffixIcon: IconButton(
-            icon: const Icon(Icons.clear), // Clear button for the search field
+            icon: const Icon(Icons.clear),
             onPressed: () {
               _searchController.clear(); // Clear the search field
               widget.searchQuery.value = ''; // Reset the search query
@@ -205,13 +298,14 @@ class SearchTextFieldState extends State<SearchTextField> {
           ),
         ),
         onChanged: (value) {
-          widget.searchQuery.value =
-              value; // Update search query as the user types
+          widget.searchQuery.value = value; // Update search query as the user types
         },
       ),
     );
   }
 }
+
+
 
 /// AddUserAlertDialog allows admins to add users to the organization either by entering individual emails or uploading a CSV file.
 class AddUserAlertDialog extends StatefulWidget {
