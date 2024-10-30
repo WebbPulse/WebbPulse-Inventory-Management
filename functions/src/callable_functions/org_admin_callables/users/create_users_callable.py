@@ -2,7 +2,7 @@ from src.shared import auth, https_fn, POSTcorsrules, Any, UserNotFoundError, ch
 from src.helper_functions.users.create_global_user_profile import create_global_user_profile
 from src.helper_functions.users.add_user_to_organization import add_user_to_organization
 
-@https_fn.on_call(cors=POSTcorsrules)
+@https_fn.on_call(cors=POSTcorsrules, timeout_sec=540)
 def create_users_callable(req: https_fn.CallableRequest) -> Any:
     """
     Firebase Function to create or add users to an organization based on a list of emails.
