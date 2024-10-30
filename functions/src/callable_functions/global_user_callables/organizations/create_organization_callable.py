@@ -49,7 +49,7 @@ def create_organization_callable(req: https_fn.CallableRequest) -> Any:
         })
 
         # Step 8: Add the user to the organization as a member and set their role as an admin.
-        add_user_to_organization(uid, org_id, org_member_display_name, org_member_email)  # Add the user to the organization.
+        add_user_to_organization(uid, org_id, org_member_display_name, org_member_email, org_member_display_name)  # Add the user to the organization.
         update_user_roles(uid, "admin", org_id, False)  # Assign the user an admin role for the organization.
 
         # Step 9: Return a success response with the organization ID.
