@@ -1,6 +1,6 @@
 from src.shared import POSTcorsrules, db, firestore, https_fn, Any, check_user_is_org_member, check_user_is_authed, check_user_token_current, check_user_is_email_verified
 
-@https_fn.on_call(cors=POSTcorsrules)
+@https_fn.on_call(cors=POSTcorsrules, timeout_sec=540)
 def create_devices_callable(req: https_fn.CallableRequest) -> Any:
     """
     Firebase Function to create devices for an organization.
