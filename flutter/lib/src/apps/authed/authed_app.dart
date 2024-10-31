@@ -94,9 +94,9 @@ class AuthedApp extends StatelessWidget {
                     .themeMode, // Set theme mode based on user settings
                 // Define route generation logic
                 onGenerateRoute: (RouteSettings routeSettings) {
-                  
                   // Handle routes for first time account setup views
-                  if (authProvider.noPasswordConfigured == true  || routeSettings.name == ConfigurePasswordView.routeName) {
+                  if (authProvider.noPasswordConfigured == true ||
+                      routeSettings.name == ConfigurePasswordView.routeName) {
                     return MaterialPageRoute<void>(
                       builder: (context) => const ConfigurePasswordView(),
                     );
@@ -125,9 +125,9 @@ class AuthedApp extends StatelessWidget {
                       );
                   }
 
-                  
                   // If no organization is selected, show the OrgSelectionView
-                  if (orgSelectorProvider.orgId.isEmpty || routeSettings.name==OrgSelectionView.routeName) {
+                  if (orgSelectorProvider.orgId.isEmpty ||
+                      routeSettings.name == OrgSelectionView.routeName) {
                     return MaterialPageRoute<void>(
                       builder: (context) => const OrgSelectionView(),
                     );
@@ -152,7 +152,7 @@ class AuthedApp extends StatelessWidget {
                       );
                     case OrgMemberListView.routeName:
                       return MaterialPageRoute<void>(
-                        builder: (context) => OrgMemberListView(),
+                        builder: (context) => const OrgMemberListView(),
                       );
                     case OrgSettingsView.routeName:
                       return MaterialPageRoute<void>(

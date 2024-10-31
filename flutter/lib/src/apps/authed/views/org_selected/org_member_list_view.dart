@@ -27,8 +27,9 @@ class OrgMemberListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     ThemeData theme = Theme.of(context);
-    final ValueNotifier<String> _searchQuery = ValueNotifier<String>(''); // Move searchQuery here
-    
+    final ValueNotifier<String> searchQuery =
+        ValueNotifier<String>(''); // Move searchQuery here
+
     return Consumer<OrgSelectorChangeNotifier>(
       builder: (context, orgSelectorChangeNotifier, child) {
         return AuthClaimChecker(
@@ -37,7 +38,9 @@ class OrgMemberListView extends StatelessWidget {
               appBar: OrgNameAppBar(
                 titleSuffix: 'Users',
                 actions: [
-                  if (userClaims['org_admin_${orgSelectorChangeNotifier.orgId}'] == true)
+                  if (userClaims[
+                          'org_admin_${orgSelectorChangeNotifier.orgId}'] ==
+                      true)
                     ElevatedButton.icon(
                       onPressed: () {
                         showDialog(
@@ -48,7 +51,8 @@ class OrgMemberListView extends StatelessWidget {
                         );
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
+                        backgroundColor:
+                            theme.colorScheme.surface.withOpacity(0.95),
                         side: BorderSide(
                           color: theme.colorScheme.primary.withOpacity(0.5),
                           width: 1.5,
@@ -62,7 +66,7 @@ class OrgMemberListView extends StatelessWidget {
               ),
               drawer: const AuthedDrawer(),
               body: OrgMemberList(
-                searchQuery: _searchQuery, // Pass searchQuery here
+                searchQuery: searchQuery, // Pass searchQuery here
               ),
             );
           },
@@ -71,7 +75,6 @@ class OrgMemberListView extends StatelessWidget {
     );
   }
 }
-
 
 class OrgMemberList extends StatefulWidget {
   final ValueNotifier<String> searchQuery;
@@ -89,9 +92,11 @@ class _OrgMemberListState extends State<OrgMemberList> {
   @override
   Widget build(BuildContext context) {
     return Consumer2<FirestoreReadService, OrgSelectorChangeNotifier>(
-      builder: (context, firestoreReadService, orgSelectorChangeNotifier, child) {
+      builder:
+          (context, firestoreReadService, orgSelectorChangeNotifier, child) {
         return StreamBuilder<List<DocumentSnapshot>>(
-          stream: firestoreReadService.getOrgMembersDocuments(orgSelectorChangeNotifier.orgId),
+          stream: firestoreReadService
+              .getOrgMembersDocuments(orgSelectorChangeNotifier.orgId),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
@@ -108,7 +113,8 @@ class _OrgMemberListState extends State<OrgMemberList> {
 
                 // Sort Dropdown
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0, vertical: 8.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
@@ -116,7 +122,8 @@ class _OrgMemberListState extends State<OrgMemberList> {
                       const SizedBox(width: 16.0),
                       DropdownButton<String>(
                         value: _sortCriteria,
-                        items: <String>['Display Name', 'Email', 'Role'].map((String value) {
+                        items: <String>['Display Name', 'Email', 'Role']
+                            .map((String value) {
                           return DropdownMenuItem<String>(
                             value: value,
                             child: Text(value),
@@ -135,7 +142,12 @@ class _OrgMemberListState extends State<OrgMemberList> {
                       const SizedBox(width: 16.0),
                       DropdownButton<String>(
                         value: _roleFilterCriteria,
-                        items: <String>['All', 'Org Member', 'Admin', 'Deskstation'].map((String value) {
+                        items: <String>[
+                          'All',
+                          'Org Member',
+                          'Admin',
+                          'Deskstation'
+                        ].map((String value) {
                           return DropdownMenuItem<String>(
                             value: value,
                             child: Text(value),
@@ -144,7 +156,8 @@ class _OrgMemberListState extends State<OrgMemberList> {
                         onChanged: (String? newValue) {
                           if (newValue != null) {
                             setState(() {
-                              _roleFilterCriteria = newValue; // Update sort criteria
+                              _roleFilterCriteria =
+                                  newValue; // Update sort criteria
                             });
                           }
                         },
@@ -162,29 +175,37 @@ class _OrgMemberListState extends State<OrgMemberList> {
 
                       final filteredMemberDocs = orgMemberDocs.where((doc) {
                         final data = doc.data() as Map<String, dynamic>;
-                        final orgMemberEmail = (data['orgMemberEmail'] ?? '').toString().toLowerCase();
-                        final orgMemberDisplayName = (data['orgMemberDisplayName'] ?? '').toString().toLowerCase();
-                        final orgMemberRole = (data['orgMemberRole'] == 'admin' ? 'Org Admin' : 'Org Member').toLowerCase();
+                        final orgMemberEmail = (data['orgMemberEmail'] ?? '')
+                            .toString()
+                            .toLowerCase();
+                        final orgMemberDisplayName =
+                            (data['orgMemberDisplayName'] ?? '')
+                                .toString()
+                                .toLowerCase();
+                        final orgMemberRole = (data['orgMemberRole'] == 'admin'
+                                ? 'Org Admin'
+                                : 'Org Member')
+                            .toLowerCase();
 
                         return orgMemberEmail.contains(lowerCaseQuery) ||
                             orgMemberDisplayName.contains(lowerCaseQuery) ||
                             orgMemberRole.contains(lowerCaseQuery);
                       }).toList();
-                      
+
                       filteredMemberDocs.retainWhere((doc) {
                         final data = doc.data() as Map<String, dynamic>;
-                        final orgMemberRole = (data['orgMemberRole'] == 'admin' ? 'Org Admin' : 'Org Member').toLowerCase();
+                        final orgMemberRole = (data['orgMemberRole'] == 'admin'
+                                ? 'Org Admin'
+                                : 'Org Member')
+                            .toLowerCase();
 
                         if (_roleFilterCriteria == 'All') {
                           return true;
-                        }
-                        else if (_roleFilterCriteria == 'Org Member') {
+                        } else if (_roleFilterCriteria == 'Org Member') {
                           return orgMemberRole == 'org member';
-                        }
-                        else if (_roleFilterCriteria == 'Admin') {
+                        } else if (_roleFilterCriteria == 'Admin') {
                           return orgMemberRole == 'org admin';
-                        }
-                        else {
+                        } else {
                           return orgMemberRole == 'deskstation';
                         }
                       });
@@ -195,16 +216,28 @@ class _OrgMemberListState extends State<OrgMemberList> {
                         final orgMemberDataB = b.data() as Map<String, dynamic>;
 
                         if (_sortCriteria == 'Email') {
-                          return (orgMemberDataA['orgMemberEmail'] ?? '').toString().toLowerCase()
-                              .compareTo((orgMemberDataB['orgMemberEmail'] ?? '').toString().toLowerCase());
-                        }
-                        else if (_sortCriteria == 'Role') {
-                          return (orgMemberDataA['orgMemberRole'] ?? '').toString().toLowerCase()
-                              .compareTo((orgMemberDataB['orgMemberRole'] ?? '').toString().toLowerCase());
-                        }
-                        else {
-                          return (orgMemberDataA['orgMemberDisplayName'] ?? '').toString().toLowerCase()
-                              .compareTo((orgMemberDataB['orgMemberDisplayName'] ?? '').toString().toLowerCase());
+                          return (orgMemberDataA['orgMemberEmail'] ?? '')
+                              .toString()
+                              .toLowerCase()
+                              .compareTo(
+                                  (orgMemberDataB['orgMemberEmail'] ?? '')
+                                      .toString()
+                                      .toLowerCase());
+                        } else if (_sortCriteria == 'Role') {
+                          return (orgMemberDataA['orgMemberRole'] ?? '')
+                              .toString()
+                              .toLowerCase()
+                              .compareTo((orgMemberDataB['orgMemberRole'] ?? '')
+                                  .toString()
+                                  .toLowerCase());
+                        } else {
+                          return (orgMemberDataA['orgMemberDisplayName'] ?? '')
+                              .toString()
+                              .toLowerCase()
+                              .compareTo(
+                                  (orgMemberDataB['orgMemberDisplayName'] ?? '')
+                                      .toString()
+                                      .toLowerCase());
                         }
                       });
 
@@ -218,7 +251,8 @@ class _OrgMemberListState extends State<OrgMemberList> {
                                     itemCount: filteredMemberDocs.length,
                                     itemBuilder: (context, index) {
                                       Map<String, dynamic> userData =
-                                          filteredMemberDocs[index].data() as Map<String, dynamic>;
+                                          filteredMemberDocs[index].data()
+                                              as Map<String, dynamic>;
                                       return UserCard(userData: userData);
                                     },
                                   ),
@@ -237,9 +271,6 @@ class _OrgMemberListState extends State<OrgMemberList> {
     );
   }
 }
-
-
-
 
 class SearchTextField extends StatefulWidget {
   final ValueNotifier<String> searchQuery;
@@ -297,14 +328,13 @@ class SearchTextFieldState extends State<SearchTextField> {
           ),
         ),
         onChanged: (value) {
-          widget.searchQuery.value = value; // Update search query as the user types
+          widget.searchQuery.value =
+              value; // Update search query as the user types
         },
       ),
     );
   }
 }
-
-
 
 /// AddUserAlertDialog allows admins to add users to the organization either by entering individual emails or uploading a CSV file.
 class AddUserAlertDialog extends StatefulWidget {
@@ -376,7 +406,8 @@ class AddUserAlertDialogState extends State<AddUserAlertDialog> {
             context, 'Failed to get storage directory');
       }
     } else {
-      await AsyncContextHelpers.showSnackBarIfMounted(context, 'Permission denied');
+      await AsyncContextHelpers.showSnackBarIfMounted(
+          context, 'Permission denied');
     }
   }
 
