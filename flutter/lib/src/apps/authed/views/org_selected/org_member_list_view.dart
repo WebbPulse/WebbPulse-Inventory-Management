@@ -27,8 +27,7 @@ class OrgMemberListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     ThemeData theme = Theme.of(context);
-    final ValueNotifier<String> searchQuery =
-        ValueNotifier<String>(''); // Move searchQuery here
+    final ValueNotifier<String> searchQuery = ValueNotifier<String>('');
 
     return Consumer<OrgSelectorChangeNotifier>(
       builder: (context, orgSelectorChangeNotifier, child) {
@@ -145,8 +144,8 @@ class _OrgMemberListState extends State<OrgMemberList> {
                         items: <String>[
                           'All',
                           'Org Member',
-                          'Admin',
-                          'Deskstation'
+                          'Org Admin',
+                          'Desk Station'
                         ].map((String value) {
                           return DropdownMenuItem<String>(
                             value: value,
@@ -173,7 +172,7 @@ class _OrgMemberListState extends State<OrgMemberList> {
                     builder: (context, query, child) {
                       final lowerCaseQuery = query.toLowerCase();
 
-                      final filteredMemberDocs = orgMemberDocs.where((doc) {
+                      final searchedMemberDocs = orgMemberDocs.where((doc) {
                         final data = doc.data() as Map<String, dynamic>;
                         final orgMemberEmail = (data['orgMemberEmail'] ?? '')
                             .toString()
@@ -184,7 +183,10 @@ class _OrgMemberListState extends State<OrgMemberList> {
                                 .toLowerCase();
                         final orgMemberRole = (data['orgMemberRole'] == 'admin'
                                 ? 'Org Admin'
-                                : 'Org Member')
+                                : data['orgMemberRole'] == 'deskstation'
+                                    ? 'Desk Station'
+                                    : 'Org Member')
+                            .toString()
                             .toLowerCase();
 
                         return orgMemberEmail.contains(lowerCaseQuery) ||
@@ -192,26 +194,27 @@ class _OrgMemberListState extends State<OrgMemberList> {
                             orgMemberRole.contains(lowerCaseQuery);
                       }).toList();
 
-                      filteredMemberDocs.retainWhere((doc) {
+                      searchedMemberDocs.retainWhere((doc) {
                         final data = doc.data() as Map<String, dynamic>;
                         final orgMemberRole = (data['orgMemberRole'] == 'admin'
-                                ? 'Org Admin'
-                                : 'Org Member')
-                            .toLowerCase();
+                            ? 'Org Admin'
+                            : data['orgMemberRole'] == 'deskstation'
+                                ? 'Desk Station'
+                                : 'Org Member');
 
                         if (_roleFilterCriteria == 'All') {
                           return true;
                         } else if (_roleFilterCriteria == 'Org Member') {
-                          return orgMemberRole == 'org member';
-                        } else if (_roleFilterCriteria == 'Admin') {
-                          return orgMemberRole == 'org admin';
+                          return orgMemberRole == 'Org Member';
+                        } else if (_roleFilterCriteria == 'Org Admin') {
+                          return orgMemberRole == 'Org Admin';
                         } else {
-                          return orgMemberRole == 'deskstation';
+                          return orgMemberRole == 'Desk Station';
                         }
                       });
 
                       // Sort based on the selected criteria
-                      filteredMemberDocs.sort((a, b) {
+                      searchedMemberDocs.sort((a, b) {
                         final orgMemberDataA = a.data() as Map<String, dynamic>;
                         final orgMemberDataB = b.data() as Map<String, dynamic>;
 
@@ -241,17 +244,17 @@ class _OrgMemberListState extends State<OrgMemberList> {
                         }
                       });
 
-                      return filteredMemberDocs.isNotEmpty
+                      return searchedMemberDocs.isNotEmpty
                           ? LayoutBuilder(
                               builder: (context, constraints) {
                                 return SizedBox(
                                   width: constraints.maxWidth * 0.95,
                                   child: ListView.builder(
                                     physics: const BouncingScrollPhysics(),
-                                    itemCount: filteredMemberDocs.length,
+                                    itemCount: searchedMemberDocs.length,
                                     itemBuilder: (context, index) {
                                       Map<String, dynamic> userData =
-                                          filteredMemberDocs[index].data()
+                                          searchedMemberDocs[index].data()
                                               as Map<String, dynamic>;
                                       return UserCard(userData: userData);
                                     },
@@ -635,7 +638,12 @@ class UserCard extends StatelessWidget {
                 Text('Role: ',
                     style: theme.textTheme.labelSmall
                         ?.copyWith(fontWeight: FontWeight.bold)),
-                Text(orgMemberRole == 'admin' ? 'Org Admin' : 'Org Member',
+                Text(
+                    orgMemberRole == 'admin'
+                        ? 'Org Admin'
+                        : orgMemberRole == 'deskstation'
+                            ? ' Desk Station'
+                            : 'Org Member',
                     style: theme.textTheme.labelSmall),
               ],
             ),
