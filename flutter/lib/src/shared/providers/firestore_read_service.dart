@@ -83,30 +83,27 @@ class FirestoreReadService {
   }
 
   /// Stream that returns a list of all device documents in an organization
-  Stream<List<DocumentSnapshot>> getOrgDevicesDocuments(String orgId) {
-    CollectionReference collectionRef =
-        _db.collection('organizations').doc(orgId).collection('devices');
-    return collectionRef.snapshots().map((querySnapshot) {
-      return querySnapshot.docs; // Return a list of device documents
-    }).handleError((error) {
-      return <DocumentSnapshot>[]; // Return an empty list in case of error
-    });
-  }
-
-  /// Stream that returns a list of device documents checked out by a specific organization member
-  Stream<List<DocumentSnapshot>> getOrgMemberDevicesDocuments(
-      String orgId, String orgMemberId) {
+  Stream<List<DocumentSnapshot>> getOrgDevicesDocuments(
+      String orgId, String? orgMemberId) {
     CollectionReference collectionRef =
         _db.collection('organizations').doc(orgId).collection('devices');
 
-    return collectionRef
-        .where('deviceCheckedOutBy', isEqualTo: orgMemberId)
-        .snapshots()
-        .map((querySnapshot) =>
-            querySnapshot.docs) // Map the query result to a list of documents
-        .handleError((error) {
-      return <DocumentSnapshot>[]; // Return an empty list in case of error
-    });
+    if (orgMemberId != null) {
+      return collectionRef
+          .where('deviceCheckedOutBy', isEqualTo: orgMemberId)
+          .snapshots()
+          .map((querySnapshot) =>
+              querySnapshot.docs) // Map the query result to a list of documents
+          .handleError((error) {
+        return <DocumentSnapshot>[]; // Return an empty list in case of error
+      });
+    } else {
+      return collectionRef.snapshots().map((querySnapshot) {
+        return querySnapshot.docs; // Return a list of device documents
+      }).handleError((error) {
+        return <DocumentSnapshot>[]; // Return an empty list in case of error
+      });
+    }
   }
 
   /// Stream that returns a list of member documents in an organization

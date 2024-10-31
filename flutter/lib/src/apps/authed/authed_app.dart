@@ -136,7 +136,7 @@ class AuthedApp extends StatelessWidget {
                   // Provider dependant view, make sure you can only get there if you set the provider properly
                   if (orgMemberSelectorProvider.orgMemberId.isNotEmpty) {
                     return MaterialPageRoute<void>(
-                      builder: (context) => const OrgMemberView(),
+                      builder: (context) => OrgMemberView(),
                     );
                   }
 
@@ -144,7 +144,7 @@ class AuthedApp extends StatelessWidget {
                   switch (routeSettings.name) {
                     case OrgDeviceListView.routeName:
                       return MaterialPageRoute<void>(
-                        builder: (context) => const OrgDeviceListView(),
+                        builder: (context) => OrgDeviceListView(),
                       );
                     case DeviceCheckoutView.routeName:
                       return MaterialPageRoute<void>(

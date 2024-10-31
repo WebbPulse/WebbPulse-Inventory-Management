@@ -13,8 +13,9 @@ import 'package:webbpulse_inventory_management/src/shared/widgets/user_widgets.d
 /// OrgMemberView is the screen where an admin can manage a selected organization member.
 /// It displays the member's profile, roles, and their checked-out devices.
 class OrgMemberView extends StatelessWidget {
-  const OrgMemberView({super.key});
+  OrgMemberView({super.key});
   static const routeName = '/manage-user';
+  final ValueNotifier<String> searchQuery = ValueNotifier<String>('');
 
   @override
   Widget build(BuildContext context) {
@@ -185,40 +186,14 @@ class OrgMemberView extends StatelessWidget {
                                           ?.copyWith(
                                               fontWeight: FontWeight.bold),
                                     ),
-                                    StreamBuilder<List<DocumentSnapshot>>(
-                                      stream: firestoreService
-                                          .getOrgMemberDevicesDocuments(
-                                              orgSelectorChangeNotifier.orgId,
-                                              orgMemberSelectorProvider
-                                                  .orgMemberId),
-                                      builder: (context, snapshot) {
-                                        if (snapshot.connectionState ==
-                                            ConnectionState.waiting) {
-                                          return const Center(
-                                              child:
-                                                  CircularProgressIndicator());
-                                        } else if (snapshot.hasError) {
-                                          return const Center(
-                                              child: Text(
-                                                  'Error loading devices'));
-                                        }
 
-                                        // If there are no devices found
-                                        if (!snapshot.hasData ||
-                                            snapshot.data!.isEmpty) {
-                                          return const Center(
-                                              child: Text('No devices found'));
-                                        }
-
-                                        final List<DocumentSnapshot>
-                                            devicesDocs = snapshot.data!;
-
-                                        return Expanded(
-                                          // Display a list of checked-out devices
-                                          child: DeviceList(
-                                              devicesDocs: devicesDocs),
-                                        );
-                                      },
+                                    Expanded(
+                                      // Display a list of checked-out devices
+                                      child: DeviceList(
+                                        orgMemberId:
+                                            orgMemberData['orgMemberId'],
+                                        searchQuery: searchQuery,
+                                      ),
                                     ),
                                   ],
                                 ),
