@@ -236,16 +236,28 @@ class SerialSearchTextField extends StatefulWidget {
 
 class SerialSearchTextFieldState extends State<SerialSearchTextField> {
   late TextEditingController _searchController;
+  late VoidCallback _listener;
 
   @override
   void initState() {
     super.initState();
-    _searchController =
-        TextEditingController(); // Controller for the search field
+    // Initialize the controller with the current value of searchQuery
+    _searchController = TextEditingController(text: widget.searchQuery.value);
+
+    // Define the listener to synchronize the controller text with searchQuery
+    _listener = () {
+      if (_searchController.text != widget.searchQuery.value) {
+        _searchController.text = widget.searchQuery.value;
+      }
+    };
+
+    // Attach the listener to searchQuery
+    widget.searchQuery.addListener(_listener);
   }
 
   @override
   void dispose() {
+    widget.searchQuery.removeListener(_listener);
     _searchController.dispose();
     super.dispose();
   }
