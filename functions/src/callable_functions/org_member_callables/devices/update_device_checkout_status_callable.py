@@ -14,6 +14,7 @@ def update_device_checkout_status_callable(req: https_fn.CallableRequest) -> Any
         device_serial_number = req.data["deviceSerialNumber"]  # Serial number of the device.
         is_device_checked_out = req.data["isDeviceCheckedOut"]  # Boolean indicating if the device is checked out.
         device_checked_out_by = req.data["deviceCheckedOutBy"]  # The ID of the user who checked out the device.
+        device_checked_out_note = req.data["deviceCheckedOutNote"]  # Optional note about the device checkout.
 
         # Step 2: Perform authentication, email verification, and token validation checks.
         check_user_is_authed(req)  # Ensure the user is authenticated.
@@ -51,6 +52,7 @@ def update_device_checkout_status_callable(req: https_fn.CallableRequest) -> Any
                     'isDeviceCheckedOut': True,
                     'deviceCheckedOutBy': device_checked_out_by,  # Set the user who checked out the device.
                     'deviceCheckedOutAt': firestore.SERVER_TIMESTAMP,  # Set the current timestamp for checkout.
+                    'deviceCheckedOutNote': device_checked_out_note,  # Set the optional checkout note.
                 })
             else:
                 # If the device is being checked in, clear the checkout fields.
@@ -58,6 +60,7 @@ def update_device_checkout_status_callable(req: https_fn.CallableRequest) -> Any
                     'isDeviceCheckedOut': False,
                     'deviceCheckedOutBy': '',  # Clear the user who checked out the device.
                     'deviceCheckedOutAt': None,  # Clear the checkout timestamp.
+                    'deviceCheckedOutNote': '',  # Clear the checkout note.
                 })
         else:
             # If the device is not found in the organization's device collection, raise a NOT_FOUND error.
