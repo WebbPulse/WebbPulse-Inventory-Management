@@ -307,7 +307,7 @@ class SerialSearchTextFieldState extends State<SerialSearchTextField> {
 }
 
 class DeviceCardDesktop extends StatelessWidget {
-  DeviceCardDesktop({
+  const DeviceCardDesktop({
     super.key,
     required this.deviceData,
   });
@@ -327,6 +327,8 @@ class DeviceCardDesktop extends StatelessWidget {
         'deviceCheckedOutBy']; // ID of the member who checked out the device
     final bool isDeviceCheckedOut =
         deviceData['isDeviceCheckedOut']; // Check-in/out button
+    final String deviceCheckedOutNote =
+        deviceData['deviceCheckedOutNote'] ?? ''; // Device note
 
     final Timestamp deviceCheckedOutAtTimestamp =
         deviceData['deviceCheckedOutAt'] ??
@@ -401,6 +403,16 @@ class DeviceCardDesktop extends StatelessWidget {
                                           style: theme.textTheme.labelSmall),
                                     ],
                                   ),
+                                  Wrap(
+                                    children: [
+                                      Text('Checkout Note: ',
+                                          style: theme.textTheme.labelSmall
+                                              ?.copyWith(
+                                                  fontWeight: FontWeight.bold)),
+                                      Text(deviceCheckedOutNote,
+                                          style: theme.textTheme.labelSmall),
+                                    ],
+                                  ),
                                 ],
                               ],
                             ),
@@ -458,6 +470,8 @@ class DeviceCardMobile extends StatelessWidget {
         'deviceCheckedOutBy']; // ID of the member who checked out the device
     final bool isDeviceCheckedOut =
         deviceData['isDeviceCheckedOut']; // Check-in/out button
+    final String deviceCheckedOutNote =
+        deviceData['deviceCheckedOutNote'] ?? ''; // Device note
 
     final Timestamp deviceCheckedOutAtTimestamp =
         deviceData['deviceCheckedOutAt'] ??
@@ -522,6 +536,15 @@ class DeviceCardMobile extends StatelessWidget {
                                   style: theme.textTheme.labelSmall
                                       ?.copyWith(fontWeight: FontWeight.bold)),
                               Text(deviceCheckedOutAtFormatted,
+                                  style: theme.textTheme.labelSmall),
+                            ],
+                          ),
+                          Wrap(
+                            children: [
+                              Text('Checkout Note: ',
+                                  style: theme.textTheme.labelSmall
+                                      ?.copyWith(fontWeight: FontWeight.bold)),
+                              Text(deviceCheckedOutNote,
                                   style: theme.textTheme.labelSmall),
                             ],
                           ),
