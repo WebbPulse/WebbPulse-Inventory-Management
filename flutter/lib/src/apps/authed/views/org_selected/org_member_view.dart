@@ -7,7 +7,7 @@ import 'package:webbpulse_inventory_management/src/shared/providers/firestore_re
 import 'package:webbpulse_inventory_management/src/shared/providers/org_member_selector_change_notifier.dart';
 import 'package:webbpulse_inventory_management/src/shared/providers/org_selector_change_notifier.dart';
 import 'package:webbpulse_inventory_management/src/shared/widgets/widgets.dart';
-import 'package:webbpulse_inventory_management/src/shared/widgets/device_widgets.dart';
+import 'package:webbpulse_inventory_management/src/shared/widgets/devices/device_list.dart';
 import 'package:webbpulse_inventory_management/src/shared/widgets/user_widgets.dart';
 
 /// OrgMemberView is the screen where an admin can manage a selected organization member.

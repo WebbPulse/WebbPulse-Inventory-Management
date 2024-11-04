@@ -19,12 +19,12 @@ class DeviceCheckoutService {
 
   /// Main method to handle device check-in and check-out
   Future<void> handleDeviceCheckout(
-    BuildContext context,
-    String deviceSerialNumber, // The serial number of the device
-    String orgId, // The organization ID
-    String deviceCheckedOutBy, // The ID of the user checking out the device
-    bool checkOut, // Boolean flag to check in or check out
-  ) async {
+      BuildContext context,
+      String deviceSerialNumber, // The serial number of the device
+      String orgId, // The organization ID
+      String deviceCheckedOutBy, // The ID of the user checking out the device
+      bool checkOut, // Boolean flag to check in or check out
+      String deviceCheckedOutNote) async {
     if (deviceSerialNumber.isNotEmpty) {
       try {
         // Retrieve the authentication state from the provider
@@ -66,6 +66,7 @@ class DeviceCheckoutService {
             "orgId": orgId,
             "isDeviceCheckedOut": checkOut,
             "deviceCheckedOutBy": checkOut ? deviceCheckedOutBy : '',
+            "deviceCheckedOutNote": deviceCheckedOutNote
           });
 
           /// Show a message based on the action performed (check-in/check-out)
@@ -101,6 +102,7 @@ class DeviceCheckoutService {
               "orgId": orgId,
               "isDeviceCheckedOut": checkOut,
               "deviceCheckedOutBy": checkOut ? deviceCheckedOutBy : '',
+              "deviceCheckedOutNote": deviceCheckedOutNote
             });
 
             await AsyncContextHelpers.showSnackBarIfMounted(
@@ -117,7 +119,8 @@ class DeviceCheckoutService {
       }
     } else {
       /// If no serial number is provided, show a prompt to enter it
-      await AsyncContextHelpers.showSnackBarIfMounted(context, 'Please enter a serial number');
+      await AsyncContextHelpers.showSnackBarIfMounted(
+          context, 'Please enter a serial number');
     }
   }
 }

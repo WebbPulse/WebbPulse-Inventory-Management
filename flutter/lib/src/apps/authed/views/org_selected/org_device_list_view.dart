@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:webbpulse_inventory_management/src/shared/widgets/user_widgets.dart'; // Importing user-related widgets
 import 'package:webbpulse_inventory_management/src/shared/widgets/org_widgets.dart'; // Importing organization-related widgets
-import 'package:webbpulse_inventory_management/src/shared/widgets/device_widgets.dart'; // Importing device-related widgets
+import 'package:webbpulse_inventory_management/src/shared/widgets/devices/device_list.dart'; // Importing device-related widgets
+import 'package:webbpulse_inventory_management/src/shared/widgets/devices/add_device_alert_dialog.dart';
 
 /// OrgDeviceListView displays a list of devices for a selected organization.
 /// It also provides functionality for adding new devices to the organization.
