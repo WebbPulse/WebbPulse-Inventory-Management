@@ -63,61 +63,75 @@ class _DeviceListState extends State<DeviceList> {
 
                   // Sort Dropdown
                   Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16.0, vertical: 8.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        const Text('Sort by:'),
-                        const SizedBox(width: 16.0),
-                        DropdownButton<String>(
-                          value: _sortCriteria,
-                          items: <String>[
-                            'Checked Out',
-                            'Checked In',
-                            'Alphanumeric'
-                          ].map((String value) {
-                            return DropdownMenuItem<String>(
-                              value: value,
-                              child: Text(value),
-                            );
-                          }).toList(),
-                          onChanged: (String? newValue) {
-                            if (newValue != null) {
-                              setState(() {
-                                _sortCriteria =
-                                    newValue; // Update sort criteria
-                              });
-                            }
-                          },
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0, vertical: 8.0),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Wrap(
+                          spacing:
+                              16.0, // Adds space between the rows if they wrap
+                          children: [
+                            Row(
+                              mainAxisSize: MainAxisSize
+                                  .min, // Keeps the Row as compact as possible
+                              children: [
+                                const Text('Sort by:'),
+                                const SizedBox(width: 8.0),
+                                DropdownButton<String>(
+                                  value: _sortCriteria,
+                                  items: <String>[
+                                    'Checked Out',
+                                    'Checked In',
+                                    'Alphanumeric'
+                                  ].map((String value) {
+                                    return DropdownMenuItem<String>(
+                                      value: value,
+                                      child: Text(value),
+                                    );
+                                  }).toList(),
+                                  onChanged: (String? newValue) {
+                                    if (newValue != null) {
+                                      setState(() {
+                                        _sortCriteria =
+                                            newValue; // Update sort criteria
+                                      });
+                                    }
+                                  },
+                                ),
+                              ],
+                            ),
+                            Row(
+                              mainAxisSize: MainAxisSize
+                                  .min, // Keeps the Row as compact as possible
+                              children: [
+                                const Text('Filter by Status:'),
+                                const SizedBox(width: 8.0),
+                                DropdownButton<String>(
+                                  value: _statusFilterCriteria,
+                                  items: <String>[
+                                    'All',
+                                    'Checked Out',
+                                    'Checked In',
+                                  ].map((String value) {
+                                    return DropdownMenuItem<String>(
+                                      value: value,
+                                      child: Text(value),
+                                    );
+                                  }).toList(),
+                                  onChanged: (String? newValue) {
+                                    if (newValue != null) {
+                                      setState(() {
+                                        _statusFilterCriteria =
+                                            newValue; // Update filter criteria
+                                      });
+                                    }
+                                  },
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 16.0),
-                        const Text('Filter by Status:'),
-                        const SizedBox(width: 16.0),
-                        DropdownButton<String>(
-                          value: _statusFilterCriteria,
-                          items: <String>[
-                            'All',
-                            'Checked Out',
-                            'Checked In',
-                          ].map((String value) {
-                            return DropdownMenuItem<String>(
-                              value: value,
-                              child: Text(value),
-                            );
-                          }).toList(),
-                          onChanged: (String? newValue) {
-                            if (newValue != null) {
-                              setState(() {
-                                _statusFilterCriteria =
-                                    newValue; // Update sort criteria
-                              });
-                            }
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
+                      )),
 
                   Expanded(
                     child: ValueListenableBuilder<String>(
@@ -205,7 +219,7 @@ class _DeviceListState extends State<DeviceList> {
                                           searchedDevicesDocs[index].data()
                                               as Map<String, dynamic>;
 
-                                      return DeviceCard(
+                                      return DeviceCardMasterWidget(
                                         deviceData: deviceData,
                                       );
                                     },
@@ -289,8 +303,8 @@ class SerialSearchTextFieldState extends State<SerialSearchTextField> {
 }
 
 /// Widget to represent each individual device card in the list
-class DeviceCard extends StatelessWidget {
-  const DeviceCard({
+class DeviceCardMasterWidget extends StatelessWidget {
+  const DeviceCardMasterWidget({
     super.key,
     required this.deviceData,
   });
@@ -300,11 +314,24 @@ class DeviceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final String deviceId = deviceData['deviceId']; // Unique ID for the device
+    final String deviceId =
+        deviceData['deviceId']; // Retrieve the device ID from the passed data
     final String deviceSerialNumber =
         deviceData['deviceSerialNumber']; // Device serial number
     final bool deviceDeleted =
         deviceData['deviceDeleted'] ?? false; // Check if device is deleted
+    final String orgMemberId = deviceData[
+        'deviceCheckedOutBy']; // ID of the member who checked out the device
+    final bool isDeviceCheckedOut =
+        deviceData['isDeviceCheckedOut']; // Check-in/out button
+
+    final Timestamp deviceCheckedOutAtTimestamp =
+        deviceData['deviceCheckedOutAt'] ??
+            Timestamp.now(); // Timestamp of check-out
+    final DateTime deviceCheckedOutAt =
+        deviceCheckedOutAtTimestamp.toDate(); // Convert to DateTime
+    final String deviceCheckedOutAtFormatted = DateFormat('yyyy-MM-dd kk:mm a')
+        .format(deviceCheckedOutAt); // Format the date
 
     // Skip rendering if the device has been marked as deleted
     if (deviceDeleted) {
@@ -313,13 +340,16 @@ class DeviceCard extends StatelessWidget {
 
     return AuthClaimChecker(builder: (context, userClaims) {
       return Consumer4<FirestoreReadService, DeviceCheckoutService,
-          OrgSelectorChangeNotifier, FirebaseFunctions>(
-        builder: (context, firestoreService, deviceCheckoutService,
-            orgSelectorChangeNotifier, firebaseFunctions, child) {
-          // Stream the device data for updates
-          return StreamBuilder(
-            stream: firestoreService.getOrgDeviceDocument(
-                deviceId, orgSelectorChangeNotifier.orgId),
+              OrgSelectorChangeNotifier, FirebaseFunctions>(
+          builder: (context, firestoreService, deviceCheckoutService,
+              orgSelectorChangeNotifier, firebaseFunctions, child) {
+        final orgId =
+            orgSelectorChangeNotifier.orgId; // Current organization ID
+
+        // Stream the organization member data
+        return StreamBuilder<DocumentSnapshot?>(
+            stream: firestoreService.getOrgMemberDocument(
+                orgSelectorChangeNotifier.orgId, orgMemberId),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(
@@ -327,276 +357,208 @@ class DeviceCard extends StatelessWidget {
                         CircularProgressIndicator()); // Show loading indicator
               } else if (snapshot.hasError) {
                 return const Text(
-                    'Error loading devices'); // Show error message
-              }
-
-              final deviceData = snapshot.data?.data()
-                  as Map<String, dynamic>; // Fetch device data
-              final orgMemberId = deviceData[
-                  'deviceCheckedOutBy']; // ID of the member who checked out the device
-              final orgId =
-                  orgSelectorChangeNotifier.orgId; // Current organization ID
-
-              // Stream the organization member data
-              return StreamBuilder<DocumentSnapshot?>(
-                  stream: firestoreService.getOrgMemberDocument(
-                      orgSelectorChangeNotifier.orgId, orgMemberId),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(
-                          child:
-                              CircularProgressIndicator()); // Show loading indicator
-                    } else if (snapshot.hasError) {
-                      return const Text(
-                          'Error loading org member data'); // Show error message
-                    } else if (!snapshot.hasData ||
-                        snapshot.data == null ||
-                        snapshot.data!.data() == null) {
-                      // If no member data is available, show a basic device card layout
-                      return LayoutBuilder(builder: (context, constraints) {
-                        if (constraints.maxWidth < 600) {
-                          return CustomCard(
-                            theme: theme,
-                            customCardLeading: null,
-                            customCardTitle: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Icon(Icons.devices,
-                                      color: theme.colorScheme
-                                          .secondary), // Device icon
-                                  Wrap(
-                                    children: [
-                                      Text(deviceSerialNumber,
-                                          style: const TextStyle(
-                                              fontWeight: FontWeight.bold)),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Wrap(
-                                    alignment: WrapAlignment.start,
-                                    runSpacing: 8,
-                                    children: [
-                                      DeviceCheckoutButton(
-                                        deviceSerialNumber: deviceSerialNumber,
-                                        isDeviceCheckedOut: deviceData[
-                                            'isDeviceCheckedOut'], // Check-in/out button
-                                      ),
-                                      const SizedBox(width: 8),
-                                      if (userClaims['org_admin_$orgId'] ==
-                                          true)
-                                        DeleteDeviceButton(
-                                            deviceData:
-                                                deviceData), // Delete button if the user is admin
-                                    ],
-                                  ),
-                                ]),
-                            customCardTrailing: null,
-                            onTapAction: () {},
-                          );
-                        }
-                        return CustomCard(
-                          theme: theme,
-                          customCardLeading: Icon(Icons.devices,
-                              color:
-                                  theme.colorScheme.secondary), // Device icon
-                          customCardTitle: Row(
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Wrap(
-                                      children: [
-                                        Text(deviceSerialNumber,
-                                            style: const TextStyle(
-                                                fontWeight: FontWeight
-                                                    .bold)), // Display serial number
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  Row(
-                                    children: [
-                                      DeviceCheckoutButton(
-                                        deviceSerialNumber: deviceSerialNumber,
-                                        isDeviceCheckedOut: deviceData[
-                                            'isDeviceCheckedOut'], // Check-in/out button
-                                      ),
-                                      const SizedBox(width: 8),
-                                      if (userClaims['org_admin_$orgId'] ==
-                                          true)
-                                        DeleteDeviceButton(
-                                            deviceData:
-                                                deviceData), // Admin delete button
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                          customCardTrailing: null,
-                          onTapAction: () {},
-                        );
-                      });
-                    }
-
-                    // Fetch the organization member data
-                    Map<String, dynamic> orgMemberData =
-                        snapshot.data?.data() as Map<String, dynamic>;
-
-                    final Timestamp deviceCheckedOutAtTimestamp = deviceData[
-                        'deviceCheckedOutAt']; // Timestamp for check-out date
-                    final DateTime deviceCheckedOutAt =
-                        deviceCheckedOutAtTimestamp
-                            .toDate(); // Convert to DateTime
-                    final String deviceCheckedOutAtFormatted =
-                        DateFormat('yyyy-MM-dd kk:mm a')
-                            .format(deviceCheckedOutAt); // Format the date
-
-                    // Display the full device card with member and check-out details
-                    return LayoutBuilder(builder: (context, constraints) {
-                      if (constraints.maxWidth < 600) {
-                        return CustomCard(
-                          theme: theme,
-                          customCardLeading: null,
-                          customCardTitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Icon(Icons.devices,
-                                    color: theme
-                                        .colorScheme.secondary), // Device icon
-                                Wrap(
-                                  children: [
-                                    Text(deviceSerialNumber,
-                                        style: const TextStyle(
-                                            fontWeight: FontWeight
-                                                .bold)), // Serial number
-                                  ],
-                                ),
-                                Wrap(
-                                  children: [
-                                    Text('Checked Out By: ',
-                                        style: theme.textTheme.labelSmall?.copyWith(
-                                            fontWeight: FontWeight
-                                                .bold)), // Label for checked out by
-                                    Text(orgMemberData['orgMemberDisplayName'],
-                                        style: theme.textTheme
-                                            .labelSmall), // Member's name
-                                  ],
-                                ),
-                                Wrap(
-                                  children: [
-                                    Text('Checked Out On: ',
-                                        style: theme.textTheme.labelSmall?.copyWith(
-                                            fontWeight: FontWeight
-                                                .bold)), // Label for checked out date
-                                    Text(deviceCheckedOutAtFormatted,
-                                        style: theme.textTheme
-                                            .labelSmall), // Date of check-out
-                                  ],
-                                ),
-                                const SizedBox(height: 8),
-                                Wrap(
-                                  alignment: WrapAlignment.start,
-                                  runSpacing: 8,
-                                  children: [
-                                    DeviceCheckoutButton(
-                                      deviceSerialNumber: deviceSerialNumber,
-                                      isDeviceCheckedOut: deviceData[
-                                          'isDeviceCheckedOut'], // Check-in/out button
-                                    ),
-                                    const SizedBox(width: 8),
-                                    if (userClaims['org_admin_$orgId'] == true)
-                                      DeleteDeviceButton(
-                                          deviceData:
-                                              deviceData), // Admin delete button
-                                  ],
-                                ),
-                              ]),
-                          customCardTrailing: null,
-                          onTapAction: () {},
-                        );
-                      }
-                      return CustomCard(
+                    'Error loading org member data'); // Show error message
+              } else {
+                // If no member data is available, show a basic device card layout
+                // Fetch the organization member data
+                Map<String, dynamic> orgMemberData =
+                    snapshot.data?.data() as Map<String, dynamic>? ?? {};
+                return LayoutBuilder(builder: (context, constraints) {
+                  if (constraints.maxWidth < 600) {
+                    return DeviceCardMobile(
                         theme: theme,
-                        customCardLeading: Icon(Icons.devices,
-                            color: theme.colorScheme.secondary), // Device icon
-                        customCardTitle: Row(
-                          children: [
-                            Expanded(
-                              child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Wrap(
-                                      children: [
-                                        Text(deviceSerialNumber,
-                                            style: const TextStyle(
-                                                fontWeight: FontWeight
-                                                    .bold)), // Serial number
-                                      ],
-                                    ),
-                                    Wrap(
-                                      children: [
-                                        Text('Checked Out By: ',
-                                            style: theme.textTheme.labelSmall
-                                                ?.copyWith(
-                                                    fontWeight: FontWeight
-                                                        .bold)), // Label for checked out by
-                                        Text(
-                                            orgMemberData[
-                                                'orgMemberDisplayName'], // Member's display name
-                                            style: theme.textTheme.labelSmall),
-                                      ],
-                                    ),
-                                    Wrap(
-                                      children: [
-                                        Text('Checked Out On: ',
-                                            style: theme.textTheme.labelSmall
-                                                ?.copyWith(
-                                                    fontWeight: FontWeight
-                                                        .bold)), // Label for check-out date
-                                        Text(deviceCheckedOutAtFormatted,
-                                            style: theme.textTheme
-                                                .labelSmall), // Date of check-out
-                                      ],
-                                    )
-                                  ]),
-                            ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Row(
-                                  children: [
-                                    DeviceCheckoutButton(
-                                      deviceSerialNumber: deviceSerialNumber,
-                                      isDeviceCheckedOut: deviceData[
-                                          'isDeviceCheckedOut'], // Check-in/out button
-                                    ),
-                                    const SizedBox(width: 8),
-                                    if (userClaims['org_admin_$orgId'] == true)
-                                      DeleteDeviceButton(
-                                          deviceData:
-                                              deviceData), // Admin delete button
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                        customCardTrailing: null,
-                        onTapAction: () {},
-                      );
-                    });
-                  });
-            },
-          );
-        },
-      );
+                        deviceSerialNumber: deviceSerialNumber,
+                        isDeviceCheckedOut: isDeviceCheckedOut,
+                        orgId: orgId,
+                        deviceId: deviceId,
+                        orgMemberData: orgMemberData,
+                        deviceCheckedOutAtFormatted:
+                            deviceCheckedOutAtFormatted);
+                  }
+                  return DeviceCardDesktop(
+                      theme: theme,
+                      deviceSerialNumber: deviceSerialNumber,
+                      isDeviceCheckedOut: isDeviceCheckedOut,
+                      orgId: orgId,
+                      deviceId: deviceId,
+                      orgMemberData: orgMemberData,
+                      deviceCheckedOutAtFormatted: deviceCheckedOutAtFormatted);
+                });
+              }
+            });
+      });
     });
+  }
+}
+
+class DeviceCardDesktop extends StatelessWidget {
+  const DeviceCardDesktop({
+    super.key,
+    required this.theme,
+    required this.deviceSerialNumber,
+    required this.isDeviceCheckedOut,
+    required this.orgId,
+    required this.deviceId,
+    required this.orgMemberData,
+    required this.deviceCheckedOutAtFormatted,
+  });
+
+  final ThemeData theme;
+  final String deviceSerialNumber;
+  final bool isDeviceCheckedOut;
+  final String orgId;
+  final String deviceId;
+  final Map<String, dynamic> orgMemberData;
+  final String deviceCheckedOutAtFormatted;
+
+  @override
+  Widget build(BuildContext context) {
+    return AuthClaimChecker(
+      builder: (context, userClaims) {
+        return CustomCard(
+          theme: theme,
+          customCardLeading:
+              Icon(Icons.devices, color: theme.colorScheme.secondary),
+          customCardTitle: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Wrap(
+                      children: [
+                        Text(deviceSerialNumber,
+                            style:
+                                const TextStyle(fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                    if (isDeviceCheckedOut) ...[
+                      Wrap(
+                        children: [
+                          Text('Checked Out By: ',
+                              style: theme.textTheme.labelSmall
+                                  ?.copyWith(fontWeight: FontWeight.bold)),
+                          Text(orgMemberData['orgMemberDisplayName'],
+                              style: theme.textTheme.labelSmall),
+                        ],
+                      ),
+                      Wrap(
+                        children: [
+                          Text('Checked Out On: ',
+                              style: theme.textTheme.labelSmall
+                                  ?.copyWith(fontWeight: FontWeight.bold)),
+                          Text(deviceCheckedOutAtFormatted,
+                              style: theme.textTheme.labelSmall),
+                        ],
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Row(
+                    children: [
+                      DeviceCheckoutButton(
+                        deviceSerialNumber: deviceSerialNumber,
+                        isDeviceCheckedOut: isDeviceCheckedOut,
+                      ),
+                      const SizedBox(width: 8),
+                      if (userClaims['org_admin_$orgId'] == true)
+                        DeleteDeviceButton(deviceId: deviceId),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+          customCardTrailing: null,
+          onTapAction: () {},
+        );
+      },
+    );
+  }
+}
+
+class DeviceCardMobile extends StatelessWidget {
+  const DeviceCardMobile({
+    super.key,
+    required this.theme,
+    required this.deviceSerialNumber,
+    required this.orgMemberData,
+    required this.deviceCheckedOutAtFormatted,
+    required this.isDeviceCheckedOut,
+    required this.orgId,
+    required this.deviceId,
+  });
+
+  final ThemeData theme;
+  final String deviceSerialNumber;
+  final bool isDeviceCheckedOut;
+  final String orgId;
+  final String deviceId;
+  final Map<String, dynamic> orgMemberData;
+  final String deviceCheckedOutAtFormatted;
+
+  @override
+  Widget build(BuildContext context) {
+    return AuthClaimChecker(
+      builder: (context, userClaims) {
+        return CustomCard(
+          theme: theme,
+          customCardLeading: null,
+          customCardTitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(Icons.devices, color: theme.colorScheme.secondary),
+              Wrap(
+                children: [
+                  Text(deviceSerialNumber,
+                      style: const TextStyle(fontWeight: FontWeight.bold)),
+                ],
+              ),
+              if (isDeviceCheckedOut) ...[
+                Wrap(
+                  children: [
+                    Text('Checked Out By: ',
+                        style: theme.textTheme.labelSmall
+                            ?.copyWith(fontWeight: FontWeight.bold)),
+                    Text(orgMemberData['orgMemberDisplayName'],
+                        style: theme.textTheme.labelSmall),
+                  ],
+                ),
+                Wrap(
+                  children: [
+                    Text('Checked Out On: ',
+                        style: theme.textTheme.labelSmall
+                            ?.copyWith(fontWeight: FontWeight.bold)),
+                    Text(deviceCheckedOutAtFormatted,
+                        style: theme.textTheme.labelSmall),
+                  ],
+                ),
+              ],
+              const SizedBox(height: 8),
+              Wrap(
+                alignment: WrapAlignment.start,
+                runSpacing: 8,
+                children: [
+                  DeviceCheckoutButton(
+                    deviceSerialNumber: deviceSerialNumber,
+                    isDeviceCheckedOut: isDeviceCheckedOut,
+                  ),
+                  const SizedBox(width: 8),
+                  if (userClaims['org_admin_$orgId'] == true)
+                    DeleteDeviceButton(deviceId: deviceId),
+                ],
+              ),
+            ],
+          ),
+          customCardTrailing: null,
+          onTapAction: () {},
+        );
+      },
+    );
   }
 }
 
@@ -871,10 +833,10 @@ class DeviceCheckoutButtonState extends State<DeviceCheckoutButton> {
 class DeleteDeviceButton extends StatefulWidget {
   const DeleteDeviceButton({
     super.key,
-    required this.deviceData, // The device data to be deleted
+    required this.deviceId, // The device data to be deleted
   });
 
-  final Map<String, dynamic> deviceData; // Device data passed as a parameter
+  final String deviceId; // Device data passed as a parameter
 
   @override
   State<DeleteDeviceButton> createState() => _DeleteDeviceButtonState();
@@ -905,11 +867,9 @@ class _DeleteDeviceButtonState extends State<DeleteDeviceButton> {
     });
 
     try {
-      String deviceId = widget.deviceData[
-          'deviceId']; // Retrieve the device ID from the passed data
       await firebaseFunctions.httpsCallable('delete_device_callable').call({
         'orgId': orgSelectorProvider.orgId, // Pass organization ID
-        'deviceId': deviceId, // Pass device ID
+        'deviceId': widget.deviceId, // Pass device ID
       });
       // Show success message when the device is deleted
       await AsyncContextHelpers.showSnackBarIfMounted(
