@@ -114,54 +114,69 @@ class _OrgMemberListState extends State<OrgMemberList> {
                 Padding(
                   padding: const EdgeInsets.symmetric(
                       horizontal: 16.0, vertical: 8.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      const Text('Sort by:'),
-                      const SizedBox(width: 16.0),
-                      DropdownButton<String>(
-                        value: _sortCriteria,
-                        items: <String>['Display Name', 'Email', 'Role']
-                            .map((String value) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(value),
-                          );
-                        }).toList(),
-                        onChanged: (String? newValue) {
-                          if (newValue != null) {
-                            setState(() {
-                              _sortCriteria = newValue; // Update sort criteria
-                            });
-                          }
-                        },
-                      ),
-                      const SizedBox(width: 16.0),
-                      const Text('Filter by Role:'),
-                      const SizedBox(width: 16.0),
-                      DropdownButton<String>(
-                        value: _roleFilterCriteria,
-                        items: <String>[
-                          'All',
-                          'Org Member',
-                          'Org Admin',
-                          'Desk Station'
-                        ].map((String value) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(value),
-                          );
-                        }).toList(),
-                        onChanged: (String? newValue) {
-                          if (newValue != null) {
-                            setState(() {
-                              _roleFilterCriteria =
-                                  newValue; // Update sort criteria
-                            });
-                          }
-                        },
-                      ),
-                    ],
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Wrap(
+                      spacing: 16.0, // Adds space between the rows if they wrap
+                      children: [
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            const Text('Sort by:'),
+                            const SizedBox(width: 16.0),
+                            DropdownButton<String>(
+                              value: _sortCriteria,
+                              items: <String>['Display Name', 'Email', 'Role']
+                                  .map((String value) {
+                                return DropdownMenuItem<String>(
+                                  value: value,
+                                  child: Text(value),
+                                );
+                              }).toList(),
+                              onChanged: (String? newValue) {
+                                if (newValue != null) {
+                                  setState(() {
+                                    _sortCriteria =
+                                        newValue; // Update sort criteria
+                                  });
+                                }
+                              },
+                            ),
+                          ],
+                        ),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            const Text('Filter by Role:'),
+                            const SizedBox(width: 16.0),
+                            DropdownButton<String>(
+                              value: _roleFilterCriteria,
+                              items: <String>[
+                                'All',
+                                'Org Member',
+                                'Org Admin',
+                                'Desk Station'
+                              ].map((String value) {
+                                return DropdownMenuItem<String>(
+                                  value: value,
+                                  child: Text(value),
+                                );
+                              }).toList(),
+                              onChanged: (String? newValue) {
+                                if (newValue != null) {
+                                  setState(() {
+                                    _roleFilterCriteria =
+                                        newValue; // Update sort criteria
+                                  });
+                                }
+                              },
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
 

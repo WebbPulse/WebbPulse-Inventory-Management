@@ -66,6 +66,27 @@ class FirestoreReadService {
     }
   }
 
+  /// Stream that checks if a device is checked out in Firestore based on its serial number and organization ID
+  Stream<bool> isDeviceCheckedOutInFirestoreStream(
+      String? serial, String? orgId) {
+    try {
+      return _db
+          .collection('organizations')
+          .doc(orgId)
+          .collection('devices')
+          .where('deviceSerialNumber', isEqualTo: serial)
+          .snapshots()
+          .map((querySnapshot) {
+        if (querySnapshot.docs.isNotEmpty) {
+          return querySnapshot.docs.first.data()['isDeviceCheckedOut'];
+        }
+        return false; // Return false if no documents match
+      });
+    } catch (e) {
+      return Stream.value(false); // Return false in case of error
+    }
+  }
+
   /// Stream that returns a DocumentSnapshot for a device document in an organization
   Stream<DocumentSnapshot> getOrgDeviceDocument(
       String? deviceId, String? orgId) {
