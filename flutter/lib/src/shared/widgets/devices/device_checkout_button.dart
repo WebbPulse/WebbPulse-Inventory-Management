@@ -244,7 +244,7 @@ class DeviceCheckoutButtonState extends State<DeviceCheckoutButton> {
 
   /// Shows a dialog for admin or desk station users to select a user for check-in/check-out
   Future<void> _showCheckoutNoteDialog(
-      bool isDeviceCheckedOut, String orgId) async {
+      bool isDeviceBeingCheckedOut, String orgId) async {
     return showDialog<void>(
       context: context,
       builder: (BuildContext context) {
@@ -287,13 +287,13 @@ class DeviceCheckoutButtonState extends State<DeviceCheckoutButton> {
                               _deviceCheckedOutNoteController.text;
                         });
 
-                        if (isAdminOrDeskstation && !isDeviceCheckedOut) {
+                        if (isAdminOrDeskstation && isDeviceBeingCheckedOut) {
                           Navigator.of(context).pop(); // Close note dialog
                           _showUserListDialog(true, orgId,
                               _deviceCheckedOutNote); // Show user list dialog if admin or desk station
                         } else {
                           Navigator.of(context).pop(); // Close note dialog
-                          _changeDeviceStatus(!isDeviceCheckedOut,
+                          _changeDeviceStatus(isDeviceBeingCheckedOut,
                               _deviceCheckedOutNote); // Submit the action (check-in or check-out)
                         }
                       },
