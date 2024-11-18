@@ -22,8 +22,8 @@ class DeviceCheckoutService {
       BuildContext context,
       String deviceSerialNumber, // The serial number of the device
       String orgId, // The organization ID
-      String deviceCheckedOutBy, // The ID of the user checking out the device
-      bool checkOut, // Boolean flag to check in or check out
+      String deviceBeingCheckedBy, // The ID of the user checking out the device
+      bool isDeviceBeingCheckedOut, // Boolean flag to check in or check out
       String deviceCheckedOutNote) async {
     if (deviceSerialNumber.isNotEmpty) {
       try {
@@ -32,7 +32,7 @@ class DeviceCheckoutService {
             Provider.of<AuthenticationChangeNotifier>(context, listen: false);
 
         /// If the device is not checked out by the current user, verify their permissions
-        if (deviceCheckedOutBy != authenticationChangeNotifier.user!.uid) {
+        if (deviceBeingCheckedBy != authenticationChangeNotifier.user!.uid) {
           /// Retrieve the user's ID token to check claims for permissions
           IdTokenResult userIdTokenResult =
               await authenticationChangeNotifier.user!.getIdTokenResult();
@@ -64,13 +64,13 @@ class DeviceCheckoutService {
               .call({
             "deviceSerialNumber": deviceSerialNumber,
             "orgId": orgId,
-            "isDeviceCheckedOut": checkOut,
-            "deviceCheckedOutBy": checkOut ? deviceCheckedOutBy : '',
+            "isDeviceBeingCheckedOut": isDeviceBeingCheckedOut,
+            "deviceBeingCheckedBy": isDeviceBeingCheckedOut ? deviceBeingCheckedBy : '',
             "deviceCheckedOutNote": deviceCheckedOutNote
           });
 
           /// Show a message based on the action performed (check-in/check-out)
-          String snackBarMessage = checkOut
+          String snackBarMessage = isDeviceBeingCheckedOut
               ? 'Device added to organization and checked out!'
               : 'Device added to organization and checked in!';
 
@@ -82,13 +82,13 @@ class DeviceCheckoutService {
               .isDeviceCheckedOutInFirestore(deviceSerialNumber, orgId);
 
           /// If the device is already checked out, prevent re-checking it out
-          if (checkOut && isDeviceCheckedOut) {
+          if (isDeviceBeingCheckedOut && isDeviceCheckedOut) {
             await AsyncContextHelpers.showSnackBarIfMounted(
                 context, 'Device is already checked out!');
           }
 
           /// If the device is already checked in, prevent re-checking it in
-          else if (!checkOut && !isDeviceCheckedOut) {
+          else if (!isDeviceBeingCheckedOut && !isDeviceCheckedOut) {
             await AsyncContextHelpers.showSnackBarIfMounted(
                 context, 'Device is already checked in!');
           }
@@ -100,14 +100,14 @@ class DeviceCheckoutService {
                 .call({
               "deviceSerialNumber": deviceSerialNumber,
               "orgId": orgId,
-              "isDeviceCheckedOut": checkOut,
-              "deviceCheckedOutBy": checkOut ? deviceCheckedOutBy : '',
+              "isDeviceBeingCheckedOut": isDeviceBeingCheckedOut,
+              "deviceBeingCheckedBy": isDeviceBeingCheckedOut ? deviceBeingCheckedBy : '',
               "deviceCheckedOutNote": deviceCheckedOutNote
             });
 
             await AsyncContextHelpers.showSnackBarIfMounted(
                 context,
-                checkOut
+                isDeviceBeingCheckedOut
                     ? 'Device checked out successfully!'
                     : 'Device checked in successfully!');
           }
