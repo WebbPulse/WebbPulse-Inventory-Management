@@ -65,7 +65,7 @@ class DeviceCheckoutService {
             "deviceSerialNumber": deviceSerialNumber,
             "orgId": orgId,
             "isDeviceBeingCheckedOut": isDeviceBeingCheckedOut,
-            "deviceBeingCheckedBy": isDeviceBeingCheckedOut ? deviceBeingCheckedBy : '',
+            "deviceBeingCheckedBy": deviceBeingCheckedBy,
             "deviceCheckedOutNote": deviceCheckedOutNote
           });
 
@@ -101,7 +101,7 @@ class DeviceCheckoutService {
               "deviceSerialNumber": deviceSerialNumber,
               "orgId": orgId,
               "isDeviceBeingCheckedOut": isDeviceBeingCheckedOut,
-              "deviceBeingCheckedBy": isDeviceBeingCheckedOut ? deviceBeingCheckedBy : '',
+              "deviceBeingCheckedBy": deviceBeingCheckedBy,
               "deviceCheckedOutNote": deviceCheckedOutNote
             });
 
