@@ -56,7 +56,7 @@ class DeviceCheckoutButtonState extends State<DeviceCheckoutButton> {
 
   /// Handles the submission of the check-in or check-out operation
   Future<void> _changeDeviceStatus(
-      bool isDeviceCheckedOut, String deviceCheckedOutNote) async {
+      bool isDeviceBeingCheckedOut, String deviceCheckedOutNote) async {
     setState(() => _isLoading = true); // Set loading state
     final deviceCheckoutService =
         Provider.of<DeviceCheckoutService>(context, listen: false);
@@ -72,7 +72,7 @@ class DeviceCheckoutButtonState extends State<DeviceCheckoutButton> {
         widget.deviceSerialNumber,
         orgId,
         deviceCheckedOutBy,
-        isDeviceCheckedOut, // Pass the boolean to check-out or check-in the device
+        isDeviceBeingCheckedOut, // Pass the boolean to check-out or check-in the device
         deviceCheckedOutNote, // Pass the note for the check-out operation
       );
     } catch (e) {
@@ -348,7 +348,7 @@ class DeviceCheckoutButtonState extends State<DeviceCheckoutButton> {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const CircularProgressIndicator();
             }
-            final bool isDeviceCheckedOut = snapshot.data ?? false;
+            final bool isDeviceCurrentlyCheckedOut = snapshot.data ?? false;
 
             return AuthClaimChecker(builder: (context, userClaims) {
               final orgId =
@@ -361,22 +361,22 @@ class DeviceCheckoutButtonState extends State<DeviceCheckoutButton> {
                       : _isLoading
                           ? null
                           : () {
-                              if (isDeviceCheckedOut == false) {
-                                _showCheckoutNoteDialog(isDeviceCheckedOut,
+                              if (isDeviceCurrentlyCheckedOut == false) {
+                                _showCheckoutNoteDialog(true,
                                     orgId); // Show note dialog
                               } else {
-                                _changeDeviceStatus(!isDeviceCheckedOut,
+                                _changeDeviceStatus(false,
                                     ''); // Submit the action
                               }
                             }, // Disable button when loading
                   icon: _isLoading
                       ? const CircularProgressIndicator()
-                      : Icon(isDeviceCheckedOut
+                      : Icon(isDeviceCurrentlyCheckedOut
                           ? Icons.logout
                           : Icons.login), // Icon for check-in/check-out
                   label: Text(widget.deviceSerialNumber == ''
                       ? 'Please enter a serial number'
-                      : isDeviceCheckedOut
+                      : isDeviceCurrentlyCheckedOut
                           ? 'Check-in Device'
                           : 'Check-out Device'), // Label for the button
                   style: ElevatedButton.styleFrom(

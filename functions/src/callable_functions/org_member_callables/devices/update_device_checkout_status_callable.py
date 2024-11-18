@@ -1,4 +1,4 @@
-from src.shared import POSTcorsrules, db, firestore, https_fn, Any, check_user_is_org_member, check_user_is_authed, check_user_token_current, check_user_is_email_verified
+from src.shared import POSTcorsrules, db, firestore, https_fn, Any, check_user_is_org_member, check_user_is_authed, check_user_token_current, check_user_is_email_verified, check_user_is_org_deskstation_or_higher
 
 @https_fn.on_call(cors=POSTcorsrules)
 def update_device_checkout_status_callable(req: https_fn.CallableRequest) -> Any:
@@ -12,9 +12,16 @@ def update_device_checkout_status_callable(req: https_fn.CallableRequest) -> Any
         # Step 1: Extract the necessary parameters from the request data.
         org_id = req.data["orgId"]  # Organization ID to which the device belongs.
         device_serial_number = req.data["deviceSerialNumber"]  # Serial number of the device.
-        is_device_checked_out = req.data["isDeviceCheckedOut"]  # Boolean indicating if the device is checked out.
-        device_checked_out_by = req.data["deviceCheckedOutBy"]  # The ID of the user who checked out the device.
+        is_device_being_checked_out = req.data["isDeviceBeingCheckedOut"]  # Boolean indicating if the device is checked out.
+        device_being_checked_by = req.data["deviceBeingCheckedBy"]  # The ID of the user who checked out the device.
         device_checked_out_note = req.data["deviceCheckedOutNote"]  # Optional note about the device checkout.
+
+        if not isinstance(is_device_being_checked_out, bool):
+            raise https_fn.HttpsError(
+                code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
+                message="'isDeviceCheckedOut' must be a boolean."
+            )
+
 
         # Step 2: Perform authentication, email verification, and token validation checks.
         check_user_is_authed(req)  # Ensure the user is authenticated.
@@ -23,34 +30,32 @@ def update_device_checkout_status_callable(req: https_fn.CallableRequest) -> Any
         check_user_is_org_member(req, org_id)  # Ensure the user is a member of the specified organization.
 
         # Step 3: Validate that the required parameters are provided and valid.
-        if not device_serial_number or not org_id or is_device_checked_out is None:
+        if not device_serial_number or not org_id or is_device_being_checked_out is None:
             # If any required parameters are missing or invalid, raise an error.
             raise https_fn.HttpsError(
                 code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
                 message='The function must be called with valid deviceSerialNumber, orgId, and isDeviceCheckedOut parameters.'
             )
 
-        # Step 4: Check if the user is authorized to check out devices for other users.
-        if device_checked_out_by != req.auth.uid:
-            if not req.auth.token.get(f"org_admin_{org_id}") and not req.auth.token.get(f"org_deskstation_{org_id}"):
-                # If the user is neither an admin nor a desk station user for the organization, raise a permission error.
-                raise https_fn.HttpsError(
-                    code=https_fn.FunctionsErrorCode.PERMISSION_DENIED,
-                    message='You are not authorized to check out devices for other users in the organization.'
-                )
+        
 
         # Step 5: Query Firestore to find the device with the specified serial number in the organization.
         querySnapshot = db.collection('organizations').document(org_id).collection('devices').where('deviceSerialNumber', '==', device_serial_number).get()
+        
         if len(querySnapshot) > 0:
+            if is_device_being_checked_out == False:
+                device_currently_checked_out_by = querySnapshot[0].to_dict().get('deviceCheckedOutBy')
+                if device_currently_checked_out_by != device_being_checked_by:
+                    check_user_is_org_deskstation_or_higher(req, org_id)
             # If the device is found, retrieve its document ID.
             docId = querySnapshot[0].id
 
             # Step 6: Update the device's checkout status in Firestore based on the request.
-            if is_device_checked_out:
+            if is_device_being_checked_out:
                 # If the device is being checked out, update the relevant fields in Firestore.
                 db.collection('organizations').document(org_id).collection('devices').document(docId).update({
                     'isDeviceCheckedOut': True,
-                    'deviceCheckedOutBy': device_checked_out_by,  # Set the user who checked out the device.
+                    'deviceCheckedOutBy': device_being_checked_by,  # Set the user who checked out the device.
                     'deviceCheckedOutAt': firestore.SERVER_TIMESTAMP,  # Set the current timestamp for checkout.
                     'deviceCheckedOutNote': device_checked_out_note,  # Set the optional checkout note.
                 })
