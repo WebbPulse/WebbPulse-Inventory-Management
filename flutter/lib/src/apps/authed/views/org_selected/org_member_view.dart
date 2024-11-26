@@ -305,7 +305,7 @@ class _DeleteUserButtonState extends State<DeleteUserButton> {
   }
 }
 
-/// UserRoleCard displays the current role of a user (e.g., Org Admin, Org Member).
+/// UserRoleCard displays the current role of a user (e.g., Org Admin, Org Member, Desk Station).
 class UserRoleCard extends StatelessWidget {
   final DocumentSnapshot orgMemberData;
 
@@ -313,15 +313,24 @@ class UserRoleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Mapping for role display names
+    final roleDisplayNames = {
+      'admin': 'Org Admin',
+      'member': 'Org Member',
+      'deskstation': 'Desk Station',
+    };
+
+    // Fetch the role name or fallback to 'Unknown Role'
+    final role = orgMemberData['orgMemberRole'];
+    final displayName = roleDisplayNames[role] ?? 'Unknown Role';
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
             Text(
-              orgMemberData['orgMemberRole'] == 'admin'
-                  ? 'Org Admin'
-                  : 'Org Member',
+              displayName,
               style: Theme.of(context)
                   .textTheme
                   .labelSmall
