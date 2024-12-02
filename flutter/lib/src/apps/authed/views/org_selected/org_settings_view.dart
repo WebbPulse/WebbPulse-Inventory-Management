@@ -6,7 +6,7 @@ import 'package:webbpulse_inventory_management/src/shared/providers/authenticati
 import 'package:webbpulse_inventory_management/src/shared/providers/firestore_read_service.dart';
 import 'package:webbpulse_inventory_management/src/shared/providers/org_selector_change_notifier.dart';
 import 'package:webbpulse_inventory_management/src/shared/widgets/widgets.dart';
-import 'package:webbpulse_inventory_management/src/shared/widgets/user_widgets.dart';
+import 'package:webbpulse_inventory_management/src/shared/widgets/user_specific_widgets.dart';
 import 'package:webbpulse_inventory_management/src/shared/widgets/org_widgets.dart';
 
 /// OrgSettingsView displays the settings page for the selected organization,

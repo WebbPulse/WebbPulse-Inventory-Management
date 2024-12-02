@@ -6,7 +6,7 @@ import '../../providers/device_checkout_service.dart';
 import '../../providers/org_selector_change_notifier.dart';
 import '../../providers/firestore_read_service.dart';
 import '../../providers/authentication_change_notifier.dart';
-import 'package:webbpulse_inventory_management/src/shared/widgets/user_widgets.dart';
+import 'package:webbpulse_inventory_management/src/shared/widgets/user_specific_widgets.dart';
 
 class DeviceCheckoutButton extends StatefulWidget {
   final String deviceSerialNumber; // The serial number of the device

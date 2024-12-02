@@ -12,6 +12,7 @@ import '../../apps/authed/views/org_selected/device_checkout_view.dart';
 import '../../apps/authed/views/org_selected/org_device_list_view.dart';
 import '../../apps/authed/views/org_selected/org_member_list_view.dart';
 import '../../apps/authed/views/org_selected/org_settings_view.dart';
+import '../../apps/authed/views/org_selected/scanner_view.dart';
 
 /// Widget for displaying the user's profile avatar
 /// It handles both valid and invalid photo URLs, showing a default icon on error
@@ -161,6 +162,16 @@ class AuthedDrawer extends StatelessWidget {
                 },
               ),
               ListTile(
+              leading: const Icon(Icons.qr_code), // QR code icon
+              title: const Text('Scanner'), // Label
+              onTap: () {
+                Navigator.pushNamed(
+                    context,
+                    ScannerView
+                        .routeName); // Navigate to ScannerView for QR code scanning
+              },
+            ),
+              ListTile(
                 leading: const Icon(Icons.devices), // Devices icon
                 title: const Text('Devices'), // Label
                 onTap: () {
@@ -208,6 +219,7 @@ class AuthedDrawer extends StatelessWidget {
                 authenticationChangeNotifier.signOutUser(); // Sign out the user
               },
             ),
+            
           ],
         ),
       );

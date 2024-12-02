@@ -15,7 +15,7 @@ import 'package:webbpulse_inventory_management/src/shared/providers/org_selector
 import 'package:webbpulse_inventory_management/src/shared/providers/org_member_selector_change_notifier.dart';
 import 'package:webbpulse_inventory_management/src/shared/providers/firestore_read_service.dart';
 import 'package:webbpulse_inventory_management/src/shared/widgets/widgets.dart';
-import 'package:webbpulse_inventory_management/src/shared/widgets/user_widgets.dart';
+import 'package:webbpulse_inventory_management/src/shared/widgets/user_specific_widgets.dart';
 import 'package:webbpulse_inventory_management/src/shared/widgets/org_widgets.dart';
 
 /// OrgMemberListView displays a list of members in the selected organization.

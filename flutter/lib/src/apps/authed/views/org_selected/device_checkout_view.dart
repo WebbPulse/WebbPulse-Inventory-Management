@@ -1,10 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:webbpulse_inventory_management/src/shared/widgets/user_widgets.dart'; // Custom user widgets
+import 'dart:io';
+import 'package:webbpulse_inventory_management/src/shared/widgets/user_specific_widgets.dart'; // Custom user widgets
 import 'package:webbpulse_inventory_management/src/shared/widgets/org_widgets.dart'; // Custom organization widgets
 import 'package:webbpulse_inventory_management/src/shared/widgets/devices/add_device_alert_dialog.dart';
 import 'package:webbpulse_inventory_management/src/shared/widgets/devices/device_checkout_button.dart';
-import 'dart:io';
+
 
 /// DeviceCheckoutView is the main view for handling device checkouts and check-ins
 class DeviceCheckoutView extends StatelessWidget {
@@ -103,6 +104,7 @@ class CheckoutFormState extends State<CheckoutForm> {
 
   @override
   Widget build(BuildContext context) {
+    ThemeData theme = Theme.of(context);
     return AuthClaimChecker(builder: (context, userClaims) {
       return SingleChildScrollView(
         child: Center(
@@ -143,6 +145,20 @@ class CheckoutFormState extends State<CheckoutForm> {
                             );
                           },
                         ),
+                        const SizedBox(height: 8.0),
+                        ElevatedButton.icon(
+                          onPressed: null,
+                          style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            theme.colorScheme.surface.withOpacity(0.95),
+                        side: BorderSide(
+                          color: theme.colorScheme.primary.withOpacity(0.5),
+                          width: 1.5,
+                        ),
+                        padding: const EdgeInsets.all(16.0),
+                      ),
+                          label: Text('Scan QR Code'), 
+                          icon: Icon(Icons.qr_code)),
                       ],
                     ),
                   ),
@@ -155,3 +171,4 @@ class CheckoutFormState extends State<CheckoutForm> {
     });
   }
 }
+
