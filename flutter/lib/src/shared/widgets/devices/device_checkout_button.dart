@@ -207,9 +207,7 @@ class DeviceCheckoutButtonState extends State<DeviceCheckoutButton> {
       context: context,
       builder: (BuildContext context) {
         ThemeData theme = Theme.of(context);
-        return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return AlertDialog(
+        return AlertDialog(
               title: Text(isDeviceCheckedOut
                   ? 'Confirm Check-out User'
                   : 'Confirm Check-in User'), // Title based on check-out or check-in
@@ -332,9 +330,8 @@ class DeviceCheckoutButtonState extends State<DeviceCheckoutButton> {
             );
           },
         );
-      },
-    );
-  }
+      }
+      
   /// Handles the submission of the check-in or check-out operation
   Future<void> _changeDeviceStatus(
       bool isDeviceBeingCheckedOut, String deviceCheckedOutNote) async {
