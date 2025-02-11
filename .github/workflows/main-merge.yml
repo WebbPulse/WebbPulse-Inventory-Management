@@ -1,9 +1,9 @@
-name: Deploy on Merge to Main
+name: Deploy on Merge to Master
 
 on:
   push:
     branches:
-      - main # Trigger on push to the main branch
+      - master # Trigger on push to the main branch
 
 jobs:
   build_and_deploy_backend_and_web:
