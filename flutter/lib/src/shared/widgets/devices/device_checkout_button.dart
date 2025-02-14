@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../providers/device_checkout_service.dart';
 import '../../providers/org_selector_change_notifier.dart';
 import '../../providers/firestore_read_service.dart';
 import '../../providers/authentication_change_notifier.dart';
 import 'package:webbpulse_inventory_management/src/shared/widgets/user_widgets.dart';
+import 'package:webbpulse_inventory_management/src/shared/widgets/devices/checkout_note_dialog.dart';
+import 'package:webbpulse_inventory_management/src/shared/widgets/devices/checkout_user_list_dialog.dart';
 
 class DeviceCheckoutButton extends StatefulWidget {
   final String deviceSerialNumber; // The serial number of the device
@@ -123,7 +124,7 @@ Future<void> _showUserListDialog(bool isDeviceCheckedOut, String orgId, String d
   return showDialog<void>(
     context: context,
     builder: (BuildContext context) {
-      return UserListDialog(
+      return CheckoutUserListDialog(
         isDeviceCheckedOut: isDeviceCheckedOut,
         orgId: orgId,
         deviceCheckedOutNote: deviceCheckedOutNote,
@@ -191,231 +192,5 @@ Future<void> _showUserListDialog(bool isDeviceCheckedOut, String orgId, String d
   
 }
 
-class CheckoutNoteDialog extends StatefulWidget {
-  final bool isDeviceBeingCheckedOut;
-  final String orgId;
-  final bool isAdminOrDeskstation;
-  final ValueChanged<String> onSubmit; // Callback with the entered note
 
-  const CheckoutNoteDialog({
-    super.key,
-    required this.isDeviceBeingCheckedOut,
-    required this.orgId,
-    required this.isAdminOrDeskstation,
-    required this.onSubmit,
-  });
-
-  @override
-  _CheckoutNoteDialogState createState() => _CheckoutNoteDialogState();
-}
-
-class _CheckoutNoteDialogState extends State<CheckoutNoteDialog> {
-  late TextEditingController _noteController;
-
-  @override
-  void initState() {
-    super.initState();
-    _noteController = TextEditingController();
-  }
-
-  @override
-  void dispose() {
-    _noteController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    ThemeData theme = Theme.of(context);
-    return AlertDialog(
-      title: const Text('Please Leave a Note'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Please describe why you are checking out this device',
-          ),
-          TextField(
-            controller: _noteController,
-            decoration: const InputDecoration(
-              labelText: 'Leave a Note',
-              prefixIcon: Icon(Icons.note),
-            ),
-          ),
-        ],
-      ),
-      actions: <Widget>[
-        ElevatedButton.icon(
-          onPressed: () {
-            // Get the note from the text field
-            final note = _noteController.text;
-            Navigator.of(context).pop(); // Close the dialog
-            widget.onSubmit(note); // Pass the note back to the caller
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
-            side: BorderSide(
-              color: theme.colorScheme.primary.withOpacity(0.5),
-              width: 1.5,
-            ),
-            padding: const EdgeInsets.all(16.0),
-          ),
-          icon: const Icon(Icons.logout),
-          label: const Text('Check Out Device'),
-        ),
-        ElevatedButton.icon(
-          onPressed: () {
-            Navigator.of(context).pop(); // Just close the dialog
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
-            side: BorderSide(
-              color: theme.colorScheme.primary.withOpacity(0.5),
-              width: 1.5,
-            ),
-            padding: const EdgeInsets.all(16.0),
-          ),
-          icon: const Icon(Icons.arrow_back),
-          label: const Text('Go Back'),
-        ),
-      ],
-    );
-  }
-}
-
-
-class UserListDialog extends StatefulWidget {
-  final bool isDeviceCheckedOut;
-  final String orgId;
-  final String deviceCheckedOutNote;
-  final ValueChanged<String> onUserSelected; // Callback with the selected userId
-
-  const UserListDialog({
-    super.key,
-    required this.isDeviceCheckedOut,
-    required this.orgId,
-    required this.deviceCheckedOutNote,
-    required this.onUserSelected,
-  });
-
-  @override
-  _UserListDialogState createState() => _UserListDialogState();
-}
-
-class _UserListDialogState extends State<UserListDialog> {
-  late TextEditingController _userSearchController;
-  String _searchQuery = '';
-
-  @override
-  void initState() {
-    super.initState();
-    _userSearchController = TextEditingController();
-    _userSearchController.addListener(() {
-      setState(() {
-        _searchQuery = _userSearchController.text;
-      });
-    });
-  }
-
-  @override
-  void dispose() {
-    _userSearchController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    ThemeData theme = Theme.of(context);
-    return AlertDialog(
-      title: Text(widget.isDeviceCheckedOut
-          ? 'Confirm Check-out User'
-          : 'Confirm Check-in User'),
-      content: Consumer2<FirestoreReadService, OrgSelectorChangeNotifier>(
-        builder: (context, firestoreReadService, orgSelectorChangeNotifier, child) {
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                widget.isDeviceCheckedOut
-                    ? 'Select the user to check-out this device.'
-                    : 'Select the user to check-in this device.',
-              ),
-              TextField(
-                controller: _userSearchController,
-                decoration: const InputDecoration(
-                  labelText: 'Search User',
-                  prefixIcon: Icon(Icons.search),
-                ),
-              ),
-              StreamBuilder<List<DocumentSnapshot>>(
-                stream: firestoreReadService.getOrgMembersDocuments(
-                    orgSelectorChangeNotifier.orgId),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  } else if (snapshot.hasError) {
-                    return const Center(child: Text('Error loading users'));
-                  }
-                  final List<DocumentSnapshot> orgMemberDocs = snapshot.data ?? [];
-                  final filteredDocs = orgMemberDocs.where((doc) {
-                    final name = doc['orgMemberDisplayName']
-                        .toString()
-                        .toLowerCase();
-                    return name.contains(_searchQuery.toLowerCase());
-                  }).toList();
-
-                  if (filteredDocs.isNotEmpty) {
-                    return Container(
-                      constraints: const BoxConstraints(maxHeight: 200),
-                      child: SingleChildScrollView(
-                        child: Column(
-                          children: filteredDocs.map((orgMemberDoc) {
-                            return ListTile(
-                              title: Text(orgMemberDoc['orgMemberDisplayName']),
-                              subtitle: Text(orgMemberDoc['orgMemberEmail']),
-                              onTap: () {
-                                widget.onUserSelected(orgMemberDoc.id);
-                                Navigator.of(context).pop();
-                              },
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                    );
-                  } else {
-                    return const Column(
-                      children: [
-                        SizedBox(height: 16),
-                        Center(child: Text('No users found.')),
-                      ],
-                    );
-                  }
-                },
-              ),
-            ],
-          );
-        },
-      ),
-      actions: <Widget>[
-        ElevatedButton.icon(
-          onPressed: () {
-            Navigator.of(context).pop(); // Close dialog (or add additional logic)
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
-            side: BorderSide(
-              color: theme.colorScheme.primary.withOpacity(0.5),
-              width: 1.5,
-            ),
-            padding: const EdgeInsets.all(16.0),
-          ),
-          icon: const Icon(Icons.arrow_back),
-          label: const Text('Go Back'),
-        ),
-      ],
-    );
-  }
-}
 
