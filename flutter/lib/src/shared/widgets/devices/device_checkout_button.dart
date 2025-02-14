@@ -55,8 +55,7 @@ class DeviceCheckoutButtonState extends State<DeviceCheckoutButton> {
                         ? null
                         : () {
                             if (isDeviceCurrentlyCheckedOut == true) {
-                              _changeDeviceStatus(
-                                  false, ''); // Submit the action
+                              _checkinDevice(); // Submit the action
                             } else {
                               deviceSelectorChangeNotifier
                                   .selectDevice(widget.deviceSerialNumber);
@@ -87,8 +86,7 @@ class DeviceCheckoutButtonState extends State<DeviceCheckoutButton> {
   }
 
   /// Handles the submission of the check-in or check-out operation
-  Future<void> _changeDeviceStatus(
-      bool isDeviceBeingCheckedOut, String deviceCheckedOutNote) async {
+  Future<void> _checkinDevice() async {
     setState(() => _isLoading = true); // Set loading state
     final deviceCheckoutService =
         Provider.of<DeviceCheckoutService>(context, listen: false);
@@ -104,8 +102,8 @@ class DeviceCheckoutButtonState extends State<DeviceCheckoutButton> {
         widget.deviceSerialNumber,
         orgId,
         deviceCheckedOutBy,
-        isDeviceBeingCheckedOut, // Pass the boolean to check-out or check-in the device
-        deviceCheckedOutNote, // Pass the note for the check-out operation
+        false, // Pass the boolean to check-out or check-in the device
+        '', // Pass the note for the check-out operation
       );
     } catch (e) {
       // Handle errors if needed

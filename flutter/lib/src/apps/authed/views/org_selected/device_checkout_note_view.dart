@@ -48,79 +48,109 @@ class _CheckoutNoteDialogState extends State<DeviceCheckoutNoteView> {
 
       return Scaffold(
         appBar: AppBar(
-          title: const Text('temp app bar name'),
+          title: const Text('Please Leave a Note'),
         ),
-        body: Column(
-          children: [
-            const Text('Please Leave a Note'),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Please describe why you are checking out this device',
-                ),
-                TextField(
-                  controller: _noteController,
-                  decoration: const InputDecoration(
-                    labelText: 'Leave a Note',
-                    prefixIcon: Icon(Icons.note),
+        body: SingleChildScrollView(
+          child: Center(
+            child: LayoutBuilder(builder: (context, constraints) {
+              double maxWidth;
+              if (constraints.maxWidth < 600) {
+                maxWidth = constraints.maxWidth * 0.95;
+              } else if (constraints.maxWidth < 1200) {
+                maxWidth = constraints.maxWidth * 0.6;
+              } else {
+                maxWidth = constraints.maxWidth * 0.4;
+              }
+
+              return ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: maxWidth),
+                child: Card(
+                  elevation: 4.0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                ),
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton.icon(
-                  onPressed: () {
-                    // Get the note from the text field
-                    final note = _noteController.text;
-                    if (isAdminOrDeskstation) {
-                      // For admin/deskstation users, show the user list dialog
-                      _showUserListDialog(orgId, note);
-                    } else {
-                      // Otherwise, directly change the device status
-                      _changeDeviceStatus(true, note);
-                      Navigator.pushNamed(
-                        context,
-                        OrgDeviceListView.routeName,
-                      );
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                        theme.colorScheme.surface.withOpacity(0.95),
-                    side: BorderSide(
-                      color: theme.colorScheme.primary.withOpacity(0.5),
-                      width: 1.5,
-                    ),
+                  child: Padding(
                     padding: const EdgeInsets.all(16.0),
-                  ),
-                  icon: _isLoading
-                      ? const CircularProgressIndicator()
-                      : const Icon(Icons.logout),
-                  label: const Text('Check Out Device'),
-                ),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.of(context).pop(); // Just close the dialog
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                        theme.colorScheme.surface.withOpacity(0.95),
-                    side: BorderSide(
-                      color: theme.colorScheme.primary.withOpacity(0.5),
-                      width: 1.5,
+                    child: Column(
+                      children: [
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Please describe why you are checking out this device:',
+                            ),
+                            TextField(
+                              controller: _noteController,
+                              decoration: const InputDecoration(
+                                labelText: 'Leave a Note',
+                                prefixIcon: Icon(Icons.note),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16.0),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            ElevatedButton.icon(
+                              onPressed: () {
+                                Navigator.of(context)
+                                    .pop(); // Just close the dialog
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor:
+                                    theme.colorScheme.surface.withOpacity(0.95),
+                                side: BorderSide(
+                                  color: theme.colorScheme.primary
+                                      .withOpacity(0.5),
+                                  width: 1.5,
+                                ),
+                                padding: const EdgeInsets.all(16.0),
+                              ),
+                              icon: const Icon(Icons.arrow_back),
+                              label: const Text('Go Back'),
+                            ),
+                            ElevatedButton.icon(
+                              onPressed: () {
+                                // Get the note from the text field
+                                final note = _noteController.text;
+                                if (isAdminOrDeskstation) {
+                                  // For admin/deskstation users, show the user list dialog
+                                  _showUserListDialog(orgId, note);
+                                } else {
+                                  // Otherwise, directly change the device status
+                                  _checkoutDevice(true, note);
+                                  Navigator.pushNamed(
+                                    context,
+                                    OrgDeviceListView.routeName,
+                                  );
+                                }
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor:
+                                    theme.colorScheme.surface.withOpacity(0.95),
+                                side: BorderSide(
+                                  color: theme.colorScheme.primary
+                                      .withOpacity(0.5),
+                                  width: 1.5,
+                                ),
+                                padding: const EdgeInsets.all(16.0),
+                              ),
+                              icon: _isLoading
+                                  ? const CircularProgressIndicator()
+                                  : const Icon(Icons.logout),
+                              label: const Text('Check Out Device'),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                    padding: const EdgeInsets.all(16.0),
                   ),
-                  icon: const Icon(Icons.arrow_back),
-                  label: const Text('Go Back'),
                 ),
-              ],
-            ),
-          ],
+              );
+            }),
+          ),
         ),
       );
     });
@@ -143,7 +173,7 @@ class _CheckoutNoteDialogState extends State<DeviceCheckoutNoteView> {
   }
 
   /// Handles the submission of the check-in or check-out operation
-  Future<void> _changeDeviceStatus(
+  Future<void> _checkoutDevice(
       bool isDeviceBeingCheckedOut, String deviceCheckedOutNote) async {
     setState(() => _isLoading = true); // Set loading state
     final deviceCheckoutService =
