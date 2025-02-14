@@ -139,6 +139,7 @@ class CheckoutFormState extends State<CheckoutForm> {
                           valueListenable: _deviceSerialController,
                           builder: (context, value, child) {
                             return DeviceCheckoutButton(
+                              key: ValueKey(value.text),
                               deviceSerialNumber: value.text,
                             );
                           },

@@ -22,36 +22,16 @@ class DeviceCheckoutButton extends StatefulWidget {
 
 class DeviceCheckoutButtonState extends State<DeviceCheckoutButton> {
   var _isLoading = false; // Flag to indicate if an operation is in progress
-  late TextEditingController
-      _userSearchController; // Controller for the user search field
-  String _searchQuery = ''; // Search query for filtering users
-  late TextEditingController
-      _deviceCheckedOutNoteController; // Controller for the note field
-  String _deviceCheckedOutNote = ''; // Note for the check-out operation
 
   @override
   void initState() {
     super.initState();
-    _userSearchController =
-        TextEditingController(); // Initialize the search controller
-    _userSearchController.addListener(
-        _onSearchChanged); // Listen for changes in the search field
-    _deviceCheckedOutNoteController =
-        TextEditingController(); // Initialize the note controller
+    
   }
 
   @override
   void dispose() {
-    _userSearchController.dispose(); // Dispose the search controller
-    _deviceCheckedOutNoteController.dispose(); // Dispose the note controller
     super.dispose();
-  }
-
-  /// Updates the search query when the text field changes
-  void _onSearchChanged() {
-    setState(() {
-      _searchQuery = _userSearchController.text;
-    });
   }
 
   @override
@@ -111,226 +91,49 @@ class DeviceCheckoutButtonState extends State<DeviceCheckoutButton> {
     });
   }
 
-  /// Shows a dialog for admin or desk station users to select a user for check-in/check-out
-  Future<void> _showCheckoutNoteDialog(
-      bool isDeviceBeingCheckedOut, String orgId) async {
+  Future<void> _showCheckoutNoteDialog(bool isDeviceBeingCheckedOut, String orgId) async {
     return showDialog<void>(
       context: context,
       builder: (BuildContext context) {
         return AuthClaimChecker(
           builder: (context, userClaims) {
-            ThemeData theme = Theme.of(context);
-            final orgId =
-                Provider.of<OrgSelectorChangeNotifier>(context, listen: false)
-                    .orgId;
-            // Check if the user is an admin or desk station for this organization
-            bool isAdminOrDeskstation =
-                (userClaims['org_admin_$orgId'] == true) ||
-                    (userClaims['org_deskstation_$orgId'] == true);
-                return AlertDialog(
-                  title: const Text('Please Leave a Note'), // Title
-                  content: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Please describe why you are checking out this device', // Instruction text
-                      ),
-                      TextField(
-                        controller:
-                            _deviceCheckedOutNoteController, // Search field for users
-                        decoration: const InputDecoration(
-                          labelText: 'Leave a Note',
-                          prefixIcon: Icon(Icons.note),
-                        ),
-                      ),
-                    ],
-                  ),
-                  actions: <Widget>[
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        setState(() => _deviceCheckedOutNote =
-                              _deviceCheckedOutNoteController.text);
-
-                        if (isAdminOrDeskstation && isDeviceBeingCheckedOut) {
-                          Navigator.of(context).pop(); // Close note dialog
-                          _showUserListDialog(true, orgId,
-                              _deviceCheckedOutNote); // Show user list dialog if admin or desk station
-                        } else {
-                          Navigator.of(context).pop(); // Close note dialog
-                          _changeDeviceStatus(isDeviceBeingCheckedOut,
-                              _deviceCheckedOutNote); // Submit the action (check-in or check-out)
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            theme.colorScheme.surface.withOpacity(0.95),
-                        side: BorderSide(
-                          color: theme.colorScheme.primary.withOpacity(0.5),
-                          width: 1.5,
-                        ),
-                        padding: const EdgeInsets.all(16.0),
-                      ),
-                      icon: const Icon(Icons.logout),
-                      label:
-                          const Text('Check Out Device'), // Button to go back
-                    ),
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        Navigator.of(context).pop(); // Close the dialog
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            theme.colorScheme.surface.withOpacity(0.95),
-                        side: BorderSide(
-                          color: theme.colorScheme.primary.withOpacity(0.5),
-                          width: 1.5,
-                        ),
-                        padding: const EdgeInsets.all(16.0),
-                      ),
-                      icon: const Icon(Icons.arrow_back),
-                      label: const Text('Go Back'), // Button to go back
-                    ),
-                  ],
-                );
+            bool isAdminOrDeskstation = (userClaims['org_admin_$orgId'] == true) ||
+                (userClaims['org_deskstation_$orgId'] == true);
+            return CheckoutNoteDialog(
+              isDeviceBeingCheckedOut: isDeviceBeingCheckedOut,
+              orgId: orgId,
+              isAdminOrDeskstation: isAdminOrDeskstation,
+              onSubmit: (deviceCheckedOutNote) {
+                if (isAdminOrDeskstation && isDeviceBeingCheckedOut) {
+                  // For admin/deskstation users, show the user list dialog
+                  _showUserListDialog(isDeviceBeingCheckedOut, orgId, deviceCheckedOutNote);
+                } else {
+                  // Otherwise, directly change the device status
+                  _changeDeviceStatus(isDeviceBeingCheckedOut, deviceCheckedOutNote);
+                }
               },
             );
           },
         );
-      }
-  
+      },
+    );
+  }
 
-  /// Shows a dialog for admin or desk station users to select a user for check-in/check-out
-  Future<void> _showUserListDialog(bool isDeviceCheckedOut, String orgId,
-      String deviceCheckedOutNote) async {
-    return showDialog<void>(
-      context: context,
-      builder: (BuildContext context) {
-        ThemeData theme = Theme.of(context);
-        return AlertDialog(
-              title: Text(isDeviceCheckedOut
-                  ? 'Confirm Check-out User'
-                  : 'Confirm Check-in User'), // Title based on check-out or check-in
-              content:
-                  Consumer2<FirestoreReadService, OrgSelectorChangeNotifier>(
-                      builder: (context, firestoreReadService,
-                          orgSelectorChangeNotifier, child) {
-                return Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      isDeviceCheckedOut
-                          ? 'Select the user to check-out this device.'
-                          : 'Select the user to check-in this device.', // Instruction text
-                    ),
-                    TextField(
-                      controller:
-                          _userSearchController, // Search field for users
-                      decoration: const InputDecoration(
-                        labelText: 'Search User',
-                        prefixIcon: Icon(Icons.search),
-                      ),
-                      onChanged: (value) {
-                        setState(() {
-                          _searchQuery = value; // Update search query
-                        });
-                      },
-                    ),
-                    StreamBuilder<List<DocumentSnapshot>>(
-                        stream: firestoreReadService.getOrgMembersDocuments(
-                            orgSelectorChangeNotifier
-                                .orgId), // Stream to fetch organization members
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return const Center(
-                                child:
-                                    CircularProgressIndicator()); // Show loading indicator
-                          } else if (snapshot.hasError) {
-                            return const Center(
-                                child: Text(
-                                    'Error loading users')); // Show error message
-                          }
-                          final List<DocumentSnapshot> orgMemberDocs =
-                              snapshot.data!;
-
-                          // Filter members based on search query
-                          final filteredDocs = orgMemberDocs.where((doc) {
-                            final name = doc['orgMemberDisplayName']
-                                .toString()
-                                .toLowerCase();
-                            return name.contains(_searchQuery.toLowerCase());
-                          }).toList();
-
-                          if (filteredDocs.isNotEmpty) {
-                            return Container(
-                              constraints: const BoxConstraints(
-                                maxHeight: 200,
-                              ),
-                              child: SingleChildScrollView(
-                                child: Column(
-                                  children: filteredDocs.map((orgMemberDoc) {
-                                    return ListTile(
-                                      title: Text(orgMemberDoc[
-                                          'orgMemberDisplayName']), // Display member name
-                                      subtitle: Text(orgMemberDoc[
-                                          'orgMemberEmail']), // Display member email
-                                      onTap: () {
-                                        _changeDeviceStatusAdminAndDeskstation(
-                                            isDeviceCheckedOut,
-                                            orgMemberDoc.id,
-                                            _deviceCheckedOutNote // Submit with selected member
-                                            );
-                                        Navigator.of(context)
-                                            .pop(); // Close dialog
-                                      },
-                                    );
-                                  }).toList(),
-                                ),
-                              ),
-                            );
-                          } else {
-                            return const Column(
-                              children: [
-                                SizedBox(
-                                  height: 16,
-                                ),
-                                Center(
-                                  child: Text(
-                                      'No users found.'), // Message when no users match search
-                                ),
-                              ],
-                            );
-                          }
-                        }),
-                  ],
-                );
-              }),
-              actions: <Widget>[
-                ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.of(context).pop(); // Close note dialog
-                    _showCheckoutNoteDialog(isDeviceCheckedOut,
-                        orgId); // Show note dialog for check-out
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                        theme.colorScheme.surface.withOpacity(0.95),
-                    side: BorderSide(
-                      color: theme.colorScheme.primary.withOpacity(0.5),
-                      width: 1.5,
-                    ),
-                    padding: const EdgeInsets.all(16.0),
-                  ),
-                  icon: const Icon(Icons.arrow_back),
-                  label: const Text('Go Back'), // Button to go back
-                ),
-              ],
-            );
-          },
-        );
-      }
+Future<void> _showUserListDialog(bool isDeviceCheckedOut, String orgId, String deviceCheckedOutNote) async {
+  return showDialog<void>(
+    context: context,
+    builder: (BuildContext context) {
+      return UserListDialog(
+        isDeviceCheckedOut: isDeviceCheckedOut,
+        orgId: orgId,
+        deviceCheckedOutNote: deviceCheckedOutNote,
+        onUserSelected: (selectedUserId) {
+          _changeDeviceStatusAdminAndDeskstation(isDeviceCheckedOut, selectedUserId, deviceCheckedOutNote);
+        },
+      );
+    },
+  );
+}
       
   /// Handles the submission of the check-in or check-out operation
   Future<void> _changeDeviceStatus(
@@ -387,3 +190,232 @@ class DeviceCheckoutButtonState extends State<DeviceCheckoutButton> {
 
   
 }
+
+class CheckoutNoteDialog extends StatefulWidget {
+  final bool isDeviceBeingCheckedOut;
+  final String orgId;
+  final bool isAdminOrDeskstation;
+  final ValueChanged<String> onSubmit; // Callback with the entered note
+
+  const CheckoutNoteDialog({
+    super.key,
+    required this.isDeviceBeingCheckedOut,
+    required this.orgId,
+    required this.isAdminOrDeskstation,
+    required this.onSubmit,
+  });
+
+  @override
+  _CheckoutNoteDialogState createState() => _CheckoutNoteDialogState();
+}
+
+class _CheckoutNoteDialogState extends State<CheckoutNoteDialog> {
+  late TextEditingController _noteController;
+
+  @override
+  void initState() {
+    super.initState();
+    _noteController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _noteController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    ThemeData theme = Theme.of(context);
+    return AlertDialog(
+      title: const Text('Please Leave a Note'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Please describe why you are checking out this device',
+          ),
+          TextField(
+            controller: _noteController,
+            decoration: const InputDecoration(
+              labelText: 'Leave a Note',
+              prefixIcon: Icon(Icons.note),
+            ),
+          ),
+        ],
+      ),
+      actions: <Widget>[
+        ElevatedButton.icon(
+          onPressed: () {
+            // Get the note from the text field
+            final note = _noteController.text;
+            Navigator.of(context).pop(); // Close the dialog
+            widget.onSubmit(note); // Pass the note back to the caller
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
+            side: BorderSide(
+              color: theme.colorScheme.primary.withOpacity(0.5),
+              width: 1.5,
+            ),
+            padding: const EdgeInsets.all(16.0),
+          ),
+          icon: const Icon(Icons.logout),
+          label: const Text('Check Out Device'),
+        ),
+        ElevatedButton.icon(
+          onPressed: () {
+            Navigator.of(context).pop(); // Just close the dialog
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
+            side: BorderSide(
+              color: theme.colorScheme.primary.withOpacity(0.5),
+              width: 1.5,
+            ),
+            padding: const EdgeInsets.all(16.0),
+          ),
+          icon: const Icon(Icons.arrow_back),
+          label: const Text('Go Back'),
+        ),
+      ],
+    );
+  }
+}
+
+
+class UserListDialog extends StatefulWidget {
+  final bool isDeviceCheckedOut;
+  final String orgId;
+  final String deviceCheckedOutNote;
+  final ValueChanged<String> onUserSelected; // Callback with the selected userId
+
+  const UserListDialog({
+    super.key,
+    required this.isDeviceCheckedOut,
+    required this.orgId,
+    required this.deviceCheckedOutNote,
+    required this.onUserSelected,
+  });
+
+  @override
+  _UserListDialogState createState() => _UserListDialogState();
+}
+
+class _UserListDialogState extends State<UserListDialog> {
+  late TextEditingController _userSearchController;
+  String _searchQuery = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _userSearchController = TextEditingController();
+    _userSearchController.addListener(() {
+      setState(() {
+        _searchQuery = _userSearchController.text;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _userSearchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    ThemeData theme = Theme.of(context);
+    return AlertDialog(
+      title: Text(widget.isDeviceCheckedOut
+          ? 'Confirm Check-out User'
+          : 'Confirm Check-in User'),
+      content: Consumer2<FirestoreReadService, OrgSelectorChangeNotifier>(
+        builder: (context, firestoreReadService, orgSelectorChangeNotifier, child) {
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                widget.isDeviceCheckedOut
+                    ? 'Select the user to check-out this device.'
+                    : 'Select the user to check-in this device.',
+              ),
+              TextField(
+                controller: _userSearchController,
+                decoration: const InputDecoration(
+                  labelText: 'Search User',
+                  prefixIcon: Icon(Icons.search),
+                ),
+              ),
+              StreamBuilder<List<DocumentSnapshot>>(
+                stream: firestoreReadService.getOrgMembersDocuments(
+                    orgSelectorChangeNotifier.orgId),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return const Center(child: Text('Error loading users'));
+                  }
+                  final List<DocumentSnapshot> orgMemberDocs = snapshot.data ?? [];
+                  final filteredDocs = orgMemberDocs.where((doc) {
+                    final name = doc['orgMemberDisplayName']
+                        .toString()
+                        .toLowerCase();
+                    return name.contains(_searchQuery.toLowerCase());
+                  }).toList();
+
+                  if (filteredDocs.isNotEmpty) {
+                    return Container(
+                      constraints: const BoxConstraints(maxHeight: 200),
+                      child: SingleChildScrollView(
+                        child: Column(
+                          children: filteredDocs.map((orgMemberDoc) {
+                            return ListTile(
+                              title: Text(orgMemberDoc['orgMemberDisplayName']),
+                              subtitle: Text(orgMemberDoc['orgMemberEmail']),
+                              onTap: () {
+                                widget.onUserSelected(orgMemberDoc.id);
+                                Navigator.of(context).pop();
+                              },
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                    );
+                  } else {
+                    return const Column(
+                      children: [
+                        SizedBox(height: 16),
+                        Center(child: Text('No users found.')),
+                      ],
+                    );
+                  }
+                },
+              ),
+            ],
+          );
+        },
+      ),
+      actions: <Widget>[
+        ElevatedButton.icon(
+          onPressed: () {
+            Navigator.of(context).pop(); // Close dialog (or add additional logic)
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
+            side: BorderSide(
+              color: theme.colorScheme.primary.withOpacity(0.5),
+              width: 1.5,
+            ),
+            padding: const EdgeInsets.all(16.0),
+          ),
+          icon: const Icon(Icons.arrow_back),
+          label: const Text('Go Back'),
+        ),
+      ],
+    );
+  }
+}
+
