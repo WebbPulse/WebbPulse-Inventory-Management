@@ -8,7 +8,6 @@ import '../providers/authentication_change_notifier.dart';
 
 import '../../apps/authed/views/org_selection_view.dart';
 import '../../apps/authed/views/profile_settings_view.dart';
-import '../../apps/authed/views/org_selected/device_checkout_view.dart';
 import '../../apps/authed/views/org_selected/org_device_list_view.dart';
 import '../../apps/authed/views/org_selected/org_member_list_view.dart';
 import '../../apps/authed/views/org_selected/org_settings_view.dart';
@@ -150,16 +149,6 @@ class AuthedDrawer extends StatelessWidget {
                             .routeName); // Navigate to OrgSettingsView
                   },
                 ),
-              ListTile(
-                leading: const Icon(Icons.check_box), // Checkout icon
-                title: const Text('Checkout'), // Label
-                onTap: () {
-                  Navigator.pushNamed(
-                      context,
-                      DeviceCheckoutView
-                          .routeName); // Navigate to DeviceCheckoutView
-                },
-              ),
               ListTile(
                 leading: const Icon(Icons.devices), // Devices icon
                 title: const Text('Devices'), // Label

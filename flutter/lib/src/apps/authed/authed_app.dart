@@ -6,14 +6,15 @@ import 'package:webbpulse_inventory_management/src/shared/providers/authenticati
 import 'package:webbpulse_inventory_management/src/shared/providers/settings_change_notifier.dart';
 import 'package:webbpulse_inventory_management/src/shared/providers/org_selector_change_notifier.dart';
 import 'package:webbpulse_inventory_management/src/shared/providers/org_member_selector_change_notifier.dart';
+import 'package:webbpulse_inventory_management/src/shared/providers/device_selector_change_notifier.dart';
 import 'package:webbpulse_inventory_management/src/shared/providers/firestore_read_service.dart';
 import 'package:webbpulse_inventory_management/src/shared/providers/device_checkout_service.dart';
 
 import 'views/profile_settings_view.dart';
 import 'views/org_selected/org_device_list_view.dart';
-import 'views/org_selected/device_checkout_view.dart';
 import 'views/org_selected/org_member_list_view.dart';
 import 'views/org_selected/org_member_view.dart';
+import 'views/org_selected/device_checkout_note_view.dart';
 import 'package:webbpulse_inventory_management/src/apps/authed/views/org_selected/org_settings_view.dart';
 import 'views/org_create_view.dart';
 import 'views/org_selection_view.dart';
@@ -50,6 +51,9 @@ class AuthedApp extends StatelessWidget {
         ChangeNotifierProvider<OrgMemberSelectorChangeNotifier>(
             create: (_) =>
                 OrgMemberSelectorChangeNotifier()), // Manages organization member selection
+        ChangeNotifierProvider<DeviceSelectorChangeNotifier>(
+            create: (_) =>
+                DeviceSelectorChangeNotifier()), // Manages user settings
         Provider<FirestoreReadService>(
             create: (_) => firestoreService), // Provides Firestore read service
         Provider<FirebaseFunctions>.value(
@@ -146,10 +150,6 @@ class AuthedApp extends StatelessWidget {
                       return MaterialPageRoute<void>(
                         builder: (context) => OrgDeviceListView(),
                       );
-                    case DeviceCheckoutView.routeName:
-                      return MaterialPageRoute<void>(
-                        builder: (context) => const DeviceCheckoutView(),
-                      );
                     case OrgMemberListView.routeName:
                       return MaterialPageRoute<void>(
                         builder: (context) => const OrgMemberListView(),
@@ -158,10 +158,14 @@ class AuthedApp extends StatelessWidget {
                       return MaterialPageRoute<void>(
                         builder: (context) => const OrgSettingsView(),
                       );
+                    case DeviceCheckoutNoteView.routeName:
+                      return MaterialPageRoute<void>(
+                        builder: (context) => const DeviceCheckoutNoteView(),
+                      );
                     default:
                       // Default route if no match is found
                       return MaterialPageRoute<void>(
-                        builder: (context) => const DeviceCheckoutView(),
+                        builder: (context) => OrgDeviceListView(),
                       );
                   }
                 },

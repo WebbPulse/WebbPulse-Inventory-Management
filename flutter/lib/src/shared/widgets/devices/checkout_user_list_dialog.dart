@@ -1,20 +1,18 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:webbpulse_inventory_management/src/apps/authed/views/org_selected/org_device_list_view.dart';
 import 'package:webbpulse_inventory_management/src/shared/providers/firestore_read_service.dart';
 import 'package:webbpulse_inventory_management/src/shared/providers/org_selector_change_notifier.dart';
 
 class CheckoutUserListDialog extends StatefulWidget {
-  final bool isDeviceCheckedOut;
   final String orgId;
-  final String deviceCheckedOutNote;
-  final ValueChanged<String> onUserSelected; // Callback with the selected userId
+  final ValueChanged<String>
+      onUserSelected; // Callback with the selected userId
 
   const CheckoutUserListDialog({
     super.key,
-    required this.isDeviceCheckedOut,
     required this.orgId,
-    required this.deviceCheckedOutNote,
     required this.onUserSelected,
   });
 
@@ -47,20 +45,15 @@ class _CheckoutUserListDialogState extends State<CheckoutUserListDialog> {
   Widget build(BuildContext context) {
     ThemeData theme = Theme.of(context);
     return AlertDialog(
-      title: Text(widget.isDeviceCheckedOut
-          ? 'Confirm Check-out User'
-          : 'Confirm Check-in User'),
+      title: const Text('Confirm Check-out User'),
       content: Consumer2<FirestoreReadService, OrgSelectorChangeNotifier>(
-        builder: (context, firestoreReadService, orgSelectorChangeNotifier, child) {
+        builder:
+            (context, firestoreReadService, orgSelectorChangeNotifier, child) {
           return Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                widget.isDeviceCheckedOut
-                    ? 'Select the user to check-out this device.'
-                    : 'Select the user to check-in this device.',
-              ),
+              const Text('Select the user to check-out this device.'),
               TextField(
                 controller: _userSearchController,
                 decoration: const InputDecoration(
@@ -69,19 +62,19 @@ class _CheckoutUserListDialogState extends State<CheckoutUserListDialog> {
                 ),
               ),
               StreamBuilder<List<DocumentSnapshot>>(
-                stream: firestoreReadService.getOrgMembersDocuments(
-                    orgSelectorChangeNotifier.orgId),
+                stream: firestoreReadService
+                    .getOrgMembersDocuments(orgSelectorChangeNotifier.orgId),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
                   } else if (snapshot.hasError) {
                     return const Center(child: Text('Error loading users'));
                   }
-                  final List<DocumentSnapshot> orgMemberDocs = snapshot.data ?? [];
+                  final List<DocumentSnapshot> orgMemberDocs =
+                      snapshot.data ?? [];
                   final filteredDocs = orgMemberDocs.where((doc) {
-                    final name = doc['orgMemberDisplayName']
-                        .toString()
-                        .toLowerCase();
+                    final name =
+                        doc['orgMemberDisplayName'].toString().toLowerCase();
                     return name.contains(_searchQuery.toLowerCase());
                   }).toList();
 
@@ -96,7 +89,10 @@ class _CheckoutUserListDialogState extends State<CheckoutUserListDialog> {
                               subtitle: Text(orgMemberDoc['orgMemberEmail']),
                               onTap: () {
                                 widget.onUserSelected(orgMemberDoc.id);
-                                Navigator.of(context).pop();
+                                Navigator.pushNamed(
+                                  context,
+                                  OrgDeviceListView.routeName,
+                                );
                               },
                             );
                           }).toList(),
@@ -120,7 +116,8 @@ class _CheckoutUserListDialogState extends State<CheckoutUserListDialog> {
       actions: <Widget>[
         ElevatedButton.icon(
           onPressed: () {
-            Navigator.of(context).pop(); // Close dialog (or add additional logic)
+            Navigator.of(context)
+                .pop(); // Close dialog (or add additional logic)
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
@@ -137,4 +134,3 @@ class _CheckoutUserListDialogState extends State<CheckoutUserListDialog> {
     );
   }
 }
-

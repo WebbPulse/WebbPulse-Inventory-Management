@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:webbpulse_inventory_management/src/shared/authentication_provider_list.dart';
 
 import 'package:webbpulse_inventory_management/src/shared/providers/authentication_change_notifier.dart';
-import 'package:webbpulse_inventory_management/src/apps/authed/views/org_selected/device_checkout_view.dart';
+import 'package:webbpulse_inventory_management/src/apps/authed/views/org_selected/org_device_list_view.dart';
 
 /// SignInView is the screen where users can sign in using Firebase UI.
 class SignInView extends StatelessWidget {
@@ -30,7 +30,7 @@ class SignInView extends StatelessWidget {
             actions: [
               AuthStateChangeAction<SignedIn>((context, state) {
                 // If the user signs in successfully, navigate to DeviceCheckoutView
-                Navigator.pushNamed(context, DeviceCheckoutView.routeName);
+                Navigator.pushNamed(context, OrgDeviceListView.routeName);
               }),
             ],
           ),
