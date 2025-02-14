@@ -5,7 +5,7 @@ import 'org_create_view.dart';
 import 'package:webbpulse_inventory_management/src/shared/widgets/widgets.dart';
 import 'package:webbpulse_inventory_management/src/shared/providers/org_selector_change_notifier.dart';
 import 'package:webbpulse_inventory_management/src/shared/providers/authentication_change_notifier.dart';
-import 'org_selected/device_checkout_view.dart';
+import 'org_selected/org_device_list_view.dart';
 import 'package:webbpulse_inventory_management/src/shared/widgets/user_widgets.dart';
 
 /// OrgSelectionView provides the screen for selecting an organization.
@@ -198,7 +198,7 @@ class OrgCard extends StatelessWidget {
                 orgSelectorProvider.selectOrg(orgId); // Select the organization
                 Navigator.pushNamed(
                     context,
-                    DeviceCheckoutView
+                    OrgDeviceListView
                         .routeName); // Navigate to DeviceCheckoutView
               },
             );

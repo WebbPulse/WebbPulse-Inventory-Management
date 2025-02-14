@@ -131,6 +131,7 @@ class DeviceCardDesktop extends StatelessWidget {
                               Row(
                                 children: [
                                   DeviceCheckoutButton(
+                                    key: ValueKey(deviceSerialNumber),
                                     deviceSerialNumber: deviceSerialNumber,
                                   ),
                                   const SizedBox(width: 8),
@@ -262,6 +263,7 @@ class DeviceCardMobile extends StatelessWidget {
                           runSpacing: 8,
                           children: [
                             DeviceCheckoutButton(
+                              key: ValueKey(deviceSerialNumber),
                               deviceSerialNumber: deviceSerialNumber,
                             ),
                             const SizedBox(width: 8),
