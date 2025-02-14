@@ -105,7 +105,7 @@ class DeviceCheckoutButtonState extends State<DeviceCheckoutButton> {
               orgId: orgId,
               isAdminOrDeskstation: isAdminOrDeskstation,
               onSubmit: (deviceCheckedOutNote) {
-                if (isAdminOrDeskstation && isDeviceBeingCheckedOut) {
+                if (isAdminOrDeskstation) {
                   // For admin/deskstation users, show the user list dialog
                   _showUserListDialog(isDeviceBeingCheckedOut, orgId, deviceCheckedOutNote);
                 } else {
