@@ -1,5 +1,8 @@
-from src.shared import https_fn, POSTcorsrules, Any, db, auth, check_user_is_org_admin, check_user_is_authed, check_user_token_current, check_user_is_email_verified
+from src.shared import POSTcorsrules, check_user_is_org_admin, check_user_is_authed, check_user_token_current, check_user_is_email_verified
 from src.helper_functions.users.update_user_roles import update_user_roles
+
+from firebase_functions import https_fn
+from typing import Any
 
 @https_fn.on_call(cors=POSTcorsrules)
 def update_user_role_callable(req: https_fn.CallableRequest) -> Any:

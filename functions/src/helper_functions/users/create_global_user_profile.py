@@ -1,5 +1,9 @@
-from src.shared import db, firestore, https_fn, send_email, Mail, Asm
+from src.shared import db, send_email
 from src.helper_functions.users.generate_email_login_link import generate_email_login_link
+
+from firebase_functions import https_fn
+from sendgrid.helpers.mail import Mail, Asm
+from firebase_admin import firestore
 
 def create_global_user_profile(user, inviter_display_name):
     """

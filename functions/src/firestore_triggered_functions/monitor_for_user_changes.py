@@ -1,6 +1,8 @@
-from src.shared import firestore_fn, auth
 from src.helper_functions.users.update_user_display_names_in_orgs import update_user_display_names_in_orgs
 from src.helper_functions.users.update_user_photo_urls_in_orgs import update_user_photo_urls_in_orgs
+
+from firebase_admin import auth
+from firebase_functions import firestore_fn
 from firebase_functions.firestore_fn import (
   Event,
   Change,

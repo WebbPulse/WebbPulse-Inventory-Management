@@ -1,4 +1,7 @@
-from src.shared import auth, UserNotFoundError, https_fn
+from firebase_admin import auth
+from firebase_functions import https_fn
+from firebase_admin.auth import UserNotFoundError
+from typing import Any
 
 def generate_email_login_link(email):
     """

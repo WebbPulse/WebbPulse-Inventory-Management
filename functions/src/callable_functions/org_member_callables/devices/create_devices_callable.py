@@ -1,4 +1,8 @@
-from src.shared import POSTcorsrules, db, firestore, https_fn, Any, check_user_is_org_member, check_user_is_authed, check_user_token_current, check_user_is_email_verified
+from src.shared import POSTcorsrules, db, check_user_is_org_member, check_user_is_authed, check_user_token_current, check_user_is_email_verified
+
+from firebase_functions import https_fn
+from typing import Any
+from firebase_admin import firestore
 
 @https_fn.on_call(cors=POSTcorsrules, timeout_sec=540)
 def create_devices_callable(req: https_fn.CallableRequest) -> Any:

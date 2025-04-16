@@ -1,5 +1,9 @@
-from src.shared import db, firestore, https_fn, auth, send_email, Mail, Asm
+from src.shared import db, send_email
 from src.helper_functions.users.update_user_roles import update_user_roles
+
+from firebase_functions import https_fn
+from sendgrid.helpers.mail import Mail, Asm
+from firebase_admin import firestore
 
 def add_user_to_organization(uid, org_id, org_member_display_name, org_member_email, inviter_display_name):
     """

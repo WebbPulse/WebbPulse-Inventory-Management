@@ -1,5 +1,9 @@
-from src.shared import auth, https_fn, db, POSTcorsrules, Any, UserNotFoundError, check_user_is_org_admin, check_user_is_authed, check_user_token_current, check_user_is_email_verified
+from src.shared import db, POSTcorsrules,check_user_is_authed
 from src.helper_functions.users.create_global_user_profile import create_global_user_profile
+
+from firebase_admin import auth
+from firebase_functions import https_fn
+from typing import Any
 
 @https_fn.on_call(cors=POSTcorsrules)
 def create_global_user_profile_callable(req: https_fn.CallableRequest) -> Any:

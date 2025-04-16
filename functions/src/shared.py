@@ -1,11 +1,7 @@
-from firebase_functions import options, https_fn, identity_fn, firestore_fn
+from firebase_functions import options, https_fn
 from firebase_admin import firestore, auth
-from firebase_admin.auth import UserNotFoundError
-from typing import Any
-import time
 from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail, Asm
-import os
+from sendgrid.helpers.mail import Mail
 
 # Define CORS options for HTTP functions
 POSTcorsrules = options.CorsOptions(cors_origins="*", cors_methods=["get", "post"])

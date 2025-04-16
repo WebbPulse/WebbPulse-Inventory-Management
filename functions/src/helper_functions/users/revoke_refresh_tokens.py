@@ -1,4 +1,6 @@
-from src.shared import db, auth, time
+from src.shared import db
+from firebase_admin import auth
+import time
 
 def revoke_refresh_tokens(org_member_id):
     """

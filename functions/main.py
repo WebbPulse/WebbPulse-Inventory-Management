@@ -30,6 +30,9 @@ from src.callable_functions.global_user_callables.global_user_profile.delete_glo
 #firestore triggered functions
 from src.firestore_triggered_functions.monitor_for_user_changes import monitor_for_user_changes
 
+#scheduled functions
+from src.scheduled_functions.temp import temp
+
 
 
 

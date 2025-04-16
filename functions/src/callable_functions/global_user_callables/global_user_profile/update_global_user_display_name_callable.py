@@ -1,4 +1,6 @@
-from src.shared import https_fn, POSTcorsrules, Any, db, check_user_is_authed, check_user_token_current, check_user_is_email_verified
+from src.shared import POSTcorsrules, db, check_user_is_authed, check_user_token_current, check_user_is_email_verified
+from firebase_functions import https_fn
+from typing import Any
 
 @https_fn.on_call(cors=POSTcorsrules)
 def update_global_user_display_name_callable(req: https_fn.CallableRequest) -> Any:

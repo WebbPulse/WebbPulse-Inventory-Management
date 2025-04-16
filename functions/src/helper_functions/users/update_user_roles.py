@@ -1,5 +1,8 @@
-from src.shared import https_fn, db, auth, time
+from src.shared import db
 from src.helper_functions.users.revoke_refresh_tokens import revoke_refresh_tokens
+
+from firebase_functions import https_fn
+from firebase_admin import auth
 
 def update_user_roles(org_member_id, org_member_role, org_id, revoke_tokens):
     """
