@@ -46,3 +46,5 @@ app.*.map.json
 
 #firebase hosting deploy cache
 .firebase
+functions/gcp_key.json
+gcp_key.json
