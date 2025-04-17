@@ -37,7 +37,7 @@ def create_global_user_profile_callable(req: https_fn.CallableRequest) -> Any:
         user = auth.get_user(uid)
 
         # Step 7: Call the helper function to create a global user profile in Firestore.
-        create_global_user_profile(user)
+        create_global_user_profile(user, inviter_display_name=user.email)
 
         # Step 8: Return a success response indicating that the user has been created in the database.
         response_message = f"User {user.email} created in database."
