@@ -14,9 +14,9 @@ import 'package:webbpulse_inventory_management/src/apps/authed/views/org_selecte
 import 'package:webbpulse_inventory_management/src/shared/providers/org_selector_change_notifier.dart';
 import 'package:webbpulse_inventory_management/src/shared/providers/org_member_selector_change_notifier.dart';
 import 'package:webbpulse_inventory_management/src/shared/providers/firestore_read_service.dart';
-import 'package:webbpulse_inventory_management/src/shared/widgets/widgets.dart';
-import 'package:webbpulse_inventory_management/src/shared/widgets/user_widgets.dart';
-import 'package:webbpulse_inventory_management/src/shared/widgets/org_widgets.dart';
+import 'package:webbpulse_inventory_management/src/shared/widgets/styling/styling_widgets.dart';
+import 'package:webbpulse_inventory_management/src/shared/widgets/users/user_widgets.dart';
+import 'package:webbpulse_inventory_management/src/shared/widgets/org/org_widgets.dart';
 
 /// OrgMemberListView displays a list of members in the selected organization.
 /// It also includes functionality for searching, adding, and managing users.

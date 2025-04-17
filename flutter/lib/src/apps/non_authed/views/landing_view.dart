@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'register_view.dart';
 import 'signin_view.dart';
-import 'package:webbpulse_inventory_management/src/shared/widgets/widgets.dart';
+import 'package:webbpulse_inventory_management/src/shared/widgets/styling/styling_widgets.dart';
 
 /// LandingView provides the initial landing screen for the app.
 /// It offers options for users to either register or sign in.

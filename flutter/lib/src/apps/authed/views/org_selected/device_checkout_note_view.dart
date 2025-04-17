@@ -7,7 +7,7 @@ import 'package:webbpulse_inventory_management/src/shared/providers/org_selector
 import 'package:webbpulse_inventory_management/src/shared/providers/authentication_change_notifier.dart';
 import 'package:webbpulse_inventory_management/src/shared/providers/device_selector_change_notifier.dart';
 import 'package:webbpulse_inventory_management/src/shared/widgets/devices/checkout_user_list_dialog.dart';
-import 'package:webbpulse_inventory_management/src/shared/widgets/user_widgets.dart';
+import 'package:webbpulse_inventory_management/src/shared/widgets/users/user_widgets.dart';
 
 class DeviceCheckoutNoteView extends StatefulWidget {
   const DeviceCheckoutNoteView({

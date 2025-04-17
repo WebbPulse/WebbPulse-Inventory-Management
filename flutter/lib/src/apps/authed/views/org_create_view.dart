@@ -4,7 +4,7 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:webbpulse_inventory_management/src/shared/providers/authentication_change_notifier.dart';
 
 import 'org_selection_view.dart';
-import 'package:webbpulse_inventory_management/src/shared/widgets/widgets.dart';
+import 'package:webbpulse_inventory_management/src/shared/widgets/styling/styling_widgets.dart';
 
 /// OrgCreateView provides the UI for creating a new organization.
 /// Users can enter a name for their organization and submit the form to create it.

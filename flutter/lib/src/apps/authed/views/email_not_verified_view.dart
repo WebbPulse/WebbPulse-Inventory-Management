@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:webbpulse_inventory_management/src/apps/authed/views/verify_email_view.dart';
-import 'package:webbpulse_inventory_management/src/shared/widgets/widgets.dart';
+import 'package:webbpulse_inventory_management/src/shared/widgets/styling/styling_widgets.dart';
 import 'package:webbpulse_inventory_management/src/shared/providers/authentication_change_notifier.dart';
 
 /// EmailNotVerifiedView provides the screen for if a user is not currently email verified.

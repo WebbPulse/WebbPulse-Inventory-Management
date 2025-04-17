@@ -5,7 +5,7 @@ import 'firestore_read_service.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:webbpulse_inventory_management/src/shared/widgets/widgets.dart';
+import 'package:webbpulse_inventory_management/src/shared/widgets/styling/styling_widgets.dart';
 
 /// Service class for handling the check-in and check-out logic of devices
 class DeviceCheckoutService {

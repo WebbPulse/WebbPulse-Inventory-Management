@@ -22,7 +22,7 @@ import 'views/verify_email_view.dart';
 import 'views/email_not_verified_view.dart';
 import 'views/configure_password.dart';
 
-import 'package:webbpulse_inventory_management/src/shared/widgets/widgets.dart';
+import 'package:webbpulse_inventory_management/src/shared/widgets/styling/styling_widgets.dart';
 
 /// Main app widget for authenticated users
 /// Provides routes and handles various services like Firestore and Cloud Functions
