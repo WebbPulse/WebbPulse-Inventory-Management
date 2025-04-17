@@ -11,8 +11,8 @@ import '../../providers/firestore_read_service.dart';
 import 'package:webbpulse_inventory_management/src/shared/widgets/devices/device_checkout_button.dart';
 import 'package:webbpulse_inventory_management/src/shared/widgets/devices/device_delete_button.dart';
 
-import 'package:webbpulse_inventory_management/src/shared/widgets/widgets.dart';
-import 'package:webbpulse_inventory_management/src/shared/widgets/user_widgets.dart';
+import 'package:webbpulse_inventory_management/src/shared/widgets/styling/styling_widgets.dart';
+import 'package:webbpulse_inventory_management/src/shared/widgets/users/user_widgets.dart';
 
 class DeviceCardDesktop extends StatelessWidget {
   const DeviceCardDesktop({

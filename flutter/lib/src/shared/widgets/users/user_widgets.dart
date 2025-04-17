@@ -3,14 +3,14 @@ import 'package:provider/provider.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import '../providers/org_selector_change_notifier.dart';
-import '../providers/authentication_change_notifier.dart';
+import '../../providers/org_selector_change_notifier.dart';
+import '../../providers/authentication_change_notifier.dart';
 
-import '../../apps/authed/views/org_selection_view.dart';
-import '../../apps/authed/views/profile_settings_view.dart';
-import '../../apps/authed/views/org_selected/org_device_list_view.dart';
-import '../../apps/authed/views/org_selected/org_member_list_view.dart';
-import '../../apps/authed/views/org_selected/org_settings_view.dart';
+import '../../../apps/authed/views/org_selection_view.dart';
+import '../../../apps/authed/views/profile_settings_view.dart';
+import '../../../apps/authed/views/org_selected/org_device_list_view.dart';
+import '../../../apps/authed/views/org_selected/org_member_list_view.dart';
+import '../../../apps/authed/views/org_selected/org_settings_view.dart';
 
 /// Widget for displaying the user's profile avatar
 /// It handles both valid and invalid photo URLs, showing a default icon on error

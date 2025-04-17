@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:webbpulse_inventory_management/src/shared/widgets/user_widgets.dart'; // Importing user-related widgets
-import 'package:webbpulse_inventory_management/src/shared/widgets/org_widgets.dart'; // Importing organization-related widgets
+import 'package:webbpulse_inventory_management/src/shared/widgets/users/user_widgets.dart'; // Importing user-related widgets
+import 'package:webbpulse_inventory_management/src/shared/widgets/org/org_widgets.dart'; // Importing organization-related widgets
 import 'package:webbpulse_inventory_management/src/shared/widgets/devices/device_list.dart'; // Importing device-related widgets
 import 'package:webbpulse_inventory_management/src/shared/widgets/devices/add_device_alert_dialog.dart';
 

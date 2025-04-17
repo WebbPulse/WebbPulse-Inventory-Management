@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 
-import '../providers/firestore_read_service.dart';
-import '../providers/org_selector_change_notifier.dart';
+import '../../providers/firestore_read_service.dart';
+import '../../providers/org_selector_change_notifier.dart';
 
 /// A reusable widget that listens to changes in the organization document from Firestore
 /// It builds a widget based on the provided builder function, passing the organization document to it

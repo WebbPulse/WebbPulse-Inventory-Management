@@ -4,10 +4,10 @@ import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:webbpulse_inventory_management/src/shared/providers/authentication_change_notifier.dart';
 import 'package:webbpulse_inventory_management/src/shared/providers/firestore_read_service.dart';
-import 'package:webbpulse_inventory_management/src/shared/widgets/widgets.dart';
+import 'package:webbpulse_inventory_management/src/shared/widgets/styling/styling_widgets.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:webbpulse_inventory_management/src/shared/providers/settings_change_notifier.dart';
-import 'package:webbpulse_inventory_management/src/shared/widgets/user_widgets.dart';
+import 'package:webbpulse_inventory_management/src/shared/widgets/users/user_widgets.dart';
 
 /// ProfileSettingsView allows users to manage their profile settings, such as changing
 /// their profile picture, display name, and theme preferences.

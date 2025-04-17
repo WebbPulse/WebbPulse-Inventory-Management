@@ -11,7 +11,7 @@ import 'package:file_picker/file_picker.dart';
 
 import '../../providers/org_selector_change_notifier.dart';
 
-import 'package:webbpulse_inventory_management/src/shared/widgets/widgets.dart';
+import 'package:webbpulse_inventory_management/src/shared/widgets/styling/styling_widgets.dart';
 
 /// A dialog widget to add a new device, supporting CSV upload or manual input
 class AddDeviceAlertDialog extends StatefulWidget {
