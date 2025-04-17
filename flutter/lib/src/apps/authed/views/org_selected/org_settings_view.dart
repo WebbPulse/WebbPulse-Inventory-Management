@@ -9,33 +9,28 @@ import 'package:webbpulse_inventory_management/src/shared/widgets/widgets.dart';
 import 'package:webbpulse_inventory_management/src/shared/widgets/user_widgets.dart';
 import 'package:webbpulse_inventory_management/src/shared/widgets/org_widgets.dart';
 
-/// OrgSettingsView displays the settings page for the selected organization,
-/// allowing users to update the organization's name, background image, or delete the organization.
 class OrgSettingsView extends StatelessWidget {
   const OrgSettingsView({super.key});
   static const routeName = '/org-settings';
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context); // Get the theme data for styling
+    final theme = Theme.of(context);
 
     return OrgDocumentStreamBuilder(builder: (context, orgDocument) {
       return Scaffold(
         appBar: const OrgNameAppBar(
-          titleSuffix:
-              'Settings', // App bar shows the organization's name and "Settings"
+          titleSuffix: 'Settings',
         ),
-        drawer: const AuthedDrawer(), // Sidebar drawer for navigation
+        drawer: const AuthedDrawer(),
         body: Stack(
           children: [
-            // Display organization background image if available
             if (orgDocument['orgBackgroundImageURL'] != null &&
                 orgDocument['orgBackgroundImageURL'] != '')
               Positioned.fill(
                 child: Image.network(
-                  orgDocument[
-                      'orgBackgroundImageURL'], // Display background image from URL
-                  fit: BoxFit.cover, // Fit the image to cover the background
+                  orgDocument['orgBackgroundImageURL'],
+                  fit: BoxFit.cover,
                 ),
               ),
             SafeArea(
@@ -51,7 +46,6 @@ class OrgSettingsView extends StatelessWidget {
                       child: Center(
                         child: LayoutBuilder(
                           builder: (context, constraints) {
-                            // Set maximum width for the card based on screen size
                             double maxWidth;
                             if (constraints.maxWidth < 600) {
                               maxWidth = constraints.maxWidth * 0.95;
@@ -63,18 +57,15 @@ class OrgSettingsView extends StatelessWidget {
 
                             return ConstrainedBox(
                               constraints: BoxConstraints(
-                                maxWidth: maxWidth, // Limit the card's width
+                                maxWidth: maxWidth,
                               ),
                               child: Card(
-                                elevation:
-                                    4.0, // Card elevation for shadow effect
+                                elevation: 4.0,
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(
-                                      12), // Rounded corners
+                                  borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Padding(
-                                  padding: const EdgeInsets.all(
-                                      16.0), // Padding around the content
+                                  padding: const EdgeInsets.all(16.0),
                                   child: Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.center,
@@ -82,7 +73,7 @@ class OrgSettingsView extends StatelessWidget {
                                     children: [
                                       const SizedBox(height: 20),
                                       const Text(
-                                        'Organization Settings', // Title of the settings page
+                                        'Organization Settings',
                                         style: TextStyle(
                                           fontSize: 24,
                                           fontWeight: FontWeight.bold,
@@ -90,12 +81,30 @@ class OrgSettingsView extends StatelessWidget {
                                         textAlign: TextAlign.center,
                                       ),
                                       const SizedBox(height: 16),
-                                      // Widget to edit the organization name
                                       OrgNameEditor(
                                         orgDocument: orgDocument,
                                       ),
                                       const SizedBox(height: 16),
-                                      // Button to change the organization image
+                                      const Text(
+                                        'Verkada Org Integration Settings',
+                                        style: TextStyle(
+                                          fontSize: 20,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                      const SizedBox(height: 16),
+                                      VerkadaOrgShortNameEditor(
+                                        orgDocument: orgDocument,
+                                      ),
+                                      const SizedBox(height: 16),
+                                      VerkadaOrgEmailEditor(
+                                        orgDocument: orgDocument,
+                                      ),
+                                      const SizedBox(height: 16),
+                                      VerkadaOrgPasswordEditor(
+                                        orgDocument: orgDocument,
+                                      ),
+                                      const SizedBox(height: 16),
                                       ElevatedButton.icon(
                                         onPressed: () {
                                           showDialog(
@@ -122,7 +131,6 @@ class OrgSettingsView extends StatelessWidget {
                                         ),
                                       ),
                                       const SizedBox(height: 20),
-                                      // Button to delete the organization with red background
                                       ElevatedButton.icon(
                                         onPressed: () {
                                           showDialog(
@@ -161,7 +169,7 @@ class OrgSettingsView extends StatelessWidget {
   }
 }
 
-/// OrgNameEditor provides a text field to edit the organization's name.
+// OrgNameEditor provides a text field to edit the organization's name.
 class OrgNameEditor extends StatefulWidget {
   final dynamic orgDocument;
 
@@ -172,31 +180,30 @@ class OrgNameEditor extends StatefulWidget {
 }
 
 class _OrgNameEditorState extends State<OrgNameEditor> {
-  late TextEditingController orgNameController; // Controller for the text field
-  var _isLoading = false; // Tracks the loading state during submission
+  late TextEditingController orgNameController;
+  var _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    orgNameController = TextEditingController(
-        text: widget.orgDocument['orgName']
-            as String); // Initialize controller with the current org name
+    orgNameController =
+        TextEditingController(text: widget.orgDocument['orgName'] as String);
   }
 
   @override
   void dispose() {
-    orgNameController.dispose(); // Dispose the controller when done
+    orgNameController.dispose();
     super.dispose();
   }
 
   /// Handles the submission of the new organization name.
   void _onSubmit() async {
-    final newName = orgNameController.text; // Get the new name from the input
-    final firebaseFunctions = Provider.of<FirebaseFunctions>(context,
-        listen: false); // Access Firebase Functions
+    final newName = orgNameController.text;
+    final firebaseFunctions =
+        Provider.of<FirebaseFunctions>(context, listen: false);
 
     setState(() {
-      _isLoading = true; // Show loading indicator
+      _isLoading = true;
     });
     try {
       await firebaseFunctions.httpsCallable('update_org_name_callable').call({
@@ -205,13 +212,13 @@ class _OrgNameEditorState extends State<OrgNameEditor> {
       });
 
       await AsyncContextHelpers.showSnackBarIfMounted(
-          context, 'Org name changed successfully'); // Show success message
+          context, 'Org name changed successfully');
     } catch (e) {
       await AsyncContextHelpers.showSnackBarIfMounted(
-          context, 'Failed to change Org name: $e'); // Show error message
+          context, 'Failed to change Org name: $e');
     } finally {
       setState(() {
-        _isLoading = false; // Hide loading indicator
+        _isLoading = false;
       });
     }
   }
@@ -219,24 +226,243 @@ class _OrgNameEditorState extends State<OrgNameEditor> {
   @override
   Widget build(BuildContext context) {
     return TextField(
-      controller: orgNameController, // Bind controller to text field
+      controller: orgNameController,
       decoration: InputDecoration(
-        labelText: 'Organization Name', // Label for the text field
+        labelText: 'Organization Name',
         border: const OutlineInputBorder(),
-        prefixIcon: const Icon(Icons.edit), // Prefix icon for the text field
+        prefixIcon: const Icon(Icons.edit),
         suffixIcon: IconButton(
           icon: _isLoading
-              ? const CircularProgressIndicator() // Show loading indicator if waiting
-              : const Icon(Icons.check), // Check icon for submission
-          onPressed:
-              _isLoading ? null : _onSubmit, // Disable button while loading
+              ? const CircularProgressIndicator()
+              : const Icon(Icons.check),
+          onPressed: _isLoading ? null : _onSubmit,
         ),
       ),
     );
   }
 }
 
-/// OrgImageEditorAlertDialog allows users to change the organization's background image URL.
+class VerkadaOrgShortNameEditor extends StatefulWidget {
+  final dynamic orgDocument;
+
+  const VerkadaOrgShortNameEditor({super.key, required this.orgDocument});
+
+  @override
+  _VerkadaOrgShortNameEditorState createState() =>
+      _VerkadaOrgShortNameEditorState();
+}
+
+class _VerkadaOrgShortNameEditorState extends State<VerkadaOrgShortNameEditor> {
+  late TextEditingController verkadaOrgShortNameController;
+  var _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    verkadaOrgShortNameController = TextEditingController(
+        text: widget.orgDocument['verkadaOrgShortName'] as String);
+  }
+
+  @override
+  void dispose() {
+    verkadaOrgShortNameController.dispose();
+    super.dispose();
+  }
+
+  void _onSubmit() async {
+    final newShortName = verkadaOrgShortNameController.text;
+    final firebaseFunctions =
+        Provider.of<FirebaseFunctions>(context, listen: false);
+
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      await firebaseFunctions
+          .httpsCallable('update_verkada_org_shortname_callable')
+          .call({
+        'orgId': widget.orgDocument.id,
+        'orgName': newShortName,
+      });
+
+      await AsyncContextHelpers.showSnackBarIfMounted(
+          context, 'Verkada org short name changed successfully');
+    } catch (e) {
+      await AsyncContextHelpers.showSnackBarIfMounted(
+          context, 'Failed to change Verkada org short name: $e');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: verkadaOrgShortNameController,
+      decoration: InputDecoration(
+        labelText: 'Verkada Org Short Name',
+        border: const OutlineInputBorder(),
+        prefixIcon: const Icon(Icons.edit),
+        suffixIcon: IconButton(
+          icon: _isLoading
+              ? const CircularProgressIndicator()
+              : const Icon(Icons.check),
+          onPressed: _isLoading ? null : _onSubmit,
+        ),
+      ),
+    );
+  }
+}
+
+class VerkadaOrgEmailEditor extends StatefulWidget {
+  final dynamic orgDocument;
+
+  const VerkadaOrgEmailEditor({super.key, required this.orgDocument});
+
+  @override
+  _VerkadaOrgEmailEditorState createState() => _VerkadaOrgEmailEditorState();
+}
+
+class _VerkadaOrgEmailEditorState extends State<VerkadaOrgEmailEditor> {
+  late TextEditingController verkadaOrgEmailController;
+  var _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    verkadaOrgEmailController = TextEditingController(
+        text: widget.orgDocument['verkadaOrgEmail'] as String);
+  }
+
+  @override
+  void dispose() {
+    verkadaOrgEmailController.dispose();
+    super.dispose();
+  }
+
+  void _onSubmit() async {
+    final newEmail = verkadaOrgEmailController.text;
+    final firebaseFunctions =
+        Provider.of<FirebaseFunctions>(context, listen: false);
+
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      await firebaseFunctions
+          .httpsCallable('update_verkada_org_email_callable')
+          .call({
+        'orgId': widget.orgDocument.id,
+        'orgName': newEmail,
+      });
+
+      await AsyncContextHelpers.showSnackBarIfMounted(
+          context, 'Verkada org email changed successfully');
+    } catch (e) {
+      await AsyncContextHelpers.showSnackBarIfMounted(
+          context, 'Failed to change Verkada org email: $e');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: verkadaOrgEmailController,
+      decoration: InputDecoration(
+        labelText: 'Verkada Org Email',
+        border: const OutlineInputBorder(),
+        prefixIcon: const Icon(Icons.edit),
+        suffixIcon: IconButton(
+          icon: _isLoading
+              ? const CircularProgressIndicator()
+              : const Icon(Icons.check),
+          onPressed: _isLoading ? null : _onSubmit,
+        ),
+      ),
+    );
+  }
+}
+
+class VerkadaOrgPasswordEditor extends StatefulWidget {
+  final dynamic orgDocument;
+
+  const VerkadaOrgPasswordEditor({super.key, required this.orgDocument});
+
+  @override
+  _VerkadaOrgPasswordEditorState createState() =>
+      _VerkadaOrgPasswordEditorState();
+}
+
+class _VerkadaOrgPasswordEditorState extends State<VerkadaOrgPasswordEditor> {
+  late TextEditingController verkadaOrgPasswordController;
+  var _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    verkadaOrgPasswordController = TextEditingController(
+        text: widget.orgDocument['verkadaOrgPassword'] as String);
+  }
+
+  @override
+  void dispose() {
+    verkadaOrgPasswordController.dispose();
+    super.dispose();
+  }
+
+  void _onSubmit() async {
+    final newPassword = verkadaOrgPasswordController.text;
+    final firebaseFunctions =
+        Provider.of<FirebaseFunctions>(context, listen: false);
+
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      await firebaseFunctions
+          .httpsCallable('update_verkada_org_password_callable')
+          .call({
+        'orgId': widget.orgDocument.id,
+        'orgName': newPassword,
+      });
+
+      await AsyncContextHelpers.showSnackBarIfMounted(
+          context, 'Verkada org password changed successfully');
+    } catch (e) {
+      await AsyncContextHelpers.showSnackBarIfMounted(
+          context, 'Failed to change Verkada org password: $e');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: verkadaOrgPasswordController,
+      decoration: InputDecoration(
+        labelText: 'Verkada Org Password',
+        border: const OutlineInputBorder(),
+        prefixIcon: const Icon(Icons.edit),
+        suffixIcon: IconButton(
+          icon: _isLoading
+              ? const CircularProgressIndicator()
+              : const Icon(Icons.check),
+          onPressed: _isLoading ? null : _onSubmit,
+        ),
+      ),
+    );
+  }
+}
+
 class OrgImageEditorAlertDialog extends StatefulWidget {
   final dynamic orgDocument;
 
@@ -248,30 +474,28 @@ class OrgImageEditorAlertDialog extends StatefulWidget {
 }
 
 class OrgImageEditorAlertDialogState extends State<OrgImageEditorAlertDialog> {
-  late TextEditingController
-      urlController; // Controller for the image URL input
-  var _isLoading = false; // Tracks loading state
+  late TextEditingController urlController;
+  var _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    urlController = TextEditingController(); // Initialize the controller
+    urlController = TextEditingController();
   }
 
   @override
   void dispose() {
-    urlController.dispose(); // Dispose controller when done
+    urlController.dispose();
     super.dispose();
   }
 
-  /// Handles the submission of the new background image URL.
   void _onSubmit() async {
-    final newOrgImageUrl = urlController.text; // Get the new image URL
-    final firebaseFunctions = Provider.of<FirebaseFunctions>(context,
-        listen: false); // Access Firebase Functions
+    final newOrgImageUrl = urlController.text;
+    final firebaseFunctions =
+        Provider.of<FirebaseFunctions>(context, listen: false);
 
     setState(() {
-      _isLoading = true; // Show loading indicator
+      _isLoading = true;
     });
     try {
       await firebaseFunctions
@@ -281,24 +505,24 @@ class OrgImageEditorAlertDialogState extends State<OrgImageEditorAlertDialog> {
         'orgBackgroundImageURL': newOrgImageUrl,
       });
 
-      await AsyncContextHelpers.showSnackBarIfMounted(context,
-          'Org background image changed successfully'); // Show success message
-      AsyncContextHelpers.popContextIfMounted(context); // Close the dialog
+      await AsyncContextHelpers.showSnackBarIfMounted(
+          context, 'Org background image changed successfully');
+      AsyncContextHelpers.popContextIfMounted(context);
     } catch (e) {
-      await AsyncContextHelpers.showSnackBarIfMounted(context,
-          'Failed to change Org background image: $e'); // Show error message
+      await AsyncContextHelpers.showSnackBarIfMounted(
+          context, 'Failed to change Org background image: $e');
     } finally {
       setState(() {
-        _isLoading = false; // Hide loading indicator
+        _isLoading = false;
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context); // Access the theme
+    final theme = Theme.of(context);
     return AlertDialog(
-      title: const Text('Change Organization Image URL'), // Dialog title
+      title: const Text('Change Organization Image URL'),
       content: SizedBox(
         height: 120,
         child: Column(
@@ -308,7 +532,7 @@ class OrgImageEditorAlertDialogState extends State<OrgImageEditorAlertDialog> {
             ),
             const SizedBox(height: 16),
             TextField(
-              controller: urlController, // TextField for the image URL
+              controller: urlController,
               decoration: const InputDecoration(
                 labelText: 'Image URL',
                 border: OutlineInputBorder(),
@@ -327,17 +551,16 @@ class OrgImageEditorAlertDialogState extends State<OrgImageEditorAlertDialog> {
             ),
             padding: const EdgeInsets.all(16.0),
           ),
-          onPressed:
-              _isLoading ? null : _onSubmit, // Disable button while loading
+          onPressed: _isLoading ? null : _onSubmit,
           icon: _isLoading
-              ? const CircularProgressIndicator() // Show loading indicator while waiting
+              ? const CircularProgressIndicator()
               : const Icon(Icons.photo),
-          label: const Text('Change Organization Image'), // Button label
+          label: const Text('Change Organization Image'),
         ),
         const SizedBox(height: 16.0),
         ElevatedButton.icon(
           onPressed: () {
-            Navigator.of(context).pop(); // Close the dialog
+            Navigator.of(context).pop();
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
@@ -366,60 +589,55 @@ class DeleteOrgAlertDialog extends StatefulWidget {
 }
 
 class DeleteOrgAlertDialogState extends State<DeleteOrgAlertDialog> {
-  var _isLoading = false; // Tracks the loading state during deletion
+  var _isLoading = false;
 
-  /// Handles the deletion of the organization.
   void _onSubmit() async {
-    final firebaseFunctions = Provider.of<FirebaseFunctions>(context,
-        listen: false); // Access Firebase Functions
+    final firebaseFunctions =
+        Provider.of<FirebaseFunctions>(context, listen: false);
     final authenticationChangeNotifier =
-        Provider.of<AuthenticationChangeNotifier>(context,
-            listen: false); // Access authentication change notifier
+        Provider.of<AuthenticationChangeNotifier>(context, listen: false);
 
     setState(() {
-      _isLoading = true; // Show loading indicator
+      _isLoading = true;
     });
     try {
       await firebaseFunctions.httpsCallable('delete_org_callable').call({
-        'orgId': widget
-            .orgDocument.id, // Pass the organization ID to the cloud function
+        'orgId': widget.orgDocument.id,
       });
-      authenticationChangeNotifier
-          .signOutUser(); // Sign out the user after deleting the organization
+      authenticationChangeNotifier.signOutUser();
     } catch (e) {
       await AsyncContextHelpers.showSnackBarIfMounted(
-          context, 'Failed to delete Org: $e'); // Show error message
+          context, 'Failed to delete Org: $e');
     } finally {
       setState(() {
-        _isLoading = false; // Hide loading indicator
+        _isLoading = false;
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context); // Access the theme
+    final theme = Theme.of(context);
     return AlertDialog(
-      title: const Text('Delete Organization'), // Dialog title
+      title: const Text('Delete Organization'),
       content: const Text(
-          'Are you sure you want to delete this organization? This action cannot be undone.'), // Confirmation message
+          'Are you sure you want to delete this organization? This action cannot be undone.'),
       actions: <Widget>[
         ElevatedButton.icon(
-          onPressed:
-              _isLoading ? null : _onSubmit, // Disable button while loading
+          onPressed: _isLoading ? null : _onSubmit,
           icon: _isLoading
-              ? const CircularProgressIndicator() // Show loading indicator while waiting
-              : const Icon(Icons.delete), // Delete icon for the button
-          label: const Text('Delete Organization'), // Button label
+              ? const CircularProgressIndicator()
+              : const Icon(Icons.delete),
+          label: const Text('Delete Organization'),
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.red, // Red background to indicate danger
+            backgroundColor: Colors.red,
             padding: const EdgeInsets.all(16.0),
           ),
         ),
         const SizedBox(height: 16.0),
         ElevatedButton.icon(
           onPressed: () {
-            Navigator.of(context).pop(); // Close the dialog
+            Navigator.of(context).pop();
           },
           icon: const Icon(Icons.arrow_back),
           label: const Text('Go Back'),
