@@ -279,10 +279,10 @@ class _VerkadaOrgShortNameEditorState extends State<VerkadaOrgShortNameEditor> {
     });
     try {
       await firebaseFunctions
-          .httpsCallable('update_verkada_org_shortname_callable')
+          .httpsCallable('update_verkada_org_short_name_callable')
           .call({
         'orgId': widget.orgDocument.id,
-        'orgName': newShortName,
+        'verkadaOrgShortName': newShortName,
       });
 
       await AsyncContextHelpers.showSnackBarIfMounted(
@@ -355,7 +355,7 @@ class _VerkadaOrgEmailEditorState extends State<VerkadaOrgEmailEditor> {
           .httpsCallable('update_verkada_org_email_callable')
           .call({
         'orgId': widget.orgDocument.id,
-        'orgName': newEmail,
+        'verkadaOrgEmail': newEmail,
       });
 
       await AsyncContextHelpers.showSnackBarIfMounted(
@@ -429,7 +429,7 @@ class _VerkadaOrgPasswordEditorState extends State<VerkadaOrgPasswordEditor> {
           .httpsCallable('update_verkada_org_password_callable')
           .call({
         'orgId': widget.orgDocument.id,
-        'orgName': newPassword,
+        'verkadaOrgPassword': newPassword,
       });
 
       await AsyncContextHelpers.showSnackBarIfMounted(
