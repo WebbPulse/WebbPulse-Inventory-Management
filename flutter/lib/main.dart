@@ -7,43 +7,57 @@ import 'src/apps/authed/authed_app.dart';
 import 'src/apps/non_authed/non_authed_app.dart';
 import 'src/shared/non_provider_services/settings_service.dart';
 import 'firebase_options.dart';
+import 'package:flutter/foundation.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 
 /// Main entry point of the Flutter application
 void main() async {
-  /// Ensure Flutter's widget binding is initialized before Firebase or any other async calls
   WidgetsFlutterBinding.ensureInitialized();
-
-  /// Initialize the settings change notifier by providing the SettingsService
   final settingsChangeNotifier = SettingsChangeNotifier(SettingsService());
-
-  /// Load the settings from a persistent source (e.g., local storage)
   await settingsChangeNotifier.loadSettings();
-
-  /// Initialize Firebase using platform-specific options
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  /// Start the app with a MultiProvider to provide multiple ChangeNotifiers to the widget tree
+  // --- Start Emulator Configuration ---
+  // Use emulators only in debug mode
+  if (kDebugMode) {
+    try {
+      // !!! IMPORTANT: Replace with the actual IP if running on a physical device
+      // or if your emulator/simulator requires it. 'localhost' works for web and
+      // most desktop/Android emulators. iOS might need the machine's IP.
+      const String host = 'localhost'; // Or use '10.0.2.2' for Android Emulator
+
+      FirebaseFirestore.instance.useFirestoreEmulator(host, 8080);
+
+      await FirebaseAuth.instance.useAuthEmulator(host, 9099);
+
+      FirebaseFunctions.instance.useFunctionsEmulator(host, 5001);
+
+      print('Using Firebase Emulators: Auth (9099), Firestore (8080), Functions (5001)');
+    } catch (e) {
+      // Handle exceptions, e.g., emulator not running
+      print('Error configuring Firebase Emulators: $e');
+    }
+  }
+  // --- End Emulator Configuration ---
+
+
   runApp(MultiProvider(
       providers: [
-        /// Provider for managing authentication state changes
         ChangeNotifierProvider<AuthenticationChangeNotifier>(
           create: (_) => AuthenticationChangeNotifier(),
         ),
-
-        /// Provider for managing application settings
         ChangeNotifierProvider<SettingsChangeNotifier>.value(
           value: settingsChangeNotifier,
         ),
       ],
 
-      /// Use a Consumer to listen to changes in the AuthenticationChangeNotifier
       child: Consumer<AuthenticationChangeNotifier>(
         builder: (context, authProvider, child) {
-          /// If the user is logged in, show the authenticated part of the app (AuthedApp)
           if (authProvider.userLoggedIn) {
             return AuthedApp();
           } else {
-            /// If the user is not logged in, show the non-authenticated part (NonAuthedApp)
             return const NonAuthedApp();
           }
         },
