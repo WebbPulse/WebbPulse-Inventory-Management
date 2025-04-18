@@ -18,6 +18,7 @@ class OrgSettingsView extends StatelessWidget {
     final theme = Theme.of(context);
 
     return OrgDocumentStreamBuilder(builder: (context, orgDocument) {
+      final orgData = orgDocument.data() as Map<String, dynamic>;
       return Scaffold(
         appBar: const OrgNameAppBar(
           titleSuffix: 'Settings',
@@ -25,11 +26,11 @@ class OrgSettingsView extends StatelessWidget {
         drawer: const AuthedDrawer(),
         body: Stack(
           children: [
-            if (orgDocument['orgBackgroundImageURL'] != null &&
-                orgDocument['orgBackgroundImageURL'] != '')
+            if (orgData['orgBackgroundImageURL'] != null &&
+                orgData['orgBackgroundImageURL'] != '')
               Positioned.fill(
                 child: Image.network(
-                  orgDocument['orgBackgroundImageURL'],
+                  orgData['orgBackgroundImageURL'],
                   fit: BoxFit.cover,
                 ),
               ),
@@ -80,16 +81,74 @@ class OrgSettingsView extends StatelessWidget {
                                         ),
                                         textAlign: TextAlign.center,
                                       ),
-                                      const SizedBox(height: 16),
+                                      const SizedBox(height: 20),
+                                      Wrap(
+                                        alignment: WrapAlignment.center,
+                                        spacing: 20,
+                                        runSpacing: 10,
+                                        children: [
+                                          ElevatedButton.icon(
+                                            onPressed: () {
+                                              showDialog(
+                                                  context: context,
+                                                  builder: (BuildContext context) {
+                                                    return OrgImageEditorAlertDialog(
+                                                      orgData: orgData,
+                                                    );
+                                                  });
+                                            },
+                                            icon: const Icon(Icons.image),
+                                            label: const Text(
+                                                'Change Organization Image'),
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: theme
+                                                  .colorScheme.surface
+                                                  .withOpacity(0.95),
+                                              side: BorderSide(
+                                                color: theme.colorScheme.primary
+                                                    .withOpacity(0.5),
+                                                width: 1.5,
+                                              ),
+                                              padding: const EdgeInsets.all(16.0),
+                                            ),
+                                          ),
+                                          ElevatedButton.icon(
+                                            onPressed: () {
+                                              showDialog(
+                                                  context: context,
+                                                  builder: (BuildContext context) {
+                                                    return DeleteOrgAlertDialog(
+                                                      orgData: orgData,
+                                                    );
+                                                  });
+                                            },
+                                            icon: const Icon(Icons.delete),
+                                            label:
+                                                const Text('Delete Organization'),
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: Colors.red,
+                                              padding: const EdgeInsets.all(16.0),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 20),
                                       OrgNameEditor(
-                                        orgDocument: orgDocument,
+                                        orgData: orgData,
                                       ),
                                       const SizedBox(height: 16),
+                                      OrgDeviceRegexEditor(
+                                          orgData: orgData),
+                                      const SizedBox(height: 16),
+                                      
+                                      const SizedBox(height: 20),
                                       VerkadaIntegrationToggle(
-                                        orgDocument: orgDocument,
+                                        orgData: orgData,
                                       ),
                                       const SizedBox(height: 16),
-                                      if (orgDocument['verkadaIntegrationEnabled'] == true) ...[
+                                      if (orgData[
+                                              'orgVerkadaIntegrationEnabled'] ==
+                                          true) ...[
                                         const Text(
                                           'Verkada Org Integration Settings',
                                           style: TextStyle(
@@ -99,62 +158,19 @@ class OrgSettingsView extends StatelessWidget {
                                         ),
                                         const SizedBox(height: 16),
                                         VerkadaOrgShortNameEditor(
-                                          orgDocument: orgDocument,
+                                          orgData: orgData,
                                         ),
                                         const SizedBox(height: 16),
                                         VerkadaOrgEmailEditor(
-                                          orgDocument: orgDocument,
+                                          orgData: orgData,
                                         ),
                                         const SizedBox(height: 16),
                                         VerkadaOrgPasswordEditor(
-                                          orgDocument: orgDocument,
+                                          orgData: orgData,
                                         ),
                                         const SizedBox(height: 16),
                                       ],
-                                      ElevatedButton.icon(
-                                        onPressed: () {
-                                          showDialog(
-                                              context: context,
-                                              builder: (BuildContext context) {
-                                                return OrgImageEditorAlertDialog(
-                                                  orgDocument: orgDocument,
-                                                );
-                                              });
-                                        },
-                                        icon: const Icon(Icons.image),
-                                        label: const Text(
-                                            'Change Organization Image'),
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: theme
-                                              .colorScheme.surface
-                                              .withOpacity(0.95),
-                                          side: BorderSide(
-                                            color: theme.colorScheme.primary
-                                                .withOpacity(0.5),
-                                            width: 1.5,
-                                          ),
-                                          padding: const EdgeInsets.all(16.0),
-                                        ),
-                                      ),
-                                      const SizedBox(height: 20),
-                                      ElevatedButton.icon(
-                                        onPressed: () {
-                                          showDialog(
-                                              context: context,
-                                              builder: (BuildContext context) {
-                                                return DeleteOrgAlertDialog(
-                                                  orgDocument: orgDocument,
-                                                );
-                                              });
-                                        },
-                                        icon: const Icon(Icons.delete),
-                                        label:
-                                            const Text('Delete Organization'),
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.red,
-                                          padding: const EdgeInsets.all(16.0),
-                                        ),
-                                      ),
+                                      
                                     ],
                                   ),
                                 ),
@@ -174,5 +190,3 @@ class OrgSettingsView extends StatelessWidget {
     });
   }
 }
-
-
