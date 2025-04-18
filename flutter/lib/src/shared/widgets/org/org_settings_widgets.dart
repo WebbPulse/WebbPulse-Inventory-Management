@@ -4,7 +4,6 @@ import 'package:webbpulse_inventory_management/src/shared/providers/authenticati
 import 'package:webbpulse_inventory_management/src/shared/widgets/styling/styling_widgets.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 
-
 // OrgNameEditor provides a text field to edit the organization's name.
 class OrgNameEditor extends StatefulWidget {
   final dynamic orgDocument;
@@ -106,7 +105,8 @@ class _VerkadaIntegrationToggleState extends State<VerkadaIntegrationToggle> {
 
     try {
       await firebaseFunctions
-          .httpsCallable('update_verkada_integration_status_callable') // Placeholder function name
+          .httpsCallable(
+              'update_verkada_integration_status_callable') // Placeholder function name
           .call({
         'orgId': widget.orgDocument.id,
         'enabled': newValue,
@@ -117,17 +117,17 @@ class _VerkadaIntegrationToggleState extends State<VerkadaIntegrationToggle> {
     } catch (e) {
       await AsyncContextHelpers.showSnackBarIfMounted(
           context, 'Failed to update Verkada integration status: $e');
-
     } finally {
-         setState(() {
-           _isLoading = false;
-         });
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final currentEnabledState = widget.orgDocument['verkadaIntegrationEnabled'] as bool? ?? false;
+    final currentEnabledState =
+        widget.orgDocument['verkadaIntegrationEnabled'] as bool? ?? false;
 
     return SwitchListTile(
       title: const Text('Verkada Command Integration'),
@@ -301,6 +301,7 @@ class VerkadaOrgPasswordEditor extends StatefulWidget {
 class _VerkadaOrgPasswordEditorState extends State<VerkadaOrgPasswordEditor> {
   late TextEditingController verkadaOrgPasswordController;
   var _isLoading = false;
+  bool _obscureText = true; // Add state variable for visibility
 
   @override
   void initState() {
@@ -346,16 +347,32 @@ class _VerkadaOrgPasswordEditorState extends State<VerkadaOrgPasswordEditor> {
   @override
   Widget build(BuildContext context) {
     return TextField(
+      obscureText: _obscureText,
       controller: verkadaOrgPasswordController,
       decoration: InputDecoration(
         labelText: 'Verkada Org Password',
         border: const OutlineInputBorder(),
         prefixIcon: const Icon(Icons.edit),
-        suffixIcon: IconButton(
-          icon: _isLoading
-              ? const CircularProgressIndicator()
-              : const Icon(Icons.check),
-          onPressed: _isLoading ? null : _onSubmit,
+        suffixIcon: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              icon: Icon(
+                _obscureText ? Icons.visibility_off : Icons.visibility,
+              ),
+              onPressed: () {
+                setState(() {
+                  _obscureText = !_obscureText;
+                });
+              },
+            ),
+            IconButton(
+              icon: _isLoading
+                  ? const CircularProgressIndicator()
+                  : const Icon(Icons.check),
+              onPressed: _isLoading ? null : _onSubmit,
+            ),
+          ],
         ),
       ),
     );
