@@ -6,9 +6,9 @@ import 'package:cloud_functions/cloud_functions.dart';
 
 // OrgNameEditor provides a text field to edit the organization's name.
 class OrgNameEditor extends StatefulWidget {
-  final dynamic orgDocument;
+  final Map<String, dynamic> orgData;
 
-  const OrgNameEditor({super.key, required this.orgDocument});
+  const OrgNameEditor({super.key, required this.orgData});
 
   @override
   _OrgNameEditorState createState() => _OrgNameEditorState();
@@ -22,7 +22,7 @@ class _OrgNameEditorState extends State<OrgNameEditor> {
   void initState() {
     super.initState();
     orgNameController =
-        TextEditingController(text: widget.orgDocument['orgName'] as String);
+        TextEditingController(text: widget.orgData['orgName'] as String? ?? '');
   }
 
   @override
@@ -42,7 +42,7 @@ class _OrgNameEditorState extends State<OrgNameEditor> {
     });
     try {
       await firebaseFunctions.httpsCallable('update_org_name_callable').call({
-        'orgId': widget.orgDocument.id,
+        'orgId': widget.orgData['orgId'],
         'orgName': newName,
       });
 
@@ -79,9 +79,10 @@ class _OrgNameEditorState extends State<OrgNameEditor> {
 
 //
 class OrgDeviceRegexEditor extends StatefulWidget {
-  final dynamic orgDocument;
+  final Map<String, dynamic> orgData;
 
-  const OrgDeviceRegexEditor({super.key, required this.orgDocument});
+
+  const OrgDeviceRegexEditor({super.key, required this.orgData});
 
   @override
   _OrgDeviceRegexEditorState createState() => _OrgDeviceRegexEditorState();
@@ -95,7 +96,7 @@ class _OrgDeviceRegexEditorState extends State<OrgDeviceRegexEditor> {
   void initState() {
     super.initState();
     regexStringController = TextEditingController(
-        text: widget.orgDocument['orgDeviceRegexString'] as String);
+        text: widget.orgData['orgDeviceRegexString'] as String? ?? '');
   }
 
   @override
@@ -117,7 +118,7 @@ class _OrgDeviceRegexEditorState extends State<OrgDeviceRegexEditor> {
       await firebaseFunctions
           .httpsCallable('update_org_device_regex_callable')
           .call({
-        'orgId': widget.orgDocument.id,
+        'orgId': widget.orgData['orgId'],
         'orgDeviceRegexString': newRegexString,
       });
 
@@ -153,9 +154,10 @@ class _OrgDeviceRegexEditorState extends State<OrgDeviceRegexEditor> {
 }
 
 class VerkadaIntegrationToggle extends StatefulWidget {
-  final dynamic orgDocument;
+  final Map<String, dynamic> orgData;
 
-  const VerkadaIntegrationToggle({super.key, required this.orgDocument});
+
+  const VerkadaIntegrationToggle({super.key, required this.orgData});
 
   @override
   _VerkadaIntegrationToggleState createState() =>
@@ -183,7 +185,7 @@ class _VerkadaIntegrationToggleState extends State<VerkadaIntegrationToggle> {
           .httpsCallable(
               'update_verkada_integration_status_callable') // Placeholder function name
           .call({
-        'orgId': widget.orgDocument.id,
+        'orgId': widget.orgData['orgId'],
         'enabled': newValue,
       });
 
@@ -202,7 +204,7 @@ class _VerkadaIntegrationToggleState extends State<VerkadaIntegrationToggle> {
   @override
   Widget build(BuildContext context) {
     final currentEnabledState =
-        widget.orgDocument['verkadaIntegrationEnabled'] as bool? ?? false;
+        widget.orgData['orgVerkadaIntegrationEnabled'] as bool? ?? false;
 
     return SwitchListTile(
       title: const Text('Verkada Command Integration'),
@@ -217,9 +219,8 @@ class _VerkadaIntegrationToggleState extends State<VerkadaIntegrationToggle> {
 }
 
 class VerkadaOrgShortNameEditor extends StatefulWidget {
-  final dynamic orgDocument;
-
-  const VerkadaOrgShortNameEditor({super.key, required this.orgDocument});
+  final Map<String, dynamic> orgData;
+  const VerkadaOrgShortNameEditor({super.key, required this.orgData});
 
   @override
   _VerkadaOrgShortNameEditorState createState() =>
@@ -234,7 +235,7 @@ class _VerkadaOrgShortNameEditorState extends State<VerkadaOrgShortNameEditor> {
   void initState() {
     super.initState();
     verkadaOrgShortNameController = TextEditingController(
-        text: widget.orgDocument['verkadaOrgShortName'] as String);
+        text: widget.orgData['orgVerkadaOrgShortName'] as String? ?? '');
   }
 
   @override
@@ -255,8 +256,8 @@ class _VerkadaOrgShortNameEditorState extends State<VerkadaOrgShortNameEditor> {
       await firebaseFunctions
           .httpsCallable('update_verkada_org_short_name_callable')
           .call({
-        'orgId': widget.orgDocument.id,
-        'verkadaOrgShortName': newShortName,
+        'orgId': widget.orgData['orgId'],
+        'orgVerkadaOrgShortName': newShortName,
       });
 
       await AsyncContextHelpers.showSnackBarIfMounted(
@@ -291,9 +292,10 @@ class _VerkadaOrgShortNameEditorState extends State<VerkadaOrgShortNameEditor> {
 }
 
 class VerkadaOrgEmailEditor extends StatefulWidget {
-  final dynamic orgDocument;
+  final Map<String, dynamic> orgData;
 
-  const VerkadaOrgEmailEditor({super.key, required this.orgDocument});
+
+  const VerkadaOrgEmailEditor({super.key, required this.orgData});
 
   @override
   _VerkadaOrgEmailEditorState createState() => _VerkadaOrgEmailEditorState();
@@ -307,7 +309,7 @@ class _VerkadaOrgEmailEditorState extends State<VerkadaOrgEmailEditor> {
   void initState() {
     super.initState();
     verkadaOrgEmailController = TextEditingController(
-        text: widget.orgDocument['verkadaOrgEmail'] as String);
+        text: widget.orgData['orgVerkadaOrgEmail'] as String? ?? '');
   }
 
   @override
@@ -328,8 +330,8 @@ class _VerkadaOrgEmailEditorState extends State<VerkadaOrgEmailEditor> {
       await firebaseFunctions
           .httpsCallable('update_verkada_org_email_callable')
           .call({
-        'orgId': widget.orgDocument.id,
-        'verkadaOrgEmail': newEmail,
+        'orgId': widget.orgData['orgId'],
+        'orgVerkadaOrgEmail': newEmail,
       });
 
       await AsyncContextHelpers.showSnackBarIfMounted(
@@ -364,9 +366,10 @@ class _VerkadaOrgEmailEditorState extends State<VerkadaOrgEmailEditor> {
 }
 
 class VerkadaOrgPasswordEditor extends StatefulWidget {
-  final dynamic orgDocument;
+  final Map<String, dynamic> orgData;
 
-  const VerkadaOrgPasswordEditor({super.key, required this.orgDocument});
+
+  const VerkadaOrgPasswordEditor({super.key, required this.orgData});
 
   @override
   _VerkadaOrgPasswordEditorState createState() =>
@@ -382,7 +385,7 @@ class _VerkadaOrgPasswordEditorState extends State<VerkadaOrgPasswordEditor> {
   void initState() {
     super.initState();
     verkadaOrgPasswordController = TextEditingController(
-        text: widget.orgDocument['verkadaOrgPassword'] as String);
+        text: widget.orgData['orgVerkadaOrgPassword'] as String? ?? '');
   }
 
   @override
@@ -403,8 +406,8 @@ class _VerkadaOrgPasswordEditorState extends State<VerkadaOrgPasswordEditor> {
       await firebaseFunctions
           .httpsCallable('update_verkada_org_password_callable')
           .call({
-        'orgId': widget.orgDocument.id,
-        'verkadaOrgPassword': newPassword,
+        'orgId': widget.orgData['orgId'],
+        'orgVerkadaOrgPassword': newPassword,
       });
 
       await AsyncContextHelpers.showSnackBarIfMounted(
@@ -455,9 +458,10 @@ class _VerkadaOrgPasswordEditorState extends State<VerkadaOrgPasswordEditor> {
 }
 
 class OrgImageEditorAlertDialog extends StatefulWidget {
-  final dynamic orgDocument;
+  final Map<String, dynamic> orgData;
 
-  const OrgImageEditorAlertDialog({super.key, required this.orgDocument});
+
+  const OrgImageEditorAlertDialog({super.key, required this.orgData});
 
   @override
   OrgImageEditorAlertDialogState createState() =>
@@ -492,7 +496,7 @@ class OrgImageEditorAlertDialogState extends State<OrgImageEditorAlertDialog> {
       await firebaseFunctions
           .httpsCallable('update_org_background_image_callable')
           .call({
-        'orgId': widget.orgDocument.id,
+        'orgId': widget.orgData['orgId'],
         'orgBackgroundImageURL': newOrgImageUrl,
       });
 
@@ -571,9 +575,10 @@ class OrgImageEditorAlertDialogState extends State<OrgImageEditorAlertDialog> {
 
 /// DeleteOrgAlertDialog confirms and handles the deletion of the organization.
 class DeleteOrgAlertDialog extends StatefulWidget {
-  final dynamic orgDocument;
+  final Map<String, dynamic> orgData;
 
-  const DeleteOrgAlertDialog({super.key, required this.orgDocument});
+
+  const DeleteOrgAlertDialog({super.key, required this.orgData});
 
   @override
   DeleteOrgAlertDialogState createState() => DeleteOrgAlertDialogState();
@@ -593,7 +598,7 @@ class DeleteOrgAlertDialogState extends State<DeleteOrgAlertDialog> {
     });
     try {
       await firebaseFunctions.httpsCallable('delete_org_callable').call({
-        'orgId': widget.orgDocument.id,
+        'orgId': widget.orgData['orgId'],
       });
       authenticationChangeNotifier.signOutUser();
     } catch (e) {

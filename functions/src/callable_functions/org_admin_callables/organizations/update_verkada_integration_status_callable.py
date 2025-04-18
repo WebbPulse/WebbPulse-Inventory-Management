@@ -33,7 +33,7 @@ def update_verkada_integration_status_callable(req: https_fn.CallableRequest) ->
         # Step 4: Update the organization's name in Firestore.
         org_ref = db.collection('organizations').document(org_id)  # Reference to the organization document.
         org_ref.update({
-            'verkadaIntegrationEnabled': enabled,  # Update the organization name to the provided new name.
+            'orgVerkadaIntegrationEnabled': enabled,  # Update the organization name to the provided new name.
         })
 
         # Step 5: Return a success response with the updated organization name.

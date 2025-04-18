@@ -50,10 +50,11 @@ def create_organization_callable(req: https_fn.CallableRequest) -> Any:
             'orgName': org_name,  # Set the organization name from the request.
             'orgBackgroundImageURL': "",  # Default empty background image URL.
             'orgDeleted': False,  # Mark the organization as active (not deleted).
-            'verkadaIntegrationEnabled': False,  # Default Verkada integration status as inactive.
-            'verkadaOrgEmail': "",  # Default empty Verkada organization email.
-            'verkadaOrgShortName': "",  # Default empty Verkada organization short name.
-            'verkadaOrgPassword': "",  # Default empty Verkada organization password.
+            'orgVerkadaIntegrationEnabled': False,  # Default Verkada integration status as inactive.
+            'orgVerkadaOrgEmail': "",  # Default empty Verkada organization email.
+            'orgVerkadaOrgShortName': "",  # Default empty Verkada organization short name.
+            'orgVerkadaOrgPassword': "",  # Default empty Verkada organization password.
+            'orgDeviceRegexString': "",  # Default empty device regex string.
         })
 
         # Step 8: Add the user to the organization as a member and set their role as an admin.
