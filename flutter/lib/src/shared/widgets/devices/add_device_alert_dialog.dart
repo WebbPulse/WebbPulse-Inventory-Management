@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_functions/cloud_functions.dart';
-import 'package:universal_html/html.dart' as html; // Universal web support
+import 'package:universal_html/html.dart' as html;
 import 'package:path_provider/path_provider.dart';
 import 'dart:io' as io;
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -13,7 +13,6 @@ import '../../providers/org_selector_change_notifier.dart';
 
 import 'package:webbpulse_inventory_management/src/shared/widgets/styling/styling_widgets.dart';
 
-/// A dialog widget to add a new device, supporting CSV upload or manual input
 class AddDeviceAlertDialog extends StatefulWidget {
   const AddDeviceAlertDialog({super.key});
 
@@ -22,66 +21,52 @@ class AddDeviceAlertDialog extends StatefulWidget {
 }
 
 class AddDeviceAlertDialogState extends State<AddDeviceAlertDialog> {
-  late TextEditingController
-      _deviceSerialNumberController; // Controller for device serial number input
-  var _isLoading = false; // Loading state for submit action
+  late TextEditingController _deviceSerialNumberController;
+  var _isLoading = false;
   final String csvTemplate =
-      "Device Serial Number\nAAAA-AAAA-AAAA\nBBBB-BBBB-BBBB"; // CSV template for downloading
+      "Device Serial Number\nAAAA-AAAA-AAAA\nBBBB-BBBB-BBBB";
 
   @override
   void initState() {
     super.initState();
-    _deviceSerialNumberController =
-        TextEditingController(); // Initialize the text controller
+    _deviceSerialNumberController = TextEditingController();
   }
 
   @override
   void dispose() {
-    _deviceSerialNumberController
-        .dispose(); // Dispose of the controller when the widget is destroyed
+    _deviceSerialNumberController.dispose();
     super.dispose();
   }
 
-  /// Method to download the CSV template for both web and mobile platforms
   Future<void> downloadCSV() async {
     if (kIsWeb) {
-      // Web platform: Trigger CSV download using HTML anchor element
       downloadCSVForWeb();
     } else {
-      // Mobile/Desktop platform: Save CSV to file and notify user
       await downloadCSVForMobile();
     }
   }
 
-  /// Method to download CSV on web platforms using `universal_html`
   void downloadCSVForWeb() {
-    final bytes = utf8.encode(csvTemplate); // Convert CSV content to bytes
-    final blob = html.Blob([bytes], 'text/csv'); // Create a Blob for the CSV
+    final bytes = utf8.encode(csvTemplate);
+    final blob = html.Blob([bytes], 'text/csv');
 
-    // Create an anchor element to trigger the download
     final url = html.Url.createObjectUrlFromBlob(blob);
     html.AnchorElement(href: url)
-      ..setAttribute("download", "device_template.csv") // Set the file name
-      ..click(); // Trigger the download
-    html.Url.revokeObjectUrl(url); // Revoke the URL to free up memory
+      ..setAttribute("download", "device_template.csv")
+      ..click();
+    html.Url.revokeObjectUrl(url);
   }
 
-  /// Method to download CSV for mobile and desktop platforms
   Future<void> downloadCSVForMobile() async {
-    // Request storage permissions (only for Android/iOS)
     var status = await Permission.storage.request();
     if (status.isGranted) {
-      // Get the directory to save the CSV file
       final directory = await getExternalStorageDirectory();
       if (directory != null) {
-        String filePath =
-            '${directory.path}/user_template.csv'; // Define the file path
+        String filePath = '${directory.path}/user_template.csv';
 
-        // Write the CSV content to the file
         io.File file = io.File(filePath);
         await file.writeAsString(csvTemplate);
 
-        // Notify user that the file has been saved
         await AsyncContextHelpers.showSnackBarIfMounted(
             context, 'CSV Template saved to $filePath');
       } else {
@@ -94,7 +79,6 @@ class AddDeviceAlertDialogState extends State<AddDeviceAlertDialog> {
     }
   }
 
-  /// Method to handle the submission of device serial numbers
   Future<void> _submitDeviceSerialNumbers(
       List<String> deviceSerialNumbers) async {
     final orgSelectorProvider =
@@ -102,53 +86,63 @@ class AddDeviceAlertDialogState extends State<AddDeviceAlertDialog> {
     final firebaseFunctions =
         Provider.of<FirebaseFunctions>(context, listen: false);
     setState(() {
-      _isLoading = true; // Set loading state
+      _isLoading = true;
     });
 
     try {
-      await firebaseFunctions.httpsCallable('create_devices_callable').call({
-        "deviceSerialNumbers": deviceSerialNumbers, // List of serial numbers
-        "orgId": orgSelectorProvider.orgId, // Organization ID
+      final HttpsCallableResult createDevicesResult = await firebaseFunctions
+          .httpsCallable('create_devices_callable')
+          .call({
+        "deviceSerialNumbers": deviceSerialNumbers,
+        "orgId": orgSelectorProvider.orgId,
       });
-      await AsyncContextHelpers.showSnackBarIfMounted(
-          context, 'Devices created successfully'); // Show success message
-      AsyncContextHelpers.popContextIfMounted(context); // Close the dialog
+      final responseData = createDevicesResult.data;
+
+      int successCount = 0;
+      int failureCount = 0;
+      if (responseData is Map<String, dynamic>) {
+        Map<String, dynamic>? successes = responseData['success'];
+        Map<String, dynamic>? failures = responseData['failure'];
+        if (successes != null) {
+          successCount = successes.length;
+        }
+        if (failures != null) {
+          failureCount = failures.length;
+        }
+      }
+      await AsyncContextHelpers.showSnackBarIfMounted(context,
+          'Devices Creation Processed. Success Count: $successCount, Failure Count:$failureCount');
+      AsyncContextHelpers.popContextIfMounted(context);
     } catch (e) {
       await AsyncContextHelpers.showSnackBarIfMounted(
-          context, 'Failed to create Devices: $e'); // Show error message
+          context, 'Failed to create Devices: $e');
     } finally {
       setState(() {
-        _isLoading = false; // Reset loading state
+        _isLoading = false;
       });
     }
   }
 
-  /// Handle submission of a single device serial number entered manually
   void _onSubmitSingleEmail() async {
     final deviceSerialNumber = _deviceSerialNumberController.text;
     if (deviceSerialNumber.isNotEmpty) {
-      await _submitDeviceSerialNumbers(
-          [deviceSerialNumber]); // Submit the serial number
+      await _submitDeviceSerialNumbers([deviceSerialNumber]);
     }
   }
 
-  /// Method to handle file selection and parsing of CSV content
   void _onCsvFileSelected() async {
     final result = await FilePicker.platform.pickFiles(
-      type: FileType.custom, // Limit the file type to custom (CSV)
-      allowedExtensions: ['csv'], // Allow only CSV files
+      type: FileType.custom,
+      allowedExtensions: ['csv'],
     );
 
     if (result != null) {
       String content = '';
 
-      // Handle file content differently for web and mobile platforms
       if (kIsWeb) {
-        // Web: Get content from file bytes
         final file = result.files.first;
         content = utf8.decode(file.bytes!);
       } else {
-        // Mobile/Desktop: Get content from file path
         final path = result.files.single.path;
         if (path != null) {
           final file = io.File(path);
@@ -156,21 +150,17 @@ class AddDeviceAlertDialogState extends State<AddDeviceAlertDialog> {
         }
       }
 
-      // Split the CSV content by line breaks and process it
       List<String> lines = content.split(RegExp(r'[\r\n]+'));
 
-      // Skip the first line (header) and process remaining lines
       if (lines.isNotEmpty) {
-        lines = lines.sublist(1); // Remove header row
+        lines = lines.sublist(1);
       }
 
-      // Extract the device serial numbers, excluding empty lines
       List<String> deviceSerialNumbers = lines
-          .map((line) => line.trim()) // Trim each line
-          .where((line) => line.isNotEmpty) // Exclude empty lines
+          .map((line) => line.trim())
+          .where((line) => line.isNotEmpty)
           .toList();
 
-      // Submit the device serial numbers if the list is not empty
       if (deviceSerialNumbers.isNotEmpty) {
         await _submitDeviceSerialNumbers(deviceSerialNumbers);
       }
@@ -179,24 +169,22 @@ class AddDeviceAlertDialogState extends State<AddDeviceAlertDialog> {
 
   @override
   Widget build(BuildContext context) {
-    ThemeData theme = Theme.of(context); // Get current theme data
+    ThemeData theme = Theme.of(context);
     return AlertDialog(
-      title: const Text('Add New Device'), // Dialog title
+      title: const Text('Add New Device'),
       content: SingleChildScrollView(
         child: ConstrainedBox(
-          constraints:
-              const BoxConstraints(maxWidth: 500), // Set max width for dialog
+          constraints: const BoxConstraints(maxWidth: 500),
           child: Column(
-            mainAxisSize: MainAxisSize.min, // Minimize size based on content
+            mainAxisSize: MainAxisSize.min,
             children: [
               Column(
                 children: [
                   const Text(
-                    'Add a new device to this organization', // Instruction text
+                    'Add a new device to this organization',
                   ),
                   TextField(
-                    controller:
-                        _deviceSerialNumberController, // Input for device serial number
+                    controller: _deviceSerialNumberController,
                     decoration: const InputDecoration(
                       labelText: 'Device Serial Number',
                     ),
@@ -209,8 +197,7 @@ class AddDeviceAlertDialogState extends State<AddDeviceAlertDialog> {
       ),
       actions: <Widget>[
         ElevatedButton.icon(
-          onPressed:
-              _isLoading ? null : _onSubmitSingleEmail, // Submit single device
+          onPressed: _isLoading ? null : _onSubmitSingleEmail,
           style: ElevatedButton.styleFrom(
             backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
             side: BorderSide(
@@ -221,13 +208,12 @@ class AddDeviceAlertDialogState extends State<AddDeviceAlertDialog> {
           ),
           icon: _isLoading
               ? const CircularProgressIndicator()
-              : const Icon(Icons.add), // Add icon
-          label: const Text('Add Device'), // Button label
+              : const Icon(Icons.add),
+          label: const Text('Add Device'),
         ),
         const SizedBox(height: 16.0),
         ElevatedButton.icon(
-          onPressed:
-              _isLoading ? null : _onCsvFileSelected, // Submit devices via CSV
+          onPressed: _isLoading ? null : _onCsvFileSelected,
           style: ElevatedButton.styleFrom(
             backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
             side: BorderSide(
@@ -238,13 +224,13 @@ class AddDeviceAlertDialogState extends State<AddDeviceAlertDialog> {
           ),
           icon: _isLoading
               ? const CircularProgressIndicator()
-              : const Icon(Icons.upload_file), // CSV upload icon
-          label: const Text('Add Devices from CSV'), // Button label
+              : const Icon(Icons.upload_file),
+          label: const Text('Add Devices from CSV'),
         ),
         const SizedBox(height: 16.0),
         ElevatedButton.icon(
           onPressed: () async {
-            await downloadCSV(); // Trigger download of CSV template
+            await downloadCSV();
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
@@ -254,13 +240,13 @@ class AddDeviceAlertDialogState extends State<AddDeviceAlertDialog> {
             ),
             padding: const EdgeInsets.all(16.0),
           ),
-          icon: const Icon(Icons.download), // Download icon
-          label: const Text('Download CSV Template'), // Button label
+          icon: const Icon(Icons.download),
+          label: const Text('Download CSV Template'),
         ),
         const SizedBox(height: 16.0),
         ElevatedButton.icon(
           onPressed: () {
-            Navigator.of(context).pop(); // Close dialog
+            Navigator.of(context).pop();
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
@@ -270,8 +256,8 @@ class AddDeviceAlertDialogState extends State<AddDeviceAlertDialog> {
             ),
             padding: const EdgeInsets.all(16.0),
           ),
-          icon: const Icon(Icons.arrow_back), // Back icon
-          label: const Text('Go Back'), // Button label
+          icon: const Icon(Icons.arrow_back),
+          label: const Text('Go Back'),
         ),
       ],
     );
