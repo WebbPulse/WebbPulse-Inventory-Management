@@ -6,21 +6,20 @@ import '../../providers/org_selector_change_notifier.dart';
 
 import '../../providers/authentication_change_notifier.dart';
 
-/// A button widget for deleting a device
 class DeleteDeviceButton extends StatefulWidget {
   const DeleteDeviceButton({
     super.key,
-    required this.deviceId, // The device data to be deleted
+    required this.deviceId,
   });
 
-  final String deviceId; // Device data passed as a parameter
+  final String deviceId;
 
   @override
   State<DeleteDeviceButton> createState() => _DeleteDeviceButtonState();
 }
 
 class _DeleteDeviceButtonState extends State<DeleteDeviceButton> {
-  var _isLoading = false; // Loading state to show progress indicator
+  var _isLoading = false;
 
   @override
   void initState() {
@@ -32,32 +31,31 @@ class _DeleteDeviceButtonState extends State<DeleteDeviceButton> {
     super.dispose();
   }
 
-  /// Method to handle the delete device operation
   void _onPressed() async {
     final orgSelectorProvider = Provider.of<OrgSelectorChangeNotifier>(context,
-        listen: false); // Get the current organization ID
+        listen: false);
     final firebaseFunctions = Provider.of<FirebaseFunctions>(context,
-        listen: false); // Firebase Functions provider
+        listen: false);
 
     setState(() {
-      _isLoading = true; // Set loading state to true during the operation
+      _isLoading = true;
     });
 
     try {
       await firebaseFunctions.httpsCallable('delete_device_callable').call({
-        'orgId': orgSelectorProvider.orgId, // Pass organization ID
-        'deviceId': widget.deviceId, // Pass device ID
+        'orgId': orgSelectorProvider.orgId,
+        'deviceId': widget.deviceId,
       });
-      // Show success message when the device is deleted
+
       await AsyncContextHelpers.showSnackBarIfMounted(
           context, 'Device deleted successfully');
     } catch (e) {
-      // Show error message if the operation fails
+
       await AsyncContextHelpers.showSnackBarIfMounted(
           context, 'Failed to delete device: $e');
     } finally {
       setState(() {
-        _isLoading = false; // Reset loading state after the operation
+        _isLoading = false;
       });
     }
   }
@@ -70,22 +68,22 @@ class _DeleteDeviceButtonState extends State<DeleteDeviceButton> {
             authenticationChangeNotifier, child) {
       return ElevatedButton.icon(
         onPressed:
-            _isLoading ? null : _onPressed, // Disable button when loading
+            _isLoading ? null : _onPressed,
         icon: _isLoading
-            ? const CircularProgressIndicator() // Show loading indicator if loading
-            : const Icon(Icons.delete), // Delete icon for the button
+            ? const CircularProgressIndicator()
+            : const Icon(Icons.delete),
         label: Wrap(children: [
           Text(
             'Delete Device',
             style: Theme.of(context)
                 .textTheme
                 .labelSmall
-                ?.copyWith(fontWeight: FontWeight.bold), // Button label
+                ?.copyWith(fontWeight: FontWeight.bold),
           ),
         ]),
         style: ElevatedButton.styleFrom(
-          disabledBackgroundColor: Colors.red, // Background color when disabled
-          backgroundColor: Colors.red, // Background color
+          disabledBackgroundColor: Colors.red,
+          backgroundColor: Colors.red,
           padding: const EdgeInsets.all(16.0),
         ),
       );
