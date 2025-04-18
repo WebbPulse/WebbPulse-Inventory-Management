@@ -77,6 +77,81 @@ class _OrgNameEditorState extends State<OrgNameEditor> {
   }
 }
 
+//
+class OrgDeviceRegexEditor extends StatefulWidget {
+  final dynamic orgDocument;
+
+  const OrgDeviceRegexEditor({super.key, required this.orgDocument});
+
+  @override
+  _OrgDeviceRegexEditorState createState() => _OrgDeviceRegexEditorState();
+}
+
+class _OrgDeviceRegexEditorState extends State<OrgDeviceRegexEditor> {
+  late TextEditingController regexStringController;
+  var _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    regexStringController = TextEditingController(
+        text: widget.orgDocument['orgDeviceRegexString'] as String);
+  }
+
+  @override
+  void dispose() {
+    regexStringController.dispose();
+    super.dispose();
+  }
+
+  /// Handles the submission of the new organization name.
+  void _onSubmit() async {
+    final newRegexString = regexStringController.text;
+    final firebaseFunctions =
+        Provider.of<FirebaseFunctions>(context, listen: false);
+
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      await firebaseFunctions
+          .httpsCallable('update_org_device_regex_callable')
+          .call({
+        'orgId': widget.orgDocument.id,
+        'orgDeviceRegexString': newRegexString,
+      });
+
+      await AsyncContextHelpers.showSnackBarIfMounted(
+          context, 'Device regex configuration changed');
+    } catch (e) {
+      await AsyncContextHelpers.showSnackBarIfMounted(
+          context, 'Failed to change device regex configuration: $e');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: regexStringController,
+      decoration: InputDecoration(
+        labelText: 'Device Regex Filter',
+        border: const OutlineInputBorder(),
+        prefixIcon: const Icon(Icons.edit),
+        suffixIcon: IconButton(
+          icon: _isLoading
+              ? const CircularProgressIndicator()
+              : const Icon(Icons.check),
+          onPressed: _isLoading ? null : _onSubmit,
+        ),
+      ),
+    );
+  }
+}
+
 class VerkadaIntegrationToggle extends StatefulWidget {
   final dynamic orgDocument;
 

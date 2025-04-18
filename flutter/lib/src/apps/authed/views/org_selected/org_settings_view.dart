@@ -85,11 +85,16 @@ class OrgSettingsView extends StatelessWidget {
                                         orgDocument: orgDocument,
                                       ),
                                       const SizedBox(height: 16),
+                                      OrgDeviceRegexEditor(
+                                          orgDocument: orgDocument),
+                                      const SizedBox(height: 16),
                                       VerkadaIntegrationToggle(
                                         orgDocument: orgDocument,
                                       ),
                                       const SizedBox(height: 16),
-                                      if (orgDocument['verkadaIntegrationEnabled'] == true) ...[
+                                      if (orgDocument[
+                                              'verkadaIntegrationEnabled'] ==
+                                          true) ...[
                                         const Text(
                                           'Verkada Org Integration Settings',
                                           style: TextStyle(
@@ -174,5 +179,3 @@ class OrgSettingsView extends StatelessWidget {
     });
   }
 }
-
-
