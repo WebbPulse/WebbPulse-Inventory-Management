@@ -1,5 +1,6 @@
-from src.shared import POSTcorsrules, check_user_is_org_admin, check_user_is_authed, check_user_token_current, check_user_is_email_verified
+from src.helper_functions.auth.auth_functions import check_user_is_org_admin, check_user_is_authed, check_user_token_current, check_user_is_email_verified
 from src.helper_functions.users.update_user_roles import update_user_roles
+from src.shared import db, POSTcorsrules
 
 from firebase_functions import https_fn
 from typing import Any

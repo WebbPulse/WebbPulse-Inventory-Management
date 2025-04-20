@@ -1,4 +1,5 @@
-from src.shared import db, send_email
+from src.shared import db
+from src.helper_functions.users.send_email import send_email
 from src.helper_functions.users.update_user_roles import update_user_roles
 
 from firebase_functions import https_fn

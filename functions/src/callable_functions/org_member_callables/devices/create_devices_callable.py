@@ -1,4 +1,6 @@
-from src.shared import POSTcorsrules, db, check_user_is_org_member, check_user_is_authed, check_user_token_current, check_user_is_email_verified
+from src.helper_functions.auth.auth_functions import check_user_is_org_member, check_user_is_authed, check_user_token_current, check_user_is_email_verified
+from src.helper_functions.devices.check_verkada_device_type import check_verkada_device_type
+from src.shared import db, POSTcorsrules
 
 from firebase_functions import https_fn
 from typing import Any
@@ -22,12 +24,13 @@ def create_devices_callable(req: https_fn.CallableRequest) -> Any:
                 message='The function must be called with a valid list of "deviceSerialNumbers" and a valid "org_id".'
             )
         regex_filter = db.collection('organizations').document(org_id).get().get('orgDeviceRegexString')
-        
+
         response = {}
 
         for device_serial_number in device_serial_numbers:
             if not device_serial_number:
                 continue
+            device_verkada_device_type = check_verkada_device_type(device_serial_number)
             if regex_filter and not re.fullmatch(regex_filter, device_serial_number):
                 if 'failure' not in response:
                     response['failure'] = {}
@@ -44,6 +47,7 @@ def create_devices_callable(req: https_fn.CallableRequest) -> Any:
                     'deviceCheckedOutBy': '',
                     'deviceCheckedOutAt': None,
                     'deviceDeleted': False,
+                    'deviceVerkadaDeviceType': device_verkada_device_type,
                 }, merge=True)
             else:
                 device_ref = db.collection('organizations').document(org_id).collection('devices').document()
@@ -55,6 +59,7 @@ def create_devices_callable(req: https_fn.CallableRequest) -> Any:
                     'deviceCheckedOutBy': '',
                     'deviceCheckedOutAt': None,
                     'deviceDeleted': False,
+                    'deviceVerkadaDeviceType': device_verkada_device_type,
                 })
 
             if 'success' not in response:

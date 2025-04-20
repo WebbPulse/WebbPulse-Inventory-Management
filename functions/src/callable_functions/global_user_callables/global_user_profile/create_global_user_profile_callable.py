@@ -1,5 +1,6 @@
-from src.shared import db, POSTcorsrules,check_user_is_authed
+from src.helper_functions.auth.auth_functions import check_user_is_authed
 from src.helper_functions.users.create_global_user_profile import create_global_user_profile
+from src.shared import db, POSTcorsrules
 
 from firebase_admin import auth
 from firebase_functions import https_fn
