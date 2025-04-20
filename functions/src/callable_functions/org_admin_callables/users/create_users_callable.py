@@ -1,6 +1,7 @@
-from src.shared import POSTcorsrules, check_user_is_org_admin, check_user_is_authed, check_user_token_current, check_user_is_email_verified, db
+from src.helper_functions.auth.auth_functions import check_user_is_org_admin, check_user_is_authed, check_user_token_current, check_user_is_email_verified
 from src.helper_functions.users.create_global_user_profile import create_global_user_profile
 from src.helper_functions.users.add_user_to_organization import add_user_to_organization
+from src.shared import db, POSTcorsrules
 
 from firebase_admin import auth
 from firebase_admin.auth import UserNotFoundError

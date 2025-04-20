@@ -1,5 +1,6 @@
 from src.shared import db
 
+
 def update_user_photo_urls_in_orgs(org_id, uid, org_member_photo_url):
     """
     Updates the photo URL of a user in a specific organization's members collection in Firestore.

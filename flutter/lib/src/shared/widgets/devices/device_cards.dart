@@ -10,6 +10,7 @@ import '../../providers/org_selector_change_notifier.dart';
 import '../../providers/firestore_read_service.dart';
 import 'package:webbpulse_inventory_management/src/shared/widgets/devices/device_checkout_button.dart';
 import 'package:webbpulse_inventory_management/src/shared/widgets/devices/device_delete_button.dart';
+import 'package:webbpulse_inventory_management/src/shared/widgets/org/org_widgets.dart';
 
 import 'package:webbpulse_inventory_management/src/shared/widgets/styling/styling_widgets.dart';
 import 'package:webbpulse_inventory_management/src/shared/widgets/users/user_widgets.dart';
@@ -25,26 +26,22 @@ class DeviceCardDesktop extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final String deviceId =
-        deviceData['deviceId']; // Retrieve the device ID from the passed data
-    final String deviceSerialNumber =
-        deviceData['deviceSerialNumber']; // Device serial number
-    final bool deviceDeleted =
-        deviceData['deviceDeleted'] ?? false; // Check if device is deleted
-    final String orgMemberId = deviceData[
-        'deviceCheckedOutBy']; // ID of the member who checked out the device
-    final bool isDeviceCheckedOut =
-        deviceData['isDeviceCheckedOut']; // Check-in/out button
+    final String deviceId = deviceData['deviceId'];
+    final String deviceSerialNumber = deviceData['deviceSerialNumber'];
+    final bool deviceDeleted = deviceData['deviceDeleted'] ?? false;
+    final String orgMemberId = deviceData['deviceCheckedOutBy'];
+    final bool isDeviceCheckedOut = deviceData['isDeviceCheckedOut'];
     final String deviceCheckedOutNote =
-        deviceData['deviceCheckedOutNote'] ?? ''; // Device note
+        deviceData['deviceCheckedOutNote'] ?? '';
+    final String verkadaDeviceType =
+        deviceData['deviceVerkadaDeviceType'] ?? '';
 
+    // Timestamp related
     final Timestamp deviceCheckedOutAtTimestamp =
-        deviceData['deviceCheckedOutAt'] ??
-            Timestamp.now(); // Timestamp of check-out
-    final DateTime deviceCheckedOutAt =
-        deviceCheckedOutAtTimestamp.toDate(); // Convert to DateTime
-    final String deviceCheckedOutAtFormatted = DateFormat('yyyy-MM-dd kk:mm a')
-        .format(deviceCheckedOutAt); // Format the date
+        deviceData['deviceCheckedOutAt'] ?? Timestamp.now();
+    final DateTime deviceCheckedOutAt = deviceCheckedOutAtTimestamp.toDate();
+    final String deviceCheckedOutAtFormatted =
+        DateFormat('yyyy-MM-dd kk:mm a').format(deviceCheckedOutAt);
 
     // Skip rendering if the device has been marked as deleted
     if (deviceDeleted) {
@@ -54,104 +51,125 @@ class DeviceCardDesktop extends StatelessWidget {
               OrgSelectorChangeNotifier, FirebaseFunctions>(
           builder: (context, firestoreService, deviceCheckoutService,
               orgSelectorChangeNotifier, firebaseFunctions, child) {
-        return StreamBuilder<DocumentSnapshot?>(
-            stream: firestoreService.getOrgMemberDocument(
-                orgSelectorChangeNotifier.orgId, orgMemberId),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(
-                    child:
-                        CircularProgressIndicator()); // Show loading indicator
-              } else if (snapshot.hasError) {
-                return const Text(
-                    'Error loading org member data'); // Show error message
-              } else {
-                // If no member data is available, show a basic device card layout
-                // Fetch the organization member data
-                Map<String, dynamic> orgMemberData =
-                    snapshot.data?.data() as Map<String, dynamic>? ?? {};
-                return AuthClaimChecker(
-                  builder: (context, userClaims) {
-                    return CustomCard(
-                      theme: theme,
-                      customCardLeading: Icon(Icons.devices,
-                          color: theme.colorScheme.secondary),
-                      customCardTitle: Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Wrap(
-                                  children: [
-                                    Text(deviceSerialNumber,
-                                        style: const TextStyle(
-                                            fontWeight: FontWeight.bold)),
-                                  ],
-                                ),
-                                if (isDeviceCheckedOut) ...[
-                                  Wrap(
-                                    children: [
-                                      Text('Checked Out By: ',
-                                          style: theme.textTheme.labelSmall
-                                              ?.copyWith(
-                                                  fontWeight: FontWeight.bold)),
-                                      Text(
-                                          orgMemberData['orgMemberDisplayName'],
-                                          style: theme.textTheme.labelSmall),
-                                    ],
-                                  ),
-                                  Wrap(
-                                    children: [
-                                      Text('Checked Out On: ',
-                                          style: theme.textTheme.labelSmall
-                                              ?.copyWith(
-                                                  fontWeight: FontWeight.bold)),
-                                      Text(deviceCheckedOutAtFormatted,
-                                          style: theme.textTheme.labelSmall),
-                                    ],
-                                  ),
-                                  Wrap(
-                                    children: [
-                                      Text('Checkout Note: ',
-                                          style: theme.textTheme.labelSmall
-                                              ?.copyWith(
-                                                  fontWeight: FontWeight.bold)),
-                                      Text(deviceCheckedOutNote,
-                                          style: theme.textTheme.labelSmall),
-                                    ],
-                                  ),
-                                ],
-                              ],
-                            ),
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Row(
+        return OrgDocumentStreamBuilder(builder: (context, orgDocument) {
+          final orgData = orgDocument.data() as Map<String, dynamic>;
+          return StreamBuilder<DocumentSnapshot?>(
+              stream: firestoreService.getOrgMemberDocument(
+                  orgSelectorChangeNotifier.orgId, orgMemberId),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                      child:
+                          CircularProgressIndicator()); // Show loading indicator
+                } else if (snapshot.hasError) {
+                  return const Text(
+                      'Error loading org member data'); // Show error message
+                } else {
+                  // If no member data is available, show a basic device card layout
+                  // Fetch the organization member data
+                  Map<String, dynamic> orgMemberData =
+                      snapshot.data?.data() as Map<String, dynamic>? ?? {};
+                  return AuthClaimChecker(
+                    builder: (context, userClaims) {
+                      return CustomCard(
+                        theme: theme,
+                        customCardLeading: Icon(Icons.devices,
+                            color: theme.colorScheme.secondary),
+                        customCardTitle: Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  DeviceCheckoutButton(
-                                    key: ValueKey(deviceSerialNumber),
-                                    deviceSerialNumber: deviceSerialNumber,
+                                  Wrap(
+                                    children: [
+                                      Text(deviceSerialNumber,
+                                          style: const TextStyle(
+                                              fontWeight: FontWeight.bold)),
+                                    ],
                                   ),
-                                  const SizedBox(width: 8),
-                                  if (userClaims[
-                                          'org_admin_${orgSelectorChangeNotifier.orgId}'] ==
-                                      true)
-                                    DeleteDeviceButton(deviceId: deviceId),
+                                  if (orgData['orgVerkadaIntegrationEnabled'] ==
+                                      true) ...[
+                                    Wrap(
+                                      children: [
+                                        Text('Verkada Device Category: ',
+                                            style: theme.textTheme.labelSmall
+                                                ?.copyWith(
+                                                    fontWeight:
+                                                        FontWeight.bold)),
+                                        Text(verkadaDeviceType,
+                                            style: theme.textTheme.labelSmall),
+                                      ],
+                                    ),
+                                  ],
+                                  if (isDeviceCheckedOut) ...[
+                                    Wrap(
+                                      children: [
+                                        Text('Checked Out By: ',
+                                            style: theme.textTheme.labelSmall
+                                                ?.copyWith(
+                                                    fontWeight:
+                                                        FontWeight.bold)),
+                                        Text(
+                                            orgMemberData[
+                                                'orgMemberDisplayName'],
+                                            style: theme.textTheme.labelSmall),
+                                      ],
+                                    ),
+                                    Wrap(
+                                      children: [
+                                        Text('Checked Out On: ',
+                                            style: theme.textTheme.labelSmall
+                                                ?.copyWith(
+                                                    fontWeight:
+                                                        FontWeight.bold)),
+                                        Text(deviceCheckedOutAtFormatted,
+                                            style: theme.textTheme.labelSmall),
+                                      ],
+                                    ),
+                                    Wrap(
+                                      children: [
+                                        Text('Checkout Note: ',
+                                            style: theme.textTheme.labelSmall
+                                                ?.copyWith(
+                                                    fontWeight:
+                                                        FontWeight.bold)),
+                                        Text(deviceCheckedOutNote,
+                                            style: theme.textTheme.labelSmall),
+                                      ],
+                                    ),
+                                  ],
                                 ],
                               ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      customCardTrailing: null,
-                      onTapAction: () {},
-                    );
-                  },
-                );
-              }
-            });
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Row(
+                                  children: [
+                                    DeviceCheckoutButton(
+                                      key: ValueKey(deviceSerialNumber),
+                                      deviceSerialNumber: deviceSerialNumber,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    if (userClaims[
+                                            'org_admin_${orgSelectorChangeNotifier.orgId}'] ==
+                                        true)
+                                      DeleteDeviceButton(deviceId: deviceId),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        customCardTrailing: null,
+                        onTapAction: () {},
+                      );
+                    },
+                  );
+                }
+              });
+        });
       });
     }
   }
