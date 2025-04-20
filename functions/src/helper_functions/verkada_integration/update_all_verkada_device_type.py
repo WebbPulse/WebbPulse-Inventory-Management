@@ -1,4 +1,4 @@
-from src.helper_functions.devices.check_verkada_device_type import check_verkada_device_type
+from src.helper_functions.verkada_integration.check_verkada_device_type import check_verkada_device_type
 from src.shared import db
 
 def update_all_devices_verkada_device_type(org_id: str) -> None:
