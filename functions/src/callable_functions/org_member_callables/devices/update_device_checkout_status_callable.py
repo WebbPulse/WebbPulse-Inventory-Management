@@ -60,7 +60,7 @@ def update_device_checkout_status_callable(req: https_fn.CallableRequest) -> Any
 
             org_verkada_integration_enabled = db.collection('organizations').document(org_id).get().get('orgVerkadaIntegrationEnabled')
             if org_verkada_integration_enabled:
-                verkada_device_id = device_snapshot[0].to_dict().get('deviceVerkadaDeviceId')
+                verkada_device_id = db.collection('organizations').document(org_id).collection('devices').document(device_id).get().get('deviceVerkadaDeviceId')
                 if verkada_device_id:
                     rename_device_in_verkada_command(device_id, org_id, is_device_being_checked_out)
                     
