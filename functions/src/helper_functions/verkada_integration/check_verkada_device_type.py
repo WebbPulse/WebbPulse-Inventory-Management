@@ -29,6 +29,16 @@ def check_verkada_device_type(device_serial_number: str) -> str:
     gateway_prefixes = ["PR4","LPT","NAR"]
     command_connector_prefixes = ["WEY","A9G","MYW","7WP","7CG","EWL","CFA","CFC","CFD"]
     viewing_station_prefixes = ["DRJ"]
+    deskstation_prefixes = ["DEK"]
+    speaker_prefixes = ["ANN"]
+    hub_prefixes = ["DQ6"]
+    keypad_prefixes = ["KP4", "KP9", "KP7", "KP6"]
+    door_contact_prefixes = ["DC3"]
+    glass_break_prefixes = ["DG3"]
+    motion_sensor_prefixes = ["DM3"]
+    panic_button_prefixes = ["DP3"]
+    water_sensor_prefixes = ["DW3"]
+    wireless_relay_prefixes = ["DR3"]
 
     prefix = device_serial_number[:3]
 
@@ -48,5 +58,25 @@ def check_verkada_device_type(device_serial_number: str) -> str:
         return 'Command Connector'
     elif prefix in viewing_station_prefixes:
         return 'Viewing Station'
+    elif prefix in deskstation_prefixes:
+        return 'Desk Station'
+    elif prefix in speaker_prefixes:
+        return 'Speaker'
+    elif prefix in hub_prefixes:
+        return 'Hub'
+    elif prefix in keypad_prefixes:
+        return 'Keypad'
+    elif prefix in door_contact_prefixes:
+        return 'Door Contact'
+    elif prefix in glass_break_prefixes:
+        return 'Glass Break'
+    elif prefix in motion_sensor_prefixes:
+        return 'Motion Sensor'
+    elif prefix in panic_button_prefixes:
+        return 'Panic Button'
+    elif prefix in water_sensor_prefixes:
+        return 'Water Sensors'
+    elif prefix in wireless_relay_prefixes:
+        return 'Wireless Relay'
     else:
         return 'Unknown'
