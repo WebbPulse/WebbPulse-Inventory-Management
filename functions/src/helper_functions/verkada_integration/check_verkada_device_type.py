@@ -25,13 +25,14 @@ def check_verkada_device_type(device_serial_number: str) -> str:
     access_controller_prefixes = ["R7M","M7R","MPH","NEX","DAM","DXM"]
     input_output_board_prefixes = ["6GA"]
     envirmental_sensor_prefixes = ["6CC","PJE","NR6","T7L","NCG","9JX","JQ9","CHQ"]
-    intercom_prefixes = ["CHA","DDD","CRY","MKE","LKE","KEN","YDA","DKC","DEK","KYL"]
+    intercom_prefixes = ["CHA","DDD","CRY","MKE","LKE","KEN","YDA","DKC","KYL"]
     gateway_prefixes = ["PR4","LPT","NAR"]
     command_connector_prefixes = ["WEY","A9G","MYW","7WP","7CG","EWL","CFA","CFC","CFD"]
     viewing_station_prefixes = ["DRJ"]
     deskstation_prefixes = ["DEK"]
     speaker_prefixes = ["ANN"]
     hub_prefixes = ["DQ6"]
+    panel_prefixes = ["DQ4"]
     keypad_prefixes = ["KP4", "KP9", "KP7", "KP6"]
     door_contact_prefixes = ["DC3"]
     glass_break_prefixes = ["DG3"]
@@ -39,6 +40,10 @@ def check_verkada_device_type(device_serial_number: str) -> str:
     panic_button_prefixes = ["DP3"]
     water_sensor_prefixes = ["DW3"]
     wireless_relay_prefixes = ["DR3"]
+    siren_strobe_prefixes = ["FDT"]
+    new_panel_prefixes = ["XC4"]
+    alarm_expander_prefixes = ["39Q"]
+
 
     prefix = device_serial_number[:3]
 
@@ -64,6 +69,8 @@ def check_verkada_device_type(device_serial_number: str) -> str:
         return 'Speaker'
     elif prefix in hub_prefixes:
         return 'Hub'
+    elif prefix in panel_prefixes:
+        return 'Classic Alarm Panel'
     elif prefix in keypad_prefixes:
         return 'Keypad'
     elif prefix in door_contact_prefixes:
@@ -78,5 +85,11 @@ def check_verkada_device_type(device_serial_number: str) -> str:
         return 'Water Sensors'
     elif prefix in wireless_relay_prefixes:
         return 'Wireless Relay'
+    elif prefix in siren_strobe_prefixes:
+        return 'Siren Strobe'
+    elif prefix in new_panel_prefixes:
+        return 'BP52 Panel'
+    elif prefix in alarm_expander_prefixes:
+        return 'Alarm Expander'
     else:
         return 'Unknown'
