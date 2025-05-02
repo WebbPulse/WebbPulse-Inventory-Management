@@ -335,6 +335,266 @@ def _process_speaker(speaker_data: dict, org_id: str):
     except Exception as e:
         print(f"Error processing speaker SN {serial_number}: {e}")
 
+def _process_classic_alarm_keypad(classic_alarm_keypad_data: dict, org_id: str):
+    """Processes a single classic alarm keypad: finds/creates Firestore doc and updates Verkada ID."""
+    verkada_device_id = classic_alarm_keypad_data.get("deviceId")
+    serial_number = classic_alarm_keypad_data.get("claimedSerialNumber")
+
+    if not (verkada_device_id and serial_number):
+        print(f"Skipping classic alarm keypad due to missing ID or Serial: {classic_alarm_keypad_data}")
+        return
+
+    try:
+        existing_device_query = db.collection('organizations').document(org_id).collection('devices').where('deviceSerialNumber', '==', serial_number).limit(1).get()
+        if existing_device_query:
+            device_ref = existing_device_query[0].reference
+            device_ref.set({
+                'deviceVerkadaDeviceId': verkada_device_id,
+                'deviceVerkadaDeviceType': "Classic Alarm Keypad",
+            }, merge=True)
+        else:
+            device_ref = db.collection('organizations').document(org_id).collection('devices').document()
+            device_ref.set({
+                'deviceId': device_ref.id,
+                'deviceSerialNumber': serial_number,
+                'deviceVerkadaDeviceId': verkada_device_id,
+                'createdAt': firestore.SERVER_TIMESTAMP,
+                'isDeviceCheckedOut': False,
+                'deviceCheckedOutBy': '',
+                'deviceCheckedOutAt': None,
+                'deviceDeleted': False,
+                'deviceVerkadaDeviceType': "Classic Alarm Keypad",
+            })
+    except Exception as e:
+        print(f"Error processing classic alarm keypad SN {serial_number}: {e}")
+
+
+def _process_classic_alarm_hub_device(classic_alarm_hub_device_data: dict, org_id: str):
+    """Processes a single classic alarm hub device: finds/creates Firestore doc and updates Verkada ID."""
+    verkada_device_id = classic_alarm_hub_device_data.get("deviceId")
+    serial_number = classic_alarm_hub_device_data.get("claimedSerialNumber")
+
+    if not (verkada_device_id and serial_number):
+        print(f"Skipping classic alarm hub device due to missing ID or Serial: {classic_alarm_hub_device_data}")
+        return
+
+    try:
+        existing_device_query = db.collection('organizations').document(org_id).collection('devices').where('deviceSerialNumber', '==', serial_number).limit(1).get()
+        if existing_device_query:
+            device_ref = existing_device_query[0].reference
+            device_ref.set({
+                'deviceVerkadaDeviceId': verkada_device_id,
+                'deviceVerkadaDeviceType': "Classic Alarm Hub",
+            }, merge=True)
+        else:
+            device_ref = db.collection('organizations').document(org_id).collection('devices').document()
+            device_ref.set({
+                'deviceId': device_ref.id,
+                'deviceSerialNumber': serial_number,
+                'deviceVerkadaDeviceId': verkada_device_id,
+                'createdAt': firestore.SERVER_TIMESTAMP,
+                'isDeviceCheckedOut': False,
+                'deviceCheckedOutBy': '',
+                'deviceCheckedOutAt': None,
+                'deviceDeleted': False,
+                'deviceVerkadaDeviceType': "Classic Alarm Hub",
+            })
+    except Exception as e:
+        print(f"Error processing classic alarm hub device SN {serial_number}: {e}")
+def _process_classic_alarms_door_contact_sensor(classic_alarm_door_contact_sensor_data: dict, org_id: str):
+    """Processes a single classic alarm door contact sensor: finds/creates Firestore doc and updates Verkada ID."""
+    verkada_device_id = classic_alarm_door_contact_sensor_data.get("deviceId")
+    serial_number = classic_alarm_door_contact_sensor_data.get("serialNumber")
+
+    if not (verkada_device_id and serial_number):
+        print(f"Skipping classic alarm door contact sensor due to missing ID or Serial: {classic_alarm_door_contact_sensor_data}")
+        return
+
+    try:
+        existing_device_query = db.collection('organizations').document(org_id).collection('devices').where('deviceSerialNumber', '==', serial_number).limit(1).get()
+        if existing_device_query:
+            device_ref = existing_device_query[0].reference
+            device_ref.set({
+                'deviceVerkadaDeviceId': verkada_device_id,
+                'deviceVerkadaDeviceType': "Classic Alarm Door Contact Sensor",
+            }, merge=True)
+        else:
+            device_ref = db.collection('organizations').document(org_id).collection('devices').document()
+            device_ref.set({
+                'deviceId': device_ref.id,
+                'deviceSerialNumber': serial_number,
+                'deviceVerkadaDeviceId': verkada_device_id,
+                'createdAt': firestore.SERVER_TIMESTAMP,
+                'isDeviceCheckedOut': False,
+                'deviceCheckedOutBy': '',
+                'deviceCheckedOutAt': None,
+                'deviceDeleted': False,
+                'deviceVerkadaDeviceType': "Classic Alarm Door Contact Sensor",
+            })
+    except Exception as e:
+        print(f"Error processing classic alarm door contact sensor SN {serial_number}: {e}")
+def _process_classic_alarms_glass_break_sensor(classic_alarm_glass_break_sensor_data: dict, org_id: str):
+    """Processes a single classic alarm glass break sensor: finds/creates Firestore doc and updates Verkada ID."""
+    verkada_device_id = classic_alarm_glass_break_sensor_data.get("deviceId")
+    serial_number = classic_alarm_glass_break_sensor_data.get("serialNumber")
+
+    if not (verkada_device_id and serial_number):
+        print(f"Skipping classic alarm glass break sensor due to missing ID or Serial: {classic_alarm_glass_break_sensor_data}")
+        return
+
+    try:
+        existing_device_query = db.collection('organizations').document(org_id).collection('devices').where('deviceSerialNumber', '==', serial_number).limit(1).get()
+        if existing_device_query:
+            device_ref = existing_device_query[0].reference
+            device_ref.set({
+                'deviceVerkadaDeviceId': verkada_device_id,
+                'deviceVerkadaDeviceType': "Classic Alarm Glass Break Sensor",
+            }, merge=True)
+        else:
+            device_ref = db.collection('organizations').document(org_id).collection('devices').document()
+            device_ref.set({
+                'deviceId': device_ref.id,
+                'deviceSerialNumber': serial_number,
+                'deviceVerkadaDeviceId': verkada_device_id,
+                'createdAt': firestore.SERVER_TIMESTAMP,
+                'isDeviceCheckedOut': False,
+                'deviceCheckedOutBy': '',
+                'deviceCheckedOutAt': None,
+                'deviceDeleted': False,
+                'deviceVerkadaDeviceType': "Classic Alarm Glass Break Sensor",
+            })
+    except Exception as e:
+        print(f"Error processing classic alarm glass break sensor SN {serial_number}: {e}")
+def _process_classic_alarms_motion_sensor(classic_alarm_motion_sensor_data: dict, org_id: str):
+    """Processes a single classic alarm motion sensor: finds/creates Firestore doc and updates Verkada ID."""
+    verkada_device_id = classic_alarm_motion_sensor_data.get("deviceId")
+    serial_number = classic_alarm_motion_sensor_data.get("serialNumber")
+
+    if not (verkada_device_id and serial_number):
+        print(f"Skipping classic alarm motion sensor due to missing ID or Serial: {classic_alarm_motion_sensor_data}")
+        return
+
+    try:
+        existing_device_query = db.collection('organizations').document(org_id).collection('devices').where('deviceSerialNumber', '==', serial_number).limit(1).get()
+        if existing_device_query:
+            device_ref = existing_device_query[0].reference
+            device_ref.set({
+                'deviceVerkadaDeviceId': verkada_device_id,
+                'deviceVerkadaDeviceType': "Classic Alarm Motion Sensor",
+            }, merge=True)
+        else:
+            device_ref = db.collection('organizations').document(org_id).collection('devices').document()
+            device_ref.set({
+                'deviceId': device_ref.id,
+                'deviceSerialNumber': serial_number,
+                'deviceVerkadaDeviceId': verkada_device_id,
+                'createdAt': firestore.SERVER_TIMESTAMP,
+                'isDeviceCheckedOut': False,
+                'deviceCheckedOutBy': '',
+                'deviceCheckedOutAt': None,
+                'deviceDeleted': False,
+                'deviceVerkadaDeviceType': "Classic Alarm Motion Sensor",
+            })
+    except Exception as e:
+        print(f"Error processing classic alarm motion sensor SN {serial_number}: {e}")
+
+def _process_classic_alarms_panic_button(classic_alarm_panic_button_data: dict, org_id: str):
+    """Processes a single classic alarm panic button: finds/creates Firestore doc and updates Verkada ID."""
+    verkada_device_id = classic_alarm_panic_button_data.get("deviceId")
+    serial_number = classic_alarm_panic_button_data.get("serialNumber")
+
+    if not (verkada_device_id and serial_number):
+        print(f"Skipping classic alarm panic button due to missing ID or Serial: {classic_alarm_panic_button_data}")
+        return
+
+    try:
+        existing_device_query = db.collection('organizations').document(org_id).collection('devices').where('deviceSerialNumber', '==', serial_number).limit(1).get()
+        if existing_device_query:
+            device_ref = existing_device_query[0].reference
+            device_ref.set({
+                'deviceVerkadaDeviceId': verkada_device_id,
+                'deviceVerkadaDeviceType': "Classic Alarm Panic Button",
+            }, merge=True)
+        else:
+            device_ref = db.collection('organizations').document(org_id).collection('devices').document()
+            device_ref.set({
+                'deviceId': device_ref.id,
+                'deviceSerialNumber': serial_number,
+                'deviceVerkadaDeviceId': verkada_device_id,
+                'createdAt': firestore.SERVER_TIMESTAMP,
+                'isDeviceCheckedOut': False,
+                'deviceCheckedOutBy': '',
+                'deviceCheckedOutAt': None,
+                'deviceDeleted': False,
+                'deviceVerkadaDeviceType': "Classic Alarm Panic Button",
+            })
+    except Exception as e:
+        print(f"Error processing classic alarm panic button SN {serial_number}: {e}")
+def _process_classic_alarms_water_sensor(classic_alarm_water_sesnsor_data: dict, org_id: str):
+    """Processes a single classic alarm water sensor: finds/creates Firestore doc and updates Verkada ID."""
+    verkada_device_id = classic_alarm_water_sesnsor_data.get("deviceId")
+    serial_number = classic_alarm_water_sesnsor_data.get("serialNumber")
+
+    if not (verkada_device_id and serial_number):
+        print(f"Skipping classic alarm water sensor due to missing ID or Serial: {classic_alarm_water_sesnsor_data}")
+        return
+
+    try:
+        existing_device_query = db.collection('organizations').document(org_id).collection('devices').where('deviceSerialNumber', '==', serial_number).limit(1).get()
+        if existing_device_query:
+            device_ref = existing_device_query[0].reference
+            device_ref.set({
+                'deviceVerkadaDeviceId': verkada_device_id,
+                'deviceVerkadaDeviceType': "Classic Alarm Water Sensor",
+            }, merge=True)
+        else:
+            device_ref = db.collection('organizations').document(org_id).collection('devices').document()
+            device_ref.set({
+                'deviceId': device_ref.id,
+                'deviceSerialNumber': serial_number,
+                'deviceVerkadaDeviceId': verkada_device_id,
+                'createdAt': firestore.SERVER_TIMESTAMP,
+                'isDeviceCheckedOut': False,
+                'deviceCheckedOutBy': '',
+                'deviceCheckedOutAt': None,
+                'deviceDeleted': False,
+                'deviceVerkadaDeviceType': "Classic Alarm Water Sensor",
+            })
+    except Exception as e:
+        print(f"Error processing classic alarm water sensor SN {serial_number}: {e}")
+def _process_classic_alarms_wireless_relay(classic_alarm_wireless_relay_data: dict, org_id: str):
+    """Processes a single classic alarm wireless relay: finds/creates Firestore doc and updates Verkada ID."""
+    verkada_device_id = classic_alarm_wireless_relay_data.get("deviceId")
+    serial_number = classic_alarm_wireless_relay_data.get("serialNumber")
+
+    if not (verkada_device_id and serial_number):
+        print(f"Skipping classic alarm wireless relay due to missing ID or Serial: {classic_alarm_wireless_relay_data}")
+        return
+
+    try:
+        existing_device_query = db.collection('organizations').document(org_id).collection('devices').where('deviceSerialNumber', '==', serial_number).limit(1).get()
+        if existing_device_query:
+            device_ref = existing_device_query[0].reference
+            device_ref.set({
+                'deviceVerkadaDeviceId': verkada_device_id,
+                'deviceVerkadaDeviceType': "Classic Alarm Wireless Relay",
+            }, merge=True)
+        else:
+            device_ref = db.collection('organizations').document(org_id).collection('devices').document()
+            device_ref.set({
+                'deviceId': device_ref.id,
+                'deviceSerialNumber': serial_number,
+                'deviceVerkadaDeviceId': verkada_device_id,
+                'createdAt': firestore.SERVER_TIMESTAMP,
+                'isDeviceCheckedOut': False,
+                'deviceCheckedOutBy': '',
+                'deviceCheckedOutAt': None,
+                'deviceDeleted': False,
+                'deviceVerkadaDeviceType': "Classic Alarm Wireless Relay",
+            })
+    except Exception as e:
+        print(f"Error processing classic alarm wireless relay SN {serial_number}: {e}")
+
 def sync_verkada_device_ids(org_id, verkada_bot_user_info: dict) -> None:
     verkada_org_shortname = verkada_bot_user_info.get("org_name")
     verkada_org_id = verkada_bot_user_info.get("org_id")
@@ -496,10 +756,10 @@ def sync_verkada_device_ids(org_id, verkada_bot_user_info: dict) -> None:
     
     def sync_command_connector_ids():
         url = f"https://vprovision.command.verkada.com/__v/{verkada_org_shortname}/vfortress/list_boxes"
-        payload = {}
+        payload = {'organizationId': verkada_org_id}
         command_connectors = []
         try:
-            response = requests_with_retry('get', url, headers=auth_headers, json=payload)
+            response = requests_with_retry('post', url, headers=auth_headers, json=payload)
             response.raise_for_status()
             command_connectors = response.json()
         except RequestException as e:
@@ -581,6 +841,112 @@ def sync_verkada_device_ids(org_id, verkada_bot_user_info: dict) -> None:
             list(executor.map(process_speaker_with_org, speakers))
 
         print(f"Finished processing {len(speakers)} speakers.")
+    
+    def sync_classic_alarms_keypad_ids():
+        url = f"https://alarms.command.verkada.com/__v/{verkada_org_shortname}/device/keypad/get_all"
+        payload = {
+            "organizationId": verkada_org_id,
+        }
+        classic_alarms_keypads = []
+        try:
+            response = requests_with_retry('post', url, headers=auth_headers, json=payload)
+            response.raise_for_status()
+            classic_alarms_keypads = response.json().get("keypad", [])
+            
+
+        except RequestException as e:
+            print(f"Error fetching classic alarm keypad info after retries: {e}")
+            return
+        except JSONDecodeError as e:
+            print(f"Error decoding JSON response for classic alarm keypad: {e}")
+            return
+        except Exception as e:
+            print(f"An unexpected error occurred during classic alarm keypad fetch: {e}")
+            return
+
+        if not classic_alarms_keypads:
+            print("No classic alarms keypads found to process.")
+            return
+        
+
+        process_classic_alarm_keypad_with_org = partial(_process_classic_alarm_keypad, org_id=org_id)
+        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+            list(executor.map(process_classic_alarm_keypad_with_org, classic_alarms_keypads))
+        print(f"Finished processing {len(classic_alarms_keypads)} classic alarm keypads.")
+    
+    def sync_classic_alarms_hub_and_sensor_ids():
+        url = f"https://alarms.command.verkada.com/__v/{verkada_org_shortname}/device/get_all"
+        payload = {
+            "organizationId": verkada_org_id,
+        }
+        classic_alarms_hub_devices = []
+        classic_alarms_door_contact_sensors = []
+        classic_alarms_glass_break_sensors = []
+        classic_alarms_motion_sensors = []
+        classic_alarms_panic_buttons = []
+        classic_alarms_water_sensors = []
+        classic_alarms_wireless_relays = []
+        try:
+            response = requests_with_retry('post', url, headers=auth_headers, json=payload)
+            response.raise_for_status()
+            classic_alarms_hub_devices = response.json().get("hubDevice", [])
+            classic_alarms_door_contact_sensors = response.json().get("doorContactSensor", [])
+            classic_alarms_glass_break_sensors = response.json().get("glassBreakSensor", [])
+            classic_alarms_motion_sensors = response.json().get("motionSensor", [])
+            classic_alarms_panic_buttons = response.json().get("panicButton", [])
+            classic_alarms_water_sensors = response.json().get("waterSensor", [])
+            classic_alarms_wireless_relays = response.json().get("wirelessRelay", [])
+            
+
+        except RequestException as e:
+            print(f"Error fetching classic alarm device info after retries: {e}")
+            return
+        except JSONDecodeError as e:
+            print(f"Error decoding JSON response for classic alarm device: {e}")
+            return
+        except Exception as e:
+            print(f"An unexpected error occurred during classic alarm device fetch: {e}")
+            return
+
+        if not classic_alarms_hub_devices and not classic_alarms_door_contact_sensors and not classic_alarms_glass_break_sensors and not classic_alarms_motion_sensors and not classic_alarms_panic_buttons and not classic_alarms_water_sensors and not classic_alarms_wireless_relays:
+            print("No classic alarms devices found to process.")
+            return
+        
+
+        process_classic_alarm_hub_device_with_org = partial(_process_classic_alarm_hub_device, org_id=org_id)
+        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+            list(executor.map(process_classic_alarm_hub_device_with_org, classic_alarms_hub_devices))
+        print(f"Finished processing {len(classic_alarms_hub_devices)} classic alarm hub devices.")
+
+        process_classic_alarms_door_contact_sensor_with_org = partial(_process_classic_alarms_door_contact_sensor, org_id=org_id)
+        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+            list(executor.map(process_classic_alarms_door_contact_sensor_with_org, classic_alarms_door_contact_sensors))
+        print(f"Finished processing {len(classic_alarms_door_contact_sensors)} classic alarm door contact sensors.")
+
+        process_classic_alarms_glass_break_sensor_with_org = partial(_process_classic_alarms_glass_break_sensor, org_id=org_id)
+        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+            list(executor.map(process_classic_alarms_glass_break_sensor_with_org, classic_alarms_glass_break_sensors))
+        print(f"Finished processing {len(classic_alarms_glass_break_sensors)} classic alarm glass break sensors.")
+
+        process_classic_alarms_motion_sensor_with_org = partial(_process_classic_alarms_motion_sensor, org_id=org_id)
+        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+            list(executor.map(process_classic_alarms_motion_sensor_with_org, classic_alarms_motion_sensors))
+        print(f"Finished processing {len(classic_alarms_motion_sensors)} classic alarm motion sensors.")
+        
+        process_classic_alarms_panic_button_with_org = partial(_process_classic_alarms_panic_button, org_id=org_id)
+        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+            list(executor.map(process_classic_alarms_panic_button_with_org, classic_alarms_panic_buttons))
+        print(f"Finished processing {len(classic_alarms_panic_buttons)} classic alarm panic buttons.")
+
+        process_classic_alarms_water_sensor_with_org = partial(_process_classic_alarms_water_sensor, org_id=org_id)
+        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+            list(executor.map(process_classic_alarms_water_sensor_with_org, classic_alarms_water_sensors))
+        print(f"Finished processing {len(classic_alarms_water_sensors)} classic alarm water sensors.")
+
+        process_classic_alarms_wireless_relay_with_org = partial(_process_classic_alarms_wireless_relay, org_id=org_id)
+        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+            list(executor.map(process_classic_alarms_wireless_relay_with_org, classic_alarms_wireless_relays))
+        print(f"Finished processing {len(classic_alarms_wireless_relays)} classic alarm wireless relays.")
 
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
@@ -593,6 +959,8 @@ def sync_verkada_device_ids(org_id, verkada_bot_user_info: dict) -> None:
             executor.submit(sync_command_connector_ids),
             executor.submit(sync_viewing_station_ids),
             executor.submit(sync_speaker_ids),
+            executor.submit(sync_classic_alarms_keypad_ids),
+            executor.submit(sync_classic_alarms_hub_and_sensor_ids),
         ]
         for future in concurrent.futures.as_completed(futures):
             try:

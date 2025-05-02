@@ -166,7 +166,7 @@ def rename_device_in_verkada_command(device_id, org_id, device_being_checked_out
         except Exception as e:
             print(f"Error renaming {device_verkada_device_type} {device_serial_number}: {e}")
 
-    elif device_verkada_device_type == "Hub":
+    elif device_verkada_device_type == "Classic Alarm Hub Device":
         rename_url = f"https://alarms.command.verkada.com/__v/{verkada_org_short_name}/device/hub/{device_verkada_device_id}"
         payload = {
                     "siteId": verkada_device_site_id,
@@ -181,22 +181,8 @@ def rename_device_in_verkada_command(device_id, org_id, device_being_checked_out
         except Exception as e:
             print(f"Error renaming {device_verkada_device_type} {device_serial_number}: {e}")
         
-    elif device_verkada_device_type == "Classic Alarm Panel":
-        rename_url = f"https://alarms.command.verkada.com/__v/{verkada_org_short_name}/device/hub/{device_verkada_device_id}"
-        payload = {
-                    "name": device_name,
-                    "siteId": verkada_device_site_id
-                }
-        try:
-            response = requests_with_retry('post', rename_url, headers=verkada_bot_headers, json=payload)
-            response.raise_for_status()
-            print(f"{device_verkada_device_type} {device_serial_number} renamed successfully to {device_name}.")
-        except RequestException as e:
-            print(f"Error fetching {device_verkada_device_type} info after retries: {e}")
-        except Exception as e:
-            print(f"Error renaming {device_verkada_device_type} {device_serial_number}: {e}")
 
-    elif device_verkada_device_type == "Keypad":
+    elif device_verkada_device_type == "Classic Alarm Keypad":
         rename_url = f"https://alarms.command.verkada.com/__v/{device_verkada_device_id}/device/keypad/update"
         payload = {
                     "keypadId": device_verkada_device_id,
