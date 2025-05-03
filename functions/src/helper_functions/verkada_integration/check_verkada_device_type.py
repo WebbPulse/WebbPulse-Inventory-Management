@@ -67,7 +67,7 @@ def check_verkada_device_type(device_serial_number: str) -> str:
         return 'Desk Station'
     elif prefix in speaker_prefixes:
         return 'Speaker'
-    elif prefix in hub_prefixes or panel_prefixes:
+    elif prefix in hub_prefixes or prefix in panel_prefixes:
         return 'Classic Alarm Hub Device'
     elif prefix in keypad_prefixes:
         return 'Keypad'
