@@ -8,13 +8,6 @@ def grant_all_verkada_permissions(verkada_bot_user_info: dict) -> None:
     Args:
         verkada_bot_user_info (dict): A dictionary containing the user token, organization ID, and other relevant information.
 
-    verkada_bot_user_info = {
-            "auth_headers": auth_headers,
-            "org_id": verkada_org_id,
-            "org_name": verkada_org_shortname, # Assuming org_name is available
-            "user_id": verkada_bot_user_id,
-            "v2": verkada_bot_v2,
-        }
     """
     user_id = verkada_bot_user_info.get("user_id")
     org_id = verkada_bot_user_info.get("org_id")
