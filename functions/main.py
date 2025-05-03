@@ -33,6 +33,7 @@ from src.firestore_triggered_functions.monitor_for_user_changes import monitor_f
 
 #scheduled functions
 from src.scheduled_functions.sync_verkada_permissions_scheduled import sync_verkada_permissions_scheduled
+from src.scheduled_functions.sync_verkada_device_ids_scheduled import sync_verkada_device_ids_scheduled
 
 
 
