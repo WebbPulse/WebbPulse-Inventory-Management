@@ -76,7 +76,7 @@ jobs:
           pip install -r ./functions/requirements.txt
           deactivate
           firebase experiments:enable webframeworks
-          firebase deploy --only hosting,functions,firestore:rules
+          firebase deploy --only hosting,functions,firestore:rules --force
   build_and_deploy_android_app_internal:
     name: Build and Deploy Internal Android App
     runs-on: ubuntu-latest
