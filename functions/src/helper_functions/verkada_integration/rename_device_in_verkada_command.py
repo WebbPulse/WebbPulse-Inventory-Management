@@ -8,10 +8,10 @@ from requests.exceptions import RequestException
 def rename_device_in_verkada_command(device_id, org_id, device_being_checked_out):
     """
     """
-    org_doc = db.collection('organizations').document(org_id).get()
-    verkada_org_short_name = org_doc.get('orgVerkadaOrgShortName')
-    verkada_org_bot_email = org_doc.get('orgVerkadaBotEmail')
-    verkada_org_bot_password = org_doc.get('orgVerkadaBotPassword')
+    org__verkada_integration_doc = db.collection('organizations').document(org_id).collection('sensitiveConfigs').document('verkadaIntegrationSettings').get()
+    verkada_org_short_name = org__verkada_integration_doc.get('orgVerkadaOrgShortName')
+    verkada_org_bot_email = org__verkada_integration_doc.get('orgVerkadaBotEmail')
+    verkada_org_bot_password = org__verkada_integration_doc.get('orgVerkadaBotPassword')
 
     verkada_bot_user_info = login_to_verkada(verkada_org_short_name, verkada_org_bot_email, verkada_org_bot_password)
     verkada_org_id = verkada_bot_user_info.get('org_id')
@@ -22,13 +22,12 @@ def rename_device_in_verkada_command(device_id, org_id, device_being_checked_out
     device_serial_number = deviceDoc.get('deviceSerialNumber')
     device_verkada_device_id = deviceDoc.get('deviceVerkadaDeviceId')
     device_verkada_device_type = deviceDoc.get('deviceVerkadaDeviceType')
-    device_verkada_site_id = deviceDoc.get('deviceVerkadaSiteId')
+    
     
     if device_being_checked_out:
         device_name = f"{device_serial_number} - Checked Out"
     else:
         device_name = f"{device_serial_number} - Available"
-
     if device_verkada_device_type == "Camera":
         rename_url = f"https://vprovision.command.verkada.com/__v/{verkada_org_short_name}/camera/name/set"
         payload = {
@@ -165,6 +164,7 @@ def rename_device_in_verkada_command(device_id, org_id, device_being_checked_out
             print(f"Error renaming {device_verkada_device_type} {device_serial_number}: {e}")
 
     elif device_verkada_device_type == "Classic Alarm Hub Device":
+        device_verkada_site_id = deviceDoc.get('deviceVerkadaSiteId')
         rename_url = f"https://alarms.command.verkada.com/__v/{verkada_org_short_name}/device/hub/{device_verkada_device_id}"
         payload = {
                     "siteId": device_verkada_site_id,

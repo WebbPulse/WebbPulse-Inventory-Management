@@ -7,31 +7,46 @@ from src.shared import db
 from functools import partial
 from src.helper_functions.verkada_integration.check_verkada_device_type import check_verkada_device_type
 
-# --- Helper function to process a single camera ---
-def _process_camera(camera_data: dict, org_id: str):
-    """Processes a single camera: finds/creates Firestore doc and updates Verkada ID."""
-    verkada_device_id = camera_data.get("cameraId")
-    serial_number = camera_data.get("serialNumber")
-    device_type = check_verkada_device_type(serial_number)
-    if device_type != "Camera":
-        print(f"Skipping camera due to device type mismatch: {device_type} for {serial_number}")
-        return
+# --- Generic Helper to Prepare Write Data ---
+
+def _prepare_device_write_data(device_data: dict, org_id: str, id_field: str, serial_field: str, expected_type: str, extra_fields: dict = None):
+    """
+    Prepares data for Firestore write (update or create) for a single device.
+    Queries Firestore to check existence based on serial number.
+    Returns a tuple: (action, target, data) or None.
+    action: 'update' or 'create'
+    target: DocumentReference for update, serial_number for create
+    data: Dictionary of fields to set/update
+    """
+    verkada_device_id = device_data.get(id_field)
+    serial_number = device_data.get(serial_field)
+    # Special case for env sensors using 'claimedSerialNumber'
+    if serial_field == 'claimedSerialNumber' and not serial_number:
+        serial_number = device_data.get('serialNumber') # Fallback if needed, adjust if API guarantees one or the other
+
     if not (verkada_device_id and serial_number):
-        print(f"Skipping camera due to missing ID or Serial: {camera_data}")
-        return
+        print(f"Skipping {expected_type} due to missing ID ('{id_field}') or Serial ('{serial_field}'): {device_data}")
+        return None
 
     try:
-        existing_device_query = db.collection('organizations').document(org_id).collection('devices').where('deviceSerialNumber', '==', serial_number).limit(1).get()
+        devices_ref = db.collection('organizations').document(org_id).collection('devices')
+        existing_device_query = devices_ref.where('deviceSerialNumber', '==', serial_number).limit(1).get()
+
+        update_data = {
+            'deviceVerkadaDeviceId': verkada_device_id,
+            'deviceVerkadaDeviceType': expected_type,
+        }
+        if extra_fields:
+            update_data.update(extra_fields) # Add specific fields like siteId
+
         if existing_device_query:
+            # Device exists, prepare for update
             device_ref = existing_device_query[0].reference
-            device_ref.set({
-                'deviceVerkadaDeviceId': verkada_device_id,
-                'deviceVerkadaDeviceType': "Camera",  
-            }, merge=True)
+            return ('update', device_ref, update_data)
         else:
-            device_ref = db.collection('organizations').document(org_id).collection('devices').document()
-            device_ref.set({
-                'deviceId': device_ref.id,
+            # Device doesn't exist, prepare for creation
+            create_data = {
+                # 'deviceId' will be added during batch creation
                 'deviceSerialNumber': serial_number,
                 'deviceVerkadaDeviceId': verkada_device_id,
                 'createdAt': firestore.SERVER_TIMESTAMP,
@@ -39,1007 +54,301 @@ def _process_camera(camera_data: dict, org_id: str):
                 'deviceCheckedOutBy': '',
                 'deviceCheckedOutAt': None,
                 'deviceDeleted': False,
-                'deviceVerkadaDeviceType': "Camera",
-            })
+                'deviceVerkadaDeviceType': expected_type,
+            }
+            if extra_fields:
+                create_data.update(extra_fields) # Add specific fields like siteId
+            # Return serial number for create case, doc id will be generated later
+            return ('create', serial_number, create_data)
+
     except Exception as e:
-        print(f"Error processing camera SN {serial_number}: {e}")
+        print(f"Error preparing write data for {expected_type} SN {serial_number}: {e}")
+        return None
 
-# --- Helper function to process a single access controller ---
-def _process_access_controller(access_controller_data: dict, org_id: str):
-    """Processes a single access controller: finds/creates Firestore doc and updates Verkada ID."""
-    verkada_device_id = access_controller_data.get("accessControllerId")
-    serial_number = access_controller_data.get("serialNumber")
-    device_type = check_verkada_device_type(serial_number)
-    if device_type != "Access Controller":
-        print(f"Skipping access controller due to device type mismatch: {device_type} for {serial_number}")
-        return
-    if not (verkada_device_id and serial_number):
-        print(f"Skipping access controller due to missing ID or Serial: {access_controller_data}")
-        return
+# --- Function to Execute Batches ---
 
-    try:
-        existing_device_query = db.collection('organizations').document(org_id).collection('devices').where('deviceSerialNumber', '==', serial_number).limit(1).get()
-        if existing_device_query:
-            device_ref = existing_device_query[0].reference
-            device_ref.set({
-                'deviceVerkadaDeviceId': verkada_device_id,
-                'deviceVerkadaDeviceType': "Access Controller", 
-            }, merge=True)
-        else:
-            device_ref = db.collection('organizations').document(org_id).collection('devices').document()
-            device_ref.set({
-                'deviceId': device_ref.id,
-                'deviceSerialNumber': serial_number,
-                'deviceVerkadaDeviceId': verkada_device_id,
-                'createdAt': firestore.SERVER_TIMESTAMP,
-                'isDeviceCheckedOut': False,
-                'deviceCheckedOutBy': '',
-                'deviceCheckedOutAt': None,
-                'deviceDeleted': False,
-                'deviceVerkadaDeviceType': "Access Controller",
-            })
-    except Exception as e:
-        print(f"Error processing access controller SN {serial_number}: {e}")
+def _execute_firestore_batches(write_data_list: list, org_id: str, batch_size: int = 499):
+    """Executes Firestore writes in batches based on prepared data."""
+    if not write_data_list:
+        return 0
 
-# --- Helper function to process a single env sensor ---
-def _process_env_sensor(env_sensor_data: dict, org_id: str):
-    """Processes a single env sensor: finds/creates Firestore doc and updates Verkada ID."""
-    verkada_device_id = env_sensor_data.get("deviceId")
-    serial_number = env_sensor_data.get("claimedSerialNumber")
-    device_type = check_verkada_device_type(serial_number)
-    if device_type != "Environmental Sensor":
-        print(f"Skipping env sensor due to device type mismatch: {device_type} for {serial_number}")
-        return
-    if not (verkada_device_id and serial_number):
-        print(f"Skipping env sensor due to missing ID or Serial: {env_sensor_data}")
-        return
+    devices_ref = db.collection('organizations').document(org_id).collection('devices')
+    batch = db.batch()
+    batch_count = 0
+    total_processed = 0
 
-    try:
-        existing_device_query = db.collection('organizations').document(org_id).collection('devices').where('deviceSerialNumber', '==', serial_number).limit(1).get()
-        if existing_device_query:
-            device_ref = existing_device_query[0].reference
-            device_ref.set({
-                'deviceVerkadaDeviceId': verkada_device_id,
-                'deviceVerkadaDeviceType': "Environmental Sensor", 
-            }, merge=True)
-        else:
-            device_ref = db.collection('organizations').document(org_id).collection('devices').document()
-            device_ref.set({
-                'deviceId': device_ref.id,
-                'deviceSerialNumber': serial_number,
-                'deviceVerkadaDeviceId': verkada_device_id,
-                'createdAt': firestore.SERVER_TIMESTAMP,
-                'isDeviceCheckedOut': False,
-                'deviceCheckedOutBy': '',
-                'deviceCheckedOutAt': None,
-                'deviceDeleted': False,
-                'deviceVerkadaDeviceType': "Environmental Sensor", 
-            })
-    except Exception as e:
-        print(f"Error processing env sensor SN {serial_number}: {e}")
+    for action, target, data in write_data_list:
+        try:
+            if action == 'update':
+                doc_ref = target # Target is the DocumentReference
+                batch.set(doc_ref, data, merge=True)
+                total_processed += 1
+                batch_count += 1
+            elif action == 'create':
+                # Target is the serial_number, data is the full doc data
+                # We need to generate a new ID here before adding to batch
+                doc_ref = devices_ref.document()
+                data['deviceId'] = doc_ref.id # Add the generated ID
+                batch.set(doc_ref, data)
+                total_processed += 1
+                batch_count += 1
+            else:
+                 print(f"Unknown action '{action}' in write data list.")
+                 continue # Skip unknown actions
 
-    # --- Helper function to process a single env sensor ---
-def _process_desk_station(desk_station_data: dict, org_id: str):
-    """Processes a single desk station: finds/creates Firestore doc and updates Verkada ID."""
-    verkada_device_id = desk_station_data.get("deviceId")
-    serial_number = desk_station_data.get("serialNumber")
-    device_type = check_verkada_device_type(serial_number)
-    if device_type != "Desk Station":
-        print(f"Skipping desk station due to device type mismatch: {device_type} for {serial_number}")
-        return
-    if not (verkada_device_id and serial_number):
-        print(f"Skipping desk station due to missing ID or Serial: {desk_station_data}")
-        return
+            if batch_count >= batch_size:
+                print(f"Committing batch of {batch_count} operations...")
+                batch.commit()
+                print("Batch committed.")
+                # Start new batch
+                batch = db.batch()
+                batch_count = 0
 
-    try:
-        existing_device_query = db.collection('organizations').document(org_id).collection('devices').where('deviceSerialNumber', '==', serial_number).limit(1).get()
-        if existing_device_query:
-            device_ref = existing_device_query[0].reference
-            device_ref.set({
-                'deviceVerkadaDeviceId': verkada_device_id,
-                'deviceVerkadaDeviceType': "Desk Station", 
-            }, merge=True)
-        else:
-            device_ref = db.collection('organizations').document(org_id).collection('devices').document()
-            device_ref.set({
-                'deviceId': device_ref.id,
-                'deviceSerialNumber': serial_number,
-                'deviceVerkadaDeviceId': verkada_device_id,
-                'createdAt': firestore.SERVER_TIMESTAMP,
-                'isDeviceCheckedOut': False,
-                'deviceCheckedOutBy': '',
-                'deviceCheckedOutAt': None,
-                'deviceDeleted': False,
-                'deviceVerkadaDeviceType': "Desk Station", 
-            })
-    except Exception as e:
-        print(f"Error processing desk station SN {serial_number}: {e}")
+        except Exception as e:
+            print(f"Error adding operation to batch or committing batch: {e}")
+            batch = db.batch()
+            batch_count = 0
 
-    # --- Helper function to process a single env sensor ---
-def _process_intercom(intercom_data: dict, org_id: str):
-    """Processes a single intercom: finds/creates Firestore doc and updates Verkada ID."""
-    verkada_device_id = intercom_data.get("deviceId")
-    serial_number = intercom_data.get("serialNumber")
-    device_type = check_verkada_device_type(serial_number)
-    if device_type != "Intercom":
-        print(f"Skipping intercom due to device type mismatch: {device_type} for {serial_number}")
-        return
-    if not (verkada_device_id and serial_number):
-        print(f"Skipping intercom due to missing ID or Serial: {intercom_data}")
-        return
+    # Commit any remaining items
+    if batch_count > 0:
+        try:
+            print(f"Committing final batch of {batch_count} operations...")
+            batch.commit()
+            print("Final batch committed.")
+        except Exception as e:
+            print(f"Error committing final batch: {e}")
 
-    try:
-        existing_device_query = db.collection('organizations').document(org_id).collection('devices').where('deviceSerialNumber', '==', serial_number).limit(1).get()
-        if existing_device_query:
-            device_ref = existing_device_query[0].reference
-            device_ref.set({
-                'deviceVerkadaDeviceId': verkada_device_id,
-                'deviceVerkadaDeviceType': "Intercom",
-            }, merge=True)
-        else:
-            device_ref = db.collection('organizations').document(org_id).collection('devices').document()
-            device_ref.set({
-                'deviceId': device_ref.id,
-                'deviceSerialNumber': serial_number,
-                'deviceVerkadaDeviceId': verkada_device_id,
-                'createdAt': firestore.SERVER_TIMESTAMP,
-                'isDeviceCheckedOut': False,
-                'deviceCheckedOutBy': '',
-                'deviceCheckedOutAt': None,
-                'deviceDeleted': False,
-                'deviceVerkadaDeviceType': "Intercom",
-            })
-    except Exception as e:
-        print(f"Error processing intercom SN {serial_number}: {e}")
+    return total_processed
 
+# --- Main Sync Function (Modified Structure) ---
 
-def _process_gateway(gateway_data: dict, org_id: str):
-    """Processes a single gateway: finds/creates Firestore doc and updates Verkada ID."""
-    verkada_device_id = gateway_data.get("device_id")
-    serial_number = gateway_data.get("claimed_serial_number")
-    device_type = check_verkada_device_type(serial_number)
-    if device_type != "Gateway":
-        print(f"Skipping gateway due to device type mismatch: {device_type} for {serial_number}")
-        return
-    if not (verkada_device_id and serial_number):
-        print(f"Skipping gateway due to missing ID or Serial: {gateway_data}")
-        return
-
-    try:
-        existing_device_query = db.collection('organizations').document(org_id).collection('devices').where('deviceSerialNumber', '==', serial_number).limit(1).get()
-        if existing_device_query:
-            device_ref = existing_device_query[0].reference
-            device_ref.set({
-                'deviceVerkadaDeviceId': verkada_device_id,
-                'deviceVerkadaDeviceType': "Gateway",
-            }, merge=True)
-        else:
-            device_ref = db.collection('organizations').document(org_id).collection('devices').document()
-            device_ref.set({
-                'deviceId': device_ref.id,
-                'deviceSerialNumber': serial_number,
-                'deviceVerkadaDeviceId': verkada_device_id,
-                'createdAt': firestore.SERVER_TIMESTAMP,
-                'isDeviceCheckedOut': False,
-                'deviceCheckedOutBy': '',
-                'deviceCheckedOutAt': None,
-                'deviceDeleted': False,
-                'deviceVerkadaDeviceType': "Gateway",
-            })
-    except Exception as e:
-        print(f"Error processing gateway SN {serial_number}: {e}")
-
-def _process_command_connector(command_connector_data: dict, org_id: str):
-    """Processes a single command connector: finds/creates Firestore doc and updates Verkada ID."""
-    verkada_device_id = command_connector_data.get("deviceId")
-    serial_number = command_connector_data.get("claimedSerialNumber")
-    device_type = check_verkada_device_type(serial_number)
-    if device_type != "Command Connector":
-        print(f"Skipping command connector due to device type mismatch: {device_type} for {serial_number}")
-        return
-    if not (verkada_device_id and serial_number):
-        print(f"Skipping command connector due to missing ID or Serial: {command_connector_data}")
-        return
-
-    try:
-        existing_device_query = db.collection('organizations').document(org_id).collection('devices').where('deviceSerialNumber', '==', serial_number).limit(1).get()
-        if existing_device_query:
-            device_ref = existing_device_query[0].reference
-            device_ref.set({
-                'deviceVerkadaDeviceId': verkada_device_id,
-                'deviceVerkadaDeviceType': "Command Connector",
-            }, merge=True)
-        else:
-            device_ref = db.collection('organizations').document(org_id).collection('devices').document()
-            device_ref.set({
-                'deviceId': device_ref.id,
-                'deviceSerialNumber': serial_number,
-                'deviceVerkadaDeviceId': verkada_device_id,
-                'createdAt': firestore.SERVER_TIMESTAMP,
-                'isDeviceCheckedOut': False,
-                'deviceCheckedOutBy': '',
-                'deviceCheckedOutAt': None,
-                'deviceDeleted': False,
-                'deviceVerkadaDeviceType': "Command Connector",
-            })
-    except Exception as e:
-        print(f"Error processing command connector SN {serial_number}: {e}")
-
-def _process_viewing_station(viewing_station_data: dict, org_id: str):
-    """Processes a single viewing station: finds/creates Firestore doc and updates Verkada ID."""
-    verkada_device_id = viewing_station_data.get("viewingStationId")
-    serial_number = viewing_station_data.get("claimedSerialNumber")
-    device_type = check_verkada_device_type(serial_number)
-    if device_type != "Viewing Station":
-        print(f"Skipping viewing station due to device type mismatch: {device_type} for {serial_number}")
-        return
-    if not (verkada_device_id and serial_number):
-        print(f"Skipping viewing station due to missing ID or Serial: {viewing_station_data}")
-        return
-
-    try:
-        existing_device_query = db.collection('organizations').document(org_id).collection('devices').where('deviceSerialNumber', '==', serial_number).limit(1).get()
-        if existing_device_query:
-            device_ref = existing_device_query[0].reference
-            device_ref.set({
-                'deviceVerkadaDeviceId': verkada_device_id,
-                'deviceVerkadaDeviceType': "Viewing Station",
-            }, merge=True)
-        else:
-            device_ref = db.collection('organizations').document(org_id).collection('devices').document()
-            device_ref.set({
-                'deviceId': device_ref.id,
-                'deviceSerialNumber': serial_number,
-                'deviceVerkadaDeviceId': verkada_device_id,
-                'createdAt': firestore.SERVER_TIMESTAMP,
-                'isDeviceCheckedOut': False,
-                'deviceCheckedOutBy': '',
-                'deviceCheckedOutAt': None,
-                'deviceDeleted': False,
-                'deviceVerkadaDeviceType': "Viewing Station",
-            })
-    except Exception as e:
-        print(f"Error processing viewing station SN {serial_number}: {e}")
-def _process_speaker(speaker_data: dict, org_id: str):
-    """Processes a single speaker: finds/creates Firestore doc and updates Verkada ID."""
-    verkada_device_id = speaker_data.get("deviceId")
-    serial_number = speaker_data.get("serialNumber")
-    device_type = check_verkada_device_type(serial_number)
-    if device_type != "Speaker":
-        print(f"Skipping speaker due to device type mismatch: {device_type} for {serial_number}")
-        return
-    if not (verkada_device_id and serial_number):
-        print(f"Skipping speaker due to missing ID or Serial: {speaker_data}")
-        return
-
-    try:
-        existing_device_query = db.collection('organizations').document(org_id).collection('devices').where('deviceSerialNumber', '==', serial_number).limit(1).get()
-        if existing_device_query:
-            device_ref = existing_device_query[0].reference
-            device_ref.set({
-                'deviceVerkadaDeviceId': verkada_device_id,
-                'deviceVerkadaDeviceType': "Speaker",
-            }, merge=True)
-        else:
-            device_ref = db.collection('organizations').document(org_id).collection('devices').document()
-            device_ref.set({
-                'deviceId': device_ref.id,
-                'deviceSerialNumber': serial_number,
-                'deviceVerkadaDeviceId': verkada_device_id,
-                'createdAt': firestore.SERVER_TIMESTAMP,
-                'isDeviceCheckedOut': False,
-                'deviceCheckedOutBy': '',
-                'deviceCheckedOutAt': None,
-                'deviceDeleted': False,
-                'deviceVerkadaDeviceType': "Speaker",
-            })
-    except Exception as e:
-        print(f"Error processing speaker SN {serial_number}: {e}")
-
-def _process_classic_alarm_keypad(classic_alarm_keypad_data: dict, org_id: str):
-    """Processes a single classic alarm keypad: finds/creates Firestore doc and updates Verkada ID."""
-    verkada_device_id = classic_alarm_keypad_data.get("deviceId")
-    serial_number = classic_alarm_keypad_data.get("claimedSerialNumber")
-
-    if not (verkada_device_id and serial_number):
-        print(f"Skipping classic alarm keypad due to missing ID or Serial: {classic_alarm_keypad_data}")
-        return
-
-    try:
-        existing_device_query = db.collection('organizations').document(org_id).collection('devices').where('deviceSerialNumber', '==', serial_number).limit(1).get()
-        if existing_device_query:
-            device_ref = existing_device_query[0].reference
-            device_ref.set({
-                'deviceVerkadaDeviceId': verkada_device_id,
-                'deviceVerkadaDeviceType': "Classic Alarm Keypad",
-            }, merge=True)
-        else:
-            device_ref = db.collection('organizations').document(org_id).collection('devices').document()
-            device_ref.set({
-                'deviceId': device_ref.id,
-                'deviceSerialNumber': serial_number,
-                'deviceVerkadaDeviceId': verkada_device_id,
-                'createdAt': firestore.SERVER_TIMESTAMP,
-                'isDeviceCheckedOut': False,
-                'deviceCheckedOutBy': '',
-                'deviceCheckedOutAt': None,
-                'deviceDeleted': False,
-                'deviceVerkadaDeviceType': "Classic Alarm Keypad",
-            })
-    except Exception as e:
-        print(f"Error processing classic alarm keypad SN {serial_number}: {e}")
-
-
-def _process_classic_alarm_hub_device(classic_alarm_hub_device_data: dict, org_id: str):
-    """Processes a single classic alarm hub device: finds/creates Firestore doc and updates Verkada ID."""
-    verkada_device_id = classic_alarm_hub_device_data.get("deviceId")
-    verkada_site_id = classic_alarm_hub_device_data.get("siteId")
-    serial_number = classic_alarm_hub_device_data.get("claimedSerialNumber")
-    device_type = check_verkada_device_type(serial_number)
-    if device_type != "Classic Alarm Hub Device":
-        print(f"Skipping classic alarm hub device due to device type mismatch: {device_type} for {serial_number}")
-        return
-
-    if not (verkada_device_id and serial_number):
-        print(f"Skipping classic alarm hub device due to missing ID or Serial: {classic_alarm_hub_device_data}")
-        return
-
-    try:
-        existing_device_query = db.collection('organizations').document(org_id).collection('devices').where('deviceSerialNumber', '==', serial_number).limit(1).get()
-        if existing_device_query:
-            device_ref = existing_device_query[0].reference
-            device_ref.set({
-                'deviceVerkadaDeviceId': verkada_device_id,
-                'deviceVerkadaDeviceType': "Classic Alarm Hub Device",
-                'deviceVerkadaSiteId': verkada_site_id,
-            }, merge=True)
-        else:
-            device_ref = db.collection('organizations').document(org_id).collection('devices').document()
-            device_ref.set({
-                'deviceId': device_ref.id,
-                'deviceSerialNumber': serial_number,
-                'deviceVerkadaDeviceId': verkada_device_id,
-                'createdAt': firestore.SERVER_TIMESTAMP,
-                'isDeviceCheckedOut': False,
-                'deviceCheckedOutBy': '',
-                'deviceCheckedOutAt': None,
-                'deviceDeleted': False,
-                'deviceVerkadaDeviceType': "Classic Alarm Hub Device",
-                'deviceVerkadaSiteId': verkada_site_id,
-            })
-    except Exception as e:
-        print(f"Error processing classic alarm hub device SN {serial_number}: {e}")
-def _process_classic_alarms_door_contact_sensor(classic_alarm_door_contact_sensor_data: dict, org_id: str):
-    """Processes a single classic alarm door contact sensor: finds/creates Firestore doc and updates Verkada ID."""
-    verkada_device_id = classic_alarm_door_contact_sensor_data.get("deviceId")
-    serial_number = classic_alarm_door_contact_sensor_data.get("serialNumber")
-
-    if not (verkada_device_id and serial_number):
-        print(f"Skipping classic alarm door contact sensor due to missing ID or Serial: {classic_alarm_door_contact_sensor_data}")
-        return
-
-    try:
-        existing_device_query = db.collection('organizations').document(org_id).collection('devices').where('deviceSerialNumber', '==', serial_number).limit(1).get()
-        if existing_device_query:
-            device_ref = existing_device_query[0].reference
-            device_ref.set({
-                'deviceVerkadaDeviceId': verkada_device_id,
-                'deviceVerkadaDeviceType': "Classic Alarm Door Contact Sensor",
-            }, merge=True)
-        else:
-            device_ref = db.collection('organizations').document(org_id).collection('devices').document()
-            device_ref.set({
-                'deviceId': device_ref.id,
-                'deviceSerialNumber': serial_number,
-                'deviceVerkadaDeviceId': verkada_device_id,
-                'createdAt': firestore.SERVER_TIMESTAMP,
-                'isDeviceCheckedOut': False,
-                'deviceCheckedOutBy': '',
-                'deviceCheckedOutAt': None,
-                'deviceDeleted': False,
-                'deviceVerkadaDeviceType': "Classic Alarm Door Contact Sensor",
-            })
-    except Exception as e:
-        print(f"Error processing classic alarm door contact sensor SN {serial_number}: {e}")
-def _process_classic_alarms_glass_break_sensor(classic_alarm_glass_break_sensor_data: dict, org_id: str):
-    """Processes a single classic alarm glass break sensor: finds/creates Firestore doc and updates Verkada ID."""
-    verkada_device_id = classic_alarm_glass_break_sensor_data.get("deviceId")
-    serial_number = classic_alarm_glass_break_sensor_data.get("serialNumber")
-
-    if not (verkada_device_id and serial_number):
-        print(f"Skipping classic alarm glass break sensor due to missing ID or Serial: {classic_alarm_glass_break_sensor_data}")
-        return
-
-    try:
-        existing_device_query = db.collection('organizations').document(org_id).collection('devices').where('deviceSerialNumber', '==', serial_number).limit(1).get()
-        if existing_device_query:
-            device_ref = existing_device_query[0].reference
-            device_ref.set({
-                'deviceVerkadaDeviceId': verkada_device_id,
-                'deviceVerkadaDeviceType': "Classic Alarm Glass Break Sensor",
-            }, merge=True)
-        else:
-            device_ref = db.collection('organizations').document(org_id).collection('devices').document()
-            device_ref.set({
-                'deviceId': device_ref.id,
-                'deviceSerialNumber': serial_number,
-                'deviceVerkadaDeviceId': verkada_device_id,
-                'createdAt': firestore.SERVER_TIMESTAMP,
-                'isDeviceCheckedOut': False,
-                'deviceCheckedOutBy': '',
-                'deviceCheckedOutAt': None,
-                'deviceDeleted': False,
-                'deviceVerkadaDeviceType': "Classic Alarm Glass Break Sensor",
-            })
-    except Exception as e:
-        print(f"Error processing classic alarm glass break sensor SN {serial_number}: {e}")
-def _process_classic_alarms_motion_sensor(classic_alarm_motion_sensor_data: dict, org_id: str):
-    """Processes a single classic alarm motion sensor: finds/creates Firestore doc and updates Verkada ID."""
-    verkada_device_id = classic_alarm_motion_sensor_data.get("deviceId")
-    serial_number = classic_alarm_motion_sensor_data.get("serialNumber")
-
-    if not (verkada_device_id and serial_number):
-        print(f"Skipping classic alarm motion sensor due to missing ID or Serial: {classic_alarm_motion_sensor_data}")
-        return
-
-    try:
-        existing_device_query = db.collection('organizations').document(org_id).collection('devices').where('deviceSerialNumber', '==', serial_number).limit(1).get()
-        if existing_device_query:
-            device_ref = existing_device_query[0].reference
-            device_ref.set({
-                'deviceVerkadaDeviceId': verkada_device_id,
-                'deviceVerkadaDeviceType': "Classic Alarm Motion Sensor",
-            }, merge=True)
-        else:
-            device_ref = db.collection('organizations').document(org_id).collection('devices').document()
-            device_ref.set({
-                'deviceId': device_ref.id,
-                'deviceSerialNumber': serial_number,
-                'deviceVerkadaDeviceId': verkada_device_id,
-                'createdAt': firestore.SERVER_TIMESTAMP,
-                'isDeviceCheckedOut': False,
-                'deviceCheckedOutBy': '',
-                'deviceCheckedOutAt': None,
-                'deviceDeleted': False,
-                'deviceVerkadaDeviceType': "Classic Alarm Motion Sensor",
-            })
-    except Exception as e:
-        print(f"Error processing classic alarm motion sensor SN {serial_number}: {e}")
-
-def _process_classic_alarms_panic_button(classic_alarm_panic_button_data: dict, org_id: str):
-    """Processes a single classic alarm panic button: finds/creates Firestore doc and updates Verkada ID."""
-    verkada_device_id = classic_alarm_panic_button_data.get("deviceId")
-    serial_number = classic_alarm_panic_button_data.get("serialNumber")
-
-    if not (verkada_device_id and serial_number):
-        print(f"Skipping classic alarm panic button due to missing ID or Serial: {classic_alarm_panic_button_data}")
-        return
-
-    try:
-        existing_device_query = db.collection('organizations').document(org_id).collection('devices').where('deviceSerialNumber', '==', serial_number).limit(1).get()
-        if existing_device_query:
-            device_ref = existing_device_query[0].reference
-            device_ref.set({
-                'deviceVerkadaDeviceId': verkada_device_id,
-                'deviceVerkadaDeviceType': "Classic Alarm Panic Button",
-            }, merge=True)
-        else:
-            device_ref = db.collection('organizations').document(org_id).collection('devices').document()
-            device_ref.set({
-                'deviceId': device_ref.id,
-                'deviceSerialNumber': serial_number,
-                'deviceVerkadaDeviceId': verkada_device_id,
-                'createdAt': firestore.SERVER_TIMESTAMP,
-                'isDeviceCheckedOut': False,
-                'deviceCheckedOutBy': '',
-                'deviceCheckedOutAt': None,
-                'deviceDeleted': False,
-                'deviceVerkadaDeviceType': "Classic Alarm Panic Button",
-            })
-    except Exception as e:
-        print(f"Error processing classic alarm panic button SN {serial_number}: {e}")
-def _process_classic_alarms_water_sensor(classic_alarm_water_sesnsor_data: dict, org_id: str):
-    """Processes a single classic alarm water sensor: finds/creates Firestore doc and updates Verkada ID."""
-    verkada_device_id = classic_alarm_water_sesnsor_data.get("deviceId")
-    serial_number = classic_alarm_water_sesnsor_data.get("serialNumber")
-
-    if not (verkada_device_id and serial_number):
-        print(f"Skipping classic alarm water sensor due to missing ID or Serial: {classic_alarm_water_sesnsor_data}")
-        return
-
-    try:
-        existing_device_query = db.collection('organizations').document(org_id).collection('devices').where('deviceSerialNumber', '==', serial_number).limit(1).get()
-        if existing_device_query:
-            device_ref = existing_device_query[0].reference
-            device_ref.set({
-                'deviceVerkadaDeviceId': verkada_device_id,
-                'deviceVerkadaDeviceType': "Classic Alarm Water Sensor",
-            }, merge=True)
-        else:
-            device_ref = db.collection('organizations').document(org_id).collection('devices').document()
-            device_ref.set({
-                'deviceId': device_ref.id,
-                'deviceSerialNumber': serial_number,
-                'deviceVerkadaDeviceId': verkada_device_id,
-                'createdAt': firestore.SERVER_TIMESTAMP,
-                'isDeviceCheckedOut': False,
-                'deviceCheckedOutBy': '',
-                'deviceCheckedOutAt': None,
-                'deviceDeleted': False,
-                'deviceVerkadaDeviceType': "Classic Alarm Water Sensor",
-            })
-    except Exception as e:
-        print(f"Error processing classic alarm water sensor SN {serial_number}: {e}")
-def _process_classic_alarms_wireless_relay(classic_alarm_wireless_relay_data: dict, org_id: str):
-    """Processes a single classic alarm wireless relay: finds/creates Firestore doc and updates Verkada ID."""
-    verkada_device_id = classic_alarm_wireless_relay_data.get("deviceId")
-    serial_number = classic_alarm_wireless_relay_data.get("serialNumber")
-
-    if not (verkada_device_id and serial_number):
-        print(f"Skipping classic alarm wireless relay due to missing ID or Serial: {classic_alarm_wireless_relay_data}")
-        return
-
-    try:
-        existing_device_query = db.collection('organizations').document(org_id).collection('devices').where('deviceSerialNumber', '==', serial_number).limit(1).get()
-        if existing_device_query:
-            device_ref = existing_device_query[0].reference
-            device_ref.set({
-                'deviceVerkadaDeviceId': verkada_device_id,
-                'deviceVerkadaDeviceType': "Classic Alarm Wireless Relay",
-            }, merge=True)
-        else:
-            device_ref = db.collection('organizations').document(org_id).collection('devices').document()
-            device_ref.set({
-                'deviceId': device_ref.id,
-                'deviceSerialNumber': serial_number,
-                'deviceVerkadaDeviceId': verkada_device_id,
-                'createdAt': firestore.SERVER_TIMESTAMP,
-                'isDeviceCheckedOut': False,
-                'deviceCheckedOutBy': '',
-                'deviceCheckedOutAt': None,
-                'deviceDeleted': False,
-                'deviceVerkadaDeviceType': "Classic Alarm Wireless Relay",
-            })
-    except Exception as e:
-        print(f"Error processing classic alarm wireless relay SN {serial_number}: {e}")
-
-def _process_new_alarms_device(new_alarms_device_data: dict, org_id: str):
-    """Processes a single new alarms device: finds/creates Firestore doc and updates Verkada ID."""
-    verkada_device_id = new_alarms_device_data.get("id")
-    serial_number = new_alarms_device_data.get("verkadaDeviceConfig").get("serialNumber")
-    verkada_new_alarms_system_id = new_alarms_device_data.get("alarmSystemId")
-
-    if not (verkada_device_id and serial_number):
-        print(f"Skipping new alarms device due to missing ID or Serial: {new_alarms_device_data}")
-        return
-
-    try:
-        existing_device_query = db.collection('organizations').document(org_id).collection('devices').where('deviceSerialNumber', '==', serial_number).limit(1).get()
-        if existing_device_query:
-            device_ref = existing_device_query[0].reference
-            device_ref.set({
-                'deviceVerkadaDeviceId': verkada_device_id,
-                'deviceVerkadaDeviceType': "New Alarms Device",
-                'deviceVerkadaNewAlarmsSystemId': verkada_new_alarms_system_id,
-            }, merge=True)
-        else:
-            device_ref = db.collection('organizations').document(org_id).collection('devices').document()
-            device_ref.set({
-                'deviceId': device_ref.id,
-                'deviceSerialNumber': serial_number,
-                'deviceVerkadaDeviceId': verkada_device_id,
-                'createdAt': firestore.SERVER_TIMESTAMP,
-                'isDeviceCheckedOut': False,
-                'deviceCheckedOutBy': '',
-                'deviceCheckedOutAt': None,
-                'deviceDeleted': False,
-                'deviceVerkadaDeviceType': "New Alarms Device",
-                'deviceVerkadaNewAlarmsSystemId': verkada_new_alarms_system_id,
-            })
-    except Exception as e:
-        print(f"Error processing new alarms device SN {serial_number}: {e}")
-
-def sync_verkada_device_ids(org_id, verkada_bot_user_info: dict) -> None:
+def sync_verkada_device_ids(org_id, verkada_bot_user_info: dict, max_workers: int = 10) -> None:
     verkada_org_shortname = verkada_bot_user_info.get("org_name")
     verkada_org_id = verkada_bot_user_info.get("org_id")
     auth_headers = verkada_bot_user_info.get("auth_headers")
 
-    def sync_camera_ids():
-        url = f"https://vappinit.command.verkada.com/__v/{verkada_org_shortname}/app/v2/init"
-        payload = {"fieldsToSkip": ["permissions"]}
-        cameras = []
+    def _sync_generic(api_url: str, api_method: str, api_payload: dict, result_key: str, id_field: str, serial_field: str, device_type_str: str, extra_fields_map: dict = None):
+        """Generic function to fetch, prepare, and batch write for a device type."""
+        print(f"Starting sync for {device_type_str}...")
+        items = []
         try:
-            response = requests_with_retry('post', url, headers=auth_headers, json=payload)
+            response = requests_with_retry(api_method, api_url, headers=auth_headers, json=api_payload)
             response.raise_for_status()
-            cameras = response.json().get("cameras", [])
+            json_response = response.json()
+            if isinstance(json_response, list):
+                items = json_response
+            elif isinstance(json_response, dict):
+                items = json_response.get(result_key, [])
+            else:
+                print(f"Warning: Unexpected response format for {device_type_str}. Expected list or dict, got {type(json_response)}")
+                items = []
+
         except RequestException as e:
-            print(f"Error fetching camera info after retries: {e}")
+            print(f"Error fetching {device_type_str} info after retries: {e}")
             return
         except JSONDecodeError as e:
-            print(f"Error decoding JSON response for cameras: {e}")
+            print(f"Error decoding JSON response for {device_type_str}: {e}")
             return
         except Exception as e:
-            print(f"An unexpected error occurred during camera fetch: {e}")
+            print(f"An unexpected error occurred during {device_type_str} fetch: {e}")
             return
 
-        if not cameras:
-            print("No cameras found to process.")
+        if not items:
+            print(f"No {device_type_str} found to process.")
             return
 
-        process_camera_with_org = partial(_process_camera, org_id=org_id)
+        prepared_writes = []
+        worker_func = partial(_prepare_device_write_data,
+                            org_id=org_id,
+                            id_field=id_field,
+                            serial_field=serial_field,
+                            expected_type=device_type_str)
 
-        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-            list(executor.map(process_camera_with_org, cameras))
+        tasks = []
+        for item_data in items:
+            extra_data = {}
+            if extra_fields_map:
+                for dest_key, src_key in extra_fields_map.items():
+                    val = item_data.get(src_key)
+                    if val is not None:
+                        extra_data[dest_key] = val
+            tasks.append((item_data, extra_data))
 
-        print(f"Finished processing {len(cameras)} cameras.")
+        def worker_wrapper(task_args):
+            item_data, extra_data = task_args
+            return worker_func(device_data=item_data, extra_fields=extra_data)
 
-    def sync_access_controller_ids():
-        url = f"https://vcerberus.command.verkada.com/__v/{verkada_org_shortname}/access/v2/user/access_controllers"
-        payload = {}
-        access_controllers = []
-        try:
-            response = requests_with_retry('get', url, headers=auth_headers, json=payload)
-            response.raise_for_status()
-            access_controllers = response.json().get("accessControllers", [])
-        except RequestException as e:
-            print(f"Error fetching access controller info after retries: {e}")
-            return
-        except JSONDecodeError as e:
-            print(f"Error decoding JSON response for access controllers: {e}")
-            return
-        except Exception as e:
-            print(f"An unexpected error occurred during access controller fetch: {e}")
-            return
+        with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+            results = executor.map(worker_wrapper, tasks)
+            prepared_writes = [result for result in results if result is not None]
 
-        if not access_controllers:
-            print("No access controllers found to process.")
-            return
+        print(f"Prepared {len(prepared_writes)} write operations for {len(items)} fetched {device_type_str}.")
+        processed_count = _execute_firestore_batches(prepared_writes, org_id)
+        print(f"Finished processing {device_type_str}. Processed {processed_count} Firestore operations.")
 
-        process_access_controller_with_org = partial(_process_access_controller, org_id=org_id)
+    sync_tasks_definitions = [
+        {
+            "api_url": f"https://vappinit.command.verkada.com/__v/{verkada_org_shortname}/app/v2/init",
+            "api_method": "post", "api_payload": {"fieldsToSkip": ["permissions"]}, "result_key": "cameras",
+            "id_field": "cameraId", "serial_field": "serialNumber", "device_type_str": "Camera"
+        },
+        {
+            "api_url": f"https://vcerberus.command.verkada.com/__v/{verkada_org_shortname}/access/v2/user/access_controllers",
+            "api_method": "get", "api_payload": {}, "result_key": "accessControllers",
+            "id_field": "accessControllerId", "serial_field": "serialNumber", "device_type_str": "Access Controller"
+        },
+        {
+            "api_url": f"https://vsensor.command.verkada.com/__v/{verkada_org_shortname}/devices/list",
+            "api_method": "post", "api_payload": {"organizationId": verkada_org_id, "favoritesOnly": False}, "result_key": "sensorDevice",
+            "id_field": "deviceId", "serial_field": "claimedSerialNumber", "device_type_str": "Environmental Sensor"
+        },
+        {
+            "api_url": f"https://vnet.command.verkada.com/__v/{verkada_org_shortname}/devices/list",
+            "api_method": "post", "api_payload": {"organizationId": verkada_org_id}, "result_key": None,
+            "id_field": "device_id", "serial_field": "claimed_serial_number", "device_type_str": "Gateway"
+        },
+        {
+            "api_url": f"https://vprovision.command.verkada.com/__v/{verkada_org_shortname}/vfortress/list_boxes",
+            "api_method": "post", "api_payload": {'organizationId': verkada_org_id}, "result_key": None,
+            "id_field": "deviceId", "serial_field": "claimedSerialNumber", "device_type_str": "Command Connector"
+        },
+        {
+            "api_url": f"https://vvx.command.verkada.com/__v/{verkada_org_shortname}/device/list",
+            "api_method": "post", "api_payload": {"organizationId": verkada_org_id}, "result_key": "viewingStations",
+            "id_field": "viewingStationId", "serial_field": "claimedSerialNumber", "device_type_str": "Viewing Station"
+        },
+        {
+            "api_url": f"https://vbroadcast.command.verkada.com/__v/{verkada_org_shortname}/management/speaker/list",
+            "api_method": "post", "api_payload": {"organizationId": verkada_org_id}, "result_key": "garfunkel",
+            "id_field": "deviceId", "serial_field": "serialNumber", "device_type_str": "Speaker"
+        },
+        {
+            "api_url": f"https://alarms.command.verkada.com/__v/{verkada_org_shortname}/device/keypad/get_all",
+            "api_method": "post", "api_payload": {"organizationId": verkada_org_id}, "result_key": "keypad",
+            "id_field": "deviceId", "serial_field": "claimedSerialNumber", "device_type_str": "Classic Alarm Keypad"
+        },
+        {
+            "api_url": f"https://vproconfig.command.verkada.com/__v/{verkada_org_shortname}/org/get_devices_and_alarm_systems",
+            "api_method": "post", "api_payload": {}, "result_key": "devices",
+            "id_field": "id", "serial_field": "serialNumber",
+            "device_type_str": "New Alarms Device",
+            "extra_fields_map": {"deviceVerkadaNewAlarmsSystemId": "alarmSystemId"}
+        },
+    ]
 
-        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-            list(executor.map(process_access_controller_with_org, access_controllers))
-
-        print(f"Finished processing {len(access_controllers)} access controllers.")
-
-    def sync_env_sensor_ids():
-        url = f"https://vsensor.command.verkada.com/__v/{verkada_org_shortname}/devices/list"
-        payload = {"organizationId": verkada_org_id, "favoritesOnly":False}
-        env_sensors = []
-        try:
-            response = requests_with_retry('post', url, headers=auth_headers, json=payload)
-            response.raise_for_status()
-            env_sensors = response.json().get("sensorDevice", [])
-        except RequestException as e:
-            print(f"Error fetching env sensor info after retries: {e}")
-            return
-        except JSONDecodeError as e:
-            print(f"Error decoding JSON response for env sensor: {e}")
-            return
-        except Exception as e:
-            print(f"An unexpected error occurred during env sensor fetch: {e}")
-            return
-
-        if not env_sensors:
-            print("No env sensors found to process.")
-            return
-
-        process_env_sensor_with_org = partial(_process_env_sensor, org_id=org_id)
-
-        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-            list(executor.map(process_env_sensor_with_org, env_sensors))
-
-        print(f"Finished processing {len(env_sensors)} env sensors.")
-
-    def sync_intercom_and_desk_station_ids():
+    def sync_intercom_and_desk_station_ids_combined():
+        print("Starting sync for Intercoms and Desk Stations...")
         url = f"https://api.command.verkada.com/__v/{verkada_org_shortname}/vinter/v1/user/organization/{verkada_org_id}/device"
-        payload = {}
         desk_stations = []
         intercoms = []
         try:
-            response = requests_with_retry('get', url, headers=auth_headers, json=payload)
+            response = requests_with_retry('get', url, headers=auth_headers, json={})
             response.raise_for_status()
-            desk_stations = response.json().get("deskApps", [])
-            intercoms = response.json().get("intercoms", [])
-
-        except RequestException as e:
-            print(f"Error fetching intercom and desk station info after retries: {e}")
-            return
-        except JSONDecodeError as e:
-            print(f"Error decoding JSON response for intercom or desk station: {e}")
-            return
+            data = response.json()
+            desk_stations = data.get("deskApps", [])
+            intercoms = data.get("intercoms", [])
         except Exception as e:
-            print(f"An unexpected error occurred during desk station/intercom fetch: {e}")
+            print(f"Error fetching intercom/desk station data: {e}")
             return
 
-        if not desk_stations and not intercoms:
-            print("No desk stations or intercoms found to process.")
-            return
-        
+        if desk_stations:
+            worker_func_ds = partial(_prepare_device_write_data, org_id=org_id, id_field="deviceId", serial_field="serialNumber", expected_type="Desk Station")
+            tasks_ds = [(ds_data, {}) for ds_data in desk_stations]
+            def worker_wrapper_ds(task_args):
+                item_data, extra_data = task_args
+                return worker_func_ds(device_data=item_data, extra_fields=extra_data)
 
-        process_desk_station_with_org = partial(_process_desk_station, org_id=org_id)
-        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-            list(executor.map(process_desk_station_with_org, desk_stations))
-        print(f"Finished processing {len(desk_stations)} desk stations.")
-        
-        process_intercom_with_org = partial(_process_intercom, org_id=org_id)
-        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-            list(executor.map(process_intercom_with_org, intercoms))
-        print(f"Finished processing {len(intercoms)} intercoms.")
+            with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+                results_ds = executor.map(worker_wrapper_ds, tasks_ds)
+                prepared_writes_ds = [result for result in results_ds if result is not None]
+            print(f"Prepared {len(prepared_writes_ds)} write operations for {len(desk_stations)} fetched Desk Stations.")
+            processed_count_ds = _execute_firestore_batches(prepared_writes_ds, org_id)
+            print(f"Finished processing Desk Stations. Processed {processed_count_ds} Firestore operations.")
+        else:
+            print("No Desk Stations found to process.")
 
-    def sync_gateway_ids():
-        url = f"https://vnet.command.verkada.com/__v/{verkada_org_shortname}/devices/list"
-        payload = {"organizationId": verkada_org_id}
-        gateways = []
-        
-        try:
-            response = requests_with_retry('post', url, headers=auth_headers, json=payload)
-            response.raise_for_status()
-            gateways = response.json()
+        if intercoms:
+            worker_func_ic = partial(_prepare_device_write_data, org_id=org_id, id_field="deviceId", serial_field="serialNumber", expected_type="Intercom")
+            tasks_ic = [(ic_data, {}) for ic_data in intercoms]
+            def worker_wrapper_ic(task_args):
+                item_data, extra_data = task_args
+                return worker_func_ic(device_data=item_data, extra_fields=extra_data)
 
-        except RequestException as e:
-            print(f"Error fetching gateway info after retries: {e}")
-            return
-        except JSONDecodeError as e:
-            print(f"Error decoding JSON response for gateway: {e}")
-            return
-        except Exception as e:
-            print(f"An unexpected error occurred during gateway fetch: {e}")
-            return
+            with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+                results_ic = executor.map(worker_wrapper_ic, tasks_ic)
+                prepared_writes_ic = [result for result in results_ic if result is not None]
+            print(f"Prepared {len(prepared_writes_ic)} write operations for {len(intercoms)} fetched Intercoms.")
+            processed_count_ic = _execute_firestore_batches(prepared_writes_ic, org_id)
+            print(f"Finished processing Intercoms. Processed {processed_count_ic} Firestore operations.")
+        else:
+            print("No Intercoms found to process.")
 
-        if not gateways:
-            print("No gateways found to process.")
-            return
-        
-
-        process_gateway_with_org = partial(_process_gateway, org_id=org_id)
-        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-            list(executor.map(process_gateway_with_org, gateways))
-        print(f"Finished processing {len(gateways)} gateways.")
-        
-    
-    def sync_command_connector_ids():
-        url = f"https://vprovision.command.verkada.com/__v/{verkada_org_shortname}/vfortress/list_boxes"
-        payload = {'organizationId': verkada_org_id}
-        command_connectors = []
-        try:
-            response = requests_with_retry('post', url, headers=auth_headers, json=payload)
-            response.raise_for_status()
-            command_connectors = response.json()
-        except RequestException as e:
-            print(f"Error fetching command connector info after retries: {e}")
-            return
-        except JSONDecodeError as e:
-            print(f"Error decoding JSON response for command connector: {e}")
-            return
-        except Exception as e:
-            print(f"An unexpected error occurred during command connector fetch: {e}")
-            return
-
-        if not command_connectors:
-            print("No command connectors found to process.")
-            return
-
-        process_command_connector_with_org = partial(_process_command_connector, org_id=org_id)
-
-        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-            list(executor.map(process_command_connector_with_org, command_connectors))
-
-        print(f"Finished processing {len(command_connectors)} command connectors.")
-    
-
-    def sync_viewing_station_ids():
-        url = f"https://vvx.command.verkada.com/__v/{verkada_org_shortname}/device/list"
-        payload = {"organizationId": verkada_org_id}
-        viewing_stations = []
-        print(f"Fetching viewing stations for org: {verkada_org_shortname} with ID: {verkada_org_id}")
-        try:
-            response = requests_with_retry('post', url, headers=auth_headers, json=payload)
-            response.raise_for_status()
-            viewing_stations = response.json().get("viewingStations", [])
-        except RequestException as e:
-            print(f"Error fetching viewing station info after retries: {e}")
-            return
-        except JSONDecodeError as e:
-            print(f"Error decoding JSON response for viewing station: {e}")
-            return
-        except Exception as e:
-            print(f"An unexpected error occurred during viewing station fetch: {e}")
-            return
-
-        if not viewing_stations:
-            print("No viewing stations found to process.")
-            return
-        process_viewing_station_with_org = partial(_process_viewing_station, org_id=org_id)
-
-        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-            list(executor.map(process_viewing_station_with_org, viewing_stations))
-
-        print(f"Finished processing {len(viewing_stations)} viewing stations.")
-
-    def sync_speaker_ids():
-        url = f"https://vbroadcast.command.verkada.com/__v/{verkada_org_shortname}/management/speaker/list"
-        payload = {"organizationId": verkada_org_id}
-        speakers = []
-        try:
-            response = requests_with_retry('post', url, headers=auth_headers, json=payload)
-            response.raise_for_status()
-            speakers = response.json().get("garfunkel", [])
-        except RequestException as e:
-            print(f"Error fetching speaker info after retries: {e}")
-            return
-        except JSONDecodeError as e:
-            print(f"Error decoding JSON response for speaker: {e}")
-            return
-        except Exception as e:
-            print(f"An unexpected error occurred during speaker fetch: {e}")
-            return
-
-        if not speakers:
-            print("No speakers found to process.")
-            return
-
-        process_speaker_with_org = partial(_process_speaker, org_id=org_id)
-
-        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-            list(executor.map(process_speaker_with_org, speakers))
-
-        print(f"Finished processing {len(speakers)} speakers.")
-    
-    def sync_classic_alarms_keypad_ids():
-        url = f"https://alarms.command.verkada.com/__v/{verkada_org_shortname}/device/keypad/get_all"
-        payload = {
-            "organizationId": verkada_org_id,
-        }
-        classic_alarms_keypads = []
-        try:
-            response = requests_with_retry('post', url, headers=auth_headers, json=payload)
-            response.raise_for_status()
-            classic_alarms_keypads = response.json().get("keypad", [])
-            
-
-        except RequestException as e:
-            print(f"Error fetching classic alarm keypad info after retries: {e}")
-            return
-        except JSONDecodeError as e:
-            print(f"Error decoding JSON response for classic alarm keypad: {e}")
-            return
-        except Exception as e:
-            print(f"An unexpected error occurred during classic alarm keypad fetch: {e}")
-            return
-
-        if not classic_alarms_keypads:
-            print("No classic alarms keypads found to process.")
-            return
-        
-
-        process_classic_alarm_keypad_with_org = partial(_process_classic_alarm_keypad, org_id=org_id)
-        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-            list(executor.map(process_classic_alarm_keypad_with_org, classic_alarms_keypads))
-        print(f"Finished processing {len(classic_alarms_keypads)} classic alarm keypads.")
-    
-    def sync_classic_alarms_hub_and_sensor_ids():
+    def sync_classic_alarms_hub_and_sensors_combined():
+        print("Starting sync for Classic Alarm Hubs and Sensors...")
         url = f"https://alarms.command.verkada.com/__v/{verkada_org_shortname}/device/get_all"
-        payload = {
-            "organizationId": verkada_org_id,
-        }
-        classic_alarms_hub_devices = []
-        classic_alarms_door_contact_sensors = []
-        classic_alarms_glass_break_sensors = []
-        classic_alarms_motion_sensors = []
-        classic_alarms_panic_buttons = []
-        classic_alarms_water_sensors = []
-        classic_alarms_wireless_relays = []
+        payload = {"organizationId": verkada_org_id}
+        all_sensor_types = {}
         try:
             response = requests_with_retry('post', url, headers=auth_headers, json=payload)
             response.raise_for_status()
-            classic_alarms_hub_devices = response.json().get("hubDevice", [])
-            classic_alarms_door_contact_sensors = response.json().get("doorContactSensor", [])
-            classic_alarms_glass_break_sensors = response.json().get("glassBreakSensor", [])
-            classic_alarms_motion_sensors = response.json().get("motionSensor", [])
-            classic_alarms_panic_buttons = response.json().get("panicButton", [])
-            classic_alarms_water_sensors = response.json().get("waterSensor", [])
-            classic_alarms_wireless_relays = response.json().get("wirelessRelay", [])
-            
-
-        except RequestException as e:
-            print(f"Error fetching classic alarm device info after retries: {e}")
-            return
-        except JSONDecodeError as e:
-            print(f"Error decoding JSON response for classic alarm device: {e}")
-            return
+            data = response.json()
+            all_sensor_types = {
+                "hubDevice": (data.get("hubDevice", []), "deviceId", "claimedSerialNumber", "Classic Alarm Hub Device", {"deviceVerkadaSiteId": "siteId"}),
+                "doorContactSensor": (data.get("doorContactSensor", []), "deviceId", "serialNumber", "Classic Alarm Door Contact Sensor", {}),
+                "glassBreakSensor": (data.get("glassBreakSensor", []), "deviceId", "serialNumber", "Classic Alarm Glass Break Sensor", {}),
+                "motionSensor": (data.get("motionSensor", []), "deviceId", "serialNumber", "Classic Alarm Motion Sensor", {}),
+                "panicButton": (data.get("panicButton", []), "deviceId", "serialNumber", "Classic Alarm Panic Button", {}),
+                "waterSensor": (data.get("waterSensor", []), "deviceId", "serialNumber", "Classic Alarm Water Sensor", {}),
+                "wirelessRelay": (data.get("wirelessRelay", []), "deviceId", "serialNumber", "Classic Alarm Wireless Relay", {}),
+            }
         except Exception as e:
-            print(f"An unexpected error occurred during classic alarm device fetch: {e}")
+            print(f"Error fetching classic alarm device data: {e}")
             return
 
-        if not classic_alarms_hub_devices and not classic_alarms_door_contact_sensors and not classic_alarms_glass_break_sensors and not classic_alarms_motion_sensors and not classic_alarms_panic_buttons and not classic_alarms_water_sensors and not classic_alarms_wireless_relays:
-            print("No classic alarms devices found to process.")
-            return
-        
+        if not any(v[0] for v in all_sensor_types.values()):
+             print("No classic alarm devices found to process.")
+             return
 
-        process_classic_alarm_hub_device_with_org = partial(_process_classic_alarm_hub_device, org_id=org_id)
-        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-            list(executor.map(process_classic_alarm_hub_device_with_org, classic_alarms_hub_devices))
-        print(f"Finished processing {len(classic_alarms_hub_devices)} classic alarm hub devices.")
+        for api_key, (items, id_field, serial_field, type_str, extra_map) in all_sensor_types.items():
+            if items:
+                print(f"Processing {len(items)} {type_str}...")
+                worker_func = partial(_prepare_device_write_data, org_id=org_id, id_field=id_field, serial_field=serial_field, expected_type=type_str)
+                tasks = []
+                for item_data in items:
+                     extra_data = {}
+                     if extra_map:
+                         for dest_key, src_key in extra_map.items():
+                             val = item_data.get(src_key)
+                             if val is not None:
+                                 extra_data[dest_key] = val
+                     tasks.append((item_data, extra_data))
 
-        process_classic_alarms_door_contact_sensor_with_org = partial(_process_classic_alarms_door_contact_sensor, org_id=org_id)
-        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-            list(executor.map(process_classic_alarms_door_contact_sensor_with_org, classic_alarms_door_contact_sensors))
-        print(f"Finished processing {len(classic_alarms_door_contact_sensors)} classic alarm door contact sensors.")
+                def worker_wrapper(task_args):
+                    item_data, extra_data = task_args
+                    return worker_func(device_data=item_data, extra_fields=extra_data)
 
-        process_classic_alarms_glass_break_sensor_with_org = partial(_process_classic_alarms_glass_break_sensor, org_id=org_id)
-        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-            list(executor.map(process_classic_alarms_glass_break_sensor_with_org, classic_alarms_glass_break_sensors))
-        print(f"Finished processing {len(classic_alarms_glass_break_sensors)} classic alarm glass break sensors.")
+                with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+                    results = executor.map(worker_wrapper, tasks)
+                    prepared_writes = [result for result in results if result is not None]
+                print(f"Prepared {len(prepared_writes)} write operations for {len(items)} fetched {type_str}.")
+                processed_count = _execute_firestore_batches(prepared_writes, org_id)
+                print(f"Finished processing {type_str}. Processed {processed_count} Firestore operations.")
+            else:
+                print(f"No {type_str} found to process.")
 
-        process_classic_alarms_motion_sensor_with_org = partial(_process_classic_alarms_motion_sensor, org_id=org_id)
-        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-            list(executor.map(process_classic_alarms_motion_sensor_with_org, classic_alarms_motion_sensors))
-        print(f"Finished processing {len(classic_alarms_motion_sensors)} classic alarm motion sensors.")
-        
-        process_classic_alarms_panic_button_with_org = partial(_process_classic_alarms_panic_button, org_id=org_id)
-        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-            list(executor.map(process_classic_alarms_panic_button_with_org, classic_alarms_panic_buttons))
-        print(f"Finished processing {len(classic_alarms_panic_buttons)} classic alarm panic buttons.")
+    all_futures = []
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+        for task_def in sync_tasks_definitions:
+             future = executor.submit(_sync_generic, **task_def)
+             all_futures.append(future)
 
-        process_classic_alarms_water_sensor_with_org = partial(_process_classic_alarms_water_sensor, org_id=org_id)
-        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-            list(executor.map(process_classic_alarms_water_sensor_with_org, classic_alarms_water_sensors))
-        print(f"Finished processing {len(classic_alarms_water_sensors)} classic alarm water sensors.")
+        all_futures.append(executor.submit(sync_intercom_and_desk_station_ids_combined))
+        all_futures.append(executor.submit(sync_classic_alarms_hub_and_sensors_combined))
 
-        process_classic_alarms_wireless_relay_with_org = partial(_process_classic_alarms_wireless_relay, org_id=org_id)
-        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-            list(executor.map(process_classic_alarms_wireless_relay_with_org, classic_alarms_wireless_relays))
-        print(f"Finished processing {len(classic_alarms_wireless_relays)} classic alarm wireless relays.")
-
-    def sync_new_alarms_device_ids():
-        url = f"https://vproconfig.command.verkada.com/__v/{verkada_org_shortname}/org/get_devices_and_alarm_systems"
-        payload = {}
-        new_alarms_devices = []
-        try:
-            response = requests_with_retry('post', url, headers=auth_headers, json=payload)
-            response.raise_for_status()
-            new_alarms_devices = response.json().get("devices", [])
-            
-        except RequestException as e:
-            print(f"Error fetching new alarms device info after retries: {e}")
-            return
-        except JSONDecodeError as e:
-            print(f"Error decoding JSON response for new alarms device: {e}")
-            return
-        except Exception as e:
-            print(f"An unexpected error occurred during new alarms device fetch: {e}")
-            return
-
-        if not new_alarms_devices:
-            print("No new alarms devices found to process.")
-            return
-        
-
-        process_new_alarms_device_with_org = partial(_process_new_alarms_device, org_id=org_id)
-        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-            list(executor.map(process_new_alarms_device_with_org, new_alarms_devices))
-        print(f"Finished processing {len(new_alarms_devices)} new alarms devices.")
-
-
-    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-        futures = [
-            executor.submit(sync_camera_ids),
-            executor.submit(sync_access_controller_ids),
-            executor.submit(sync_env_sensor_ids),
-            executor.submit(sync_intercom_and_desk_station_ids),
-            executor.submit(sync_gateway_ids),
-            executor.submit(sync_command_connector_ids),
-            executor.submit(sync_viewing_station_ids),
-            executor.submit(sync_speaker_ids),
-            executor.submit(sync_classic_alarms_keypad_ids),
-            executor.submit(sync_classic_alarms_hub_and_sensor_ids),
-            executor.submit(sync_new_alarms_device_ids),
-        ]
-        for future in concurrent.futures.as_completed(futures):
+        for future in concurrent.futures.as_completed(all_futures):
             try:
                 future.result()
             except Exception as exc:
-                print(f'A sync function generated an exception: {exc}')
+                print(f'A sync task generated an exception: {exc}')
 
     print(f"Completed all Verkada device sync for org: {org_id}")
