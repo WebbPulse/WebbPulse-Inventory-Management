@@ -18,7 +18,7 @@ def login_to_verkada(verkada_org_shortname, verkada_org_bot_email, verkada_org_b
         "orgShortName": verkada_org_shortname,
         "termsAcked": True,
         "password": verkada_org_bot_password,
-        "shard": "prod1", #Only prod1 supported for now do to the significant amount of work to ensure that janitor functions work correctly on other shards
+        "shard": "prod1", #Only prod1 supported for now due to the significant amount of work to ensure that janitor functions work correctly on other shards
         "subdomain": True,
     }
     headers = {}
