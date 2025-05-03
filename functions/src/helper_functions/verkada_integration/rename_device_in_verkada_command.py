@@ -173,7 +173,7 @@ def rename_device_in_verkada_command(device_id, org_id, device_being_checked_out
                     "name": device_name
                 }
         try:
-            response = requests_with_retry('post', rename_url, headers=verkada_bot_headers, json=payload)
+            response = requests_with_retry('patch', rename_url, headers=verkada_bot_headers, json=payload)
             response.raise_for_status()
             print(f"{device_verkada_device_type} {device_serial_number} renamed successfully to {device_name}.")
         except RequestException as e:
@@ -199,19 +199,19 @@ def rename_device_in_verkada_command(device_id, org_id, device_being_checked_out
 
     # WILL ONLY WORK FOR CLASSIC ALARMS ATM
     # NEXT STEP - TRY CLASSIC ENDPOINT FIRST, IF NOT 200 PROCEED WITH NEW ALARM ENDPOINT
-    elif device_verkada_device_type == "Door Contact" or device_verkada_device_type == 'Glass Break' or device_verkada_device_type == 'Motion Sensor' or device_verkada_device_type == 'Panic Button' or device_verkada_device_type == 'Water Sensor' or device_verkada_device_type == 'Wireless Relay':
+    elif device_verkada_device_type == "Classic Alarm Door Contact Sensor" or device_verkada_device_type == 'Classic Alarm Glass Break Sensor' or device_verkada_device_type == 'lassic Alarm Motion Sensor' or device_verkada_device_type == 'Classic Alarm Panic Button' or device_verkada_device_type == 'Classic Alarm Water Sensor' or device_verkada_device_type == 'Classic Alarm Wireless Relay' or device_verkada_device_type == 'Classic Alarm Motion Sensor':
 
-        if device_verkada_device_type == "Door Contact":
+        if device_verkada_device_type == "Classic Alarm Door Contact Sensor":
             payload_type = "doorContact"
-        elif device_verkada_device_type == "Glass Break":
+        elif device_verkada_device_type == "Classic Alarm Glass Break Sensor":
             payload_type = "glassBreakSensor"
-        elif device_verkada_device_type == "Motion Sensor":
+        elif device_verkada_device_type == "Classic Alarm Motion Sensor":
             payload_type = "motionSensor"
-        elif device_verkada_device_type == "Panic Button":
+        elif device_verkada_device_type == "Classic Alarm Panic Button":
             payload_type = "panicButton"
-        elif device_verkada_device_type == "Water Sensor":
+        elif device_verkada_device_type == "Classic Alarm Water Sensor":
             payload_type = "waterSensor"
-        elif device_verkada_device_type == "Wireless Relay":
+        elif device_verkada_device_type == "Classic Alarm Wireless Relay":
             payload_type = "wirelessRelay"
 
         rename_url = f"https://alarms.command.verkada.com/__v/{verkada_org_short_name}/device/sensor/update"
@@ -229,7 +229,7 @@ def rename_device_in_verkada_command(device_id, org_id, device_being_checked_out
         except Exception as e:
             print(f"Error renaming {device_verkada_device_type} {device_serial_number}: {e}")
     
-    elif device_verkada_device_type == "Siren Strobe" or device_verkada_device_type == "BP52 Panel" or device_verkada_device_type == "Alarm Expander":
+    elif device_verkada_device_type == "New Alarms Device":
         rename_url = f"https://vproconfig.command.verkada.com/__v/{verkada_org_short_name}/device/name/set"
         payload = {
                     "deviceId": device_verkada_device_id,

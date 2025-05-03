@@ -1,3 +1,4 @@
+import requests
 import concurrent.futures
 from firebase_admin import firestore
 from requests.exceptions import RequestException, JSONDecodeError
@@ -384,7 +385,7 @@ def _process_classic_alarm_hub_device(classic_alarm_hub_device_data: dict, org_i
             device_ref = existing_device_query[0].reference
             device_ref.set({
                 'deviceVerkadaDeviceId': verkada_device_id,
-                'deviceVerkadaDeviceType': "Classic Alarm Hub",
+                'deviceVerkadaDeviceType': "Classic Alarm Hub Device",
             }, merge=True)
         else:
             device_ref = db.collection('organizations').document(org_id).collection('devices').document()
@@ -397,7 +398,7 @@ def _process_classic_alarm_hub_device(classic_alarm_hub_device_data: dict, org_i
                 'deviceCheckedOutBy': '',
                 'deviceCheckedOutAt': None,
                 'deviceDeleted': False,
-                'deviceVerkadaDeviceType': "Classic Alarm Hub",
+                'deviceVerkadaDeviceType': "Classic Alarm Hub Device",
             })
     except Exception as e:
         print(f"Error processing classic alarm hub device SN {serial_number}: {e}")
@@ -594,6 +595,42 @@ def _process_classic_alarms_wireless_relay(classic_alarm_wireless_relay_data: di
             })
     except Exception as e:
         print(f"Error processing classic alarm wireless relay SN {serial_number}: {e}")
+
+def _process_new_alarms_device(new_alarms_device_data: dict, org_id: str):
+    """Processes a single new alarms device: finds/creates Firestore doc and updates Verkada ID."""
+    verkada_device_id = new_alarms_device_data.get("id")
+    serial_number = new_alarms_device_data.get("verkadaDeviceConfig").get("serialNumber")
+    verkada_new_alarms_system_id = new_alarms_device_data.get("alarmSystemId")
+
+    if not (verkada_device_id and serial_number):
+        print(f"Skipping new alarms device due to missing ID or Serial: {new_alarms_device_data}")
+        return
+
+    try:
+        existing_device_query = db.collection('organizations').document(org_id).collection('devices').where('deviceSerialNumber', '==', serial_number).limit(1).get()
+        if existing_device_query:
+            device_ref = existing_device_query[0].reference
+            device_ref.set({
+                'deviceVerkadaDeviceId': verkada_device_id,
+                'deviceVerkadaDeviceType': "New Alarms Device",
+                'deviceVerkadaNewAlarmsSystemId': verkada_new_alarms_system_id,
+            }, merge=True)
+        else:
+            device_ref = db.collection('organizations').document(org_id).collection('devices').document()
+            device_ref.set({
+                'deviceId': device_ref.id,
+                'deviceSerialNumber': serial_number,
+                'deviceVerkadaDeviceId': verkada_device_id,
+                'createdAt': firestore.SERVER_TIMESTAMP,
+                'isDeviceCheckedOut': False,
+                'deviceCheckedOutBy': '',
+                'deviceCheckedOutAt': None,
+                'deviceDeleted': False,
+                'deviceVerkadaDeviceType': "New Alarms Device",
+                'deviceVerkadaNewAlarmsSystemId': verkada_new_alarms_system_id,
+            })
+    except Exception as e:
+        print(f"Error processing new alarms device SN {serial_number}: {e}")
 
 def sync_verkada_device_ids(org_id, verkada_bot_user_info: dict) -> None:
     verkada_org_shortname = verkada_bot_user_info.get("org_name")
@@ -948,6 +985,35 @@ def sync_verkada_device_ids(org_id, verkada_bot_user_info: dict) -> None:
             list(executor.map(process_classic_alarms_wireless_relay_with_org, classic_alarms_wireless_relays))
         print(f"Finished processing {len(classic_alarms_wireless_relays)} classic alarm wireless relays.")
 
+    def sync_new_alarms_device_ids():
+        url = f"https://vproconfig.command.verkada.com/__v/{verkada_org_shortname}/org/get_devices_and_alarm_systems"
+        payload = {}
+        new_alarms_devices = []
+        try:
+            response = requests_with_retry('post', url, headers=auth_headers, json=payload)
+            response.raise_for_status()
+            new_alarms_devices = response.json().get("devices", [])
+            
+        except RequestException as e:
+            print(f"Error fetching new alarms device info after retries: {e}")
+            return
+        except JSONDecodeError as e:
+            print(f"Error decoding JSON response for new alarms device: {e}")
+            return
+        except Exception as e:
+            print(f"An unexpected error occurred during new alarms device fetch: {e}")
+            return
+
+        if not new_alarms_devices:
+            print("No new alarms devices found to process.")
+            return
+        
+
+        process_new_alarms_device_with_org = partial(_process_new_alarms_device, org_id=org_id)
+        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+            list(executor.map(process_new_alarms_device_with_org, new_alarms_devices))
+        print(f"Finished processing {len(new_alarms_devices)} new alarms devices.")
+
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
         futures = [
@@ -961,6 +1027,7 @@ def sync_verkada_device_ids(org_id, verkada_bot_user_info: dict) -> None:
             executor.submit(sync_speaker_ids),
             executor.submit(sync_classic_alarms_keypad_ids),
             executor.submit(sync_classic_alarms_hub_and_sensor_ids),
+            executor.submit(sync_new_alarms_device_ids),
         ]
         for future in concurrent.futures.as_completed(futures):
             try:
