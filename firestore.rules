@@ -24,6 +24,10 @@ service cloud.firestore {
       request.auth.token["org_deskstation_" + orgId] == true;
     }
 
+    function hasOrgAdminClaim(orgId) {
+      return request.auth.token["org_admin_" + orgId] == true;
+    }
+    
     function isEmailVerified() {
       return request.auth.token.email_verified == true;
     } 
@@ -40,11 +44,19 @@ service cloud.firestore {
       allow write: if false; // Disallow any client-side writes
     }
     // Match for the organizations collection
-    match /organizations/{orgId}/{document=**} {
-      // Allow read and write access if the user is an authenticated member of the organization
+    match /organizations/{orgId} {
       allow read: if isAuthenticated() && hasOrgMemberClaim(orgId) && hasValidToken() && isEmailVerified();
-			allow write: if false; // Disallow any client-side writes
+      allow write: if false;
+
+      match /sensitiveConfigs/{configDoc=**} {
+        allow read: if isAuthenticated() && hasOrgAdminClaim(orgId) && hasValidToken() && isEmailVerified();
+        allow write: if false; // Disallow any client-side writes
+      }
+
+      match /{document=**} {
+        allow read: if isAuthenticated() && hasOrgMemberClaim(orgId) && hasValidToken() && isEmailVerified();
+        allow write: if false; // Disallow any client-side writes
+      }
     }
-    
   }
 }

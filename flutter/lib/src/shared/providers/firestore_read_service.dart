@@ -18,6 +18,20 @@ class FirestoreReadService {
     }
   }
 
+  Stream<DocumentSnapshot> getOrgVerkadaIntegrationDocument(String orgId) {
+    try {
+      DocumentReference documentRef = _db
+          .collection('organizations')
+          .doc(orgId)
+          .collection('sensitiveConfigs')
+          .doc('verkadaIntegrationSettings');
+      return documentRef.snapshots();
+    } catch (e) {
+      return Stream.error(
+          'Failed to get organization verkada integration info');
+    }
+  }
+
   /// Stream that returns a list of organization IDs that the user is a part of
   Stream<List<String>> getUserOrgsIds(String? uid) {
     if (uid == null) {

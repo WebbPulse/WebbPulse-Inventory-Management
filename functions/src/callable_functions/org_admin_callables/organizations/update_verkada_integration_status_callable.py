@@ -1,6 +1,6 @@
 from src.helper_functions.auth.auth_functions import check_user_is_org_admin, check_user_is_authed, check_user_token_current, check_user_is_email_verified
 from src.shared import db, POSTcorsrules
-from src.helper_functions.devices.update_all_verkada_device_type import update_all_devices_verkada_device_type
+from src.helper_functions.verkada_integration.update_all_verkada_device_type import update_all_devices_verkada_device_type
 
 from firebase_functions import https_fn
 from typing import Any
@@ -33,6 +33,14 @@ def update_verkada_integration_status_callable(req: https_fn.CallableRequest) ->
             'orgVerkadaIntegrationEnabled': enabled,
         })
         if enabled:
+            if not org_ref.collection('sensitiveConfigs').document('verkadaIntegrationSettings').get().exists:
+                org_ref.collection('sensitiveConfigs').document('verkadaIntegrationSettings').set({
+                    'orgVerkadaOrgId': '',
+                    'orgVerkadaBotUserId': '',
+                    'orgVerkadaBotEmail': '',
+                    'orgVerkadaBotPassword': '',
+                    'orgVerkadaOrgShortName': '',
+                })
             update_all_devices_verkada_device_type(org_id)
         
         return {"response": f"Organization Verkada integration status updated to: {enabled}"}

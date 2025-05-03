@@ -91,7 +91,8 @@ class OrgSettingsView extends StatelessWidget {
                                             onPressed: () {
                                               showDialog(
                                                   context: context,
-                                                  builder: (BuildContext context) {
+                                                  builder:
+                                                      (BuildContext context) {
                                                     return OrgImageEditorAlertDialog(
                                                       orgData: orgData,
                                                     );
@@ -109,25 +110,28 @@ class OrgSettingsView extends StatelessWidget {
                                                     .withOpacity(0.5),
                                                 width: 1.5,
                                               ),
-                                              padding: const EdgeInsets.all(16.0),
+                                              padding:
+                                                  const EdgeInsets.all(16.0),
                                             ),
                                           ),
                                           ElevatedButton.icon(
                                             onPressed: () {
                                               showDialog(
                                                   context: context,
-                                                  builder: (BuildContext context) {
+                                                  builder:
+                                                      (BuildContext context) {
                                                     return DeleteOrgAlertDialog(
                                                       orgData: orgData,
                                                     );
                                                   });
                                             },
                                             icon: const Icon(Icons.delete),
-                                            label:
-                                                const Text('Delete Organization'),
+                                            label: const Text(
+                                                'Delete Organization'),
                                             style: ElevatedButton.styleFrom(
                                               backgroundColor: Colors.red,
-                                              padding: const EdgeInsets.all(16.0),
+                                              padding:
+                                                  const EdgeInsets.all(16.0),
                                             ),
                                           ),
                                         ],
@@ -137,10 +141,8 @@ class OrgSettingsView extends StatelessWidget {
                                         orgData: orgData,
                                       ),
                                       const SizedBox(height: 16),
-                                      OrgDeviceRegexEditor(
-                                          orgData: orgData),
+                                      OrgDeviceRegexEditor(orgData: orgData),
                                       const SizedBox(height: 16),
-                                      
                                       const SizedBox(height: 20),
                                       VerkadaIntegrationToggle(
                                         orgData: orgData,
@@ -157,20 +159,22 @@ class OrgSettingsView extends StatelessWidget {
                                           textAlign: TextAlign.center,
                                         ),
                                         const SizedBox(height: 16),
-                                        VerkadaOrgShortNameEditor(
-                                          orgData: orgData,
-                                        ),
-                                        const SizedBox(height: 16),
-                                        VerkadaOrgEmailEditor(
-                                          orgData: orgData,
-                                        ),
-                                        const SizedBox(height: 16),
-                                        VerkadaOrgPasswordEditor(
-                                          orgData: orgData,
-                                        ),
+                                        OrgVerkadaIntegrationDocumentStreamBuilder(
+                                            builder: (context,
+                                                orgVerkadaIntegrationDocument) {
+                                          final orgVerkadaIntegrationData =
+                                              orgVerkadaIntegrationDocument
+                                                          .data()
+                                                      as Map<String,
+                                                          dynamic>? ?? // Use nullable type cast
+                                                  {};
+                                          return VerkadaCredentialsEditor(
+                                              orgData: orgData,
+                                              orgVerkadaIntegrationData:
+                                                  orgVerkadaIntegrationData);
+                                        }),
                                         const SizedBox(height: 16),
                                       ],
-                                      
                                     ],
                                   ),
                                 ),

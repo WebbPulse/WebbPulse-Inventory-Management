@@ -1,5 +1,5 @@
 from src.helper_functions.auth.auth_functions import check_user_is_org_member, check_user_is_authed, check_user_token_current, check_user_is_email_verified
-from src.helper_functions.devices.check_verkada_device_type import check_verkada_device_type
+from src.helper_functions.verkada_integration.check_verkada_device_type import check_verkada_device_type
 from src.shared import db, POSTcorsrules
 
 from firebase_functions import https_fn

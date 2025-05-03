@@ -5,10 +5,7 @@ import 'package:provider/provider.dart';
 import '../../providers/firestore_read_service.dart';
 import '../../providers/org_selector_change_notifier.dart';
 
-/// A reusable widget that listens to changes in the organization document from Firestore
-/// It builds a widget based on the provided builder function, passing the organization document to it
 class OrgDocumentStreamBuilder extends StatelessWidget {
-  /// The builder function that takes the context and the organization document
   final Widget Function(BuildContext context, DocumentSnapshot orgDocument)
       builder;
 
@@ -19,20 +16,47 @@ class OrgDocumentStreamBuilder extends StatelessWidget {
     return Consumer2<FirestoreReadService, OrgSelectorChangeNotifier>(
       builder:
           (context, firestoreReadService, orgSelectorChangeNotifier, child) {
-        // Stream the organization document based on the selected organization ID
         return StreamBuilder<DocumentSnapshot>(
           stream: firestoreReadService
               .getOrgDocument(orgSelectorChangeNotifier.orgId),
           builder: (context, snapshot) {
-            // Show a loading indicator if the stream is still waiting for data
             if (snapshot.connectionState == ConnectionState.waiting ||
                 snapshot.data == null) {
               return const CircularProgressIndicator();
             }
-            // If data is available, pass the organization document to the builder function
             DocumentSnapshot orgDocument = snapshot.data!;
 
             return builder(context, orgDocument);
+          },
+        );
+      },
+    );
+  }
+}
+
+class OrgVerkadaIntegrationDocumentStreamBuilder extends StatelessWidget {
+  final Widget Function(BuildContext context, DocumentSnapshot orgDocument)
+      builder;
+
+  const OrgVerkadaIntegrationDocumentStreamBuilder(
+      {super.key, required this.builder});
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer2<FirestoreReadService, OrgSelectorChangeNotifier>(
+      builder:
+          (context, firestoreReadService, orgSelectorChangeNotifier, child) {
+        return StreamBuilder<DocumentSnapshot>(
+          stream: firestoreReadService.getOrgVerkadaIntegrationDocument(
+              orgSelectorChangeNotifier.orgId),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting ||
+                snapshot.data == null) {
+              return const CircularProgressIndicator();
+            }
+            DocumentSnapshot orgVerkadaIntegrationDocument = snapshot.data!;
+
+            return builder(context, orgVerkadaIntegrationDocument);
           },
         );
       },
@@ -64,9 +88,7 @@ class OrgNameAppBar extends StatelessWidget implements PreferredSizeWidget {
         return AppBar(
           title: FittedBox(
             fit: BoxFit.scaleDown,
-            child: Text(
-                '$orgName $titleSuffix'
-                ),
+            child: Text('$orgName $titleSuffix'),
           ), // Display the organization name with the title suffix
           actions: actions, // Set the AppBar actions
           leading: leading, // Set the leading widget if provided
