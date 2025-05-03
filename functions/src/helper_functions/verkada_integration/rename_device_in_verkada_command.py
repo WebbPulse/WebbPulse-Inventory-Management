@@ -22,9 +22,7 @@ def rename_device_in_verkada_command(device_id, org_id, device_being_checked_out
     device_serial_number = deviceDoc.get('deviceSerialNumber')
     device_verkada_device_id = deviceDoc.get('deviceVerkadaDeviceId')
     device_verkada_device_type = deviceDoc.get('deviceVerkadaDeviceType')
-
-    # PLACEHOLDER UNTIL DATA IS PRESENT IN DB
-    verkada_device_site_id = ""
+    device_verkada_site_id = deviceDoc.get('deviceVerkadaSiteId')
     
     if device_being_checked_out:
         device_name = f"{device_serial_number} - Checked Out"
@@ -169,7 +167,7 @@ def rename_device_in_verkada_command(device_id, org_id, device_being_checked_out
     elif device_verkada_device_type == "Classic Alarm Hub Device":
         rename_url = f"https://alarms.command.verkada.com/__v/{verkada_org_short_name}/device/hub/{device_verkada_device_id}"
         payload = {
-                    "siteId": verkada_device_site_id,
+                    "siteId": device_verkada_site_id,
                     "name": device_name
                 }
         try:

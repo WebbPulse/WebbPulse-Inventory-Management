@@ -33,6 +33,14 @@ def update_verkada_integration_status_callable(req: https_fn.CallableRequest) ->
             'orgVerkadaIntegrationEnabled': enabled,
         })
         if enabled:
+            if not org_ref.collection('sensitiveConfigs').document('verkadaIntegrationSettings').get().exists:
+                org_ref.collection('sensitiveConfigs').document('verkadaIntegrationSettings').set({
+                    'orgVerkadaOrgId': '',
+                    'orgVerkadaBotUserId': '',
+                    'orgVerkadaBotEmail': '',
+                    'orgVerkadaBotPassword': '',
+                    'orgVerkadaOrgShortName': '',
+                })
             update_all_devices_verkada_device_type(org_id)
         
         return {"response": f"Organization Verkada integration status updated to: {enabled}"}

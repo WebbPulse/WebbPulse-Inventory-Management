@@ -159,8 +159,20 @@ class OrgSettingsView extends StatelessWidget {
                                           textAlign: TextAlign.center,
                                         ),
                                         const SizedBox(height: 16),
-                                        VerkadaCredentialsEditor(
-                                            orgData: orgData),
+                                        OrgVerkadaIntegrationDocumentStreamBuilder(
+                                            builder: (context,
+                                                orgVerkadaIntegrationDocument) {
+                                          final orgVerkadaIntegrationData =
+                                              orgVerkadaIntegrationDocument
+                                                          .data()
+                                                      as Map<String,
+                                                          dynamic>? ?? // Use nullable type cast
+                                                  {};
+                                          return VerkadaCredentialsEditor(
+                                              orgData: orgData,
+                                              orgVerkadaIntegrationData:
+                                                  orgVerkadaIntegrationData);
+                                        }),
                                         const SizedBox(height: 16),
                                       ],
                                     ],

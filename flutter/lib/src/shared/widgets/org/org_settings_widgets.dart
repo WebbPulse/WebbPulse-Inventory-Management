@@ -218,7 +218,12 @@ class _VerkadaIntegrationToggleState extends State<VerkadaIntegrationToggle> {
 // Combined widget for Verkada Credentials
 class VerkadaCredentialsEditor extends StatefulWidget {
   final Map<String, dynamic> orgData;
-  const VerkadaCredentialsEditor({super.key, required this.orgData});
+  // Mark orgVerkadaIntegrationData as potentially nullable in the definition
+  final Map<String, dynamic>? orgVerkadaIntegrationData;
+  const VerkadaCredentialsEditor(
+      {super.key,
+      required this.orgData,
+      required this.orgVerkadaIntegrationData});
 
   @override
   _VerkadaCredentialsEditorState createState() =>
@@ -231,16 +236,22 @@ class _VerkadaCredentialsEditorState extends State<VerkadaCredentialsEditor> {
   late TextEditingController verkadaOrgPasswordController;
   var _isLoading = false;
   bool _obscureText = true;
-
   @override
   void initState() {
     super.initState();
+    // Use null-aware access on the potentially null map
     verkadaOrgShortNameController = TextEditingController(
-        text: widget.orgData['orgVerkadaOrgShortName'] as String? ?? '');
+        text: widget.orgVerkadaIntegrationData?['orgVerkadaOrgShortName']
+                as String? ??
+            '');
     verkadaOrgEmailController = TextEditingController(
-        text: widget.orgData['orgVerkadaBotEmail'] as String? ?? '');
+        text: widget.orgVerkadaIntegrationData?['orgVerkadaBotEmail']
+                as String? ??
+            '');
     verkadaOrgPasswordController = TextEditingController(
-        text: widget.orgData['orgVerkadaBotPassword'] as String? ?? '');
+        text: widget.orgVerkadaIntegrationData?['orgVerkadaBotPassword']
+                as String? ??
+            '');
   }
 
   @override
@@ -255,14 +266,18 @@ class _VerkadaCredentialsEditorState extends State<VerkadaCredentialsEditor> {
     final shortName = verkadaOrgShortNameController.text;
     final email = verkadaOrgEmailController.text;
     final password = verkadaOrgPasswordController.text;
-    final orgId = widget.orgData['orgId'];
+    // Add null check for orgId access
+    final orgId = widget.orgData['orgId'] as String?;
 
     if (orgId == null ||
         shortName.isEmpty ||
         email.isEmpty ||
         password.isEmpty) {
       await AsyncContextHelpers.showSnackBarIfMounted(
-          context, 'Please fill all Verkada credential fields.');
+          context,
+          orgId == null
+              ? 'Organization ID is missing.' // Specific message if orgId is null
+              : 'Please fill all Verkada credential fields.');
       return;
     }
 

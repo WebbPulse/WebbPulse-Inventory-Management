@@ -373,7 +373,12 @@ def _process_classic_alarm_keypad(classic_alarm_keypad_data: dict, org_id: str):
 def _process_classic_alarm_hub_device(classic_alarm_hub_device_data: dict, org_id: str):
     """Processes a single classic alarm hub device: finds/creates Firestore doc and updates Verkada ID."""
     verkada_device_id = classic_alarm_hub_device_data.get("deviceId")
+    verkada_site_id = classic_alarm_hub_device_data.get("siteId")
     serial_number = classic_alarm_hub_device_data.get("claimedSerialNumber")
+    device_type = check_verkada_device_type(serial_number)
+    if device_type != "Classic Alarm Hub Device":
+        print(f"Skipping classic alarm hub device due to device type mismatch: {device_type} for {serial_number}")
+        return
 
     if not (verkada_device_id and serial_number):
         print(f"Skipping classic alarm hub device due to missing ID or Serial: {classic_alarm_hub_device_data}")
@@ -386,6 +391,7 @@ def _process_classic_alarm_hub_device(classic_alarm_hub_device_data: dict, org_i
             device_ref.set({
                 'deviceVerkadaDeviceId': verkada_device_id,
                 'deviceVerkadaDeviceType': "Classic Alarm Hub Device",
+                'deviceVerkadaSiteId': verkada_site_id,
             }, merge=True)
         else:
             device_ref = db.collection('organizations').document(org_id).collection('devices').document()
@@ -399,6 +405,7 @@ def _process_classic_alarm_hub_device(classic_alarm_hub_device_data: dict, org_i
                 'deviceCheckedOutAt': None,
                 'deviceDeleted': False,
                 'deviceVerkadaDeviceType': "Classic Alarm Hub Device",
+                'deviceVerkadaSiteId': verkada_site_id,
             })
     except Exception as e:
         print(f"Error processing classic alarm hub device SN {serial_number}: {e}")

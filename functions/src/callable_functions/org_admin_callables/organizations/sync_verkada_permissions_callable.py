@@ -45,7 +45,7 @@ def sync_verkada_permissions_callable(req: https_fn.CallableRequest) -> Any:
                 message='Failed to log in to Verkada. Please check your credentials.'
             )
         
-        org_ref = db.collection('organizations').document(org_id)
+        org_ref = db.collection('organizations').document(org_id).collection('sensitiveConfigs').document('verkadaIntegrationSettings')
         org_ref.update({
             'orgVerkadaOrgId': verkada_org_id,
             'orgVerkadaBotUserId': verkada_bot_user_id,

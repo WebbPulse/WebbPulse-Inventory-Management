@@ -34,14 +34,14 @@ void main() async {
 
       FirebaseFunctions.instance.useFunctionsEmulator(host, 5001);
 
-      print('Using Firebase Emulators: Auth (9099), Firestore (8080), Functions (5001)');
+      print(
+          'Using Firebase Emulators: Auth (9099), Firestore (8080), Functions (5001)');
     } catch (e) {
       // Handle exceptions, e.g., emulator not running
       print('Error configuring Firebase Emulators: $e');
     }
   }
   // --- End Emulator Configuration ---
-
 
   runApp(MultiProvider(
       providers: [
@@ -52,7 +52,6 @@ void main() async {
           value: settingsChangeNotifier,
         ),
       ],
-
       child: Consumer<AuthenticationChangeNotifier>(
         builder: (context, authProvider, child) {
           if (authProvider.userLoggedIn) {
