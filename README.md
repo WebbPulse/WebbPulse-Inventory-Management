@@ -11,3 +11,4 @@ Local debug and dev instructions:
 prerequisites for local debug:
 - firebase service account key json in functions folder
 - sendgrid api key txt in functions folder
+- 
