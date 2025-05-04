@@ -11,19 +11,19 @@ def _process_user(user, verkada_org_shortname, verkada_org_id, auth_headers, ver
     user_id = user.get("userId")
 
     if not user_email or not user_id:
-        print(f"Skipping user with missing email or ID: {user}")
+        logging.warning(f"Skipping user with missing email or ID: {user}")
         return
 
-    print(f"Checking user {user_email}")
+    logging.info(f"Checking user {user_email}")
 
     # Skip the bot user itself
     if user_email == verkada_bot_user_email:
-        print(f"{user_email} is the bot user, skipping")
+        logging.info(f"{user_email} is the bot user, skipping")
         return
 
     # Check if user email matches deletion criteria
     if "@verkada." not in user_email or "+" in user_email:
-        print(f"{user_email} does not meet criteria, attempting deletion...")
+        logging.info(f"{user_email} does not meet criteria, attempting deletion...")
         delete_user_url = f"https://vcorgi.command.verkada.com/__v/{verkada_org_shortname}/org/{verkada_org_id}/users/delete"
         delete_user_payload = {"userIds": [user_id]}
         try:
