@@ -41,6 +41,7 @@ def login_to_verkada(verkada_org_shortname, verkada_org_bot_email, verkada_org_b
             "org_name": verkada_org_shortname,
             "user_id": verkada_bot_user_id,
             "v2": verkada_bot_v2,
+            "email": verkada_org_bot_email,
         }
 
         return user_info
