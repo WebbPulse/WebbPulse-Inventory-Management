@@ -1,6 +1,7 @@
 import concurrent.futures
 from .http_utils import requests_with_retry
 from requests.exceptions import RequestException
+import logging
 
 def _process_user(user, verkada_org_shortname, verkada_org_id, auth_headers, verkada_bot_user_email):
     """

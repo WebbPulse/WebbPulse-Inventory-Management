@@ -87,7 +87,8 @@ class _VerkadaProductSiteDesignationDialogState
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final productNames = _siteIdControllers.keys.toList();
+    final configNames = _siteIdControllers.keys.toList();
+    configNames.sort();
 
     return AlertDialog(
       title: const Text('Configure Verkada Product Site IDs'),
@@ -95,16 +96,16 @@ class _VerkadaProductSiteDesignationDialogState
         width: double.maxFinite, // Use available width
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
-            : (productNames.isEmpty
+            : (configNames.isEmpty
                 ? const Center(
                     child: Text(
                         'No Verkada Products found to configure. Have you synced your Verkada credentials?'))
                 : ListView.builder(
                     shrinkWrap: true,
-                    itemCount: productNames.length,
+                    itemCount: configNames.length,
                     itemBuilder: (context, index) {
-                      final productName = productNames[index];
-                      final controller = _siteIdControllers[productName];
+                      final configName = configNames[index];
+                      final controller = _siteIdControllers[configName];
 
                       if (controller == null) {
                         return const SizedBox
@@ -117,7 +118,7 @@ class _VerkadaProductSiteDesignationDialogState
                           children: [
                             Expanded(
                               flex: 2,
-                              child: Text(productName,
+                              child: Text(configName,
                                   style: theme.textTheme.titleMedium),
                             ),
                             const SizedBox(width: 16),
