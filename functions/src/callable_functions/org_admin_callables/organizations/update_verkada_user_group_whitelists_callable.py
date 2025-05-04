@@ -1,0 +1,56 @@
+from src.helper_functions.auth.auth_functions import check_user_is_org_admin, check_user_is_authed, check_user_token_current, check_user_is_email_verified
+from src.shared import db, POSTcorsrules
+from src.helper_functions.verkada_integration.update_all_verkada_device_type import update_all_devices_verkada_device_type
+
+from firebase_functions import https_fn
+from typing import Any
+
+@https_fn.on_call(cors=POSTcorsrules)
+def update_verkada_user_group_whitelists_callable(req: https_fn.CallableRequest) -> Any:
+    """
+    Firebase Function to update the Verkada user group whitelists for an organization.
+    The function checks if the user is authenticated, their email is verified, and they are an admin of the organization.
+    It expects a list of group maps in the 'updatedGroups' field.
+    """
+
+    try:
+        org_id = req.data["orgId"]
+        # Expect 'updatedGroups' which is a list of maps
+        updated_groups = req.data["updatedGroups"]
+
+        check_user_is_authed(req)
+        check_user_is_email_verified(req)
+        check_user_token_current(req)
+        check_user_is_org_admin(req, org_id)
+
+        if not org_id or updated_groups is None: # Check if updated_groups is provided
+            raise https_fn.HttpsError(
+                code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
+                message='The function must be called with the following arguments: orgId, updatedGroups'
+            )
+
+        # Optional: Add validation for the structure of updated_groups if needed
+        if not isinstance(updated_groups, list):
+             raise https_fn.HttpsError(
+                code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
+                message='The "updatedGroups" argument must be a list.'
+            )
+        # You could add more checks here to ensure each item in the list is a map
+        # with the expected keys ('groupId', 'groupName', 'isWhitelisted')
+
+        org_ref = db.collection('organizations').document(org_id)
+        org_ref.collection('sensitiveConfigs').document('verkadaIntegrationSettings').set({
+            # Save the received list directly to the 'orgVerkadaUserGroups' field
+            'orgVerkadaUserGroups': updated_groups
+        }, merge=True)
+
+        return {"response": f"Successfully updated the Verkada user group whitelists for organization {org_id}."}
+
+    except https_fn.HttpsError as e:
+        raise e
+
+    except Exception as e:
+        raise https_fn.HttpsError(
+            code=https_fn.FunctionsErrorCode.UNKNOWN,
+            message=f"An error occurred: {str(e)}"
+        )

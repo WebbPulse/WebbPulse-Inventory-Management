@@ -35,11 +35,31 @@ def update_verkada_integration_status_callable(req: https_fn.CallableRequest) ->
         if enabled:
             if not org_ref.collection('sensitiveConfigs').document('verkadaIntegrationSettings').get().exists:
                 org_ref.collection('sensitiveConfigs').document('verkadaIntegrationSettings').set({
-                    'orgVerkadaOrgId': '',
-                    'orgVerkadaBotUserId': '',
                     'orgVerkadaBotEmail': '',
                     'orgVerkadaBotPassword': '',
+                    'orgVerkadaBotUserId': '',
+                    'orgVerkadaOrgId': '',
                     'orgVerkadaOrgShortName': '',
+                    'orgVerkadaProductSiteDesignations': {  
+                        'Access Control Building': '',
+                        'Access Control Floor': '',
+                        'Access Control Site': '',
+                        'Access Level': '',
+                        'Camera Site': '',
+                        'Classic Alarm Site': '',
+                        'Classic Alarm Zone': '',
+                        'Command Connector Site': '',
+                        'Desk Station Site': '',
+                        'Environmental Sensor Site': '',
+                        'Gateway Site': '',
+                        'Guest Site': '',
+                        'Intercom Site': '',
+                        'Mailroom Site': '',
+                        'New Alarm Site': '',
+                        'Speaker Site': '',
+                        'Viewing Station Site': '',
+                    },
+                    'orgVerkadaUserGroups': [],
                 })
             update_all_devices_verkada_device_type(org_id)
         
