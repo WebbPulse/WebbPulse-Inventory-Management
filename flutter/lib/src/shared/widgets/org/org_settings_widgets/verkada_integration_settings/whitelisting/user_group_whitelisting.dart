@@ -49,11 +49,26 @@ class _VerkadaGroupWhitelistDialogState
         Provider.of<FirebaseFunctions>(context, listen: false);
 
     // Prepare the data for the bulk update function
-    // Ensure you only send valid group IDs
-    final Map<String, bool> updatesToSend = Map.from(_currentWhitelistStatus)
-      ..removeWhere((key, value) => key.isEmpty);
+    // Construct the list of maps with updated statuses
+    final List<Map<String, dynamic>> updatedGroupsList = widget.initialGroups
+        .map((group) {
+          final String? groupId = group['groupId'] as String?;
+          if (groupId == null || groupId.isEmpty) {
+            return null; // Skip groups with invalid IDs
+          }
+          // Create a new map for the group, preserving existing data
+          // and updating the whitelist status from the local state.
+          return {
+            'groupId': groupId,
+            'groupName': group['groupName'] as String? ?? 'Unknown Group',
+            'isWhitelisted': _currentWhitelistStatus[groupId] ?? false,
+          };
+        })
+        .where((group) => group != null) // Filter out null entries
+        .cast<Map<String, dynamic>>() // Cast to the correct type
+        .toList();
 
-    if (updatesToSend.isEmpty && widget.initialGroups.isNotEmpty) {
+    if (updatedGroupsList.isEmpty && widget.initialGroups.isNotEmpty) {
       await AsyncContextHelpers.showSnackBarIfMounted(
           context, 'No valid groups to update.');
       return;
@@ -64,12 +79,12 @@ class _VerkadaGroupWhitelistDialogState
     });
 
     try {
-      // *** IMPORTANT: Replace with your actual new bulk update function name ***
       await firebaseFunctions
-          .httpsCallable('update_verkada_group_whitelists_callable')
+          .httpsCallable('update_verkada_user_group_whitelists_callable')
           .call({
         'orgId': widget.orgId,
-        'groupWhitelistStatus': updatesToSend, // Send the map of statuses
+        // Send the list of group maps instead of just statuses
+        'updatedGroups': updatedGroupsList,
       });
       await AsyncContextHelpers.showSnackBarIfMounted(
           context, 'Group whitelist updated successfully');

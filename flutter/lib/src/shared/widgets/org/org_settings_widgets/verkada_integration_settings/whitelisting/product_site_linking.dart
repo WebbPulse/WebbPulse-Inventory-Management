@@ -126,7 +126,7 @@ class _VerkadaProductSiteDesignationDialogState
                               child: TextField(
                                 controller: controller,
                                 decoration: const InputDecoration(
-                                  labelText: 'Site ID',
+                                  labelText: 'ID',
                                   border: OutlineInputBorder(),
                                   isDense: true,
                                 ),
