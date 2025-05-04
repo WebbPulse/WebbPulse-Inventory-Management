@@ -7,7 +7,8 @@ import 'package:webbpulse_inventory_management/src/shared/providers/firestore_re
 import 'package:webbpulse_inventory_management/src/shared/providers/org_selector_change_notifier.dart';
 import 'package:webbpulse_inventory_management/src/shared/widgets/users/user_widgets.dart';
 import 'package:webbpulse_inventory_management/src/shared/widgets/org/org_widgets.dart';
-import 'package:webbpulse_inventory_management/src/shared/widgets/org/org_settings_widgets.dart';
+import 'package:webbpulse_inventory_management/src/shared/widgets/org/org_settings_widgets/normal_org_settings_widgets.dart';
+import 'package:webbpulse_inventory_management/src/shared/widgets/org/org_settings_widgets/verkada_integration_settings/main_integration_widgets.dart';
 
 class OrgSettingsView extends StatelessWidget {
   const OrgSettingsView({super.key});
@@ -168,10 +169,19 @@ class OrgSettingsView extends StatelessWidget {
                                                       as Map<String,
                                                           dynamic>? ?? // Use nullable type cast
                                                   {};
-                                          return VerkadaCredentialsEditor(
-                                              orgData: orgData,
-                                              orgVerkadaIntegrationData:
-                                                  orgVerkadaIntegrationData);
+                                          return Column(
+                                            children: [
+                                              VerkadaCredentialsEditor(
+                                                  orgData: orgData,
+                                                  orgVerkadaIntegrationData:
+                                                      orgVerkadaIntegrationData),
+                                              const SizedBox(height: 32),
+                                              VerkadaSettingsEditor(
+                                                  orgData: orgData,
+                                                  orgVerkadaIntegrationData:
+                                                      orgVerkadaIntegrationData),
+                                            ],
+                                          );
                                         }),
                                         const SizedBox(height: 16),
                                       ],
