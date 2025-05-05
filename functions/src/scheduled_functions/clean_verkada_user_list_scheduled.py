@@ -34,11 +34,6 @@ def clean_verkada_user_list_scheduled(event: scheduler_fn.ScheduledEvent) -> Non
                      logging.error(f"Failed to log in to Verkada for organization {org_id}. Check credentials.")
                      continue
 
-                org_ref = db.collection('organizations').document(org_id)
-                org_ref.update({
-                    'orgVerkadaOrgId': verkada_org_id,
-                    'orgVerkadaBotUserId': verkada_bot_user_id,
-                })
 
                 clean_verkada_user_list(verkada_bot_user_info)
                 logging.info(f"Successfully cleaned verkada user list for organization {org_id}.")

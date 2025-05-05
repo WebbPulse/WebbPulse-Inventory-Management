@@ -1,16 +1,16 @@
 from firebase_functions import scheduler_fn, https_fn
 from src.shared import db
 from src.helper_functions.verkada_integration.login_to_verkada import login_to_verkada
-from src.helper_functions.verkada_integration.grant_all_verkada_permissions import grant_all_verkada_permissions
+from src.helper_functions.verkada_integration.sync_verkada_device_names import sync_verkada_device_names
 import logging
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 
 @scheduler_fn.on_schedule(schedule="every 24 hours", timeout_sec=540)
-def sync_verkada_permissions_scheduled(event: scheduler_fn.ScheduledEvent) -> None:
+def sync_verkada_device_names_scheduled(event: scheduler_fn.ScheduledEvent) -> None:
     """
-    Scheduled function to sync Verkada permissions for all enabled organizations every 24 hours.
+    Scheduled function to sync Verkada device names for all enabled organizations every 24 hours.
     """
     logging.info("Starting scheduled Verkada permissions sync.")
 
@@ -43,15 +43,15 @@ def sync_verkada_permissions_scheduled(event: scheduler_fn.ScheduledEvent) -> No
                      logging.error(f"Failed to log in to Verkada for organization {org_id}. Check credentials.")
                      continue # Skip to the next organization
 
-                # Grant permissions
-                grant_all_verkada_permissions(verkada_bot_user_info)
-                logging.info(f"Successfully synced Verkada permissions for organization {org_id}.")
+                # Sync device names
+                sync_verkada_device_names(verkada_bot_user_info, org_id)
+                logging.info(f"Successfully synced Verkada device names for organization {org_id}.")
 
             except Exception as e:
                 logging.error(f"Error processing organization {org_id}: {str(e)}")
                 # Continue to the next organization even if one fails
 
-        logging.info("Finished scheduled Verkada permissions sync.")
+        logging.info("Finished scheduled Verkada device name sync.")
 
     except Exception as e:
         logging.error(f"An unexpected error occurred during the scheduled sync: {str(e)}")

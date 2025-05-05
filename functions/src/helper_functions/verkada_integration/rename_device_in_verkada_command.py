@@ -5,17 +5,39 @@ from src.helper_functions.verkada_integration.http_utils import requests_with_re
 
 from requests.exceptions import RequestException
 
-def rename_device_in_verkada_command(device_id, org_id, device_being_checked_out):
+def rename_device_in_verkada_command(device_id, org_id, device_being_checked_out, verkada_bot_user_info=None):
     """
+    Renames a device in the Verkada system based on its type and availability status.
+    
+    Parameters:
+        device_id (str): The ID of the device to be renamed.
+        org_id (str): The ID of the organization to which the device belongs.
+        device_being_checked_out (bool): Indicates whether the device is being checked out.
+        verkada_bot_user_info (dict, optional): A dictionary containing Verkada bot user information.
+            - org_id (str): The organization ID for the Verkada bot.
+            - auth_headers (dict): Authentication headers for API requests.
+            If not provided, the function will retrieve the bot user info using the organization's Verkada integration settings.
+    Renames a device in the Verkada system based on its type and availability status.
+    
+    Parameters:
+        device_id (str): The ID of the device to be renamed.
+        org_id (str): The ID of the organization to which the device belongs.
+        device_being_checked_out (bool): Indicates whether the device is being checked out.
+        verkada_bot_user_info (dict, optional): A dictionary containing Verkada bot user information.
+            - org_id (str): The organization ID for the Verkada bot.
+            - auth_headers (dict): Authentication headers for API requests.
+            If not provided, the function will retrieve the bot user info using the organization's Verkada integration settings.
     """
+    
     org__verkada_integration_doc = db.collection('organizations').document(org_id).collection('sensitiveConfigs').document('verkadaIntegrationSettings').get()
     verkada_org_short_name = org__verkada_integration_doc.get('orgVerkadaOrgShortName')
-    verkada_org_bot_email = org__verkada_integration_doc.get('orgVerkadaBotEmail')
-    verkada_org_bot_password = org__verkada_integration_doc.get('orgVerkadaBotPassword')
 
-    verkada_bot_user_info = login_to_verkada(verkada_org_short_name, verkada_org_bot_email, verkada_org_bot_password)
+    if not verkada_bot_user_info:
+        verkada_org_bot_email = org__verkada_integration_doc.get('orgVerkadaBotEmail')
+        verkada_org_bot_password = org__verkada_integration_doc.get('orgVerkadaBotPassword')
+        verkada_bot_user_info = login_to_verkada(verkada_org_short_name, verkada_org_bot_email, verkada_org_bot_password)
+    
     verkada_org_id = verkada_bot_user_info.get('org_id')
-    verkada_bot_user_id = verkada_bot_user_info.get('user_id')
     verkada_bot_headers = verkada_bot_user_info.get('auth_headers')
     
     deviceDoc = db.collection('organizations').document(org_id).collection('devices').document(device_id).get()
@@ -117,13 +139,34 @@ def rename_device_in_verkada_command(device_id, org_id, device_being_checked_out
 
     #might not work have to check and test
     elif device_verkada_device_type == "Viewing Station":
+        fetch_current_grid_url = f"https://vvx.command.verkada.com/__v/{verkada_org_short_name}/device/list"
+        fetch_payload = {
+            'organizationId': verkada_org_id,
+        }
+        try:
+            response = requests_with_retry('post', fetch_current_grid_url, headers=verkada_bot_headers, json=fetch_payload)
+            response.raise_for_status()
+            devices = response.json().get('viewingStations', [])
+            device_info = next((device for device in devices if device['viewingStationId'] == device_verkada_device_id), None)
+            if device_info:
+                gridData = device_info.get('gridData')
+                gridData["name"] = device_name
+            else:
+                logging.error(f"Device {device_verkada_device_id} not found in the response.")
+                return
+        except RequestException as e:
+            logging.error(f"Error fetching {device_verkada_device_type} info after retries: {e}")
+            return
+        except Exception as e:
+            logging.error(f"Error fetching {device_verkada_device_type} info: {e}")
+            return
+
         rename_url = f"https://vvx.command.verkada.com/__v/{verkada_org_short_name}/viewing_station/grid/update"
-        mp4SockEnabled = ["gridData"]["mp4SockEnabled"]
         payload = {
-                    "viewingStationId": device_id,
-                    #this is the question mark
-                    "gridData": {"mp4SockEnabled": mp4SockEnabled, "name": device_name},
+                    'gridData': gridData,
+                    'viewingStationId': device_verkada_device_id
                 }
+        
         try:
             response = requests_with_retry('post', rename_url, headers=verkada_bot_headers, json=payload)
             response.raise_for_status()

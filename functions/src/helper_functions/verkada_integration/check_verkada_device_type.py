@@ -70,7 +70,7 @@ def check_verkada_device_type(device_serial_number: str) -> str:
     elif prefix in hub_prefixes or prefix in panel_prefixes:
         return 'Classic Alarm Hub Device'
     elif prefix in keypad_prefixes:
-        return 'Keypad'
+        return 'Classic Alarm Keypad'
     elif prefix in door_contact_prefixes:
         return 'Door Contact'
     elif prefix in glass_break_prefixes:

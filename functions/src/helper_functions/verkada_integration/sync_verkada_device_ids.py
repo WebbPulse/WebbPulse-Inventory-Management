@@ -315,13 +315,21 @@ def sync_verkada_device_ids(org_id, verkada_bot_user_info: dict, max_workers: in
                 worker_func = partial(_prepare_device_write_data, org_id=org_id, id_field=id_field, serial_field=serial_field, expected_type=type_str)
                 tasks = []
                 for item_data in items:
-                     extra_data = {}
-                     if extra_map:
-                         for dest_key, src_key in extra_map.items():
-                             val = item_data.get(src_key)
-                             if val is not None:
-                                 extra_data[dest_key] = val
-                     tasks.append((item_data, extra_data))
+                    # Check if it's a hubDevice but has a Keypad serial prefix
+                    if type_str == "Classic Alarm Hub Device":
+                        serial_number = item_data.get(serial_field)
+                        if serial_number:
+                            actual_type = check_verkada_device_type(serial_number)
+                            if actual_type == 'Classic Alarm Keypad':
+                                print(f"Skipping hubDevice sync for SN {serial_number} as it's identified as a Keypad.")
+                                continue # Skip this item, it will be handled by the Keypad sync task
+                    extra_data = {}
+                    if extra_map:
+                        for dest_key, src_key in extra_map.items():
+                            val = item_data.get(src_key)
+                            if val is not None:
+                                extra_data[dest_key] = val
+                    tasks.append((item_data, extra_data))
 
                 def worker_wrapper(task_args):
                     item_data, extra_data = task_args
@@ -339,8 +347,8 @@ def sync_verkada_device_ids(org_id, verkada_bot_user_info: dict, max_workers: in
     all_futures = []
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
         for task_def in sync_tasks_definitions:
-             future = executor.submit(_sync_generic, **task_def)
-             all_futures.append(future)
+            future = executor.submit(_sync_generic, **task_def)
+            all_futures.append(future)
 
         all_futures.append(executor.submit(sync_intercom_and_desk_station_ids_combined))
         all_futures.append(executor.submit(sync_classic_alarms_hub_and_sensors_combined))

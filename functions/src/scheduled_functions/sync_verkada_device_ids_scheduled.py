@@ -59,14 +59,6 @@ def sync_verkada_device_ids_scheduled(event: scheduler_fn.ScheduledEvent) -> Non
                      logging.error(f"Failed to log in to Verkada for organization {org_id}. Check credentials.")
                      continue # Skip to the next organization
 
-                # Update Firestore with potentially refreshed IDs (optional, but good practice)
-                org_verkada_integration_ref = db.collection('organizations').document(org_id).collection('sensitiveConfigs').document('verkadaIntegrationSettings')
-                org_verkada_integration_ref.update({
-                    'orgVerkadaOrgId': verkada_org_id,
-                    'orgVerkadaBotUserId': verkada_bot_user_id,
-                    # Consider if you need to update email/password/shortname here if they could change
-                })
-
                 # Grant permissions
                 sync_verkada_device_ids(org_id, verkada_bot_user_info)
                 logging.info(f"Successfully synced Verkada device IDs for organization {org_id}.")
