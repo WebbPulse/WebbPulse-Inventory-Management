@@ -1,4 +1,5 @@
 from src.shared import db
+import logging
 
 from src.helper_functions.verkada_integration.login_to_verkada import login_to_verkada
 from src.helper_functions.verkada_integration.http_utils import requests_with_retry
