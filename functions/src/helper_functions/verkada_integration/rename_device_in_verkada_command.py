@@ -119,12 +119,12 @@ def rename_device_in_verkada_command(device_id, org_id, device_being_checked_out
 
     #might not work have to check and test
     elif device_verkada_device_type == "Viewing Station":
-        fetch_currrent_grid_url = f"https://vvx.command.verkada.com/__v/{verkada_org_short_name}/device/list"
+        fetch_current_grid_url = f"https://vvx.command.verkada.com/__v/{verkada_org_short_name}/device/list"
         fetch_payload = {
             'organizationId': verkada_org_id,
         }
         try:
-            response = requests_with_retry('post', fetch_currrent_grid_url, headers=verkada_bot_headers, json=fetch_payload)
+            response = requests_with_retry('post', fetch_current_grid_url, headers=verkada_bot_headers, json=fetch_payload)
             response.raise_for_status()
             devices = response.json().get('viewingStations', [])
             device_info = next((device for device in devices if device['viewingStationId'] == device_verkada_device_id), None)
