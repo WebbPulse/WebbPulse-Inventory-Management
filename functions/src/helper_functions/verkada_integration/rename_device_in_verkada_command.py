@@ -152,13 +152,13 @@ def rename_device_in_verkada_command(device_id, org_id, device_being_checked_out
                 gridData = device_info.get('gridData')
                 gridData["name"] = device_name
             else:
-                print(f"Device {device_verkada_device_id} not found in the response.")
+                logging.error(f"Device {device_verkada_device_id} not found in the response.")
                 return
         except RequestException as e:
-            print(f"Error fetching {device_verkada_device_type} info after retries: {e}")
+            logging.error(f"Error fetching {device_verkada_device_type} info after retries: {e}")
             return
         except Exception as e:
-            print(f"Error fetching {device_verkada_device_type} info: {e}")
+            logging.error(f"Error fetching {device_verkada_device_type} info: {e}")
             return
 
         rename_url = f"https://vvx.command.verkada.com/__v/{verkada_org_short_name}/viewing_station/grid/update"
