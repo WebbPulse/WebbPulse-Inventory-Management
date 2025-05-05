@@ -1,4 +1,5 @@
 from src.helper_functions.verkada_integration.sync_verkada_user_groups import sync_verkada_user_groups
+from src.helper_functions.verkada_integration.clean_verkada_user_groups import clean_verkada_user_groups
 from firebase_functions import scheduler_fn
 from src.shared import db
 from src.helper_functions.verkada_integration.login_to_verkada import login_to_verkada
@@ -59,6 +60,7 @@ def sync_verkada_user_groups_scheduled(event: scheduler_fn.ScheduledEvent) -> No
 
                 # Grant permissions
                 sync_verkada_user_groups(org_id, verkada_bot_user_info)
+                clean_verkada_user_groups(org_id, verkada_bot_user_info)
                 logging.info(f"Successfully synced Verkada groups for organization {org_id}.")
 
             except Exception as e:

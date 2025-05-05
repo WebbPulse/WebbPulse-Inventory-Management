@@ -6,6 +6,7 @@ from src.helper_functions.verkada_integration.sync_verkada_device_ids import syn
 from src.helper_functions.verkada_integration.sync_verkada_user_groups import sync_verkada_user_groups
 from src.helper_functions.verkada_integration.sync_verkada_device_names import sync_verkada_device_names
 from src.helper_functions.verkada_integration.clean_verkada_user_list import clean_verkada_user_list
+from src.helper_functions.verkada_integration.clean_verkada_user_groups import clean_verkada_user_groups
 
 
 from firebase_functions import https_fn
@@ -62,6 +63,7 @@ def sync_verkada_permissions_callable(req: https_fn.CallableRequest) -> Any:
         sync_verkada_device_names(org_id, verkada_bot_user_info)
         sync_verkada_user_groups(org_id, verkada_bot_user_info)
         clean_verkada_user_list(verkada_bot_user_info)
+        clean_verkada_user_groups(org_id, verkada_bot_user_info)
 
         return {"response": f"Organization Verkada permissions synced successfully."}
 
