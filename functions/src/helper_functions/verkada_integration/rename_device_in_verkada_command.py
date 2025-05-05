@@ -7,6 +7,16 @@ from requests.exceptions import RequestException
 
 def rename_device_in_verkada_command(device_id, org_id, device_being_checked_out, verkada_bot_user_info=None):
     """
+    Renames a device in the Verkada system based on its type and availability status.
+    
+    Parameters:
+        device_id (str): The ID of the device to be renamed.
+        org_id (str): The ID of the organization to which the device belongs.
+        device_being_checked_out (bool): Indicates whether the device is being checked out.
+        verkada_bot_user_info (dict, optional): A dictionary containing Verkada bot user information.
+            - org_id (str): The organization ID for the Verkada bot.
+            - auth_headers (dict): Authentication headers for API requests.
+            If not provided, the function will retrieve the bot user info using the organization's Verkada integration settings.
     """
     
     org__verkada_integration_doc = db.collection('organizations').document(org_id).collection('sensitiveConfigs').document('verkadaIntegrationSettings').get()
