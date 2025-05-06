@@ -57,10 +57,10 @@ def move_verkada_devices(org_id, verkada_bot_user_info):
         
         try:
             camera_id = device.get('deviceVerkadaDeviceId')
-            rename_url = f"https://vprovision.command.verkada.com/__v/{verkada_org_short_name}/camera/site/batch/set"
+            move_url = f"https://vprovision.command.verkada.com/__v/{verkada_org_short_name}/camera/site/batch/set"
             payload = {"cameraIds":[camera_id],
                     "destinationSiteId": verkada_camera_site_id}
-            response = requests_with_retry('post', rename_url, headers=verkada_auth_headers, json=payload)
+            response = requests_with_retry('post', move_url, headers=verkada_auth_headers, json=payload)
             response.raise_for_status()
             print(f"{camera_id} moved successfully to {verkada_camera_site_id}.")
         except RequestException as e:
@@ -69,20 +69,102 @@ def move_verkada_devices(org_id, verkada_bot_user_info):
             print(f"Error moving {camera_id}: {e}")
     
     def move_controller(device, verkada_access_control_site_id, verkada_access_control_building_id, verkada_access_control_floor_id, verada_access_level_id):
-        print("controller moving not implemented")
-        pass
+        if not verkada_access_control_site_id:
+            print("No site ID provided for access controller.")
+            return
+        
+        try:
+            controller_id = device.get('deviceVerkadaDeviceId')
+            move_url = f"https://vcerberus.command.verkada.com/__v/{verkada_org_short_name}/access_controller/move_to_site"
+            payload = {"accessControllerId":controller_id,"siteId":verkada_access_control_site_id}
+            response = requests_with_retry('post', move_url, headers=verkada_auth_headers, json=payload)
+            response.raise_for_status()
+            print(f"{controller_id} moved successfully to {verkada_access_control_site_id}.")
+        except RequestException as e:
+            print(f"Error moving {controller_id} info after retries: {e}")
+        except Exception as e:
+            print(f"Error moving {controller_id}: {e}")
+    
+
+    # WILL NOT WORK UNTIL WE PLACE ENV SENSOR SITE INFO IN DB
     def move_env_sensor(device, verkada_env_sensor_site_id):
-        print("env sensor moving not implemented")
-        pass
+        if not verkada_env_sensor_site_id:
+            print("No site ID provided for environmental sensor.")
+            return
+        
+        try:
+            env_sensor_id = device.get('deviceVerkadaDeviceId')
+            env_sensor_prev_site = ''
+            move_url = f"https://vsensor.command.verkada.com/__v/{verkada_org_short_name}/devices/{env_sensor_id}"
+            payload = {'currentSiteId': env_sensor_prev_site, 'siteId': verkada_env_sensor_site_id}
+            response = requests_with_retry('patch', move_url, headers=verkada_auth_headers, json=payload)
+            response.raise_for_status()
+            print(f"{env_sensor_id} moved successfully to {verkada_env_sensor_site_id}.")
+        except RequestException as e:
+            print(f"Error moving {env_sensor_id} info after retries: {e}")
+        except Exception as e:
+            print(f"Error moving {env_sensor_id}: {e}")
+
+
+
     def move_intercom(device, verkada_intercom_site_id):
-        print("intercom moving not implemented")
-        pass
+        if not verkada_intercom_site_id:
+            print("No site ID provided for intercom.")
+            return
+        
+        try:
+            intercom_id = device.get('deviceVerkadaDeviceId')
+            move_url = f"https://api.command.verkada.com/__v/{verkada_org_short_name}/vinter/v1/user/organization/{verkada_org_id}/intercom/{intercom_id}"
+            payload = {"siteId":verkada_intercom_site_id}
+            response = requests_with_retry('patch', move_url, headers=verkada_auth_headers, json=payload)
+            response.raise_for_status()
+            print(f"{intercom_id} moved successfully to {verkada_intercom_site_id}.")
+        except RequestException as e:
+            print(f"Error moving {intercom_id} info after retries: {e}")
+        except Exception as e:
+            print(f"Error moving {intercom_id}: {e}")
+
+    # WILL NOT WORK UNTIL WE PLACE GATEWAY SITE INFO IN DB
     def move_gateway(device, verkada_gateway_site_id):
-        print("gateway moving not implemented")
-        pass
+        if not verkada_gateway_site_id:
+            print("No site ID provided for intercom.")
+            return
+        
+        try:
+            gateway_prev_site = ''
+            gateway_id = device.get('deviceVerkadaDeviceId')
+            move_url = f"https://vnet.command.verkada.com/__v/{verkada_org_short_name}/devices/{gateway_id}"
+            payload = {'currentSiteId': gateway_prev_site, 'siteId': verkada_gateway_site_id}
+            response = requests_with_retry('patch', move_url, headers=verkada_auth_headers, json=payload)
+            response.raise_for_status()
+            print(f"{gateway_id} moved successfully to {verkada_gateway_site_id}.")
+        except RequestException as e:
+            print(f"Error moving {gateway_id} info after retries: {e}")
+        except Exception as e:
+            print(f"Error moving {gateway_id}: {e}")
+
+
     def move_command_connector(device, verkada_command_connector_site_id):
-        print("command connector moving not implemented")
-        pass
+        if not verkada_command_connector_site_id:
+            print("No site ID provided for Command Connector.")
+            return
+        
+        try:
+            cc_id = device.get('deviceVerkadaDeviceId')
+            move_url = f"https://vprovision.command.verkada.com/__v/{verkada_org_short_name}/vfortress/update_box"
+            payload = {
+                'deviceId': cc_id,
+                'siteId': config["connector_site"]
+            }
+            response = requests_with_retry('patch', move_url, headers=verkada_auth_headers, json=payload)
+            response.raise_for_status()
+            print(f"{gateway_id} moved successfully to {verkada_gateway_site_id}.")
+        except RequestException as e:
+            print(f"Error moving {gateway_id} info after retries: {e}")
+        except Exception as e:
+            print(f"Error moving {gateway_id}: {e}")
+
+    
     def move_viewing_station(device, verkada_viewing_station_site_id):
         print("viewing station moving not implemented")
         pass

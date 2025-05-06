@@ -238,6 +238,8 @@ class VerkadaSettingsEditor extends StatefulWidget {
 }
 
 class _VerkadaSettingsEditorState extends State<VerkadaSettingsEditor> {
+  bool _isSiteCleanerLoading = false;
+
   @override
   void initState() {
     super.initState();
@@ -280,6 +282,47 @@ class _VerkadaSettingsEditorState extends State<VerkadaSettingsEditor> {
     });
   }
 
+  void _onSiteCleanerToggleChanged(bool newValue) async {
+    final firebaseFunctions =
+        Provider.of<FirebaseFunctions>(context, listen: false);
+    final orgId = widget.orgData['orgId'] as String?;
+
+    if (orgId == null) {
+      AsyncContextHelpers.showSnackBarIfMounted(
+          context, 'Organization ID is missing.');
+      return;
+    }
+
+    setState(() {
+      _isSiteCleanerLoading = true;
+    });
+
+    try {
+      await firebaseFunctions
+          .httpsCallable('update_verkada_site_cleaner_status_callable')
+          .call({
+        'orgId': orgId,
+        'enabled': newValue,
+      });
+
+      if (mounted) {
+        AsyncContextHelpers.showSnackBarIfMounted(
+            context, 'Verkada Site Cleaner status updated successfully');
+      }
+    } catch (e) {
+      if (mounted) {
+        AsyncContextHelpers.showSnackBarIfMounted(
+            context, 'Failed to update Verkada Site Cleaner status: $e');
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSiteCleanerLoading = false;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -301,9 +344,17 @@ class _VerkadaSettingsEditorState extends State<VerkadaSettingsEditor> {
                 as Map<String, dynamic>?) ??
             {};
 
+    final bool currentSiteCleanerEnabled = widget
+            .orgVerkadaIntegrationData?['orgVerkadaSiteCleanerEnabled'] as bool? ??
+        false;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        const Text('Verkada Integration Settings',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center),
+        const SizedBox(height: 16.0),
         const Text('Verkada Product Designated Sites',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         const SizedBox(height: 8.0),
@@ -342,6 +393,18 @@ class _VerkadaSettingsEditorState extends State<VerkadaSettingsEditor> {
               onPressed: () {
                 _showUserWhitelistDialog(context, orgId, verkadaUserGroups);
               }),
+        const SizedBox(height: 16.0),
+        SwitchListTile(
+          title: const Text('Verkada Site Cleaner'),
+          value: currentSiteCleanerEnabled,
+          onChanged: _isSiteCleanerLoading || widget.orgVerkadaIntegrationData == null
+              ? null
+              : _onSiteCleanerToggleChanged,
+          secondary: _isSiteCleanerLoading
+              ? const CircularProgressIndicator()
+              : const Icon(Icons.integration_instructions),
+          activeColor: Theme.of(context).colorScheme.primary,
+        ),
         const SizedBox(height: 16.0),
       ],
     );

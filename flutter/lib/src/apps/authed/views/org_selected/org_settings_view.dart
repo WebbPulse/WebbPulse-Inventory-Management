@@ -153,7 +153,7 @@ class OrgSettingsView extends StatelessWidget {
                                               'orgVerkadaIntegrationEnabled'] ==
                                           true) ...[
                                         const Text(
-                                          'Verkada Org Integration Settings',
+                                          'Verkada Integration Credentials',
                                           style: TextStyle(
                                             fontSize: 20,
                                           ),
