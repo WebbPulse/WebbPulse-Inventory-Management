@@ -30,9 +30,9 @@ def login_to_verkada(verkada_org_shortname, verkada_org_bot_email, verkada_org_b
         verkada_org_id = response_data["organizationId"]
         
         auth_headers = {
-            "x-verkada-auth": verkada_bot_v2,
-            "x-verkada-user-id": verkada_bot_user_id,
-            "x-verkada-organization-id": verkada_org_id
+            "X-Verkada-Auth": verkada_bot_v2,
+            "X-Verkada-User-id": verkada_bot_user_id,
+            "X-Verkada-Organization-Id": verkada_org_id
         }
 
         user_info = {

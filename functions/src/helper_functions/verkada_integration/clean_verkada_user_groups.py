@@ -32,15 +32,16 @@ def remove_group(verkada_bot_user_info, group):
     """
     Removes a group from the Verkada organization.
     """
-    verkada_org_short_name = verkada_bot_user_info['org_name']
-    bot_auth_headers = verkada_bot_user_info['auth_headers']
+    verkada_org_short_name = verkada_bot_user_info.get('org_name')
+    bot_auth_headers = verkada_bot_user_info.get('auth_headers')
     group_id = group.get('groupId')
     print(verkada_org_short_name, bot_auth_headers, group_id)
     try:
         # Make a request to the Verkada API to remove the group
+        delete_url = f"https://vauth.command.verkada.com/__v/{verkada_org_short_name}/security_entity_group/delete"
         response = requests_with_retry(
             'post',
-            url=f"https://vauth.command.verkada.com/__v{verkada_org_short_name}/security_entity_group/delete",
+            delete_url,
             headers=bot_auth_headers,
             json={"securityEntityGroupIds":[group_id]},
         )

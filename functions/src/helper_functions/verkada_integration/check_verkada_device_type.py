@@ -72,17 +72,17 @@ def check_verkada_device_type(device_serial_number: str) -> str:
     elif prefix in keypad_prefixes:
         return 'Classic Alarm Keypad'
     elif prefix in door_contact_prefixes:
-        return 'Door Contact'
+        return 'Classic Alarm Door Contact Sensor'
     elif prefix in glass_break_prefixes:
-        return 'Glass Break'
+        return 'Classic Alarm Glass Break Sensor'
     elif prefix in motion_sensor_prefixes:
-        return 'Motion Sensor'
+        return 'Classic Alarm Motion Sensor'
     elif prefix in panic_button_prefixes:
-        return 'Panic Button'
+        return 'Classic Alarm Panic Button'
     elif prefix in water_sensor_prefixes:
-        return 'Water Sensors'
+        return 'Classic Alarm Water Sensor'
     elif prefix in wireless_relay_prefixes:
-        return 'Wireless Relay'
+        return 'Classic Alarm Wireless Relay'
     elif prefix in siren_strobe_prefixes:
         return 'Siren Strobe'
     elif prefix in new_panel_prefixes:
