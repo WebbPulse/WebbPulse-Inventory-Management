@@ -4,10 +4,8 @@ from src.helper_functions.verkada_integration.grant_all_verkada_permissions impo
 from src.helper_functions.verkada_integration.login_to_verkada import login_to_verkada
 from src.helper_functions.verkada_integration.sync_verkada_device_ids import sync_verkada_device_ids
 from src.helper_functions.verkada_integration.sync_verkada_user_groups import sync_verkada_user_groups
-from src.helper_functions.verkada_integration.sync_verkada_device_names import sync_verkada_device_names
-from src.helper_functions.verkada_integration.clean_verkada_user_list import clean_verkada_user_list
-from src.helper_functions.verkada_integration.clean_verkada_user_groups import clean_verkada_user_groups
-from src.helper_functions.verkada_integration.move_verkada_devices import move_verkada_devices
+
+
 
 
 from firebase_functions import https_fn
@@ -15,11 +13,16 @@ from typing import Any
 
 
 @https_fn.on_call(cors=POSTcorsrules, timeout_sec=540)
-def sync_verkada_permissions_callable(req: https_fn.CallableRequest) -> Any:
+def sync_with_verkada_callable(req: https_fn.CallableRequest) -> Any:
     """
-    Firebase Function to update the name of an organization.
-    The function ensures the user is authenticated, their email is verified, their token is current, 
-    and they are an admin of the organization.
+    Syncs Verkada permissions for a given organization.
+    This function is called by the organization admin to sync the Verkada permissions.
+    Args:
+        req (https_fn.CallableRequest): The request object containing the organization ID and Verkada credentials.
+    Returns:
+        dict: A response message indicating the success or failure of the operation.
+    Raises:
+        https_fn.HttpsError: If the user is not authenticated, not an organization admin, or if any required arguments are missing.
     """
 
     try:
@@ -61,11 +64,8 @@ def sync_verkada_permissions_callable(req: https_fn.CallableRequest) -> Any:
         })
         grant_all_verkada_permissions(verkada_bot_user_info)
         sync_verkada_device_ids(org_id, verkada_bot_user_info)
-        sync_verkada_device_names(org_id, verkada_bot_user_info)
         sync_verkada_user_groups(org_id, verkada_bot_user_info)
-        clean_verkada_user_list(verkada_bot_user_info)
-        clean_verkada_user_groups(org_id, verkada_bot_user_info)
-        move_verkada_devices(org_id, verkada_bot_user_info)
+        
 
         return {"response": f"Organization Verkada permissions synced successfully."}
 

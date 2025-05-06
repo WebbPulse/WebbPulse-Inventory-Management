@@ -9,7 +9,7 @@ import logging
 logging.basicConfig(level=logging.INFO)
 
 @scheduler_fn.on_schedule(schedule="every 24 hours", timeout_sec=540)
-def sync_verkada_user_groups_scheduled(event: scheduler_fn.ScheduledEvent) -> None:
+def clean_verkada_user_groups_scheduled(event: scheduler_fn.ScheduledEvent) -> None:
     """
     Scheduled function to sync Verkada user groups for all enabled organizations every 24 hours.
     """
@@ -22,25 +22,35 @@ def sync_verkada_user_groups_scheduled(event: scheduler_fn.ScheduledEvent) -> No
         for org_doc in orgs_ref:
             
             org_id = org_doc.id
-            logging.info(f"Processing organization: {org_id}")
+            # Initialize credentials to None
+            verkada_org_short_name = None
             verkada_org_bot_email = None
             verkada_org_bot_password = None
+            site_cleaner_enabled = False
 
             # --- Fetch sensitive data from the subcollection ---
             try:
-                creds_doc_ref = db.collection('organizations').document(org_id).collection('sensitiveConfigs').document('verkadaIntegrationSettings')
-                creds_doc = creds_doc_ref.get()
-                if creds_doc.exists:
-                    creds_data = creds_doc.to_dict()
-                    verkada_org_short_name = creds_data.get('orgVerkadaOrgShortName')
-                    verkada_org_bot_email = creds_data.get('orgVerkadaBotEmail')
-                    verkada_org_bot_password = creds_data.get('orgVerkadaBotPassword')
+                settings_doc_ref = db.collection('organizations').document(org_id).collection('sensitiveConfigs').document('verkadaIntegrationSettings')
+                settings_doc = settings_doc_ref.get()
+                if settings_doc.exists:
+                    settings_data = settings_doc.to_dict()
+                    verkada_org_short_name = settings_data.get('orgVerkadaOrgShortName')
+                    verkada_org_bot_email = settings_data.get('orgVerkadaBotEmail')
+                    verkada_org_bot_password = settings_data.get('orgVerkadaBotPassword')
+                    site_cleaner_enabled = settings_data.get('orgVerkadaSiteCleanerEnabled') == True
                 else:
-                    logging.warning(f"Verkada integration enabled for {org_id}, but credentials document not found at {creds_doc_ref.path}")
+                    logging.warning(f"Verkada integration settings document not found for {org_id} at {settings_doc_ref.path}")
+                    continue # Skip to the next organization
             except Exception as e:
-                logging.error(f"Error fetching credentials for organization {org_id}: {str(e)}")
-                continue
+                logging.error(f"Error fetching settings for organization {org_id}: {str(e)}")
+                continue # Skip to the next organization
             
+            # Check if site cleaner is enabled for this org
+            if not site_cleaner_enabled:
+                logging.info(f"Skipping organization {org_id}: Verkada site cleaner is not enabled.")
+                continue # Skip to the next organization
+
+            logging.info(f"Processing organization: {org_id} (Site cleaner enabled)")
 
             # Check if necessary credentials are present
             if not verkada_org_short_name or not verkada_org_bot_email or not verkada_org_bot_password:

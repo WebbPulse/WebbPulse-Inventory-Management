@@ -21,9 +21,25 @@ def sync_verkada_permissions_scheduled(event: scheduler_fn.ScheduledEvent) -> No
         for org_doc in orgs_ref:
             org_data = org_doc.to_dict()
             org_id = org_doc.id
-            verkada_org_short_name = org_data.get('orgVerkadaOrgShortName')
-            verkada_org_bot_email = org_data.get('orgVerkadaBotEmail')
-            verkada_org_bot_password = org_data.get('orgVerkadaBotPassword')
+            # Initialize credentials and settings to None/False
+            verkada_org_short_name = None
+            verkada_org_bot_email = None
+            verkada_org_bot_password = None
+            # --- Fetch sensitive data from the subcollection ---
+            try:
+                settings_doc_ref = db.collection('organizations').document(org_id).collection('sensitiveConfigs').document('verkadaIntegrationSettings')
+                settings_doc = settings_doc_ref.get()
+                if settings_doc.exists:
+                    settings_data = settings_doc.to_dict()
+                    verkada_org_short_name = settings_data.get('orgVerkadaOrgShortName')
+                    verkada_org_bot_email = settings_data.get('orgVerkadaBotEmail')
+                    verkada_org_bot_password = settings_data.get('orgVerkadaBotPassword')
+                else:
+                    logging.warning(f"Verkada integration settings document not found for {org_id} at {settings_doc_ref.path}")
+                    continue # Skip to the next organization
+            except Exception as e:
+                logging.error(f"Error fetching settings for organization {org_id}: {str(e)}")
+                continue # Skip to the next organization
 
             logging.info(f"Processing organization: {org_id}")
 

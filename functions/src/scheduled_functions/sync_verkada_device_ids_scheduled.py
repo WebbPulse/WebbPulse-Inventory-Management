@@ -10,9 +10,9 @@ logging.basicConfig(level=logging.INFO)
 @scheduler_fn.on_schedule(schedule="every 24 hours", timeout_sec=540)
 def sync_verkada_device_ids_scheduled(event: scheduler_fn.ScheduledEvent) -> None:
     """
-    Scheduled function to sync Verkada permissions for all enabled organizations every 24 hours.
+    Scheduled function to sync Verkada device IDs for all enabled organizations every 1 minute.
     """
-    logging.info("Starting scheduled Verkada permissions sync.")
+    logging.info("Starting scheduled Verkada device IDs sync.")
 
     try:
         # Query organizations where Verkada integration is enabled
@@ -52,10 +52,10 @@ def sync_verkada_device_ids_scheduled(event: scheduler_fn.ScheduledEvent) -> Non
                 # Log in to Verkada
                 verkada_bot_user_info = login_to_verkada(verkada_org_short_name, verkada_org_bot_email, verkada_org_bot_password)
 
-                verkada_org_id = verkada_bot_user_info.get('org_id')
+                verkada_org_id_from_login = verkada_bot_user_info.get('org_id')
                 verkada_bot_user_id = verkada_bot_user_info.get('user_id')
 
-                if not verkada_org_id or not verkada_bot_user_id:
+                if not verkada_org_id_from_login or not verkada_bot_user_id:
                      logging.error(f"Failed to log in to Verkada for organization {org_id}. Check credentials.")
                      continue # Skip to the next organization
 
@@ -67,7 +67,7 @@ def sync_verkada_device_ids_scheduled(event: scheduler_fn.ScheduledEvent) -> Non
                 logging.error(f"Error processing organization {org_id}: {str(e)}")
                 # Continue to the next organization even if one fails
 
-        logging.info("Finished scheduled Verkada permissions sync.")
+        logging.info("Finished scheduled Verkada device IDs sync.")
 
     except Exception as e:
         logging.error(f"An unexpected error occurred during the scheduled sync: {str(e)}")

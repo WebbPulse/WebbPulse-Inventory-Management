@@ -154,26 +154,75 @@ def move_verkada_devices(org_id, verkada_bot_user_info):
             move_url = f"https://vprovision.command.verkada.com/__v/{verkada_org_short_name}/vfortress/update_box"
             payload = {
                 'deviceId': cc_id,
-                'siteId': config["connector_site"]
+                'siteId': verkada_command_connector_site_id
             }
-            response = requests_with_retry('patch', move_url, headers=verkada_auth_headers, json=payload)
+            response = requests_with_retry('post', move_url, headers=verkada_auth_headers, json=payload)
             response.raise_for_status()
-            print(f"{gateway_id} moved successfully to {verkada_gateway_site_id}.")
+            print(f"{cc_id} moved successfully to {verkada_command_connector_site_id}.")
         except RequestException as e:
-            print(f"Error moving {gateway_id} info after retries: {e}")
+            print(f"Error moving {cc_id} info after retries: {e}")
         except Exception as e:
-            print(f"Error moving {gateway_id}: {e}")
+            print(f"Error moving {cc_id}: {e}")
 
     
     def move_viewing_station(device, verkada_viewing_station_site_id):
-        print("viewing station moving not implemented")
-        pass
+        if not verkada_viewing_station_site_id:
+            print("No site ID provided for Viewing Station.")
+            return
+        
+        try:
+            vx_id = device.get('deviceVerkadaDeviceId')
+            move_url = f"https://vvx.command.verkada.com/__v/{verkada_org_short_name}/viewing_station/update"
+            payload = {
+                'viewingStationId': vx_id,
+                'siteId': verkada_viewing_station_site_id
+            }
+            response = requests_with_retry('post', move_url, headers=verkada_auth_headers, json=payload)
+            response.raise_for_status()
+            print(f"{vx_id} moved successfully to {verkada_viewing_station_site_id}.")
+        except RequestException as e:
+            print(f"Error moving {vx_id} info after retries: {e}")
+        except Exception as e:
+            print(f"Error moving {vx_id}: {e}")
+    
     def move_desk_station(device, verkada_desk_station_site_id):
-        print("desk station moving not implemented")
-        pass
+        if not verkada_viewing_station_site_id:
+            print("No site ID provided for Viewing Station.")
+            return
+        
+        try:
+            desk_station_id = device.get('deviceVerkadaDeviceId')
+            move_url = f"https://api.command.verkada.com/__v/{verkada_org_short_name}/vinter/v1/user/organization/{verkada_org_id}/desk/{desk_station_id}"
+            payload = {"siteId": verkada_desk_station_site_id}
+            response = requests_with_retry('patch', move_url, headers=verkada_auth_headers, json=payload)
+            response.raise_for_status()
+            print(f"{desk_station_id} moved successfully to {verkada_desk_station_site_id}.")
+        except RequestException as e:
+            print(f"Error moving {desk_station_id} info after retries: {e}")
+        except Exception as e:
+            print(f"Error moving {desk_station_id}: {e}")
+
+
     def move_speaker(device, verkada_speaker_site_id):
-        print("speaker moving not implemented")
-        pass
+        if not verkada_speaker_site_id:
+            print("No site ID provided for Speaker.")
+            return
+        
+        try:
+            speaker_id = device.get('deviceVerkadaDeviceId')
+            move_url = f"https://vbroadcast.command.verkada.com/__v/{verkada_org_short_name}/management/speaker/update"
+            payload = {
+                "deviceId": speaker_id,
+                "siteId": verkada_speaker_site_id
+            }
+            response = requests_with_retry('post', move_url, headers=verkada_auth_headers, json=payload)
+            response.raise_for_status()
+            print(f"{speaker_id} moved successfully to {verkada_desk_station_site_id}.")
+        except RequestException as e:
+            print(f"Error moving {speaker_id} info after retries: {e}")
+        except Exception as e:
+            print(f"Error moving {speaker_id}: {e}")
+
     def move_classic_alarm_hub_device(device, verkada_classic_alarm_site_id, verkada_classic_alarm_zone_id):
         print("classic hub moving not implemented")
         pass

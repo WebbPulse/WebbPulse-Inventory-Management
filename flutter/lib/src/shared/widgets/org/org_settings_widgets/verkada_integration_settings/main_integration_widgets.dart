@@ -141,7 +141,7 @@ class _VerkadaCredentialsEditorState extends State<VerkadaCredentialsEditor> {
     });
     try {
       await firebaseFunctions
-          .httpsCallable('sync_verkada_permissions_callable')
+          .httpsCallable('sync_with_verkada_callable')
           .call({
         'orgId': orgId,
         'orgVerkadaOrgShortName': shortName,
