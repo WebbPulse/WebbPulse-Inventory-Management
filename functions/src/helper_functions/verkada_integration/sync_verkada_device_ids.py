@@ -157,12 +157,26 @@ def sync_verkada_device_ids(org_id, verkada_bot_user_info: dict, max_workers: in
             print(f"No {device_type_str} found to process.")
             return
 
+        # Filter out intercoms from cameras if applicable
+        if device_type_str == "Camera":
+            filtered_items = []
+            for item in items:
+                serial_number = item_data.get(serial_field)
+                if serial_number:
+                    actual_type = check_verkada_device_type(serial_number)
+                    if actual_type == 'Intercom':
+                        print(f"Skipping Camera sync for SN {serial_number} as it's identified as an Intercom.")
+                        continue # Skip this item, it will be handled by the Intercom sync task
+                
+                filtered_items.append(item)
+            items = filtered_items
+
         prepared_writes = []
         worker_func = partial(_prepare_device_write_data,
-                            org_id=org_id,
-                            id_field=id_field,
-                            serial_field=serial_field,
-                            expected_type=device_type_str)
+                              org_id=org_id,
+                              id_field=id_field,
+                              serial_field=serial_field,
+                              expected_type=device_type_str)
 
         tasks = []
         for item_data in items:
@@ -323,6 +337,7 @@ def sync_verkada_device_ids(org_id, verkada_bot_user_info: dict, max_workers: in
                             if actual_type == 'Classic Alarm Keypad':
                                 print(f"Skipping hubDevice sync for SN {serial_number} as it's identified as a Keypad.")
                                 continue # Skip this item, it will be handled by the Keypad sync task
+                    
                     extra_data = {}
                     if extra_map:
                         for dest_key, src_key in extra_map.items():

@@ -2,12 +2,12 @@ from src.helper_functions.verkada_integration.http_utils import requests_with_re
 from requests.exceptions import RequestException
 import logging
 from src.shared import db
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 def move_verkada_devices(org_id, verkada_bot_user_info):
     print("Moving Verkada devices...")
     verkada_org_id = verkada_bot_user_info.get('org_id')
     verkada_auth_headers = verkada_bot_user_info.get('auth_headers')
-    
     
     org_verkada_product_site_designations = {}
     try:
@@ -24,7 +24,7 @@ def move_verkada_devices(org_id, verkada_bot_user_info):
 
     verkada_access_control_building_id = org_verkada_product_site_designations.get('Access Controller Building', '' )
     verkada_access_control_floor_id = org_verkada_product_site_designations.get('Access Controller Floor', '' )
-    verkada_access_control_site_id = org_verkada_product_site_designations.get('Access Controller Site', '' )
+    verkada_access_control_site_id = org_verkada_product_site_designations.get('Access Control Site', '' )
     verada_access_level_id = org_verkada_product_site_designations.get('Access Level', '' )
     verkada_camera_site_id = org_verkada_product_site_designations.get('Camera Site', '' )
     verkada_classic_alarm_site_id = org_verkada_product_site_designations.get('Classic Alarm Site', '' )
@@ -94,7 +94,7 @@ def move_verkada_devices(org_id, verkada_bot_user_info):
         
         try:
             env_sensor_id = device.get('deviceVerkadaDeviceId')
-            env_sensor_prev_site = ''
+            env_sensor_prev_site = device.get('deviceVerkadaSiteId')
             move_url = f"https://vsensor.command.verkada.com/__v/{verkada_org_short_name}/devices/{env_sensor_id}"
             payload = {'currentSiteId': env_sensor_prev_site, 'siteId': verkada_env_sensor_site_id}
             response = requests_with_retry('patch', move_url, headers=verkada_auth_headers, json=payload)
@@ -104,8 +104,6 @@ def move_verkada_devices(org_id, verkada_bot_user_info):
             print(f"Error moving {env_sensor_id} info after retries: {e}")
         except Exception as e:
             print(f"Error moving {env_sensor_id}: {e}")
-
-
 
     def move_intercom(device, verkada_intercom_site_id):
         if not verkada_intercom_site_id:
@@ -124,14 +122,13 @@ def move_verkada_devices(org_id, verkada_bot_user_info):
         except Exception as e:
             print(f"Error moving {intercom_id}: {e}")
 
-    # WILL NOT WORK UNTIL WE PLACE GATEWAY SITE INFO IN DB
     def move_gateway(device, verkada_gateway_site_id):
         if not verkada_gateway_site_id:
             print("No site ID provided for intercom.")
             return
         
         try:
-            gateway_prev_site = ''
+            gateway_prev_site = device.get('deviceVerkadaSiteId')
             gateway_id = device.get('deviceVerkadaDeviceId')
             move_url = f"https://vnet.command.verkada.com/__v/{verkada_org_short_name}/devices/{gateway_id}"
             payload = {'currentSiteId': gateway_prev_site, 'siteId': verkada_gateway_site_id}
@@ -223,25 +220,77 @@ def move_verkada_devices(org_id, verkada_bot_user_info):
         except Exception as e:
             print(f"Error moving {speaker_id}: {e}")
 
-    def move_classic_alarm_hub_device(device, verkada_classic_alarm_site_id, verkada_classic_alarm_zone_id):
-        print("classic hub moving not implemented")
-        pass
-    def move_classic_alarm_keypad(device, verkada_classic_alarm_site_id):
-        print("keypad moving not implemented")
-        pass
-    def move_siren_strobe(device, verkada_new_alarm_site_id):
-        print("siren strobe moving not implemented")
-        pass
-    def move_alarm_expander(device, verkada_new_alarm_site_id):
-        print("alarm expander moving not implemented")
-        pass
-    
-    
-    for device in devices:
-        device = device.to_dict()
+    def move_classic_alarm_hub_device(device, verkada_classic_alarm_site_id):
+        if not verkada_classic_alarm_site_id:
+            print("No site ID provided for Classic Alarm Hub.")
+            return
         
+        try:
+            hub_id = device.get('deviceVerkadaDeviceId')
+            move_url = f"https://alarms.command.verkada.com/__v/{verkada_org_short_name}/device/hub/{hub_id}"
+            payload = {
+                "siteId": verkada_classic_alarm_site_id
+            }
+            response = requests_with_retry('patch', move_url, headers=verkada_auth_headers, json=payload)
+            response.raise_for_status()
+            print(f"{hub_id} moved successfully to {verkada_classic_alarm_site_id}.")
+        except RequestException as e:
+            print(f"Error moving {hub_id} info after retries: {e}")
+        except Exception as e:
+            print(f"Error moving {hub_id}: {e}")
+
+    def move_classic_alarm_keypad(device, verkada_classic_alarm_zone_id):
+        if not verkada_classic_alarm_site_id:
+            print("No zone ID provided for Classic Alarm Keypad.")
+            return
+        
+        try:
+            keypad_id = device.get('deviceVerkadaDeviceId')
+            move_url = f"https://alarms.command.verkada.com/__v/{verkada_org_short_name}/keypad/zone/set_associations"
+            payload = {
+                "keypadId":keypad_id,"zoneIds":[verkada_classic_alarm_zone_id] #target zone
+                }
+            response = requests_with_retry('post', move_url, headers=verkada_auth_headers, json=payload)
+            response.raise_for_status()
+            print(f"{keypad_id} moved successfully to {verkada_classic_alarm_zone_id}.")
+        except RequestException as e:
+            print(f"Error moving {keypad_id} info after retries: {e}")
+        except Exception as e:
+            print(f"Error moving {keypad_id}: {e}")
+
+    def move_siren_strobe(device, verkada_new_alarm_site_id):
+        print(f"Cannot move new alarm device 'Siren Strobe' to {verkada_new_alarm_site_id}")
+        
+    def move_alarm_expander(device, verkada_new_alarm_site_id):
+        print(f"Cannot move new alarm device 'Alarm Expander' to {verkada_new_alarm_site_id}")
+
+    def move_classic_alarm_sensor(device, verkada_classic_alarm_zone_id, device_type):
+        if not verkada_classic_alarm_zone_id:
+            print("No site ID provided for classic alarm sensor.")
+            return
+        
+        try:
+            sensor_id = device.get('deviceVerkadaDeviceId')
+            move_url = f"https://alarms.command.verkada.com/__v/{verkada_org_short_name}/device/sensor/add_to_zone"
+            payload = {
+                "deviceId": sensor_id,
+                "deviceType": device_type,
+                "zoneId": verkada_classic_alarm_zone_id
+            }
+            response = requests_with_retry('post', move_url, headers=verkada_auth_headers, json=payload)
+            response.raise_for_status()
+            print(f"{sensor_id} moved successfully to {verkada_classic_alarm_zone_id}.")
+        except RequestException as e:
+            print(f"Error moving {sensor_id} info after retries: {e}")
+        except Exception as e:
+            print(f"Error moving {sensor_id}: {e}")
+    
+    
+    def move_device(device):
+        device = device.to_dict()
         device_type = device.get('deviceVerkadaDeviceType')
-        if device_type == "Camera": 
+
+        if device_type == "Camera":
             move_camera(device, verkada_camera_site_id)
         elif device_type == 'Access Controller' or device_type == 'Input Output Board':
             move_controller(device, verkada_access_control_site_id, verkada_access_control_building_id, verkada_access_control_floor_id, verada_access_level_id)
@@ -260,25 +309,26 @@ def move_verkada_devices(org_id, verkada_bot_user_info):
         elif device_type == 'Speaker':
             move_speaker(device, verkada_classic_alarm_site_id)
         elif device_type == 'Classic Alarm Hub Device':
-            move_classic_alarm_hub_device(device, verkada_classic_alarm_site_id, verkada_classic_alarm_zone_id)
+            print(f"Moving classic alarm hub device {device.get('deviceSerialNumber')}")
+            move_classic_alarm_hub_device(device, verkada_classic_alarm_site_id)
         elif device_type == 'Classic Alarm Keypad':
-            move_classic_alarm_keypad(device, verkada_classic_alarm_site_id)
+            move_classic_alarm_keypad(device, verkada_classic_alarm_zone_id)
         elif device_type == 'Classic Alarm Door Contact Sensor':
-            pass
+            move_classic_alarm_sensor(device, verkada_classic_alarm_zone_id, "doorContactSensor")
         elif device_type == 'Classic Alarm Glass Break Sensor':
-            pass
+            move_classic_alarm_sensor(device, verkada_classic_alarm_zone_id, "glassBreakSensor")
         elif device_type == 'Classic Alarm Motion Sensor':
-            pass
+            move_classic_alarm_sensor(device, verkada_classic_alarm_zone_id, "motionSensor")
         elif device_type == 'Classic Alarm Panic Button':
-            pass
+            move_classic_alarm_sensor(device, verkada_classic_alarm_zone_id, "panicButton")
         elif device_type == 'Classic Alarm Water Sensor':
-            pass
+            move_classic_alarm_sensor(device, verkada_classic_alarm_zone_id, "waterSensor")
         elif device_type == 'Classic Alarm Wireless Relay':
-            pass
+            move_classic_alarm_sensor(device, verkada_classic_alarm_zone_id, "wirelessRelay")
         elif device_type == 'Siren Strobe':
             move_siren_strobe(device, verkada_new_alarm_site_id)
         elif device_type == 'BP52 Panel':
-            print('Oh fuck, this is a BP52')
+            print('Oh f***, this is a BP52')
             pass
         elif device_type == 'Alarm Expander':
             move_alarm_expander(device, verkada_new_alarm_site_id)
@@ -286,6 +336,12 @@ def move_verkada_devices(org_id, verkada_bot_user_info):
             
         else:
             print(f"Device type unaccounted for when moving: {device_type}")
-    
-    
 
+    # Multithreading with ThreadPoolExecutor
+    with ThreadPoolExecutor(max_workers=10) as executor:  # Adjust max_workers as needed
+        futures = [executor.submit(move_device, device) for device in devices]
+        for future in as_completed(futures):
+            try:
+                future.result()  # Retrieve the result to catch exceptions
+            except Exception as e:
+                logging.error(f"Error in moving device: {e}")

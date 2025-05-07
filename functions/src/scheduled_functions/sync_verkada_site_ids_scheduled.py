@@ -1,16 +1,17 @@
 from firebase_functions import scheduler_fn
 from src.shared import db
 from src.helper_functions.verkada_integration.login_to_verkada import login_to_verkada
-from src.helper_functions.verkada_integration.sync_verkada_device_ids import sync_verkada_device_ids
+from src.helper_functions.verkada_integration.sync_verkada_site_ids import sync_verkada_site_ids
+
 import logging
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 
 @scheduler_fn.on_schedule(schedule="every 24 hours", timeout_sec=540)
-def sync_verkada_device_ids_scheduled(event: scheduler_fn.ScheduledEvent) -> None:
+def sync_verkada_site_ids_scheduled(event: scheduler_fn.ScheduledEvent) -> None:
     """
-    Scheduled function to sync Verkada device IDs for all enabled organizations every 24 hours.
+    Scheduled function to sync Verkada site IDs for all enabled organizations every 24 horus.
     """
     logging.info("Starting scheduled Verkada device IDs sync.")
 
@@ -59,8 +60,7 @@ def sync_verkada_device_ids_scheduled(event: scheduler_fn.ScheduledEvent) -> Non
                      logging.error(f"Failed to log in to Verkada for organization {org_id}. Check credentials.")
                      continue # Skip to the next organization
 
-                # Grant permissions
-                sync_verkada_device_ids(org_id, verkada_bot_user_info)
+                sync_verkada_site_ids(org_id, verkada_bot_user_info)
                 logging.info(f"Successfully synced Verkada device IDs for organization {org_id}.")
 
             except Exception as e:

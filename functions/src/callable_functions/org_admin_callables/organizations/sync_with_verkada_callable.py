@@ -4,6 +4,7 @@ from src.helper_functions.verkada_integration.grant_all_verkada_permissions impo
 from src.helper_functions.verkada_integration.login_to_verkada import login_to_verkada
 from src.helper_functions.verkada_integration.sync_verkada_device_ids import sync_verkada_device_ids
 from src.helper_functions.verkada_integration.sync_verkada_user_groups import sync_verkada_user_groups
+from src.helper_functions.verkada_integration.sync_verkada_site_ids import sync_verkada_site_ids
 
 
 
@@ -65,6 +66,7 @@ def sync_with_verkada_callable(req: https_fn.CallableRequest) -> Any:
         grant_all_verkada_permissions(verkada_bot_user_info)
         sync_verkada_device_ids(org_id, verkada_bot_user_info)
         sync_verkada_user_groups(org_id, verkada_bot_user_info)
+        sync_verkada_site_ids(org_id, verkada_bot_user_info)
         
 
         return {"response": f"Organization Verkada permissions synced successfully."}
@@ -77,3 +79,4 @@ def sync_with_verkada_callable(req: https_fn.CallableRequest) -> Any:
             code=https_fn.FunctionsErrorCode.UNKNOWN,
             message=f"An error occurred: {str(e)}"
         )
+    

@@ -12,9 +12,10 @@ from src.helper_functions.verkada_integration.clean_verkada_user_groups import c
 from src.helper_functions.verkada_integration.move_verkada_devices import move_verkada_devices
 from src.helper_functions.verkada_integration.login_to_verkada import login_to_verkada
 from src.helper_functions.verkada_integration.sync_verkada_device_names import sync_verkada_device_names
+from src.helper_functions.verkada_integration.sync_verkada_site_ids import sync_verkada_site_ids
 
-@https_fn.on_call(cors=POSTcorsrules)
-def update_verkada_site_cleaner_status_callable(req: https_fn.CallableRequest) -> any:
+@https_fn.on_call(cors=POSTcorsrules, timeout_sec=540)
+def update_verkada_site_cleaner_status_callable(req: https_fn.CallableRequest,) -> any:
     """
     Updates the Verkada Site Cleaner status for a given organization.
     """
@@ -55,6 +56,7 @@ def update_verkada_site_cleaner_status_callable(req: https_fn.CallableRequest) -
             clean_verkada_user_list(verkada_bot_user_info)
             clean_verkada_user_groups(org_id, verkada_bot_user_info)
             move_verkada_devices(org_id, verkada_bot_user_info)
+            sync_verkada_site_ids(org_id, verkada_bot_user_info)
             sync_verkada_device_names(org_id, verkada_bot_user_info)
 
         return {"status": "success", "message": f"Verkada Site Cleaner status for organization {org_id} updated to {enabled}."}
