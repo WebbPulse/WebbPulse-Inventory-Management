@@ -164,7 +164,7 @@ jobs:
 
   build_and_deploy_ios_testflight_app:
     name: Build and Deploy Testflight IOS App
-    runs-on: macos-14
+    runs-on: macos-15
     env:
       FLUTTER_VERSION: 3.29.3
 
