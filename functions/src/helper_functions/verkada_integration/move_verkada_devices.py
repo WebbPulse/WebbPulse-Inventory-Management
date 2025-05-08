@@ -214,7 +214,7 @@ def move_verkada_devices(org_id, verkada_bot_user_info):
             }
             response = requests_with_retry('post', move_url, headers=verkada_auth_headers, json=payload)
             response.raise_for_status()
-            print(f"{speaker_id} moved successfully to {verkada_desk_station_site_id}.")
+            print(f"{speaker_id} moved successfully to {verkada_speaker_site_id}.")
         except RequestException as e:
             print(f"Error moving {speaker_id} info after retries: {e}")
         except Exception as e:
