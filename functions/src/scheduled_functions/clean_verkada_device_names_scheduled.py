@@ -52,7 +52,7 @@ def clean_verkada_device_names_scheduled(event: scheduler_fn.ScheduledEvent) -> 
                              continue # Skip to the next organization
 
                         # Sync device names
-                        sync_verkada_device_names(verkada_bot_user_info, org_id)
+                        sync_verkada_device_names(org_id, verkada_bot_user_info)
                         logging.info(f"Successfully synced Verkada device names for organization {org_id}.")
 
                     except Exception as e:
