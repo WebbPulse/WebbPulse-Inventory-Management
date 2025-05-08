@@ -183,8 +183,8 @@ def move_verkada_devices(org_id, verkada_bot_user_info):
             print(f"Error moving {vx_id}: {e}")
     
     def move_desk_station(device, verkada_desk_station_site_id):
-        if not verkada_viewing_station_site_id:
-            print("No site ID provided for Viewing Station.")
+        if not verkada_desk_station_site_id:
+            print("No site ID provided for Desk Station.")
             return
         
         try:
