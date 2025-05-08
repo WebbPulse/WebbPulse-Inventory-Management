@@ -200,7 +200,7 @@ jobs:
         uses: subosito/flutter-action@main
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
-          channel: "stable"
+          channel: stable
       
       #Install Flutter dependencies
       - name: Install flutter dependencies
@@ -208,6 +208,7 @@ jobs:
           cd flutter 
           flutter clean
           flutter pub get
+          flutter doctor -v
           flutter build ios --no-codesign #fake run to fetch dependancies and update xcode configs
       - name: Install the Apple certificate and provisioning profile
         env:
