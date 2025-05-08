@@ -13,7 +13,7 @@ jobs:
       SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
       FIREBASE_APPLICATION_CREDENTIALS: ${{ secrets.FIREBASE_APPLICATION_CREDENTIALS }}
       GOOGLE_APPLICATION_CREDENTIALS: ./gcp_key.json
-      FLUTTER_VERSION: 3.24.3
+      FLUTTER_VERSION: 3.29.3
     steps:
       - name: Checkout Repo
         uses: actions/checkout@main
@@ -82,7 +82,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       JAVA_VERSION: 17
-      FLUTTER_VERSION: 3.24.3
+      FLUTTER_VERSION: 3.29.3
       AAB_PATH: flutter/build/app/outputs/bundle/release/app-release.aab
       FIREBASE_APPLICATION_CREDENTIALS: ${{ secrets.FIREBASE_APPLICATION_CREDENTIALS }}
       GOOGLE_APPLICATION_CREDENTIALS: gcp_key.json
@@ -166,7 +166,7 @@ jobs:
     name: Build and Deploy Testflight IOS App
     runs-on: macos-latest
     env:
-      FLUTTER_VERSION: 3.24.3
+      FLUTTER_VERSION: 3.29.3
 
     steps:
       - name: Checkout Repo
@@ -239,7 +239,7 @@ jobs:
       - name: Build The Archive
         run: |
           cd flutter
-          xcodebuild -workspace ios/Runner.xcworkspace -scheme Runner -sdk iphoneos -configuration Release archive -archivePath build/ios/archive/Runner.xcarchive -verbose
+          xcodebuild -workspace ios/Runner.xcworkspace -scheme Runner -sdk iphoneos -configuration Release archive -archivePath build/ios/archive/Runner.xcarchive
       - name: Export the archive to IPA
         run: |
           cd flutter
