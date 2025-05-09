@@ -41,13 +41,42 @@ def sync_verkada_user_groups(org_id, verkada_bot_user_info):
             for group in user_groups
             if group.get("entityGroupId") and group.get("name") is not None
         ]
-    def update_firestore_with_user_groups(org_id, user_groups):
+    def update_firestore_with_user_groups(org_id, new_user_groups):
         """
         Updates Firestore with the fetched user groups.
         """
-        org_ref = db.collection('organizations').document(org_id).collection('sensitiveConfigs').document('verkadaIntegrationSettings')
-        org_ref.set({
-            'orgVerkadaUserGroups': user_groups
+        org_settings_ref = db.collection('organizations').document(org_id).collection('sensitiveConfigs').document('verkadaIntegrationSettings')
+        try:
+            doc = org_settings_ref.get()
+            existing_groups_data = doc.to_dict()
+            if existing_groups_data and 'orgVerkadaUserGroups' in existing_groups_data:
+                existing_groups = existing_groups_data['orgVerkadaUserGroups']
+            else:
+                existing_groups = []
+        except Exception as e:
+            logging.error(f"Error fetching existing Verkada user groups for org {org_id}: {e}")
+            existing_groups = []
+        
+        # Create a map of existing groups by groupId for easy lookup of whitelist status
+        existing_groups_map = {group['groupId']: group for group in existing_groups if 'groupId' in group}
+
+        merged_user_groups = []
+        
+        for new_group in new_user_groups:
+            group_id = new_group.get("groupId")
+            if group_id:
+                # Preserve existing whitelist status if group already exists
+                is_whitelisted = existing_groups_map.get(group_id, {}).get('isWhitelisted', False)
+                merged_group_data = {
+                    "groupId": group_id,
+                    "groupName": new_group.get("groupName"),
+                    "isWhitelisted": is_whitelisted
+                }
+                merged_user_groups.append(merged_group_data)
+            else:
+                logging.warning(f"Skipping group due to missing groupId: {new_group}")
+        org_settings_ref.set({
+            'orgVerkadaUserGroups': merged_user_groups
         }, merge=True)
 
     # Fetch user groups from Verkada
