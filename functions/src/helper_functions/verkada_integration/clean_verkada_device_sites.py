@@ -124,7 +124,7 @@ def clean_verkada_device_sites(org_id, verkada_bot_user_info):
 
     def move_gateway(device, verkada_gateway_site_id):
         if not verkada_gateway_site_id:
-            print("No site ID provided for intercom.")
+            print("No site ID provided for gateway.")
             return
         
         try:
@@ -309,7 +309,6 @@ def clean_verkada_device_sites(org_id, verkada_bot_user_info):
         elif device_type == 'Speaker':
             move_speaker(device, verkada_classic_alarm_site_id)
         elif device_type == 'Classic Alarm Hub Device':
-            print(f"Moving classic alarm hub device {device.get('deviceSerialNumber')}")
             move_classic_alarm_hub_device(device, verkada_classic_alarm_site_id)
         elif device_type == 'Classic Alarm Keypad':
             move_classic_alarm_keypad(device, verkada_classic_alarm_zone_id)

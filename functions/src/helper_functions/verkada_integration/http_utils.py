@@ -29,6 +29,8 @@ def requests_with_retry(method, url, max_retries=10, delay=1, **kwargs):
                 kwargs['timeout'] = 30 # Default timeout of 30 seconds
 
             response = requests.request(method.lower(), url, **kwargs)
+            if response.status_code == 400 and response.text == 'siteId and currentSiteId are the same':
+                response.status_code = 200
             # Raise an HTTPError exception for bad status codes (4xx or 5xx)
             response.raise_for_status()
             # If request is successful, return the response
