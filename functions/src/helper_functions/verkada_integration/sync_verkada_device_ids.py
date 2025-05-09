@@ -160,14 +160,14 @@ def sync_verkada_device_ids(org_id, verkada_bot_user_info: dict, max_workers: in
         # Filter out intercoms from cameras if applicable
         if device_type_str == "Camera":
             filtered_items = []
-            for item in items:
-                serial_number = item_data.get(serial_field)
+            for item in items: # Changed item_data to item
+                serial_number = item.get(serial_field)
                 if serial_number:
                     actual_type = check_verkada_device_type(serial_number)
                     if actual_type == 'Intercom':
                         print(f"Skipping Camera sync for SN {serial_number} as it's identified as an Intercom.")
                         continue # Skip this item, it will be handled by the Intercom sync task
-                
+        
                 filtered_items.append(item)
             items = filtered_items
 
