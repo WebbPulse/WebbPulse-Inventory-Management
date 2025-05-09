@@ -31,8 +31,6 @@ void main() async {
       FirebaseFirestore.instance.useFirestoreEmulator(host, 8080);
 
       await FirebaseAuth.instance.useAuthEmulator(host, 9099);
-      await FirebaseAuth.instance
-          .signOut(); // Add this line to sign out any existing user
 
       FirebaseFunctions.instance.useFunctionsEmulator(host, 5001);
 

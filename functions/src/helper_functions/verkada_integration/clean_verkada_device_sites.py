@@ -3,8 +3,9 @@ from requests.exceptions import RequestException
 import logging
 from src.shared import db
 from concurrent.futures import ThreadPoolExecutor, as_completed
+import requests
 
-def move_verkada_devices(org_id, verkada_bot_user_info):
+def clean_verkada_device_sites(org_id, verkada_bot_user_info):
     print("Moving Verkada devices...")
     verkada_org_id = verkada_bot_user_info.get('org_id')
     verkada_auth_headers = verkada_bot_user_info.get('auth_headers')
@@ -86,7 +87,6 @@ def move_verkada_devices(org_id, verkada_bot_user_info):
             print(f"Error moving {controller_id}: {e}")
     
 
-    # WILL NOT WORK UNTIL WE PLACE ENV SENSOR SITE INFO IN DB
     def move_env_sensor(device, verkada_env_sensor_site_id):
         if not verkada_env_sensor_site_id:
             print("No site ID provided for environmental sensor.")
