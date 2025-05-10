@@ -1,6 +1,7 @@
 import requests
 import time
 from requests.exceptions import RequestException
+import logging
 
 def requests_with_retry(method, url, max_retries=10, delay=1, **kwargs):
     """
@@ -38,11 +39,11 @@ def requests_with_retry(method, url, max_retries=10, delay=1, **kwargs):
         except RequestException as e:
             last_exception = e
             retries += 1
-            print(f"Request failed ({e}). Retrying ({retries}/{max_retries}) in {delay} second(s)... URL: {url}, Method: {method}")
+            logging.error(f"Request failed ({e}). Retrying ({retries}/{max_retries}) in {delay} second(s)... URL: {url}, Method: {method}")
             if retries < max_retries:
                 time.sleep(delay)
 
-    print(f"Request failed after {max_retries} retries. URL: {url}, Method: {method}")
+    logging.error(f"Request failed after {max_retries} retries. URL: {url}, Method: {method}")
     # If all retries fail, raise the last captured exception
     if last_exception:
         raise last_exception

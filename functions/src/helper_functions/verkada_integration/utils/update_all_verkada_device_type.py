@@ -1,6 +1,10 @@
 import concurrent.futures
-from src.helper_functions.verkada_integration.check_verkada_device_type import check_verkada_device_type
+import logging
+from src.helper_functions.verkada_integration.utils.check_verkada_device_type import check_verkada_device_type
 from src.shared import db
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Renamed: This function now only checks the type and returns data for batching
 def _get_device_update_data(args):
@@ -15,7 +19,7 @@ def _get_device_update_data(args):
             # Return None if no type found or no update needed
             return None
     except Exception as e:
-        print(f"Error checking device type for {doc_id} ({device_serial_number}): {e}")
+        logging.error(f"Error checking device type for {doc_id} ({device_serial_number}): {e}")
         return None # Indicate error or inability to process
 
 def update_all_devices_verkada_device_type(org_id: str, max_workers: int = 10, batch_size: int = 499) -> None:
@@ -54,11 +58,11 @@ def update_all_devices_verkada_device_type(org_id: str, max_workers: int = 10, b
 
         if batch_count >= batch_size:
             try:
-                print(f"Committing batch of {batch_count} updates...")
+                logging.info(f"Committing batch of {batch_count} updates...")
                 batch.commit()
-                print(f"Batch committed successfully.")
+                logging.info(f"Batch committed successfully.")
             except Exception as e:
-                print(f"Error committing batch: {e}")
+                logging.error(f"Error committing batch: {e}")
             # Start a new batch
             batch = db.batch()
             batch_count = 0
@@ -66,10 +70,10 @@ def update_all_devices_verkada_device_type(org_id: str, max_workers: int = 10, b
     # Commit any remaining updates in the last batch
     if batch_count > 0:
         try:
-            print(f"Committing final batch of {batch_count} updates...")
+            logging.info(f"Committing final batch of {batch_count} updates...")
             batch.commit()
-            print(f"Final batch committed successfully.")
+            logging.info(f"Final batch committed successfully.")
         except Exception as e:
-            print(f"Error committing final batch: {e}")
+            logging.error(f"Error committing final batch: {e}")
 
-    print(f"Finished updating Verkada device types. Attempted to update {total_updated} devices.")
+    logging.info(f"Finished updating Verkada device types. Attempted to update {total_updated} devices.")

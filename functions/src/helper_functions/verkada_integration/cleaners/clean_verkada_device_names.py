@@ -1,9 +1,9 @@
 import concurrent.futures
 from src.shared import db
-from .http_utils import requests_with_retry
+from ..utils.http_utils import requests_with_retry
 from requests.exceptions import RequestException
 import logging
-from src.helper_functions.verkada_integration.rename_device_in_verkada_command import rename_device_in_verkada_command
+from src.helper_functions.verkada_integration.utils.rename_device_in_verkada_command import rename_device_in_verkada_command
 
 def _process_device_doc(device_doc, org_id, verkada_bot_user_info):
     """Helper function to process a single device document."""

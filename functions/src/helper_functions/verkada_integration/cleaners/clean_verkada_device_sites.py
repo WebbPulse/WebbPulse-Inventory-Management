@@ -1,4 +1,4 @@
-from src.helper_functions.verkada_integration.http_utils import requests_with_retry
+from src.helper_functions.verkada_integration.utils.http_utils import requests_with_retry
 from requests.exceptions import RequestException
 import logging
 from src.shared import db
@@ -6,7 +6,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import requests
 
 def clean_verkada_device_sites(org_id, verkada_bot_user_info):
-    print("Moving Verkada devices...")
+    logging.info("Moving Verkada devices...")
     verkada_org_id = verkada_bot_user_info.get('org_id')
     verkada_auth_headers = verkada_bot_user_info.get('auth_headers')
     
@@ -46,14 +46,14 @@ def clean_verkada_device_sites(org_id, verkada_bot_user_info):
     try:
         devices_ref = db.collection('organizations').document(org_id).collection('devices').where('deviceVerkadaDeviceId', '!=', None)
         devices = devices_ref.get()
-        print(f"Devices to move: {len(devices)}")
+        logging.info(f"Devices to move: {len(devices)}")
     except Exception as e:
         logging.error(f"Error retrieving devices: {e}")
         raise
     
     def move_camera(device, verkada_camera_site_id):
         if not verkada_camera_site_id:
-            print("No site ID provided for camera.")
+            logging.error("No site ID provided for camera.")
             return
         
         try:
@@ -63,15 +63,15 @@ def clean_verkada_device_sites(org_id, verkada_bot_user_info):
                     "destinationSiteId": verkada_camera_site_id}
             response = requests_with_retry('post', move_url, headers=verkada_auth_headers, json=payload)
             response.raise_for_status()
-            print(f"{camera_id} moved successfully to {verkada_camera_site_id}.")
+            logging.info(f"{camera_id} moved successfully to {verkada_camera_site_id}.")
         except RequestException as e:
-            print(f"Error moving {camera_id} info after retries: {e}")
+            logging.error(f"Error moving {camera_id} info after retries: {e}")
         except Exception as e:
-            print(f"Error moving {camera_id}: {e}")
+            logging.error(f"Error moving {camera_id}: {e}")
     
     def move_controller(device, verkada_access_control_site_id, verkada_access_control_building_id, verkada_access_control_floor_id, verada_access_level_id):
         if not verkada_access_control_site_id:
-            print("No site ID provided for access controller.")
+            logging.error("No site ID provided for access controller.")
             return
         
         try:
@@ -80,16 +80,16 @@ def clean_verkada_device_sites(org_id, verkada_bot_user_info):
             payload = {"accessControllerId":controller_id,"siteId":verkada_access_control_site_id}
             response = requests_with_retry('post', move_url, headers=verkada_auth_headers, json=payload)
             response.raise_for_status()
-            print(f"{controller_id} moved successfully to {verkada_access_control_site_id}.")
+            logging.info(f"{controller_id} moved successfully to {verkada_access_control_site_id}.")
         except RequestException as e:
-            print(f"Error moving {controller_id} info after retries: {e}")
+            logging.error(f"Error moving {controller_id} info after retries: {e}")
         except Exception as e:
-            print(f"Error moving {controller_id}: {e}")
+            logging.error(f"Error moving {controller_id}: {e}")
     
 
     def move_env_sensor(device, verkada_env_sensor_site_id):
         if not verkada_env_sensor_site_id:
-            print("No site ID provided for environmental sensor.")
+            logging.error("No site ID provided for environmental sensor.")
             return
         
         try:
@@ -99,15 +99,15 @@ def clean_verkada_device_sites(org_id, verkada_bot_user_info):
             payload = {'currentSiteId': env_sensor_prev_site, 'siteId': verkada_env_sensor_site_id}
             response = requests_with_retry('patch', move_url, headers=verkada_auth_headers, json=payload)
             response.raise_for_status()
-            print(f"{env_sensor_id} moved successfully to {verkada_env_sensor_site_id}.")
+            logging.info(f"{env_sensor_id} moved successfully to {verkada_env_sensor_site_id}.")
         except RequestException as e:
-            print(f"Error moving {env_sensor_id} info after retries: {e}")
+            logging.error(f"Error moving {env_sensor_id} info after retries: {e}")
         except Exception as e:
-            print(f"Error moving {env_sensor_id}: {e}")
+            logging.error(f"Error moving {env_sensor_id}: {e}")
 
     def move_intercom(device, verkada_intercom_site_id):
         if not verkada_intercom_site_id:
-            print("No site ID provided for intercom.")
+            logging.error("No site ID provided for intercom.")
             return
         
         try:
@@ -116,15 +116,15 @@ def clean_verkada_device_sites(org_id, verkada_bot_user_info):
             payload = {"siteId":verkada_intercom_site_id}
             response = requests_with_retry('patch', move_url, headers=verkada_auth_headers, json=payload)
             response.raise_for_status()
-            print(f"{intercom_id} moved successfully to {verkada_intercom_site_id}.")
+            logging.info(f"{intercom_id} moved successfully to {verkada_intercom_site_id}.")
         except RequestException as e:
-            print(f"Error moving {intercom_id} info after retries: {e}")
+            logging.error(f"Error moving {intercom_id} info after retries: {e}")
         except Exception as e:
-            print(f"Error moving {intercom_id}: {e}")
+            logging.error(f"Error moving {intercom_id}: {e}")
 
     def move_gateway(device, verkada_gateway_site_id):
         if not verkada_gateway_site_id:
-            print("No site ID provided for gateway.")
+            logging.error("No site ID provided for gateway.")
             return
         
         try:
@@ -134,16 +134,16 @@ def clean_verkada_device_sites(org_id, verkada_bot_user_info):
             payload = {'currentSiteId': gateway_prev_site, 'siteId': verkada_gateway_site_id}
             response = requests_with_retry('patch', move_url, headers=verkada_auth_headers, json=payload)
             response.raise_for_status()
-            print(f"{gateway_id} moved successfully to {verkada_gateway_site_id}.")
+            logging.info(f"{gateway_id} moved successfully to {verkada_gateway_site_id}.")
         except RequestException as e:
-            print(f"Error moving {gateway_id} info after retries: {e}")
+            logging.error(f"Error moving {gateway_id} info after retries: {e}")
         except Exception as e:
-            print(f"Error moving {gateway_id}: {e}")
+            logging.error(f"Error moving {gateway_id}: {e}")
 
 
     def move_command_connector(device, verkada_command_connector_site_id):
         if not verkada_command_connector_site_id:
-            print("No site ID provided for Command Connector.")
+            logging.error("No site ID provided for Command Connector.")
             return
         
         try:
@@ -155,16 +155,16 @@ def clean_verkada_device_sites(org_id, verkada_bot_user_info):
             }
             response = requests_with_retry('post', move_url, headers=verkada_auth_headers, json=payload)
             response.raise_for_status()
-            print(f"{cc_id} moved successfully to {verkada_command_connector_site_id}.")
+            logging.info(f"{cc_id} moved successfully to {verkada_command_connector_site_id}.")
         except RequestException as e:
-            print(f"Error moving {cc_id} info after retries: {e}")
+            logging.error(f"Error moving {cc_id} info after retries: {e}")
         except Exception as e:
-            print(f"Error moving {cc_id}: {e}")
+            logging.error(f"Error moving {cc_id}: {e}")
 
     
     def move_viewing_station(device, verkada_viewing_station_site_id):
         if not verkada_viewing_station_site_id:
-            print("No site ID provided for Viewing Station.")
+            logging.error("No site ID provided for Viewing Station.")
             return
         
         try:
@@ -176,15 +176,15 @@ def clean_verkada_device_sites(org_id, verkada_bot_user_info):
             }
             response = requests_with_retry('post', move_url, headers=verkada_auth_headers, json=payload)
             response.raise_for_status()
-            print(f"{vx_id} moved successfully to {verkada_viewing_station_site_id}.")
+            logging.info(f"{vx_id} moved successfully to {verkada_viewing_station_site_id}.")
         except RequestException as e:
-            print(f"Error moving {vx_id} info after retries: {e}")
+            logging.error(f"Error moving {vx_id} info after retries: {e}")
         except Exception as e:
-            print(f"Error moving {vx_id}: {e}")
+            logging.error(f"Error moving {vx_id}: {e}")
     
     def move_desk_station(device, verkada_desk_station_site_id):
         if not verkada_desk_station_site_id:
-            print("No site ID provided for Desk Station.")
+            logging.error("No site ID provided for Desk Station.")
             return
         
         try:
@@ -193,16 +193,16 @@ def clean_verkada_device_sites(org_id, verkada_bot_user_info):
             payload = {"siteId": verkada_desk_station_site_id}
             response = requests_with_retry('patch', move_url, headers=verkada_auth_headers, json=payload)
             response.raise_for_status()
-            print(f"{desk_station_id} moved successfully to {verkada_desk_station_site_id}.")
+            logging.info(f"{desk_station_id} moved successfully to {verkada_desk_station_site_id}.")
         except RequestException as e:
-            print(f"Error moving {desk_station_id} info after retries: {e}")
+            logging.error(f"Error moving {desk_station_id} info after retries: {e}")
         except Exception as e:
-            print(f"Error moving {desk_station_id}: {e}")
+            logging.error(f"Error moving {desk_station_id}: {e}")
 
 
     def move_speaker(device, verkada_speaker_site_id):
         if not verkada_speaker_site_id:
-            print("No site ID provided for Speaker.")
+            logging.error("No site ID provided for Speaker.")
             return
         
         try:
@@ -214,15 +214,15 @@ def clean_verkada_device_sites(org_id, verkada_bot_user_info):
             }
             response = requests_with_retry('post', move_url, headers=verkada_auth_headers, json=payload)
             response.raise_for_status()
-            print(f"{speaker_id} moved successfully to {verkada_speaker_site_id}.")
+            logging.info(f"{speaker_id} moved successfully to {verkada_speaker_site_id}.")
         except RequestException as e:
-            print(f"Error moving {speaker_id} info after retries: {e}")
+            logging.error(f"Error moving {speaker_id} info after retries: {e}")
         except Exception as e:
-            print(f"Error moving {speaker_id}: {e}")
+            logging.error(f"Error moving {speaker_id}: {e}")
 
     def move_classic_alarm_hub_device(device, verkada_classic_alarm_site_id):
         if not verkada_classic_alarm_site_id:
-            print("No site ID provided for Classic Alarm Hub.")
+            logging.error("No site ID provided for Classic Alarm Hub.")
             return
         
         try:
@@ -233,15 +233,15 @@ def clean_verkada_device_sites(org_id, verkada_bot_user_info):
             }
             response = requests_with_retry('patch', move_url, headers=verkada_auth_headers, json=payload)
             response.raise_for_status()
-            print(f"{hub_id} moved successfully to {verkada_classic_alarm_site_id}.")
+            logging.info(f"{hub_id} moved successfully to {verkada_classic_alarm_site_id}.")
         except RequestException as e:
-            print(f"Error moving {hub_id} info after retries: {e}")
+            logging.error(f"Error moving {hub_id} info after retries: {e}")
         except Exception as e:
-            print(f"Error moving {hub_id}: {e}")
+            logging.error(f"Error moving {hub_id}: {e}")
 
     def move_classic_alarm_keypad(device, verkada_classic_alarm_zone_id):
-        if not verkada_classic_alarm_site_id:
-            print("No zone ID provided for Classic Alarm Keypad.")
+        if not verkada_classic_alarm_zone_id:
+            logging.error("No zone ID provided for Classic Alarm Keypad.")
             return
         
         try:
@@ -252,21 +252,21 @@ def clean_verkada_device_sites(org_id, verkada_bot_user_info):
                 }
             response = requests_with_retry('post', move_url, headers=verkada_auth_headers, json=payload)
             response.raise_for_status()
-            print(f"{keypad_id} moved successfully to {verkada_classic_alarm_zone_id}.")
+            logging.info(f"{keypad_id} moved successfully to {verkada_classic_alarm_zone_id}.")
         except RequestException as e:
-            print(f"Error moving {keypad_id} info after retries: {e}")
+            logging.error(f"Error moving {keypad_id} info after retries: {e}")
         except Exception as e:
-            print(f"Error moving {keypad_id}: {e}")
+            logging.error(f"Error moving {keypad_id}: {e}")
 
     def move_siren_strobe(device, verkada_new_alarm_site_id):
-        print(f"Cannot move new alarm device 'Siren Strobe' to {verkada_new_alarm_site_id}")
+        logging.warning(f"Cannot move new alarm device 'Siren Strobe' to {verkada_new_alarm_site_id}")
         
     def move_alarm_expander(device, verkada_new_alarm_site_id):
-        print(f"Cannot move new alarm device 'Alarm Expander' to {verkada_new_alarm_site_id}")
+        logging.warning(f"Cannot move new alarm device 'Alarm Expander' to {verkada_new_alarm_site_id}")
 
     def move_classic_alarm_sensor(device, verkada_classic_alarm_zone_id, device_type):
         if not verkada_classic_alarm_zone_id:
-            print("No site ID provided for classic alarm sensor.")
+            logging.error("No zone ID provided for classic alarm sensor.")
             return
         
         try:
@@ -279,11 +279,11 @@ def clean_verkada_device_sites(org_id, verkada_bot_user_info):
             }
             response = requests_with_retry('post', move_url, headers=verkada_auth_headers, json=payload)
             response.raise_for_status()
-            print(f"{sensor_id} moved successfully to {verkada_classic_alarm_zone_id}.")
+            logging.info(f"{sensor_id} moved successfully to {verkada_classic_alarm_zone_id}.")
         except RequestException as e:
-            print(f"Error moving {sensor_id} info after retries: {e}")
+            logging.error(f"Error moving {sensor_id} info after retries: {e}")
         except Exception as e:
-            print(f"Error moving {sensor_id}: {e}")
+            logging.error(f"Error moving {sensor_id}: {e}")
     
     
     def move_device(device):
@@ -327,14 +327,14 @@ def clean_verkada_device_sites(org_id, verkada_bot_user_info):
         elif device_type == 'Siren Strobe':
             move_siren_strobe(device, verkada_new_alarm_site_id)
         elif device_type == 'BP52 Panel':
-            print('Oh f***, this is a BP52')
+            logging.warning('Encountered unhandled device type: BP52')
             pass
         elif device_type == 'Alarm Expander':
             move_alarm_expander(device, verkada_new_alarm_site_id)
             pass
             
         else:
-            print(f"Device type unaccounted for when moving: {device_type}")
+            logging.warning(f"Device type unaccounted for when moving: {device_type}")
 
     # Multithreading with ThreadPoolExecutor
     with ThreadPoolExecutor(max_workers=10) as executor:  # Adjust max_workers as needed

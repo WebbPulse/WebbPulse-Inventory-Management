@@ -1,11 +1,15 @@
 import requests
 import concurrent.futures
+import logging
 from firebase_admin import firestore
 from requests.exceptions import RequestException, JSONDecodeError
-from .http_utils import requests_with_retry
+from ..utils.http_utils import requests_with_retry
 from src.shared import db
 from functools import partial
-from src.helper_functions.verkada_integration.check_verkada_device_type import check_verkada_device_type
+from src.helper_functions.verkada_integration.utils.check_verkada_device_type import check_verkada_device_type
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # --- Generic Helper to Prepare Write Data ---
 
@@ -25,7 +29,7 @@ def _prepare_device_write_data(device_data: dict, org_id: str, id_field: str, se
         serial_number = device_data.get('serialNumber') # Fallback if needed, adjust if API guarantees one or the other
 
     if not (verkada_device_id and serial_number):
-        print(f"Skipping {expected_type} due to missing ID ('{id_field}') or Serial ('{serial_field}'): {device_data}")
+        logging.warning(f"Skipping {expected_type} due to missing ID ('{id_field}') or Serial ('{serial_field}'): {device_data}")
         return None
 
     try:
@@ -62,7 +66,7 @@ def _prepare_device_write_data(device_data: dict, org_id: str, id_field: str, se
             return ('create', serial_number, create_data)
 
     except Exception as e:
-        print(f"Error preparing write data for {expected_type} SN {serial_number}: {e}")
+        logging.error(f"Error preparing write data for {expected_type} SN {serial_number}: {e}")
         return None
 
 # --- Function to Execute Batches ---
@@ -93,30 +97,30 @@ def _execute_firestore_batches(write_data_list: list, org_id: str, batch_size: i
                 total_processed += 1
                 batch_count += 1
             else:
-                 print(f"Unknown action '{action}' in write data list.")
+                 logging.warning(f"Unknown action '{action}' in write data list.")
                  continue # Skip unknown actions
 
             if batch_count >= batch_size:
-                print(f"Committing batch of {batch_count} operations...")
+                logging.info(f"Committing batch of {batch_count} operations...")
                 batch.commit()
-                print("Batch committed.")
+                logging.info("Batch committed.")
                 # Start new batch
                 batch = db.batch()
                 batch_count = 0
 
         except Exception as e:
-            print(f"Error adding operation to batch or committing batch: {e}")
+            logging.error(f"Error adding operation to batch or committing batch: {e}")
             batch = db.batch()
             batch_count = 0
 
     # Commit any remaining items
     if batch_count > 0:
         try:
-            print(f"Committing final batch of {batch_count} operations...")
+            logging.info(f"Committing final batch of {batch_count} operations...")
             batch.commit()
-            print("Final batch committed.")
+            logging.info("Final batch committed.")
         except Exception as e:
-            print(f"Error committing final batch: {e}")
+            logging.error(f"Error committing final batch: {e}")
 
     return total_processed
 
@@ -129,7 +133,7 @@ def sync_verkada_device_ids(org_id, verkada_bot_user_info: dict, max_workers: in
 
     def _sync_generic(api_url: str, api_method: str, api_payload: dict, result_key: str, id_field: str, serial_field: str, device_type_str: str, extra_fields_map: dict = None):
         """Generic function to fetch, prepare, and batch write for a device type."""
-        print(f"Starting sync for {device_type_str}...")
+        logging.info(f"Starting sync for {device_type_str}...")
         items = []
         try:
             response = requests_with_retry(api_method, api_url, headers=auth_headers, json=api_payload)
@@ -140,21 +144,21 @@ def sync_verkada_device_ids(org_id, verkada_bot_user_info: dict, max_workers: in
             elif isinstance(json_response, dict):
                 items = json_response.get(result_key, [])
             else:
-                print(f"Warning: Unexpected response format for {device_type_str}. Expected list or dict, got {type(json_response)}")
+                logging.warning(f"Unexpected response format for {device_type_str}. Expected list or dict, got {type(json_response)}")
                 items = []
 
         except RequestException as e:
-            print(f"Error fetching {device_type_str} info after retries: {e}")
+            logging.error(f"Error fetching {device_type_str} info after retries: {e}")
             return
         except JSONDecodeError as e:
-            print(f"Error decoding JSON response for {device_type_str}: {e}")
+            logging.error(f"Error decoding JSON response for {device_type_str}: {e}")
             return
         except Exception as e:
-            print(f"An unexpected error occurred during {device_type_str} fetch: {e}")
+            logging.error(f"An unexpected error occurred during {device_type_str} fetch: {e}")
             return
 
         if not items:
-            print(f"No {device_type_str} found to process.")
+            logging.info(f"No {device_type_str} found to process.")
             return
 
         # Filter out intercoms from cameras if applicable
@@ -165,7 +169,7 @@ def sync_verkada_device_ids(org_id, verkada_bot_user_info: dict, max_workers: in
                 if serial_number:
                     actual_type = check_verkada_device_type(serial_number)
                     if actual_type == 'Intercom':
-                        print(f"Skipping Camera sync for SN {serial_number} as it's identified as an Intercom.")
+                        logging.info(f"Skipping Camera sync for SN {serial_number} as it's identified as an Intercom.")
                         continue # Skip this item, it will be handled by the Intercom sync task
         
                 filtered_items.append(item)
@@ -196,9 +200,9 @@ def sync_verkada_device_ids(org_id, verkada_bot_user_info: dict, max_workers: in
             results = executor.map(worker_wrapper, tasks)
             prepared_writes = [result for result in results if result is not None]
 
-        print(f"Prepared {len(prepared_writes)} write operations for {len(items)} fetched {device_type_str}.")
+        logging.info(f"Prepared {len(prepared_writes)} write operations for {len(items)} fetched {device_type_str}.")
         processed_count = _execute_firestore_batches(prepared_writes, org_id)
-        print(f"Finished processing {device_type_str}. Processed {processed_count} Firestore operations.")
+        logging.info(f"Finished processing {device_type_str}. Processed {processed_count} Firestore operations.")
 
     sync_tasks_definitions = [
         {
@@ -251,7 +255,7 @@ def sync_verkada_device_ids(org_id, verkada_bot_user_info: dict, max_workers: in
     ]
 
     def sync_intercom_and_desk_station_ids_combined():
-        print("Starting sync for Intercoms and Desk Stations...")
+        logging.info("Starting sync for Intercoms and Desk Stations...")
         url = f"https://api.command.verkada.com/__v/{verkada_org_shortname}/vinter/v1/user/organization/{verkada_org_id}/device"
         desk_stations = []
         intercoms = []
@@ -262,7 +266,7 @@ def sync_verkada_device_ids(org_id, verkada_bot_user_info: dict, max_workers: in
             desk_stations = data.get("deskApps", [])
             intercoms = data.get("intercoms", [])
         except Exception as e:
-            print(f"Error fetching intercom/desk station data: {e}")
+            logging.error(f"Error fetching intercom/desk station data: {e}")
             return
 
         if desk_stations:
@@ -275,11 +279,11 @@ def sync_verkada_device_ids(org_id, verkada_bot_user_info: dict, max_workers: in
             with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
                 results_ds = executor.map(worker_wrapper_ds, tasks_ds)
                 prepared_writes_ds = [result for result in results_ds if result is not None]
-            print(f"Prepared {len(prepared_writes_ds)} write operations for {len(desk_stations)} fetched Desk Stations.")
+            logging.info(f"Prepared {len(prepared_writes_ds)} write operations for {len(desk_stations)} fetched Desk Stations.")
             processed_count_ds = _execute_firestore_batches(prepared_writes_ds, org_id)
-            print(f"Finished processing Desk Stations. Processed {processed_count_ds} Firestore operations.")
+            logging.info(f"Finished processing Desk Stations. Processed {processed_count_ds} Firestore operations.")
         else:
-            print("No Desk Stations found to process.")
+            logging.info("No Desk Stations found to process.")
 
         if intercoms:
             worker_func_ic = partial(_prepare_device_write_data, org_id=org_id, id_field="deviceId", serial_field="serialNumber", expected_type="Intercom")
@@ -291,14 +295,14 @@ def sync_verkada_device_ids(org_id, verkada_bot_user_info: dict, max_workers: in
             with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
                 results_ic = executor.map(worker_wrapper_ic, tasks_ic)
                 prepared_writes_ic = [result for result in results_ic if result is not None]
-            print(f"Prepared {len(prepared_writes_ic)} write operations for {len(intercoms)} fetched Intercoms.")
+            logging.info(f"Prepared {len(prepared_writes_ic)} write operations for {len(intercoms)} fetched Intercoms.")
             processed_count_ic = _execute_firestore_batches(prepared_writes_ic, org_id)
-            print(f"Finished processing Intercoms. Processed {processed_count_ic} Firestore operations.")
+            logging.info(f"Finished processing Intercoms. Processed {processed_count_ic} Firestore operations.")
         else:
-            print("No Intercoms found to process.")
+            logging.info("No Intercoms found to process.")
 
     def sync_classic_alarms_hub_and_sensors_combined():
-        print("Starting sync for Classic Alarm Hubs and Sensors...")
+        logging.info("Starting sync for Classic Alarm Hubs and Sensors...")
         url = f"https://alarms.command.verkada.com/__v/{verkada_org_shortname}/device/get_all"
         payload = {"organizationId": verkada_org_id}
         all_sensor_types = {}
@@ -316,16 +320,16 @@ def sync_verkada_device_ids(org_id, verkada_bot_user_info: dict, max_workers: in
                 "wirelessRelay": (data.get("wirelessRelay", []), "deviceId", "serialNumber", "Classic Alarm Wireless Relay", {}),
             }
         except Exception as e:
-            print(f"Error fetching classic alarm device data: {e}")
+            logging.error(f"Error fetching classic alarm device data: {e}")
             return
 
         if not any(v[0] for v in all_sensor_types.values()):
-             print("No classic alarm devices found to process.")
+             logging.info("No classic alarm devices found to process.")
              return
 
         for api_key, (items, id_field, serial_field, type_str, extra_map) in all_sensor_types.items():
             if items:
-                print(f"Processing {len(items)} {type_str}...")
+                logging.info(f"Processing {len(items)} {type_str}...")
                 worker_func = partial(_prepare_device_write_data, org_id=org_id, id_field=id_field, serial_field=serial_field, expected_type=type_str)
                 tasks = []
                 for item_data in items:
@@ -335,7 +339,7 @@ def sync_verkada_device_ids(org_id, verkada_bot_user_info: dict, max_workers: in
                         if serial_number:
                             actual_type = check_verkada_device_type(serial_number)
                             if actual_type == 'Classic Alarm Keypad':
-                                print(f"Skipping hubDevice sync for SN {serial_number} as it's identified as a Keypad.")
+                                logging.info(f"Skipping hubDevice sync for SN {serial_number} as it's identified as a Keypad.")
                                 continue # Skip this item, it will be handled by the Keypad sync task
                     
                     extra_data = {}
@@ -353,11 +357,11 @@ def sync_verkada_device_ids(org_id, verkada_bot_user_info: dict, max_workers: in
                 with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
                     results = executor.map(worker_wrapper, tasks)
                     prepared_writes = [result for result in results if result is not None]
-                print(f"Prepared {len(prepared_writes)} write operations for {len(items)} fetched {type_str}.")
+                logging.info(f"Prepared {len(prepared_writes)} write operations for {len(items)} fetched {type_str}.")
                 processed_count = _execute_firestore_batches(prepared_writes, org_id)
-                print(f"Finished processing {type_str}. Processed {processed_count} Firestore operations.")
+                logging.info(f"Finished processing {type_str}. Processed {processed_count} Firestore operations.")
             else:
-                print(f"No {type_str} found to process.")
+                logging.info(f"No {type_str} found to process.")
 
     all_futures = []
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
@@ -372,6 +376,6 @@ def sync_verkada_device_ids(org_id, verkada_bot_user_info: dict, max_workers: in
             try:
                 future.result()
             except Exception as exc:
-                print(f'A sync task generated an exception: {exc}')
+                logging.error(f'A sync task generated an exception: {exc}')
 
-    print(f"Completed all Verkada device sync for org: {org_id}")
+    logging.info(f"Completed all Verkada device sync for org: {org_id}")

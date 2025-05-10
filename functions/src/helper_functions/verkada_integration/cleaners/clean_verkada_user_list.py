@@ -1,5 +1,5 @@
 import concurrent.futures
-from .http_utils import requests_with_retry
+from ..utils.http_utils import requests_with_retry
 from requests.exceptions import RequestException
 import logging
 
@@ -35,16 +35,16 @@ def _process_user(user, verkada_org_shortname, verkada_org_id, auth_headers, ver
                 json=delete_user_payload,
             )
             response.raise_for_status() # Raise an exception for bad status codes (4xx or 5xx)
-            print(f"User {user_email} deleted successfully. Status: {response.status_code}")
+            logging.info(f"User {user_email} deleted successfully. Status: {response.status_code}")
         except RequestException as e:
             # Log specific request errors, including status code if available
             status_code = e.response.status_code if e.response else "N/A"
-            print(f"Error deleting user {user_email} (RequestException - Status: {status_code}): {e}")
+            logging.error(f"Error deleting user {user_email} (RequestException - Status: {status_code}): {e}")
         except Exception as e:
             # Catch any other unexpected errors during deletion
-            print(f"Unexpected error deleting user {user_email}: {e}")
+            logging.error(f"Unexpected error deleting user {user_email}: {e}")
     else:
-        print(f"User {user_email} meets criteria, keeping.")
+        logging.info(f"User {user_email} meets criteria, keeping.")
 
 
 def clean_verkada_user_list(verkada_bot_user_info):
@@ -79,7 +79,7 @@ def clean_verkada_user_list(verkada_bot_user_info):
 
     users_data = [] # Initialize to empty list
     try:
-        print("Getting user data...")
+        logging.info("Getting user data...")
         response = requests_with_retry(
             "post",
             url=get_users_url,
@@ -88,21 +88,21 @@ def clean_verkada_user_list(verkada_bot_user_info):
         )
         response.raise_for_status() # Check for HTTP errors
         users_data = response.json().get("users", []) # Default to empty list if 'users' key is missing
-        print(f"Retrieved {len(users_data)} users.")
+        logging.info(f"Retrieved {len(users_data)} users.")
     except RequestException as e:
-        print(f"Error getting user data (RequestException): {e}")
+        logging.error(f"Error getting user data (RequestException): {e}")
         return # Exit if we can't get user data
     except ValueError as e: # Catch JSON decoding errors
-        print(f"Error decoding user data JSON: {e}")
+        logging.error(f"Error decoding user data JSON: {e}")
         return
     except Exception as e: # Catch other unexpected errors
-        print(f"Unexpected error getting user data: {e}")
+        logging.error(f"Unexpected error getting user data: {e}")
         return
 
 
     # DANGEROUS BLOCK - Now multithreaded
     if not users_data:
-        print("No users found to process.")
+        logging.info("No users found to process.")
         return
 
     max_workers = 10 
@@ -127,6 +127,6 @@ def clean_verkada_user_list(verkada_bot_user_info):
                 future.result()  # Retrieve result or raise exception from the thread
             except Exception as exc:
                 # Log exceptions raised within the thread task
-                print(f"Thread processing user {user_email} generated an exception: {exc}")
+                logging.error(f"Thread processing user {user_email} generated an exception: {exc}")
 
-    print("Finished processing all users.")
+    logging.info("Finished processing all users.")

@@ -1,5 +1,5 @@
 from src.shared import db
-from .http_utils import requests_with_retry
+from ..utils.http_utils import requests_with_retry
 from requests.exceptions import RequestException
 import logging
 
@@ -7,7 +7,7 @@ def sync_verkada_user_groups(org_id, verkada_bot_user_info):
     """
     Syncs user groups from Verkada to the Firestore database.
     """
-    print("Syncing Verkada user groups...")
+    logging.info("Syncing Verkada user groups...")
     verkada_org_id = verkada_bot_user_info.get('org_id')
     verkada_bot_user_id = verkada_bot_user_info.get('user_id')
     verkada_bot_headers = verkada_bot_user_info.get('auth_headers')
@@ -29,7 +29,7 @@ def sync_verkada_user_groups(org_id, verkada_bot_user_info):
             json=payload
         )
         user_groups = response.json().get("securityEntityGroup", [])
-        print(f"Fetched {len(user_groups)} user groups from Verkada.")
+        logging.info(f"Fetched {len(user_groups)} user groups from Verkada.")
         if not user_groups:
             logging.warning("No user groups found in the response.")
             return []

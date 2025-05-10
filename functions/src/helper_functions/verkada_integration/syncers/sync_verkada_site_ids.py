@@ -1,8 +1,12 @@
-from src.helper_functions.verkada_integration.http_utils import requests_with_retry
+from src.helper_functions.verkada_integration.utils.http_utils import requests_with_retry
 from src.shared import db
 from requests.exceptions import RequestException
 from concurrent.futures import ThreadPoolExecutor
 from google.cloud.firestore import WriteBatch
+import logging
+
+# Initialize logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 
 def sync_verkada_site_ids(org_id, verkada_bot_user_info):
@@ -19,7 +23,7 @@ def sync_verkada_site_ids(org_id, verkada_bot_user_info):
             device_doc_ref = db.collection('organizations').document(org_id).collection('devices').document(update['device_id'])
             batch.update(device_doc_ref, {'deviceVerkadaSiteId': update['site_id']})
         batch.commit()
-        print(f"Batch site id write completed for {len(updates)} devices.")
+        logging.info(f"Batch site id write completed for {len(updates)} devices.")
 
     def process_device(device_id, site_id, updates):
         """Process a single device and prepare it for batch writing."""
@@ -69,11 +73,11 @@ def sync_verkada_site_ids(org_id, verkada_bot_user_info):
             write_site_ids_to_firestore(batch, updates[i:i + batch_size])
 
     except RequestException as e:
-        print(f"Error fetching site data for organization {org_id}: {e}")
+        logging.error(f"Error fetching site data for organization {org_id}: {e}")
         return
     except ValueError as e:
-        print(f"Error parsing JSON response for organization {org_id}: {e}")
+        logging.error(f"Error parsing JSON response for organization {org_id}: {e}")
         return
     except Exception as e:
-        print(f"Unexpected error for organization {org_id}: {e}")
+        logging.error(f"Unexpected error for organization {org_id}: {e}")
         return

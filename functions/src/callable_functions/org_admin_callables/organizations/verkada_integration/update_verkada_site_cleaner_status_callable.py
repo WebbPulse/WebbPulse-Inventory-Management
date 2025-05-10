@@ -7,13 +7,13 @@ from src.helper_functions.auth.auth_functions import (
     check_user_token_current,
     check_user_is_org_admin,
 )
-from src.helper_functions.verkada_integration.clean_verkada_user_list import clean_verkada_user_list
-from src.helper_functions.verkada_integration.clean_verkada_user_groups import clean_verkada_user_groups
-from src.helper_functions.verkada_integration.clean_verkada_device_sites import clean_verkada_device_sites
-from src.helper_functions.verkada_integration.login_to_verkada import login_to_verkada
-from src.helper_functions.verkada_integration.clean_verkada_device_names import clean_verkada_device_names
-from src.helper_functions.verkada_integration.sync_verkada_site_ids import sync_verkada_site_ids
-
+from src.helper_functions.verkada_integration.cleaners.clean_verkada_user_list import clean_verkada_user_list
+from src.helper_functions.verkada_integration.cleaners.clean_verkada_user_groups import clean_verkada_user_groups
+from src.helper_functions.verkada_integration.cleaners.clean_verkada_device_sites import clean_verkada_device_sites
+from src.helper_functions.verkada_integration.utils.login_to_verkada import login_to_verkada
+from src.helper_functions.verkada_integration.cleaners.clean_verkada_device_names import clean_verkada_device_names
+from src.helper_functions.verkada_integration.syncers.sync_verkada_site_ids import sync_verkada_site_ids
+import logging
 @https_fn.on_call(cors=POSTcorsrules, timeout_sec=540)
 def update_verkada_site_cleaner_status_callable(req: https_fn.CallableRequest,) -> any:
     """
@@ -66,7 +66,7 @@ def update_verkada_site_cleaner_status_callable(req: https_fn.CallableRequest,) 
         raise e
     except Exception as e:
        
-        print(f"An error occurred: {e}") 
+        logging.error(f"An error occurred: {e}") 
         raise https_fn.HttpsError(
             code=https_fn.FunctionsErrorCode.INTERNAL,
             message=f"An internal error occurred: {str(e)}"

@@ -1,6 +1,6 @@
 from src.helper_functions.auth.auth_functions import check_user_is_org_member, check_user_is_authed, check_user_token_current, check_user_is_email_verified, check_user_is_org_deskstation_or_higher
 from src.shared import db, POSTcorsrules
-from src.helper_functions.verkada_integration.rename_device_in_verkada_command import rename_device_in_verkada_command
+from src.helper_functions.verkada_integration.utils.rename_device_in_verkada_command import rename_device_in_verkada_command
 
 from firebase_functions import https_fn
 from typing import Any

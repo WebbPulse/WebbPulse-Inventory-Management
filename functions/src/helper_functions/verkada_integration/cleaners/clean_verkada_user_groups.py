@@ -1,5 +1,5 @@
 from src.shared import db
-from .http_utils import requests_with_retry
+from ..utils.http_utils import requests_with_retry
 from requests.exceptions import RequestException
 import logging
 
@@ -35,7 +35,7 @@ def remove_group(verkada_bot_user_info, group):
     verkada_org_short_name = verkada_bot_user_info.get('org_name')
     bot_auth_headers = verkada_bot_user_info.get('auth_headers')
     group_id = group.get('groupId')
-    print(verkada_org_short_name, bot_auth_headers, group_id)
+    
     try:
         # Make a request to the Verkada API to remove the group
         delete_url = f"https://vauth.command.verkada.com/__v/{verkada_org_short_name}/security_entity_group/delete"
