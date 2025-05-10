@@ -9,7 +9,7 @@ POSTcorsrules = options.CorsOptions(cors_origins="*", cors_methods=["get", "post
 db = firestore.client()
 
 # Configure logging
-logging.basicConfig(level=logging.info, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Create a logger instance
 logger = logging.getLogger(__name__)
