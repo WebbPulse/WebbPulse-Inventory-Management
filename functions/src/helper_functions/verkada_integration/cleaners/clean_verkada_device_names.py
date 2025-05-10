@@ -17,7 +17,7 @@ def _process_device_doc(device_doc, org_id, verkada_bot_user_info):
 
 def clean_verkada_device_names(org_id, verkada_bot_user_info, max_workers=10):
     """
-    Syncs device names in Verkada with the corresponding checkout status in Firestore using multiple threads.
+    Cleans device names in Verkada with the corresponding checkout status in Firestore using multiple threads.
     
     Args:
         verkada_bot_user_info (dict): The Verkada bot user information.
