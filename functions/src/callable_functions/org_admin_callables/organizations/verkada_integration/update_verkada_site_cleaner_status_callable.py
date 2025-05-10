@@ -1,6 +1,6 @@
 from firebase_functions import https_fn
 from firebase_admin import firestore
-from src.shared import db, POSTcorsrules # Assuming POSTcorsrules is defined in shared.py
+from src.shared import db, POSTcorsrules, logger
 from src.helper_functions.auth.auth_functions import (
     check_user_is_authed,
     check_user_is_email_verified,
@@ -66,7 +66,7 @@ def update_verkada_site_cleaner_status_callable(req: https_fn.CallableRequest,) 
         raise e
     except Exception as e:
        
-        logging.error(f"An error occurred: {e}") 
+        logger.error(f"An error occurred: {e}") 
         raise https_fn.HttpsError(
             code=https_fn.FunctionsErrorCode.INTERNAL,
             message=f"An internal error occurred: {str(e)}"

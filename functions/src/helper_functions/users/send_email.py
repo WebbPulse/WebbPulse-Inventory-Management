@@ -1,6 +1,6 @@
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
-import logging
+from src.shared import logger
 
 def send_email(message: Mail):
     """
@@ -25,7 +25,7 @@ def send_email(message: Mail):
         
         # Send the email
         response = sg.send(message)
-        logging.info(f"Email sent successfully with status code: {response.status_code}")
+        logger.info(f"Email sent successfully with status code: {response.status_code}")
 
     except Exception as e:
         # Provide detailed error information

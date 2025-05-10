@@ -1,13 +1,12 @@
-from src.shared import db
+from src.shared import db, logger
 from ..utils.http_utils import requests_with_retry
 from requests.exceptions import RequestException
-import logging
 
 def sync_verkada_user_groups(org_id, verkada_bot_user_info):
     """
     Syncs user groups from Verkada to the Firestore database.
     """
-    logging.info("Syncing Verkada user groups...")
+    logger.info("Syncing Verkada user groups...")
     verkada_org_id = verkada_bot_user_info.get('org_id')
     verkada_bot_user_id = verkada_bot_user_info.get('user_id')
     verkada_bot_headers = verkada_bot_user_info.get('auth_headers')
@@ -29,9 +28,9 @@ def sync_verkada_user_groups(org_id, verkada_bot_user_info):
             json=payload
         )
         user_groups = response.json().get("securityEntityGroup", [])
-        logging.info(f"Fetched {len(user_groups)} user groups from Verkada.")
+        logger.info(f"Fetched {len(user_groups)} user groups from Verkada.")
         if not user_groups:
-            logging.warning("No user groups found in the response.")
+            logger.warning("No user groups found in the response.")
             return []
         return [
             {
@@ -54,7 +53,7 @@ def sync_verkada_user_groups(org_id, verkada_bot_user_info):
             else:
                 existing_groups = []
         except Exception as e:
-            logging.error(f"Error fetching existing Verkada user groups for org {org_id}: {e}")
+            logger.error(f"Error fetching existing Verkada user groups for org {org_id}: {e}")
             existing_groups = []
         
         # Create a map of existing groups by groupId for easy lookup of whitelist status
@@ -74,7 +73,7 @@ def sync_verkada_user_groups(org_id, verkada_bot_user_info):
                 }
                 merged_user_groups.append(merged_group_data)
             else:
-                logging.warning(f"Skipping group due to missing groupId: {new_group}")
+                logger.warning(f"Skipping group due to missing groupId: {new_group}")
         org_settings_ref.set({
             'orgVerkadaUserGroups': merged_user_groups
         }, merge=True)

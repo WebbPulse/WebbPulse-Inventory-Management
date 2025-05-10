@@ -1,6 +1,6 @@
 from src.helper_functions.verkada_integration.utils.http_utils import requests_with_retry
 from requests.exceptions import RequestException
-import logging
+from src.shared import logger
 
 def login_to_verkada(verkada_org_shortname, verkada_org_bot_email, verkada_org_bot_password) -> dict:
     """
@@ -48,14 +48,14 @@ def login_to_verkada(verkada_org_shortname, verkada_org_bot_email, verkada_org_b
         return user_info
     except RequestException as e:
         # This block executes if the request fails after all retries
-        logging.error(f"Login failed after multiple retries: {e}")
+        logger.error(f"Login failed after multiple retries: {e}")
         return {}
     except KeyError as e:
         # Handle cases where the successful response JSON is missing expected keys
-        logging.error(f"Login succeeded but response format was unexpected. Missing key: {e}")
+        logger.error(f"Login succeeded but response format was unexpected. Missing key: {e}")
 
         return {}
     except Exception as e:
         # Catch any other unexpected errors during processing
-        logging.error(f"An unexpected error occurred during login processing: {e}")
+        logger.error(f"An unexpected error occurred during login processing: {e}")
         return {}
