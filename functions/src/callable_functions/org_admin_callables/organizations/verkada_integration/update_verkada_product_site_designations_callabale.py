@@ -1,6 +1,6 @@
 from firebase_functions import https_fn
 from src.shared import db, POSTcorsrules, logger
-from src.helper_functions.auth.auth_functions import check_user_is_org_admin, check_user_is_authed # Add other checks as needed
+from src.helper_functions.auth.auth_functions import check_user_is_org_admin, check_user_is_authed, check_user_token_current, check_user_is_email_verified
 
 @https_fn.on_call(cors=POSTcorsrules)
 def update_verkada_product_site_designations_callable(req: https_fn.CallableRequest) -> any:
@@ -8,7 +8,9 @@ def update_verkada_product_site_designations_callable(req: https_fn.CallableRequ
     product_site_designations = req.data.get('productSiteDesignations')
 
     check_user_is_authed(req)
-    # Add other auth checks like check_user_is_org_admin(req, org_id)
+    check_user_is_org_admin(req, org_id)
+    check_user_token_current(req)
+    check_user_is_email_verified(req)
 
     if org_id is None or product_site_designations is None or not isinstance(product_site_designations, dict):
         raise https_fn.HttpsError(
