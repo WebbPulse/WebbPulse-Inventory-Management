@@ -3,7 +3,7 @@ from ..utils.http_utils import requests_with_retry
 from requests.exceptions import RequestException
 from src.shared import logger
 
-def _process_user(user, verkada_org_shortname, verkada_org_id, auth_headers, verkada_bot_user_email):
+def _process_user(user, verkada_org_shortname, verkada_org_id, auth_headers, verkada_bot_user_id):
     """
     Processes a single user: checks email criteria and deletes if necessary.
     This function is designed to be run in a separate thread.
@@ -18,7 +18,7 @@ def _process_user(user, verkada_org_shortname, verkada_org_id, auth_headers, ver
     logger.info(f"Checking user {user_email}")
 
     # Skip the bot user itself
-    if user_email == verkada_bot_user_email:
+    if user_id == verkada_bot_user_id:
         logger.info(f"{user_email} is the bot user, skipping")
         return
 
@@ -59,9 +59,9 @@ def clean_verkada_user_list(verkada_bot_user_info):
     verkada_org_shortname = verkada_bot_user_info.get("org_name")
     verkada_org_id = verkada_bot_user_info.get("org_id")
     auth_headers = verkada_bot_user_info.get("auth_headers")
-    verkada_bot_user_email = verkada_bot_user_info.get("email")
+    verkada_bot_user_id = verkada_bot_user_info.get("user_id")
 
-    if not verkada_org_shortname or not verkada_org_id or not auth_headers or not verkada_bot_user_email:
+    if not verkada_org_shortname or not verkada_org_id or not auth_headers or not verkada_bot_user_id:
         raise ValueError("Missing required information in verkada_bot_user_info.")
 
     get_users_url = f"https://vprovision.command.verkada.com/__v/{verkada_org_shortname}/organization/{verkada_org_id}/users/search"
@@ -115,7 +115,7 @@ def clean_verkada_user_list(verkada_bot_user_info):
                 verkada_org_shortname,
                 verkada_org_id,
                 auth_headers,
-                verkada_bot_user_email,
+                verkada_bot_user_id,
             ): user.get("email", "Unknown") # Map future to email for logging
             for user in users_data
         }

@@ -23,10 +23,6 @@ service cloud.firestore {
       request.auth.token["org_admin_" + orgId] == true ||
       request.auth.token["org_deskstation_" + orgId] == true;
     }
-
-    function hasOrgAdminClaim(orgId) {
-      return request.auth.token["org_admin_" + orgId] == true;
-    }
     
     function isEmailVerified() {
       return request.auth.token.email_verified == true;
@@ -49,7 +45,7 @@ service cloud.firestore {
       allow write: if false;
 
       match /sensitiveConfigs/{configDoc=**} {
-        allow read: if isAuthenticated() && hasOrgAdminClaim(orgId) && hasValidToken() && isEmailVerified();
+        allow read: if false; // Disallow any client-side reads
         allow write: if false; // Disallow any client-side writes
       }
 

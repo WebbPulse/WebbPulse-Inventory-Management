@@ -52,9 +52,6 @@ def create_organization_callable(req: https_fn.CallableRequest) -> Any:
             'orgBackgroundImageURL': "",  # Default empty background image URL.
             'orgDeleted': False,  # Mark the organization as active (not deleted).
             'orgVerkadaIntegrationEnabled': False,  # Default Verkada integration status as inactive.
-            'orgVerkadaBotEmail': "",  # Default empty Verkada organization email.
-            'orgVerkadaOrgShortName': "",  # Default empty Verkada organization short name.
-            'orgVerkadaBotPassword': "",  # Default empty Verkada organization password.
             'orgDeviceRegexString': "",  # Default empty device regex string.
         })
 

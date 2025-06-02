@@ -173,8 +173,7 @@ class OrgSettingsView extends StatelessWidget {
                                             children: [
                                               VerkadaCredentialsEditor(
                                                   orgData: orgData,
-                                                  orgVerkadaIntegrationData:
-                                                      orgVerkadaIntegrationData),
+                                                  ),
                                               const SizedBox(height: 32),
                                               VerkadaSettingsEditor(
                                                   orgData: orgData,

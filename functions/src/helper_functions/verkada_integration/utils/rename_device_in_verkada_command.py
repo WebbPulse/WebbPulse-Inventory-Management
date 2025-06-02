@@ -1,6 +1,5 @@
 from src.shared import db, logger
 
-from src.helper_functions.verkada_integration.utils.login_to_verkada import login_to_verkada
 from src.helper_functions.verkada_integration.utils.http_utils import requests_with_retry
 
 from requests.exceptions import RequestException
@@ -18,15 +17,17 @@ def rename_device_in_verkada_command(device_id, org_id, device_being_checked_out
             - auth_headers (dict): Authentication headers for API requests.
             If not provided, the function will retrieve the bot user info using the organization's Verkada integration settings.
     """
-    
-    org__verkada_integration_doc = db.collection('organizations').document(org_id).collection('sensitiveConfigs').document('verkadaIntegrationSettings').get()
-    verkada_org_short_name = org__verkada_integration_doc.get('orgVerkadaOrgShortName')
 
+    org_verkada_integration_doc = db.collection('organizations').document(org_id).collection('sensitiveConfigs').document('verkadaIntegrationSettings').get()
     if not verkada_bot_user_info:
-        verkada_org_bot_email = org__verkada_integration_doc.get('orgVerkadaBotEmail')
-        verkada_org_bot_password = org__verkada_integration_doc.get('orgVerkadaBotPassword')
-        verkada_bot_user_info = login_to_verkada(verkada_org_short_name, verkada_org_bot_email, verkada_org_bot_password)
-    
+
+        verkada_bot_user_info = org_verkada_integration_doc.to_dict().get('orgVerkadaBotUserInfo', {})
+    if not verkada_bot_user_info:
+
+        logger.error(f"Verkada bot user info not found for organization {org_id}.")
+        return
+
+    verkada_org_short_name = verkada_bot_user_info.get('orgVerkadaOrgShortName')
     verkada_org_id = verkada_bot_user_info.get('org_id')
     verkada_bot_headers = verkada_bot_user_info.get('auth_headers')
     
