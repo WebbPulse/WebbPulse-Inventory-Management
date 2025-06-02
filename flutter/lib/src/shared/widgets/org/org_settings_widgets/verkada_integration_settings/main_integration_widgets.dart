@@ -71,11 +71,9 @@ class _VerkadaIntegrationToggleState extends State<VerkadaIntegrationToggle> {
 // Combined widget for Verkada Credentials
 class VerkadaCredentialsEditor extends StatefulWidget {
   final Map<String, dynamic> orgData;
-  final Map<String, dynamic>? orgVerkadaIntegrationData;
   const VerkadaCredentialsEditor(
       {super.key,
-      required this.orgData,
-      required this.orgVerkadaIntegrationData});
+      required this.orgData,});
 
   @override
   _VerkadaCredentialsEditorState createState() =>
@@ -84,8 +82,10 @@ class VerkadaCredentialsEditor extends StatefulWidget {
 
 class _VerkadaCredentialsEditorState extends State<VerkadaCredentialsEditor> {
   late TextEditingController verkadaOrgShortNameController;
-  late TextEditingController verkadaOrgEmailController;
-  late TextEditingController verkadaOrgPasswordController;
+  late TextEditingController verkadaOrgBotUserIdController;
+  late TextEditingController verkadaOrgBotV2Controller;
+  late TextEditingController verkadaOrgIdController;
+
   var _isLoading = false;
   bool _obscureText = true;
   @override
@@ -93,43 +93,39 @@ class _VerkadaCredentialsEditorState extends State<VerkadaCredentialsEditor> {
     super.initState();
     // Use null-aware access on the potentially null map
     verkadaOrgShortNameController = TextEditingController(
-        text: widget.orgVerkadaIntegrationData?['orgVerkadaOrgShortName']
-                as String? ??
-            '');
-    verkadaOrgEmailController = TextEditingController(
-        text: widget.orgVerkadaIntegrationData?['orgVerkadaBotEmail']
-                as String? ??
-            '');
-    verkadaOrgPasswordController = TextEditingController(
-        text: widget.orgVerkadaIntegrationData?['orgVerkadaBotPassword']
-                as String? ??
-            '');
+        text: "", // Default to empty string if null
+        );
+    verkadaOrgBotUserIdController = TextEditingController(
+        text: "");
+    verkadaOrgBotV2Controller = TextEditingController(
+        text: "");
+    verkadaOrgIdController = TextEditingController(
+        text: "");
   }
 
   @override
   void dispose() {
     verkadaOrgShortNameController.dispose();
-    verkadaOrgEmailController.dispose();
-    verkadaOrgPasswordController.dispose();
+    verkadaOrgBotUserIdController.dispose();
+    verkadaOrgBotV2Controller.dispose();
+    verkadaOrgIdController.dispose();
+
     super.dispose();
   }
 
   void _onSubmit() async {
-    final shortName = verkadaOrgShortNameController.text;
-    final email = verkadaOrgEmailController.text;
-    final password = verkadaOrgPasswordController.text;
+    final verkadaShortName = verkadaOrgShortNameController.text;
+    final verkadaBotUserId = verkadaOrgBotUserIdController.text;
+    final verkadaBotV2 = verkadaOrgBotV2Controller.text;
+    final verkadaOrgId = verkadaOrgIdController.text;
     // Add null check for orgId access
     final orgId = widget.orgData['orgId'] as String?;
 
-    if (orgId == null ||
-        shortName.isEmpty ||
-        email.isEmpty ||
-        password.isEmpty) {
+    if (orgId == null) {
       await AsyncContextHelpers.showSnackBarIfMounted(
           context,
-          orgId == null
-              ? 'Organization ID is missing.' // Specific message if orgId is null
-              : 'Please fill all Verkada credential fields.');
+          'Organization ID is missing.' // Specific message if orgId is null
+              );
       return;
     }
 
@@ -144,9 +140,11 @@ class _VerkadaCredentialsEditorState extends State<VerkadaCredentialsEditor> {
           .httpsCallable('sync_with_verkada_callable')
           .call({
         'orgId': orgId,
-        'orgVerkadaOrgShortName': shortName,
-        'orgVerkadaBotEmail': email,
-        'orgVerkadaBotPassword': password,
+        'orgVerkadaBotUserId': verkadaBotUserId,
+        'orgVerkadaBotUserV2': verkadaBotV2,
+        'orgVerkadaOrgShortName': verkadaShortName,
+        'orgVerkadaOrgId': verkadaOrgId,
+        
       });
 
       await AsyncContextHelpers.showSnackBarIfMounted(
@@ -177,9 +175,18 @@ class _VerkadaCredentialsEditorState extends State<VerkadaCredentialsEditor> {
         ),
         const SizedBox(height: 16.0),
         TextField(
-          controller: verkadaOrgEmailController,
+          controller: verkadaOrgIdController,
           decoration: const InputDecoration(
-            labelText: 'Verkada Bot Email',
+            labelText: 'Verkada Org ID',
+            border: OutlineInputBorder(),
+            prefixIcon: Icon(Icons.business_center),
+          ),
+        ),
+        const SizedBox(height: 16.0),
+        TextField(
+          controller: verkadaOrgBotUserIdController,
+          decoration: const InputDecoration(
+            labelText: 'Verkada Bot User ID',
             border: OutlineInputBorder(),
             prefixIcon: Icon(Icons.email),
           ),
@@ -187,9 +194,9 @@ class _VerkadaCredentialsEditorState extends State<VerkadaCredentialsEditor> {
         const SizedBox(height: 16.0),
         TextField(
           obscureText: _obscureText,
-          controller: verkadaOrgPasswordController,
+          controller: verkadaOrgBotV2Controller,
           decoration: InputDecoration(
-            labelText: 'Verkada Bot Password',
+            labelText: 'Verkada Bot V2 Token',
             border: const OutlineInputBorder(),
             prefixIcon: const Icon(Icons.password),
             suffixIcon: IconButton(

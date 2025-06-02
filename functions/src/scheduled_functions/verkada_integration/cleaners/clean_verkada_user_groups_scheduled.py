@@ -4,7 +4,6 @@ from src.helper_functions.verkada_integration.utils.scheduled_function_org_helpe
 
 from firebase_functions import scheduler_fn
 from src.shared import logger
-from src.helper_functions.verkada_integration.utils.login_to_verkada import login_to_verkada
 
 
 

@@ -10,7 +10,6 @@ from src.helper_functions.auth.auth_functions import (
 from src.helper_functions.verkada_integration.cleaners.clean_verkada_user_list import clean_verkada_user_list
 from src.helper_functions.verkada_integration.cleaners.clean_verkada_user_groups import clean_verkada_user_groups
 from src.helper_functions.verkada_integration.cleaners.clean_verkada_device_sites import clean_verkada_device_sites
-from src.helper_functions.verkada_integration.utils.login_to_verkada import login_to_verkada
 from src.helper_functions.verkada_integration.cleaners.clean_verkada_device_names import clean_verkada_device_names
 from src.helper_functions.verkada_integration.syncers.sync_verkada_site_ids import sync_verkada_site_ids
 import logging
@@ -48,10 +47,12 @@ def update_verkada_site_cleaner_status_callable(req: https_fn.CallableRequest,) 
         if enabled:
             #login to Verkada and run the cleaner
             current_verkada_settings = org_verkada_settings_ref.get().to_dict()
-            verkada_org_shortname = current_verkada_settings.get('orgVerkadaOrgShortName')
-            verkada_org_bot_email = current_verkada_settings.get('orgVerkadaBotEmail')
-            verkada_org_bot_password = current_verkada_settings.get('orgVerkadaBotPassword')
-            verkada_bot_user_info = login_to_verkada(verkada_org_shortname, verkada_org_bot_email, verkada_org_bot_password)
+            verkada_bot_user_info = current_verkada_settings.get('orgVerkadaBotUserInfo', {})
+            if not verkada_bot_user_info:
+                raise https_fn.HttpsError(
+                    code=https_fn.FunctionsErrorCode.FAILED_PRECONDITION,
+                    message='Verkada bot user information is not set. Please ensure the Verkada integration is properly configured.'
+                )
             
             clean_verkada_user_list(verkada_bot_user_info)
             clean_verkada_user_groups(org_id, verkada_bot_user_info)

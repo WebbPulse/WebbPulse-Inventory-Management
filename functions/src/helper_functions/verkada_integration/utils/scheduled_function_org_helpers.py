@@ -1,6 +1,5 @@
 from typing import List, Tuple, Dict, Any
 from src.shared import db, logger
-from src.helper_functions.verkada_integration.utils.login_to_verkada import login_to_verkada
 
 
 def get_verkada_integrated_orgs_data() -> List[Tuple[str, Dict[str, Any]]]:
@@ -19,32 +18,21 @@ def get_verkada_integrated_orgs_data() -> List[Tuple[str, Dict[str, Any]]]:
         for org_doc in orgs_ref:
             org_id = org_doc.id
             logger.info(f"Processing org_id for Verkada integration: {org_id}")
-            
-            verkada_org_short_name = None
-            verkada_org_bot_email = None
-            verkada_org_bot_password = None
 
             try:
                 settings_doc_ref = db.collection('organizations').document(org_id).collection('sensitiveConfigs').document('verkadaIntegrationSettings')
                 settings_doc = settings_doc_ref.get()
                 if settings_doc.exists:
                     settings_data = settings_doc.to_dict()
-                    verkada_org_short_name = settings_data.get('orgVerkadaOrgShortName')
-                    verkada_org_bot_email = settings_data.get('orgVerkadaBotEmail')
-                    verkada_org_bot_password = settings_data.get('orgVerkadaBotPassword')
+                    verkada_bot_user_info = settings_data.get('orgVerkadaBotUserInfo', {})
                 else:
                     logger.warning(f"Verkada integration settings document not found for {org_id} at {settings_doc_ref.path}")
                     continue
             except Exception as e:
                 logger.error(f"Error fetching settings for organization {org_id}: {str(e)}")
                 continue
-
-            if not verkada_org_short_name or not verkada_org_bot_email or not verkada_org_bot_password:
-                logger.warning(f"Skipping organization {org_id}: Missing Verkada credentials for integration.")
-                continue
-
             try:
-                verkada_bot_user_info = login_to_verkada(verkada_org_short_name, verkada_org_bot_email, verkada_org_bot_password)
+                
                 if verkada_bot_user_info and verkada_bot_user_info.get('org_id') and verkada_bot_user_info.get('user_id'):
                     integrated_orgs.append((org_id, verkada_bot_user_info))
                 else:
@@ -77,9 +65,6 @@ def get_site_cleaner_enabled_orgs_data() -> List[Tuple[str, Dict[str, Any]]]:
             org_id = org_doc.id
             logger.info(f"Processing org_id for site cleaner: {org_id}")
 
-            verkada_org_short_name = None
-            verkada_org_bot_email = None
-            verkada_org_bot_password = None
             
             try:
                 settings_doc_ref = db.collection('organizations').document(org_id).collection('sensitiveConfigs').document('verkadaIntegrationSettings')
@@ -87,9 +72,7 @@ def get_site_cleaner_enabled_orgs_data() -> List[Tuple[str, Dict[str, Any]]]:
                 if settings_doc.exists:
                     settings_data = settings_doc.to_dict()
                     if settings_data.get('orgVerkadaSiteCleanerEnabled') == True:
-                        verkada_org_short_name = settings_data.get('orgVerkadaOrgShortName')
-                        verkada_org_bot_email = settings_data.get('orgVerkadaBotEmail')
-                        verkada_org_bot_password = settings_data.get('orgVerkadaBotPassword')
+                        verkada_bot_user_info = settings_data.get('orgVerkadaBotUserInfo', {})
                     else:
                         # Site cleaner is not enabled for this org, skip it.
                         logger.debug(f"Site cleaner not enabled for {org_id}. Skipping.")
@@ -101,12 +84,8 @@ def get_site_cleaner_enabled_orgs_data() -> List[Tuple[str, Dict[str, Any]]]:
                 logger.error(f"Error fetching settings for organization {org_id}: {str(e)}. Skipping.")
                 continue
 
-            if not verkada_org_short_name or not verkada_org_bot_email or not verkada_org_bot_password:
-                logger.warning(f"Skipping organization {org_id}: Missing Verkada credentials though site cleaner is marked enabled.")
-                continue
-
             try:
-                verkada_bot_user_info = login_to_verkada(verkada_org_short_name, verkada_org_bot_email, verkada_org_bot_password)
+                
                 if verkada_bot_user_info and verkada_bot_user_info.get('org_id') and verkada_bot_user_info.get('user_id'):
                     site_cleaner_orgs.append((org_id, verkada_bot_user_info))
                 else:

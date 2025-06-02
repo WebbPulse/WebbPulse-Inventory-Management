@@ -1,6 +1,5 @@
 from firebase_functions import scheduler_fn, https_fn
 from src.shared import logger
-from src.helper_functions.verkada_integration.utils.login_to_verkada import login_to_verkada
 from src.helper_functions.verkada_integration.utils.grant_all_verkada_permissions import grant_all_verkada_permissions
 from src.helper_functions.verkada_integration.utils.scheduled_function_org_helpers import get_verkada_integrated_orgs_data
 

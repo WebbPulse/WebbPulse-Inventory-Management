@@ -35,11 +35,7 @@ def update_verkada_integration_status_callable(req: https_fn.CallableRequest) ->
         if enabled:
             if not org_ref.collection('sensitiveConfigs').document('verkadaIntegrationSettings').get().exists:
                 org_ref.collection('sensitiveConfigs').document('verkadaIntegrationSettings').set({
-                    'orgVerkadaBotEmail': '',
-                    'orgVerkadaBotPassword': '',
-                    'orgVerkadaBotUserId': '',
-                    'orgVerkadaOrgId': '',
-                    'orgVerkadaOrgShortName': '',
+                    'orgVerkadaBotUserInfo': {},
                     'orgVerkadaProductSiteDesignations': {  
                         'Access Control Building': '',
                         'Access Control Floor': '',
