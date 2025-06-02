@@ -44,9 +44,9 @@ def sync_verkada_user_groups(org_id, verkada_bot_user_info):
         """
         Updates Firestore with the fetched user groups.
         """
-        org_settings_ref = db.collection('organizations').document(org_id).collection('sensitiveConfigs').document('verkadaIntegrationSettings')
+        org_doc_ref = db.collection('organizations').document(org_id)
         try:
-            doc = org_settings_ref.get()
+            doc = org_doc_ref.get()
             existing_groups_data = doc.to_dict()
             if existing_groups_data and 'orgVerkadaUserGroups' in existing_groups_data:
                 existing_groups = existing_groups_data['orgVerkadaUserGroups']
@@ -74,7 +74,7 @@ def sync_verkada_user_groups(org_id, verkada_bot_user_info):
                 merged_user_groups.append(merged_group_data)
             else:
                 logger.warning(f"Skipping group due to missing groupId: {new_group}")
-        org_settings_ref.set({
+        org_doc_ref.set({
             'orgVerkadaUserGroups': merged_user_groups
         }, merge=True)
 

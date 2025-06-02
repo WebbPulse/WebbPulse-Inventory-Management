@@ -31,7 +31,7 @@ def update_verkada_user_group_whitelists_callable(req: https_fn.CallableRequest)
 
         # Optional: Add validation for the structure of updated_groups if needed
         if not isinstance(updated_groups, list):
-             raise https_fn.HttpsError(
+            raise https_fn.HttpsError(
                 code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
                 message='The "updatedGroups" argument must be a list.'
             )
@@ -39,10 +39,10 @@ def update_verkada_user_group_whitelists_callable(req: https_fn.CallableRequest)
         # with the expected keys ('groupId', 'groupName', 'isWhitelisted')
 
         org_ref = db.collection('organizations').document(org_id)
-        org_ref.collection('sensitiveConfigs').document('verkadaIntegrationSettings').set({
-            # Save the received list directly to the 'orgVerkadaUserGroups' field
+        # Save the received list directly to the 'orgVerkadaUserGroups' field in the main org document
+        org_ref.update({
             'orgVerkadaUserGroups': updated_groups
-        }, merge=True)
+        })
 
         return {"response": f"Successfully updated the Verkada user group whitelists for organization {org_id}."}
 

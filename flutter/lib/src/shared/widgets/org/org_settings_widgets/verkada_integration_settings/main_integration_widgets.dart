@@ -335,8 +335,9 @@ class _VerkadaSettingsEditorState extends State<VerkadaSettingsEditor> {
     final theme = Theme.of(context);
     final orgId = widget.orgData['orgId'] as String;
 
+    // Read Verkada settings from the main org document (widget.orgData)
     final List<Map<String, dynamic>> verkadaUserGroups =
-        (widget.orgVerkadaIntegrationData?['orgVerkadaUserGroups'] as List?)
+        (widget.orgData['orgVerkadaUserGroups'] as List?)
                 ?.map((item) {
                   if (item is Map) {
                     return Map<String, dynamic>.from(item);
@@ -347,13 +348,18 @@ class _VerkadaSettingsEditorState extends State<VerkadaSettingsEditor> {
                 .toList() ??
             [];
     final Map<String, dynamic> verkadaProductSiteDesignations =
-        (widget.orgVerkadaIntegrationData?['orgVerkadaProductSiteDesignations']
+        (widget.orgData['orgVerkadaProductSiteDesignations']
                 as Map<String, dynamic>?) ??
             {};
 
-    final bool currentSiteCleanerEnabled = widget
-            .orgVerkadaIntegrationData?['orgVerkadaSiteCleanerEnabled'] as bool? ??
-        false;
+    final bool currentSiteCleanerEnabled =
+        widget.orgData['orgVerkadaSiteCleanerEnabled'] as bool? ?? false;
+
+    // Check if credentials are synced by looking for orgVerkadaBotUserInfo
+    // in the verkadaIntegrationSettings document (widget.orgVerkadaIntegrationData)
+    final bool credentialsSynced = widget.orgVerkadaIntegrationData != null &&
+        widget.orgVerkadaIntegrationData!['orgVerkadaBotUserInfo'] != null &&
+        (widget.orgVerkadaIntegrationData!['orgVerkadaBotUserInfo'] as Map).isNotEmpty;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -365,9 +371,9 @@ class _VerkadaSettingsEditorState extends State<VerkadaSettingsEditor> {
         const Text('Verkada Product Designated Sites',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         const SizedBox(height: 8.0),
-        if (widget.orgVerkadaIntegrationData == null)
+        if (!credentialsSynced)
           const Text(
-              'Verkada credentials not synced. Sync credentials to manage groups.')
+              'Verkada credentials not synced. Sync credentials to manage sites.')
         else
           ElevatedButton.icon(
               icon: const Icon(Icons.settings),
@@ -385,7 +391,7 @@ class _VerkadaSettingsEditorState extends State<VerkadaSettingsEditor> {
         const Text('Verkada User Group Whitelist',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         const SizedBox(height: 8.0),
-        if (widget.orgVerkadaIntegrationData == null)
+        if (!credentialsSynced)
           const Text(
               'Verkada credentials not synced. Sync credentials to manage groups.')
         else
@@ -404,7 +410,7 @@ class _VerkadaSettingsEditorState extends State<VerkadaSettingsEditor> {
         SwitchListTile(
           title: const Text('Verkada Site Cleaner'),
           value: currentSiteCleanerEnabled,
-          onChanged: _isSiteCleanerLoading || widget.orgVerkadaIntegrationData == null
+          onChanged: _isSiteCleanerLoading || !credentialsSynced
               ? null
               : _onSiteCleanerToggleChanged,
           secondary: _isSiteCleanerLoading
