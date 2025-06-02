@@ -165,6 +165,14 @@ class _VerkadaCredentialsEditorState extends State<VerkadaCredentialsEditor> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        Padding(
+          padding: const EdgeInsets.only(bottom: 16.0),
+          child: Text(
+            'If you have not configured credentials in the past or if they have expired and are creating errors, please provide them below. For security these fields are not pre-filled.',
+            style: theme.textTheme.bodySmall?.copyWith(fontStyle: FontStyle.italic),
+            textAlign: TextAlign.center,
+          ),
+        ),
         TextField(
           controller: verkadaOrgShortNameController,
           decoration: const InputDecoration(
@@ -219,7 +227,7 @@ class _VerkadaCredentialsEditorState extends State<VerkadaCredentialsEditor> {
                   valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                 )
               : const Icon(Icons.sync),
-          label: const Text('Sync Verkada Credentials'),
+          label: const Text('Sync With Verkada'),
           style: ElevatedButton.styleFrom(
             backgroundColor: theme.colorScheme.primary,
             foregroundColor: theme.colorScheme.onPrimary,
