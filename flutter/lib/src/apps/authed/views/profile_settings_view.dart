@@ -21,43 +21,35 @@ class ProfileSettingsView extends StatelessWidget {
   Widget build(BuildContext context) {
     ThemeData theme = Theme.of(context);
 
-    // Use Consumer4 to listen to Firebase Functions, Authentication, Firestore, and Settings providers
     return Consumer4<FirebaseFunctions, AuthenticationChangeNotifier,
             FirestoreReadService, SettingsChangeNotifier>(
         builder: (context, firebaseFunctions, authenticationChangeNotifier,
             firestoreService, settingsChangeNotifier, child) {
       return Scaffold(
         appBar: AppBar(
-          title: const Text('Profile'), // Title of the AppBar
+          title: const Text('Profile'),
         ),
-        drawer: const AuthedDrawer(), // Drawer for navigation options
+        drawer: const AuthedDrawer(),
         body: StreamBuilder<DocumentSnapshot>(
             stream: firestoreService
                 .getGlobalUserDocument(authenticationChangeNotifier.user!.uid),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(
-                    child: CircularProgressIndicator()); // Show loading state
+                return const Center(child: CircularProgressIndicator());
               } else if (snapshot.hasError) {
-                return const Center(
-                    child: Text(
-                        'Error loading user data')); // Show error message if data fails to load
+                return const Center(child: Text('Error loading user data'));
               }
               if (!snapshot.hasData || !snapshot.data!.exists) {
-                return const Center(
-                    child: Text(
-                        'User not found')); // Show message if no user data is found
+                return const Center(child: Text('User not found'));
               }
 
               final DocumentSnapshot userDocument = snapshot.data!;
-              final bool hasPhoto = userDocument['userPhotoURL'] !=
-                  ''; // Check if the user has a profile picture
+              final bool hasPhoto = userDocument['userPhotoURL'] != '';
 
               return ProfileScreen(
                 avatar: hasPhoto
                     ? ProfileAvatar(
-                        photoUrl: userDocument[
-                            'userPhotoURL'], // Show profile avatar if available
+                        photoUrl: userDocument['userPhotoURL'],
                       )
                     : CircleAvatar(
                         radius: 75,
@@ -68,13 +60,11 @@ class ProfileSettingsView extends StatelessWidget {
                         ),
                       ),
                 actions: [
-                  // Action for deleting the user account
                   AccountDeletedAction((context, user) async {
                     await firebaseFunctions
                         .httpsCallable('delete_global_user_callable')
                         .call();
                   }),
-                  // Action for changing the user's display name
                   DisplayNameChangedAction(
                     (context, user, userDisplayName) async {
                       await firebaseFunctions
@@ -85,18 +75,17 @@ class ProfileSettingsView extends StatelessWidget {
                       });
                     },
                   ),
-                  // Action for signing out the user
                   SignedOutAction((context) {
                     authenticationChangeNotifier.setUserWasLoggedIn(false);
                   }),
                 ],
                 providers: [
-                  EmailAuthProvider(), // Support for email authentication
+                  EmailAuthProvider(),
                 ],
                 children: [
-                  const SizedBox(height: 16), // Add spacing
+                  const SizedBox(height: 16),
 
-                  // Dropdown for changing theme mode (system, light, dark)
+                  // Theme mode dropdown
                   DropdownButton<ThemeMode>(
                     value: settingsChangeNotifier.themeMode,
                     onChanged: settingsChangeNotifier.updateThemeMode,
@@ -115,9 +104,8 @@ class ProfileSettingsView extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16), // Add spacing
+                  const SizedBox(height: 16),
 
-                  // Button to open the dialog for changing profile picture
                   ElevatedButton(
                     onPressed: () {
                       showDialog(
@@ -162,13 +150,12 @@ class ChangeProfilePictureAlertDialogState
   @override
   void initState() {
     super.initState();
-    _userPhotoURLController =
-        TextEditingController(); // Initialize controller for photo URL input
+    _userPhotoURLController = TextEditingController();
   }
 
   @override
   void dispose() {
-    _userPhotoURLController.dispose(); // Dispose controller to free resources
+    _userPhotoURLController.dispose();
     super.dispose();
   }
 
@@ -182,7 +169,6 @@ class ChangeProfilePictureAlertDialogState
       _isLoading = true;
     });
     try {
-      // Call Firebase function to update the user's photo URL
       await firebaseFunctions
           .httpsCallable('update_global_user_photo_url_callable')
           .call({
@@ -215,7 +201,7 @@ class ChangeProfilePictureAlertDialogState
             children: [
               const Text(
                   'Enter the URL of a picture to use as your profile picture.'),
-              const SizedBox(height: 16.0), // Add spacing
+              const SizedBox(height: 16.0),
               TextField(
                 controller: _userPhotoURLController,
                 decoration: const InputDecoration(
@@ -236,17 +222,16 @@ class ChangeProfilePictureAlertDialogState
             ),
             padding: const EdgeInsets.all(16.0),
           ),
-          onPressed:
-              _isLoading ? null : _onSubmit, // Disable button while loading
+          onPressed: _isLoading ? null : _onSubmit,
           icon: _isLoading
-              ? const CircularProgressIndicator() // Show loading indicator if waiting
-              : const Icon(Icons.photo), // Icon for photo upload
+              ? const CircularProgressIndicator()
+              : const Icon(Icons.photo),
           label: const Text('Change Profile Picture'),
         ),
         const SizedBox(height: 16.0),
         ElevatedButton.icon(
           onPressed: () {
-            Navigator.of(context).pop(); // Close dialog
+            Navigator.of(context).pop();
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
@@ -256,8 +241,8 @@ class ChangeProfilePictureAlertDialogState
             ),
             padding: const EdgeInsets.all(16.0),
           ),
-          icon: const Icon(Icons.arrow_back), // Back icon
-          label: const Text('Go Back'), // Back button text
+          icon: const Icon(Icons.arrow_back),
+          label: const Text('Go Back'),
         ),
       ],
     );

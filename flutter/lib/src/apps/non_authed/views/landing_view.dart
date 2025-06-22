@@ -13,7 +13,6 @@ class LandingView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Retrieve the current theme to style widgets accordingly
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -22,80 +21,59 @@ class LandingView extends StatelessWidget {
           // Background image that fills the entire screen
           Positioned.fill(
             child: Image.asset(
-              'assets/boxes.jpg', // Path to your background image asset
-              fit:
-                  BoxFit.cover, // Ensures the image covers the whole background
+              'assets/boxes.jpg',
+              fit: BoxFit.cover,
             ),
           ),
           // Centered content with constrained size
           Center(
             child: LayoutBuilder(builder: (context, constraints) {
               return ConstrainedBox(
-                constraints: BoxConstraints(
-                    maxHeight: constraints
-                        .maxHeight // Constrain the height to screen size
-                    ),
+                constraints: BoxConstraints(maxHeight: constraints.maxHeight),
                 child: Center(
-                  // SmallLayoutBuilder adjusts layout based on screen size
                   child: SmallLayoutBuilder(
                     childWidget: Card(
-                      color: theme.colorScheme
-                          .onPrimary, // Set the card's background color
-                      margin: const EdgeInsets.symmetric(
-                          vertical: 8.0), // Vertical margin around the card
+                      color: theme.colorScheme.onPrimary,
+                      margin: const EdgeInsets.symmetric(vertical: 8.0),
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 16.0,
-                            vertical: 8.0), // Padding inside the card
+                            horizontal: 16.0, vertical: 8.0),
                         child: Column(
-                          mainAxisAlignment: MainAxisAlignment
-                              .center, // Center the content vertically
-                          mainAxisSize:
-                              MainAxisSize.min, // Shrink to fit the content
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
                           children: [
                             // Title card displaying the app name
                             Card(
                               margin: const EdgeInsets.symmetric(vertical: 8.0),
                               child: Container(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 16.0,
-                                    vertical:
-                                        8.0), // Padding inside the title card
+                                    horizontal: 16.0, vertical: 8.0),
                                 child: Text(
-                                  'WebbPulse Inventory Management', // App name displayed as title
-                                  style: theme.textTheme
-                                      .titleLarge, // Use theme's large text style
+                                  'WebbPulse Inventory Management',
+                                  style: theme.textTheme.titleLarge,
                                 ),
                               ),
                             ),
-                            // CustomCard for Register option
+                            // Register option
                             CustomCard(
-                              theme:
-                                  theme, // Pass the theme for consistent styling
+                              theme: theme,
                               customCardLeading: Icon(Icons.person_add,
-                                  color: theme.colorScheme
-                                      .secondary), // Leading icon for the card
-                              customCardTitle: const Text(
-                                  'Register'), // Title text for the card
-                              customCardTrailing: null, // No trailing widget
+                                  color: theme.colorScheme.secondary),
+                              customCardTitle: const Text('Register'),
+                              customCardTrailing: null,
                               onTapAction: () {
-                                // Navigate to the RegisterView when the card is tapped
                                 Navigator.pushNamed(
                                     context, RegisterView.routeName);
                               },
                             ),
-                            // CustomCard for Sign In option
+                            // Sign In option
                             CustomCard(
-                              theme:
-                                  theme, // Pass the theme for consistent styling
+                              theme: theme,
                               customCardLeading: Icon(Icons.login,
-                                  color: theme.colorScheme
-                                      .secondary), // Leading icon for the card
-                              customCardTitle: const Text(
-                                  'Sign In'), // Title text for the card
-                              customCardTrailing: null, // No trailing widget
+                                  color: theme.colorScheme.secondary),
+                              customCardTitle: const Text('Sign In'),
+                              customCardTrailing: null,
                               onTapAction: () {
-                                // Navigate to the SignInView when the card is tapped
                                 Navigator.pushNamed(
                                     context, SignInView.routeName);
                               },

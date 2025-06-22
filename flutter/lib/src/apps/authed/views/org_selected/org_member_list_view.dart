@@ -8,7 +8,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:io' as io;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:universal_html/html.dart' as html; // Universal web support
+import 'package:universal_html/html.dart' as html;
 
 import 'package:webbpulse_inventory_management/src/apps/authed/views/org_selected/org_member_view.dart';
 import 'package:webbpulse_inventory_management/src/shared/providers/org_selector_change_notifier.dart';

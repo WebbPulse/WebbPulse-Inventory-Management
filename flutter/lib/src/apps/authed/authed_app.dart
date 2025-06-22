@@ -42,25 +42,17 @@ class AuthedApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Use MultiProvider to supply multiple providers to the widget tree
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<OrgSelectorChangeNotifier>(
-            create: (_) =>
-                OrgSelectorChangeNotifier()), // Manages organization selection
+            create: (_) => OrgSelectorChangeNotifier()),
         ChangeNotifierProvider<OrgMemberSelectorChangeNotifier>(
-            create: (_) =>
-                OrgMemberSelectorChangeNotifier()), // Manages organization member selection
+            create: (_) => OrgMemberSelectorChangeNotifier()),
         ChangeNotifierProvider<DeviceSelectorChangeNotifier>(
-            create: (_) =>
-                DeviceSelectorChangeNotifier()), // Manages user settings
-        Provider<FirestoreReadService>(
-            create: (_) => firestoreService), // Provides Firestore read service
-        Provider<FirebaseFunctions>.value(
-            value: firebaseFunctions), // Provides Firebase functions
-        Provider<DeviceCheckoutService>(
-            create: (_) =>
-                deviceCheckoutService), // Provides DeviceCheckoutService
+            create: (_) => DeviceSelectorChangeNotifier()),
+        Provider<FirestoreReadService>(create: (_) => firestoreService),
+        Provider<FirebaseFunctions>.value(value: firebaseFunctions),
+        Provider<DeviceCheckoutService>(create: (_) => deviceCheckoutService),
       ],
       child: Consumer5<
           OrgSelectorChangeNotifier,
@@ -76,9 +68,9 @@ class AuthedApp extends StatelessWidget {
                 .doesGlobalUserExistInFirestore(authProvider.user!.uid),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return const CircularProgressIndicator(); // Show loading indicator while waiting for data
+                return const CircularProgressIndicator();
               } else if (snapshot.hasError) {
-                return const CircularProgressIndicator(); // Show error state (could improve error handling)
+                return const CircularProgressIndicator();
               } else if (snapshot.data == false) {
                 // If the user doesn't exist, call Firebase Function to create the global user profile
                 firebaseFunctions
@@ -87,15 +79,12 @@ class AuthedApp extends StatelessWidget {
                 return const CircularProgressIndicator(); // Show loading indicator while creating profile
               }
 
-              // Build the MaterialApp for authenticated users
               return MaterialApp(
-                restorationScopeId:
-                    'authedapp', // Enable state restoration for the app
-                title: 'WebbPulse Inventory Management', // App title
-                theme: ThemeData(), // Light theme
-                darkTheme: ThemeData.dark(), // Dark theme
-                themeMode: settingsProvider
-                    .themeMode, // Set theme mode based on user settings
+                restorationScopeId: 'authedapp',
+                title: 'WebbPulse Inventory Management',
+                theme: ThemeData(),
+                darkTheme: ThemeData.dark(),
+                themeMode: settingsProvider.themeMode,
                 // Define route generation logic
                 onGenerateRoute: (RouteSettings routeSettings) {
                   // Handle routes for first time account setup views

@@ -56,8 +56,7 @@ class _VerkadaGroupWhitelistDialogState
           if (groupId == null || groupId.isEmpty) {
             return null; // Skip groups with invalid IDs
           }
-          // Create a new map for the group, preserving existing data
-          // and updating the whitelist status from the local state.
+
           return {
             'groupId': groupId,
             'groupName': group['groupName'] as String? ?? 'Unknown Group',

@@ -1,9 +1,17 @@
-from src.helper_functions.auth.auth_functions import check_user_is_org_admin, check_user_is_authed, check_user_token_current, check_user_is_email_verified
+from src.helper_functions.auth.auth_functions import (
+    check_user_is_org_admin,
+    check_user_is_authed,
+    check_user_token_current,
+    check_user_is_email_verified,
+)
 from src.shared import db, POSTcorsrules
-from src.helper_functions.verkada_integration.utils.update_all_verkada_device_type import update_all_devices_verkada_device_type
+from src.helper_functions.verkada_integration.utils.update_all_verkada_device_type import (
+    update_all_devices_verkada_device_type,
+)
 
 from firebase_functions import https_fn
 from typing import Any
+
 
 @https_fn.on_call(cors=POSTcorsrules)
 def update_verkada_user_group_whitelists_callable(req: https_fn.CallableRequest) -> Any:
@@ -15,7 +23,7 @@ def update_verkada_user_group_whitelists_callable(req: https_fn.CallableRequest)
 
     try:
         org_id = req.data["orgId"]
-        # Expect 'updatedGroups' which is a list of maps
+
         updated_groups = req.data["updatedGroups"]
 
         check_user_is_authed(req)
@@ -23,28 +31,25 @@ def update_verkada_user_group_whitelists_callable(req: https_fn.CallableRequest)
         check_user_token_current(req)
         check_user_is_org_admin(req, org_id)
 
-        if not org_id or updated_groups is None: # Check if updated_groups is provided
+        if not org_id or updated_groups is None:
             raise https_fn.HttpsError(
                 code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
-                message='The function must be called with the following arguments: orgId, updatedGroups'
+                message="The function must be called with the following arguments: orgId, updatedGroups",
             )
 
-        # Optional: Add validation for the structure of updated_groups if needed
         if not isinstance(updated_groups, list):
             raise https_fn.HttpsError(
                 code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
-                message='The "updatedGroups" argument must be a list.'
+                message='The "updatedGroups" argument must be a list.',
             )
-        # You could add more checks here to ensure each item in the list is a map
-        # with the expected keys ('groupId', 'groupName', 'isWhitelisted')
 
-        org_ref = db.collection('organizations').document(org_id)
+        org_ref = db.collection("organizations").document(org_id)
         # Save the received list directly to the 'orgVerkadaUserGroups' field in the main org document
-        org_ref.update({
-            'orgVerkadaUserGroups': updated_groups
-        })
+        org_ref.update({"orgVerkadaUserGroups": updated_groups})
 
-        return {"response": f"Successfully updated the Verkada user group whitelists for organization {org_id}."}
+        return {
+            "response": f"Successfully updated the Verkada user group whitelists for organization {org_id}."
+        }
 
     except https_fn.HttpsError as e:
         raise e
@@ -52,5 +57,5 @@ def update_verkada_user_group_whitelists_callable(req: https_fn.CallableRequest)
     except Exception as e:
         raise https_fn.HttpsError(
             code=https_fn.FunctionsErrorCode.UNKNOWN,
-            message=f"An error occurred: {str(e)}"
+            message=f"An error occurred: {str(e)}",
         )

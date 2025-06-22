@@ -16,21 +16,16 @@ class NonAuthedApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Consumer2 listens to both AuthenticationChangeNotifier and SettingsChangeNotifier
     return Consumer2<AuthenticationChangeNotifier, SettingsChangeNotifier>(
       builder:
           (context, authenticationChangeNotifier, settingsProvider, child) =>
               MaterialApp(
-        restorationScopeId:
-            'nonauthedapp', // Enable state restoration for the app
-        title: 'WebbPulse Inventory Management', // App title
-        theme: ThemeData(), // Light theme
-        darkTheme: ThemeData.dark(), // Dark theme
-        themeMode:
-            settingsProvider.themeMode, // Use theme mode from settings provider
-        // Define routing logic for different views
+        restorationScopeId: 'nonauthedapp',
+        title: 'WebbPulse Inventory Management',
+        theme: ThemeData(),
+        darkTheme: ThemeData.dark(),
+        themeMode: settingsProvider.themeMode,
         onGenerateRoute: (RouteSettings routeSettings) {
-          // Check if the user session has expired
           if (authenticationChangeNotifier.userWasLoggedIn == true) {
             // Redirect to UserSessionExpiredView if the user was logged in but their session expired
             return MaterialPageRoute<void>(
