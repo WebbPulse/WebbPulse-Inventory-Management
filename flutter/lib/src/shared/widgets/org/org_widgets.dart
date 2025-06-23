@@ -66,38 +66,35 @@ class OrgVerkadaIntegrationDocumentStreamBuilder extends StatelessWidget {
 
 /// A custom AppBar widget that displays the organization name from Firestore in the title
 class OrgNameAppBar extends StatelessWidget implements PreferredSizeWidget {
-  final String titleSuffix; // Optional suffix for the title
-  final List<Widget> actions; // List of widgets for AppBar actions
-  final Widget? leading; // Optional widget for the leading part of the AppBar
+  final String titleSuffix;
+  final List<Widget> actions;
+  final Widget? leading;
 
   const OrgNameAppBar({
     super.key,
-    this.titleSuffix = '', // Default empty suffix for the title
-    this.actions = const [], // Default empty list of actions
-    this.leading, // Optional leading widget
+    this.titleSuffix = '',
+    this.actions = const [],
+    this.leading,
   });
 
   @override
   Widget build(BuildContext context) {
-    // Use OrgDocumentStreamBuilder to fetch and display the organization name
     return OrgDocumentStreamBuilder(
       builder: (context, orgDocument) {
-        final String orgName = orgDocument['orgName'] ??
-            ''; // Get organization name from the document
+        final String orgName = orgDocument['orgName'] ?? '';
 
         return AppBar(
           title: FittedBox(
             fit: BoxFit.scaleDown,
             child: Text('$orgName $titleSuffix'),
-          ), // Display the organization name with the title suffix
-          actions: actions, // Set the AppBar actions
-          leading: leading, // Set the leading widget if provided
+          ),
+          actions: actions,
+          leading: leading,
         );
       },
     );
   }
 
-  // Define the preferred size of the AppBar to match the default toolbar height
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }

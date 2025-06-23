@@ -11,22 +11,18 @@ import 'package:webbpulse_inventory_management/src/apps/authed/views/org_selecte
 class SignInView extends StatelessWidget {
   const SignInView({super.key});
 
-  /// Route name for navigation to this view
   static const routeName = '/signin';
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Sign In'), // Display title in the AppBar
+        title: const Text('Sign In'),
       ),
       body: Center(
-        // Use Consumer to listen for changes in AuthenticationChangeNotifier
         child: Consumer<AuthenticationChangeNotifier>(
           builder: (context, authProvider, child) => SignInScreen(
-            // Define the authentication providers (e.g., email-based authentication)
             providers: authenticationProviderList,
-            // Define actions based on authentication state changes
             actions: [
               AuthStateChangeAction<SignedIn>((context, state) {
                 // If the user signs in successfully, navigate to DeviceCheckoutView

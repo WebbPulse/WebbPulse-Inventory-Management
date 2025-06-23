@@ -18,12 +18,11 @@ class OrgCreateView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Create Organization'), // Title for the AppBar
+        title: const Text('Create Organization'),
       ),
       body: const Padding(
-        padding: EdgeInsets.all(16.0), // Padding around the form
-        child:
-            CreateOrganizationForm(), // The form widget for creating an organization
+        padding: EdgeInsets.all(16.0),
+        child: CreateOrganizationForm(),
       ),
     );
   }
@@ -38,59 +37,53 @@ class CreateOrganizationForm extends StatefulWidget {
 }
 
 class CreateOrganizationFormState extends State<CreateOrganizationForm> {
-  late TextEditingController
-      _controller; // Controller for the organization name input
-  var _isLoading = false; // Tracks the loading state during form submission
+  late TextEditingController _controller;
+  var _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _controller = TextEditingController(); // Initialize the text controller
+    _controller = TextEditingController();
   }
 
   @override
   void dispose() {
-    _controller.dispose(); // Dispose the controller to free resources
+    _controller.dispose();
     super.dispose();
   }
 
   /// Handles the submission of the organization creation form.
   void _onSubmit() async {
-    final orgName =
-        _controller.text; // Get the organization name from the input
-    final firebaseFunctions = Provider.of<FirebaseFunctions>(context,
-        listen: false); // Access Firebase Functions
-    final authenticationChangeNotifier = Provider.of<AuthenticationChangeNotifier>(context,
-        listen: false); // Access Firebase Auth
+    final orgName = _controller.text;
+    final firebaseFunctions =
+        Provider.of<FirebaseFunctions>(context, listen: false);
+    final authenticationChangeNotifier =
+        Provider.of<AuthenticationChangeNotifier>(context, listen: false);
 
     if (orgName.isNotEmpty) {
       try {
-        setState(() => _isLoading = true); // Set loading state to true
+        setState(() => _isLoading = true);
         await firebaseFunctions
-            .httpsCallable(
-                'create_organization_callable') // Call the cloud function to create the organization
+            .httpsCallable('create_organization_callable')
             .call({
-          "orgName": orgName, // Pass the organization name
+          "orgName": orgName,
         });
 
         /// Refresh the user's ID token to get the roles for the newly created organization
         await authenticationChangeNotifier.user!.getIdToken(true);
 
         await AsyncContextHelpers.showSnackBarIfMounted(
-            context, 'Organization created!'); // Show success message
-        Navigator.pushNamed(
-            context,
-            OrgSelectionView
-                .routeName); // Navigate back to the organization selection view
+            context, 'Organization created!');
+        Navigator.pushNamed(context, OrgSelectionView.routeName);
       } catch (e) {
-        await AsyncContextHelpers.showSnackBarIfMounted(context,
-            'Failed to create organization: $e'); // Show error message on failure
+        await AsyncContextHelpers.showSnackBarIfMounted(
+            context, 'Failed to create organization: $e');
       } finally {
-        setState(() => _isLoading = false); // Reset loading state
+        setState(() => _isLoading = false);
       }
     } else {
-      await AsyncContextHelpers.showSnackBarIfMounted(context,
-          'Please enter an organization name'); // Show message if organization name is empty
+      await AsyncContextHelpers.showSnackBarIfMounted(
+          context, 'Please enter an organization name');
     }
   }
 
@@ -98,23 +91,20 @@ class CreateOrganizationFormState extends State<CreateOrganizationForm> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // TextField for entering the organization name
         TextField(
           controller: _controller,
           decoration: const InputDecoration(
-            labelText: 'Organization Name', // Label for the input field
+            labelText: 'Organization Name',
           ),
         ),
-        const SizedBox(height: 16.0), // Add spacing between input and button
-        // Button for submitting the form
+        const SizedBox(height: 16.0),
         ElevatedButton.icon(
-          onPressed:
-              _isLoading ? null : _onSubmit, // Disable button when loading
+          onPressed: _isLoading ? null : _onSubmit,
           style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(16.0)),
           icon: _isLoading
-              ? const CircularProgressIndicator() // Show loading indicator if waiting for the response
-              : const Icon(Icons.add), // Show add icon when not loading
-          label: const Text('Create Organization'), // Button label
+              ? const CircularProgressIndicator()
+              : const Icon(Icons.add),
+          label: const Text('Create Organization'),
         ),
       ],
     );

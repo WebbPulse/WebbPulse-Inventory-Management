@@ -9,27 +9,23 @@ import 'package:webbpulse_inventory_management/src/shared/widgets/devices/add_de
 class OrgDeviceListView extends StatelessWidget {
   OrgDeviceListView({super.key});
 
-  // Route name for navigation
   static const routeName = '/devices';
   final ValueNotifier<String> searchQuery = ValueNotifier<String>('');
 
   @override
   Widget build(BuildContext context) {
-    ThemeData theme = Theme.of(context); // Get the current theme
+    ThemeData theme = Theme.of(context);
 
     return Scaffold(
-        // AppBar with the organization's name and an option to add new devices
         appBar: OrgNameAppBar(
-          titleSuffix: 'Devices', // Displays "Devices" next to the org name
+          titleSuffix: 'Devices',
           actions: [
-            // Button to trigger the "Add New Device" dialog
             ElevatedButton.icon(
               onPressed: () {
-                // Show dialog to add a new device
                 showDialog(
                   context: context,
                   builder: (BuildContext context) {
-                    return const AddDeviceAlertDialog(); // Add device dialog
+                    return const AddDeviceAlertDialog();
                   },
                 );
               },
@@ -42,7 +38,7 @@ class OrgDeviceListView extends StatelessWidget {
                 padding: const EdgeInsets.all(16.0),
               ),
               label: const Text('Add New Device'),
-              icon: const Icon(Icons.add), // Icon for the button
+              icon: const Icon(Icons.add),
             )
           ],
         ),

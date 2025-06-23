@@ -16,8 +16,8 @@ class DeviceList extends StatefulWidget {
 }
 
 class _DeviceListState extends State<DeviceList> {
-  String _sortCriteria = 'Checked Out'; // Initialize sort criteria
-  String _statusFilterCriteria = 'All'; // Initialize role filter criteria
+  String _sortCriteria = 'Checked Out';
+  String _statusFilterCriteria = 'All';
 
   @override
   Widget build(BuildContext context) {
@@ -25,41 +25,32 @@ class _DeviceListState extends State<DeviceList> {
       builder: (context, orgSelectorProvider, firestoreReadService, child) {
         return StreamBuilder<List<DocumentSnapshot>>(
             stream: firestoreReadService.getOrgDevicesDocuments(
-                orgSelectorProvider.orgId,
-                widget
-                    .orgMemberId), // Fetch devices by organization ID, no specific member
+                orgSelectorProvider.orgId, widget.orgMemberId),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(
-                    child:
-                        CircularProgressIndicator()); // Show loading indicator while waiting for data
+                return const Center(child: CircularProgressIndicator());
               } else if (snapshot.hasError) {
-                return const Center(
-                    child: Text(
-                        'Error loading devices')); // Display error if there's an issue
+                return const Center(child: Text('Error loading devices'));
               }
 
-              final List<DocumentSnapshot> devicesDocs =
-                  snapshot.data!; // Get the list of device documents
+              final List<DocumentSnapshot> devicesDocs = snapshot.data!;
 
               return Column(
                 children: [
                   /// Search field for filtering devices
                   SerialSearchTextField(searchQuery: widget.searchQuery),
 
-                  // Sort Dropdown
+                  // Sort and filter controls
                   Padding(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 16.0, vertical: 8.0),
                       child: Align(
                         alignment: Alignment.centerLeft,
                         child: Wrap(
-                          spacing:
-                              16.0, // Adds space between the rows if they wrap
+                          spacing: 16.0,
                           children: [
                             Row(
-                              mainAxisSize: MainAxisSize
-                                  .min, // Keeps the Row as compact as possible
+                              mainAxisSize: MainAxisSize.min,
                               children: [
                                 const Text('Sort by:'),
                                 const SizedBox(width: 8.0),
@@ -78,8 +69,7 @@ class _DeviceListState extends State<DeviceList> {
                                   onChanged: (String? newValue) {
                                     if (newValue != null) {
                                       setState(() {
-                                        _sortCriteria =
-                                            newValue; // Update sort criteria
+                                        _sortCriteria = newValue;
                                       });
                                     }
                                   },
@@ -87,8 +77,7 @@ class _DeviceListState extends State<DeviceList> {
                               ],
                             ),
                             Row(
-                              mainAxisSize: MainAxisSize
-                                  .min, // Keeps the Row as compact as possible
+                              mainAxisSize: MainAxisSize.min,
                               children: [
                                 const Text('Filter by Status:'),
                                 const SizedBox(width: 8.0),
@@ -107,8 +96,7 @@ class _DeviceListState extends State<DeviceList> {
                                   onChanged: (String? newValue) {
                                     if (newValue != null) {
                                       setState(() {
-                                        _statusFilterCriteria =
-                                            newValue; // Update filter criteria
+                                        _statusFilterCriteria = newValue;
                                       });
                                     }
                                   },
@@ -123,14 +111,12 @@ class _DeviceListState extends State<DeviceList> {
                     child: ValueListenableBuilder<String>(
                       valueListenable: widget.searchQuery,
                       builder: (context, query, child) {
-                        final lowerCaseQuery =
-                            query.toLowerCase(); // Convert query to lowercase
+                        final lowerCaseQuery = query.toLowerCase();
 
                         // Filter devices based on serial number or check-out status
                         final searchedDevicesDocs = devicesDocs.where((doc) {
                           final data = doc.data() as Map<String, dynamic>;
 
-                          // Convert boolean check-out status to a readable format
                           final isDeviceCheckedOut =
                               (data['isDeviceCheckedOut'] == true
                                       ? 'Checked Out'
@@ -142,7 +128,6 @@ class _DeviceListState extends State<DeviceList> {
                                   .toString()
                                   .toLowerCase();
 
-                          // Check if the device matches the search query
                           return deviceSerialNumber.contains(lowerCaseQuery) ||
                               isDeviceCheckedOut.contains(lowerCaseQuery);
                         }).toList();
@@ -168,7 +153,6 @@ class _DeviceListState extends State<DeviceList> {
                           final deviceDataA = a.data() as Map<String, dynamic>;
                           final deviceDataB = b.data() as Map<String, dynamic>;
 
-                          // Retrieve boolean values safely with null checks
                           final isCheckedOutA =
                               deviceDataA['isDeviceCheckedOut'] ?? false;
                           final isCheckedOutB =
@@ -245,17 +229,14 @@ class SerialSearchTextFieldState extends State<SerialSearchTextField> {
   @override
   void initState() {
     super.initState();
-    // Initialize the controller with the current value of searchQuery
     _searchController = TextEditingController(text: widget.searchQuery.value);
 
-    // Define the listener to synchronize the controller text with searchQuery
     _listener = () {
       if (_searchController.text != widget.searchQuery.value) {
         _searchController.text = widget.searchQuery.value;
       }
     };
 
-    // Attach the listener to searchQuery
     widget.searchQuery.addListener(_listener);
   }
 
@@ -271,21 +252,20 @@ class SerialSearchTextFieldState extends State<SerialSearchTextField> {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: TextField(
-        controller: _searchController, // Binds controller to the search field
+        controller: _searchController,
         decoration: InputDecoration(
           labelText: 'Search by Serial',
           border: const OutlineInputBorder(),
           suffixIcon: IconButton(
             icon: const Icon(Icons.clear),
             onPressed: () {
-              _searchController.clear(); // Clear the input field
-              widget.searchQuery.value = ''; // Reset the search query
+              _searchController.clear();
+              widget.searchQuery.value = '';
             },
           ),
         ),
         onChanged: (value) {
-          widget.searchQuery.value =
-              value; // Update the search query on input change
+          widget.searchQuery.value = value;
         },
       ),
     );

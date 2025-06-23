@@ -7,32 +7,26 @@ import 'package:webbpulse_inventory_management/src/shared/providers/authenticati
 class VerifyEmailView extends StatelessWidget {
   const VerifyEmailView({super.key});
 
-  /// Route name for navigation to this view
   static const routeName = '/verify-email';
 
   @override
   Widget build(BuildContext context) {
     return Consumer<AuthenticationChangeNotifier>(
-      builder: (context, authenticationChangeNotifier, child) {
-        return Scaffold(
-          appBar: AppBar(
-            title: const Text(
-                'Verify Email'), // Title of the AppBar for the verification screen
-          ),
-          body:
-              EmailVerificationScreen(
-                actions:[
-                  EmailVerifiedAction(() async{
-                    await authenticationChangeNotifier.user!.getIdToken(true);
-                    authenticationChangeNotifier.setUserEmailVerified(true);
-                }),
-                AuthCancelledAction((context) {     
-                  Navigator.of(context).pop(); // Close dialog
-                }),
-                ]
-              ), // Firebase UI screen for email verification
-        );
-      }
-    );
+        builder: (context, authenticationChangeNotifier, child) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Verify Email'),
+        ),
+        body: EmailVerificationScreen(actions: [
+          EmailVerifiedAction(() async {
+            await authenticationChangeNotifier.user!.getIdToken(true);
+            authenticationChangeNotifier.setUserEmailVerified(true);
+          }),
+          AuthCancelledAction((context) {
+            Navigator.of(context).pop(); // Close dialog
+          }),
+        ]),
+      );
+    });
   }
 }

@@ -20,29 +20,23 @@ class OrgSelectionView extends StatelessWidget {
   Widget build(BuildContext context) {
     ThemeData theme = Theme.of(context);
 
-    // Consumer2 listens to both AuthenticationChangeNotifier and FirestoreReadService
     return Consumer2<AuthenticationChangeNotifier, FirestoreReadService>(
       builder:
           (context, authenticationChangeNotifier, firestoreService, child) =>
-              // AuthClaimChecker checks the user's authentication claims
               AuthClaimChecker(builder: (context, userClaims) {
-        final List<String> userOrgIds = extractOrgIdsFromClaims(
-            userClaims); // Extract the user's organization IDs from claims
+        final List<String> userOrgIds = extractOrgIdsFromClaims(userClaims);
 
         return Scaffold(
           appBar: AppBar(
-            automaticallyImplyLeading:
-                false, // Disable the automatic back button
-            title: const Text('My Organizations'), // AppBar title
+            automaticallyImplyLeading: false,
+            title: const Text('My Organizations'),
             actions: [
-              // Sign out button only appears if no organization is selected
               if (Provider.of<OrgSelectorChangeNotifier>(context).orgId == '')
                 ElevatedButton.icon(
-                  icon: const Icon(Icons.logout), // Logout icon
+                  icon: const Icon(Icons.logout),
                   label: const Text('Sign Out'),
                   onPressed: () {
-                    authenticationChangeNotifier
-                        .signOutUser(); // Sign out action
+                    authenticationChangeNotifier.signOutUser();
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor:
@@ -62,7 +56,6 @@ class OrgSelectionView extends StatelessWidget {
                 child: Column(
                   children: [
                     if (constraints.maxWidth > 600)
-                      // Display heading if the screen width is larger than 600 pixels
                       Text(
                         'Select an Organization',
                         style: theme.textTheme.headlineSmall,
@@ -71,14 +64,10 @@ class OrgSelectionView extends StatelessWidget {
                       child: userOrgIds.isNotEmpty
                           ? SmallLayoutBuilder(
                               childWidget: ListView.builder(
-                                physics:
-                                    const BouncingScrollPhysics(), // Adds a bounce effect when scrolling
+                                physics: const BouncingScrollPhysics(),
                                 itemCount: userOrgIds.length +
-                                    (userOrgIds.length < 10
-                                        ? 1
-                                        : 0), // Display "Create New Organization" if org count is less than 10
+                                    (userOrgIds.length < 10 ? 1 : 0),
                                 itemBuilder: (context, index) {
-                                  // If the last item, display the "Create New Organization" button
                                   if (index == userOrgIds.length &&
                                       userOrgIds.length < 10) {
                                     return Padding(
@@ -87,9 +76,7 @@ class OrgSelectionView extends StatelessWidget {
                                       child: ElevatedButton(
                                         onPressed: () {
                                           Navigator.pushNamed(
-                                              context,
-                                              OrgCreateView
-                                                  .routeName); // Navigate to OrgCreateView
+                                              context, OrgCreateView.routeName);
                                         },
                                         style: ElevatedButton.styleFrom(
                                           backgroundColor: theme
@@ -107,23 +94,18 @@ class OrgSelectionView extends StatelessWidget {
                                       ),
                                     );
                                   }
-                                  // Display the list of organizations
                                   final orgId = userOrgIds[index];
-                                  return OrgCard(
-                                      orgId: orgId); // Custom OrgCard widget
+                                  return OrgCard(orgId: orgId);
                                 },
                               ),
                             )
                           : Column(
-                              // If no organizations are found, show this message and button
                               children: [
                                 const Text('No organizations found'),
                                 ElevatedButton(
                                   onPressed: () {
                                     Navigator.pushNamed(
-                                        context,
-                                        OrgCreateView
-                                            .routeName); // Navigate to OrgCreateView
+                                        context, OrgCreateView.routeName);
                                   },
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: theme.colorScheme.surface
@@ -157,7 +139,7 @@ class OrgCard extends StatelessWidget {
     required this.orgId,
   });
 
-  final String orgId; // Organization ID
+  final String orgId;
 
   @override
   Widget build(BuildContext context) {
@@ -166,40 +148,30 @@ class OrgCard extends StatelessWidget {
     return Consumer2<OrgSelectorChangeNotifier, FirestoreReadService>(
       builder: (context, orgSelectorProvider, firestoreService, child) {
         return StreamBuilder(
-          stream: firestoreService.getOrgDocument(
-              orgId), // Stream the organization document from Firestore
+          stream: firestoreService.getOrgDocument(orgId),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(
-                  child: CircularProgressIndicator()); // Show loading spinner
+              return const Center(child: CircularProgressIndicator());
             } else if (snapshot.hasError) {
-              return const Center(
-                  child: Text(
-                      'Error loading organizations')); // Show error message
+              return const Center(child: Text('Error loading organizations'));
             }
 
-            final String orgName =
-                snapshot.data?['orgName'] ?? ''; // Organization name
-            final bool orgDeleted = snapshot.data?['orgDeleted'] ??
-                false; // Check if the organization is deleted
+            final String orgName = snapshot.data?['orgName'] ?? '';
+            final bool orgDeleted = snapshot.data?['orgDeleted'] ?? false;
 
             if (orgDeleted) {
-              return const SizedBox
-                  .shrink(); // Return empty if the organization is deleted
+              return const SizedBox.shrink();
             }
 
             return CustomCard(
               theme: theme,
-              customCardLeading: Icon(Icons.home,
-                  color: theme.colorScheme.secondary), // Home icon
-              customCardTitle: Text(orgName), // Display the organization name
+              customCardLeading:
+                  Icon(Icons.home, color: theme.colorScheme.secondary),
+              customCardTitle: Text(orgName),
               customCardTrailing: null,
               onTapAction: () {
-                orgSelectorProvider.selectOrg(orgId); // Select the organization
-                Navigator.pushNamed(
-                    context,
-                    OrgDeviceListView
-                        .routeName); // Navigate to DeviceCheckoutView
+                orgSelectorProvider.selectOrg(orgId);
+                Navigator.pushNamed(context, OrgDeviceListView.routeName);
               },
             );
           },
@@ -211,8 +183,7 @@ class OrgCard extends StatelessWidget {
 
 /// Extracts organization IDs from the user's authentication claims.
 List<String> extractOrgIdsFromClaims(Map<String, dynamic> claims) {
-  final RegExp orgIdPattern = RegExp(
-      r'^org_(member|admin|deskstation)_(\w+)$'); // Regular expression pattern for extracting org IDs
+  final RegExp orgIdPattern = RegExp(r'^org_(member|admin|deskstation)_(\w+)$');
   List<String> orgIds = [];
 
   claims.forEach((key, value) {
@@ -220,10 +191,10 @@ List<String> extractOrgIdsFromClaims(Map<String, dynamic> claims) {
     if (match != null) {
       final orgId = match.group(2);
       if (orgId != null) {
-        orgIds.add(orgId); // Add the extracted org ID to the list
+        orgIds.add(orgId);
       }
     }
   });
 
-  return orgIds; // Return the list of organization IDs
+  return orgIds;
 }

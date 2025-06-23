@@ -14,7 +14,6 @@ class EmailNotVerifiedView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Retrieve the current theme to style widgets accordingly
     final theme = Theme.of(context);
 
     return Consumer<AuthenticationChangeNotifier>(
@@ -25,74 +24,57 @@ class EmailNotVerifiedView extends StatelessWidget {
             // Background image that fills the entire screen
             Positioned.fill(
               child: Image.asset(
-                'assets/boxes.jpg', // Path to your background image asset
-                fit: BoxFit
-                    .cover, // Ensures the image covers the whole background
+                'assets/boxes.jpg',
+                fit: BoxFit.cover,
               ),
             ),
             // Centered content with constrained size
             Center(
               child: LayoutBuilder(builder: (context, constraints) {
                 return Center(
-                  // SmallLayoutBuilder adjusts layout based on screen size
                   child: SmallLayoutBuilder(
                     childWidget: Card(
-                      color: theme.colorScheme
-                          .onPrimary, // Set the card's background color
-                      margin: const EdgeInsets.symmetric(
-                          vertical: 8.0), // Vertical margin around the card
+                      color: theme.colorScheme.onPrimary,
+                      margin: const EdgeInsets.symmetric(vertical: 8.0),
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 16.0,
-                            vertical: 8.0), // Padding inside the card
+                            horizontal: 16.0, vertical: 8.0),
                         child: Column(
-                          mainAxisAlignment: MainAxisAlignment
-                              .center, // Center the content vertically
-                          mainAxisSize:
-                              MainAxisSize.min, // Shrink to fit the content
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
                           children: [
                             // Title card displaying the app name
                             Card(
                               margin: const EdgeInsets.symmetric(vertical: 8.0),
                               child: Container(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 16.0,
-                                    vertical:
-                                        8.0), // Padding inside the title card
+                                    horizontal: 16.0, vertical: 8.0),
                                 child: Text(
-                                  'Please Verify Your Email Address', // heading text
-                                  style: theme.textTheme
-                                      .titleLarge, // Use theme's large text style
+                                  'Please Verify Your Email Address',
+                                  style: theme.textTheme.titleLarge,
                                 ),
                               ),
                             ),
-                            // CustomCard for Register option
+                            // Verify email option
                             CustomCard(
-                              theme:
-                                  theme, // Pass the theme for consistent styling
+                              theme: theme,
                               customCardLeading: Icon(Icons.mail,
-                                  color: theme.colorScheme
-                                      .secondary), // Leading icon for the card
-                              customCardTitle: const Text(
-                                  'Verify Email'), // Title text for the card
-                              customCardTrailing: null, // No trailing widget
+                                  color: theme.colorScheme.secondary),
+                              customCardTitle: const Text('Verify Email'),
+                              customCardTrailing: null,
                               onTapAction: () {
-                                // Navigate to the VerifyEmailView when the card is tapped
                                 Navigator.pushNamed(
                                     context, VerifyEmailView.routeName);
                               },
                             ),
+                            // Sign out option
                             CustomCard(
-                              theme:
-                                  theme, // Pass the theme for consistent styling
+                              theme: theme,
                               customCardLeading: Icon(Icons.logout,
-                                  color: theme.colorScheme
-                                      .secondary), // Leading icon for the card
-                              customCardTitle: const Text(
-                                  'Sign Out'), // Title text for the card
-                              customCardTrailing: null, // No trailing widget
+                                  color: theme.colorScheme.secondary),
+                              customCardTitle: const Text('Sign Out'),
+                              customCardTrailing: null,
                               onTapAction: () {
-                                // Sign out the user when the card is tapped
                                 authenticationChangeNotifier.signOutUser();
                               },
                             ),

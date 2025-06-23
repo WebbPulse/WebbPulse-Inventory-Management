@@ -18,24 +18,17 @@ class UserSessionExpiredView extends StatelessWidget {
         child: Consumer<AuthenticationChangeNotifier>(
           builder: (context, authenticationChangeNotifier, child) => Center(
             child: Column(
-              mainAxisAlignment:
-                  MainAxisAlignment.center, // Center the content vertically
+              mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                const Text(
-                    'User Session Expired'), // Message to inform the user
+                const Text('User Session Expired'),
                 ElevatedButton(
                   onPressed: () {
                     // Reset the session state and navigate back to the sign-in screen
-                    authenticationChangeNotifier.setUserWasLoggedIn(
-                        false); // Reset the user's session state
-                    Navigator.pop(context); // Close the current view
-                    Navigator.pushNamed(
-                        context,
-                        LandingView
-                            .routeName); // Navigate to the LandingView (sign-in)
+                    authenticationChangeNotifier.setUserWasLoggedIn(false);
+                    Navigator.pop(context);
+                    Navigator.pushNamed(context, LandingView.routeName);
                   },
-                  child: const Text(
-                      'Please Sign In Again'), // Button text prompting user to sign in again
+                  child: const Text('Please Sign In Again'),
                 ),
               ],
             ),

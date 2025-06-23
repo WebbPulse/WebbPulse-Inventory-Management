@@ -15,7 +15,7 @@ import '../../../apps/authed/views/org_selected/org_settings_view.dart';
 /// Widget for displaying the user's profile avatar
 /// It handles both valid and invalid photo URLs, showing a default icon on error
 class ProfileAvatar extends StatefulWidget {
-  final String? photoUrl; // The URL of the user's profile photo
+  final String? photoUrl;
 
   const ProfileAvatar({super.key, this.photoUrl});
 
@@ -24,39 +24,35 @@ class ProfileAvatar extends StatefulWidget {
 }
 
 class ProfileAvatarState extends State<ProfileAvatar> {
-  bool _hasError = false; // Tracks whether there was an error loading the image
+  bool _hasError = false;
 
   @override
   Widget build(BuildContext context) {
     return CircleAvatar(
-      radius: 75, // Set the size of the avatar
-      backgroundColor: _hasError
-          ? Theme.of(context)
-              .colorScheme
-              .onSecondary // Error color if image fails to load
-          : null, // Default color if no error
+      radius: 75,
+      backgroundColor:
+          _hasError ? Theme.of(context).colorScheme.onSecondary : null,
       backgroundImage: !_hasError && widget.photoUrl != null
-          ? NetworkImage(widget.photoUrl!) // Load image from URL
-          : null, // No image if there's an error or no URL
+          ? NetworkImage(widget.photoUrl!)
+          : null,
       onBackgroundImageError: !_hasError
           ? (exception, stackTrace) {
-              // Set error state if image loading fails
               SchedulerBinding.instance.addPostFrameCallback((_) {
                 if (mounted) {
                   setState(() {
-                    _hasError = true; // Set error flag to true
+                    _hasError = true;
                   });
                 }
               });
             }
-          : null, // Do nothing if there's already an error
+          : null,
       child: _hasError
           ? Icon(
-              Icons.person, // Display default person icon on error
+              Icons.person,
               size: 50,
               color: Theme.of(context).colorScheme.secondary,
             )
-          : null, // No child if there's no error
+          : null,
     );
   }
 }
@@ -73,36 +69,26 @@ class AuthClaimChecker extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<AuthenticationChangeNotifier>(
       builder: (context, authenticationChangeNotifier, child) {
-        final user = authenticationChangeNotifier.user; // Get the current user
+        final user = authenticationChangeNotifier.user;
 
         if (user == null) {
-          return const Center(
-              child: Text(
-                  'User not signed in')); // Show message if no user is signed in
+          return const Center(child: Text('User not signed in'));
         }
 
-        // Fetch the user's ID token to retrieve their claims
         return FutureBuilder<IdTokenResult>(
-          future: user.getIdTokenResult(), // Get ID token result
+          future: user.getIdTokenResult(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(
-                  child:
-                      CircularProgressIndicator()); // Show loading indicator while waiting
+              return const Center(child: CircularProgressIndicator());
             } else if (snapshot.hasError) {
-              return const Center(
-                  child: Text(
-                      'Error loading user data')); // Show error message on failure
+              return const Center(child: Text('Error loading user data'));
             } else if (!snapshot.hasData) {
-              return const Center(
-                  child: Text(
-                      'No token data available')); // Show message if no token data
+              return const Center(child: Text('No token data available'));
             }
 
-            final claims =
-                snapshot.data!.claims; // Get user claims from the token
+            final claims = snapshot.data!.claims;
 
-            return builder(context, claims!); // Build the UI using the claims
+            return builder(context, claims!);
           },
         );
       },
@@ -118,83 +104,66 @@ class AuthedDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AuthClaimChecker(builder: (context, userClaims) {
-      final orgId = Provider.of<OrgSelectorChangeNotifier>(context)
-          .orgId; // Get the current organization ID
+      final orgId = Provider.of<OrgSelectorChangeNotifier>(context).orgId;
       final authenticationChangeNotifier =
-          Provider.of<AuthenticationChangeNotifier>(
-              context); // Get the authentication provider
+          Provider.of<AuthenticationChangeNotifier>(context);
 
       return Drawer(
         child: ListView(
-          padding: EdgeInsets.zero, // No padding for the drawer
+          padding: EdgeInsets.zero,
           children: <Widget>[
             DrawerHeader(
               decoration: BoxDecoration(
-                color:
-                    Theme.of(context).primaryColor, // Header background color
+                color: Theme.of(context).primaryColor,
               ),
-              child: const Text('Menu'), // Header text
+              child: const Text('Menu'),
             ),
             // Display organization-specific menu options if an organization is selected
             if (orgId.isNotEmpty) ...[
-              if (userClaims['org_admin_$orgId'] ==
-                  true) // Show organization settings for admins
+              if (userClaims['org_admin_$orgId'] == true)
                 ListTile(
-                  leading: const Icon(Icons.settings), // Settings icon
-                  title: const Text('Organization Settings'), // Label
+                  leading: const Icon(Icons.settings),
+                  title: const Text('Organization Settings'),
                   onTap: () {
-                    Navigator.pushNamed(
-                        context,
-                        OrgSettingsView
-                            .routeName); // Navigate to OrgSettingsView
+                    Navigator.pushNamed(context, OrgSettingsView.routeName);
                   },
                 ),
               ListTile(
-                leading: const Icon(Icons.devices), // Devices icon
-                title: const Text('Devices'), // Label
+                leading: const Icon(Icons.devices),
+                title: const Text('Devices'),
                 onTap: () {
-                  Navigator.pushNamed(
-                      context,
-                      OrgDeviceListView
-                          .routeName); // Navigate to OrgDeviceListView
+                  Navigator.pushNamed(context, OrgDeviceListView.routeName);
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.people), // Users icon
-                title: const Text('Users'), // Label
+                leading: const Icon(Icons.people),
+                title: const Text('Users'),
                 onTap: () {
-                  Navigator.pushNamed(
-                      context,
-                      OrgMemberListView
-                          .routeName); // Navigate to OrgMemberListView
+                  Navigator.pushNamed(context, OrgMemberListView.routeName);
                 },
               ),
             ],
             // Show profile settings unless the user is on a desk station
             if (userClaims['org_deskstation_$orgId'] != true)
               ListTile(
-                leading: const Icon(Icons.person), // Profile icon
-                title: const Text('Profile'), // Label
+                leading: const Icon(Icons.person),
+                title: const Text('Profile'),
                 onTap: () {
-                  Navigator.pushNamed(
-                      context,
-                      ProfileSettingsView
-                          .routeName); // Navigate to ProfileSettingsView
+                  Navigator.pushNamed(context, ProfileSettingsView.routeName);
                 },
               ),
             ListTile(
-              leading: const Icon(Icons.home), // Home icon
-              title: const Text('My Organizations'), // Label
+              leading: const Icon(Icons.home),
+              title: const Text('My Organizations'),
               onTap: () {
-                Navigator.pushNamed(context,
-                    OrgSelectionView.routeName); // Navigate to OrgSelectionView
+                Navigator.pushNamed(context, OrgSelectionView.routeName);
               },
             ),
             ListTile(
-              leading: const Icon(Icons.logout), // Logout icon
-              title: const Text('Sign Out'), // Label
+              leading: const Icon(Icons.logout),
+              title: const Text('Sign Out'),
               onTap: () {
-                authenticationChangeNotifier.signOutUser(); // Sign out the user
+                authenticationChangeNotifier.signOutUser();
               },
             ),
           ],

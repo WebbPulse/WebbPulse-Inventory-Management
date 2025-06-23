@@ -23,9 +23,6 @@ void main() async {
   // Use emulators only in debug mode
   if (kDebugMode) {
     try {
-      // !!! IMPORTANT: Replace with the actual IP if running on a physical device
-      // or if your emulator/simulator requires it. 'localhost' works for web and
-      // most desktop/Android emulators. iOS might need the machine's IP.
       const String host = 'localhost'; // Or use '10.0.2.2' for Android Emulator
 
       FirebaseFirestore.instance.useFirestoreEmulator(host, 8080);

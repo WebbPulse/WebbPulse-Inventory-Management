@@ -9,7 +9,7 @@ import '../../providers/device_selector_change_notifier.dart';
 import 'package:webbpulse_inventory_management/src/apps/authed/views/org_selected/device_checkout_note_view.dart';
 
 class DeviceCheckoutButton extends StatefulWidget {
-  final String deviceSerialNumber; // The serial number of the device
+  final String deviceSerialNumber;
 
   const DeviceCheckoutButton({
     super.key,
@@ -21,7 +21,7 @@ class DeviceCheckoutButton extends StatefulWidget {
 }
 
 class DeviceCheckoutButtonState extends State<DeviceCheckoutButton> {
-  var _isLoading = false; // Flag to indicate if an operation is in progress
+  var _isLoading = false;
 
   @override
   void initState() {
@@ -35,7 +35,7 @@ class DeviceCheckoutButtonState extends State<DeviceCheckoutButton> {
 
   @override
   Widget build(BuildContext context) {
-    ThemeData theme = Theme.of(context); // Fetch the current theme
+    ThemeData theme = Theme.of(context);
     return Consumer3<OrgSelectorChangeNotifier, FirestoreReadService,
             DeviceSelectorChangeNotifier>(
         builder: (context, orgSelectorChangeNotifier, firestoreReadService,
@@ -55,7 +55,7 @@ class DeviceCheckoutButtonState extends State<DeviceCheckoutButton> {
                         ? null
                         : () {
                             if (isDeviceCurrentlyCheckedOut == true) {
-                              _checkinDevice(); // Submit the action
+                              _checkinDevice();
                             } else {
                               deviceSelectorChangeNotifier
                                   .selectDevice(widget.deviceSerialNumber);
@@ -64,15 +64,14 @@ class DeviceCheckoutButtonState extends State<DeviceCheckoutButton> {
                                 DeviceCheckoutNoteView.routeName,
                               );
                             }
-                          }, // Disable button when loading
-                icon: Icon(isDeviceCurrentlyCheckedOut
-                    ? Icons.login
-                    : Icons.logout), // Icon for check-in/check-out
+                          },
+                icon: Icon(
+                    isDeviceCurrentlyCheckedOut ? Icons.login : Icons.logout),
                 label: Text(widget.deviceSerialNumber == ''
                     ? 'Please enter a serial number'
                     : isDeviceCurrentlyCheckedOut
                         ? 'Check-in Device'
-                        : 'Check-out Device'), // Label for the button
+                        : 'Check-out Device'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: theme.colorScheme.surface.withOpacity(0.95),
                   side: BorderSide(
@@ -87,7 +86,7 @@ class DeviceCheckoutButtonState extends State<DeviceCheckoutButton> {
 
   /// Handles the submission of the check-in or check-out operation
   Future<void> _checkinDevice() async {
-    setState(() => _isLoading = true); // Set loading state
+    setState(() => _isLoading = true);
     final deviceCheckoutService =
         Provider.of<DeviceCheckoutService>(context, listen: false);
     final orgId =
@@ -102,13 +101,12 @@ class DeviceCheckoutButtonState extends State<DeviceCheckoutButton> {
         widget.deviceSerialNumber,
         orgId,
         deviceCheckedOutBy,
-        false, // Pass the boolean to check-out or check-in the device
-        '', // Pass the note for the check-out operation
+        false,
+        '',
       );
     } catch (e) {
-      // Handle errors if needed
     } finally {
-      setState(() => _isLoading = false); // Reset loading state
+      setState(() => _isLoading = false);
     }
   }
 }

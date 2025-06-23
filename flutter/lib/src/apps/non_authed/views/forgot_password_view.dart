@@ -5,20 +5,17 @@ import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 class ForgotPasswordView extends StatelessWidget {
   const ForgotPasswordView({super.key});
 
-  /// Route name for navigation to this view
   static const routeName = '/forgot-password';
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Forgot Password'), // Title of the app bar
+        title: const Text('Forgot Password'),
       ),
       body: const Center(
-        // Firebase UI's ForgotPasswordScreen handles the password reset process
         child: ForgotPasswordScreen(
-          headerMaxExtent:
-              200, // Set the maximum header extent for the forgot password screen
+          headerMaxExtent: 200,
         ),
       ),
     );

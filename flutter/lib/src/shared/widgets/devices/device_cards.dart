@@ -58,14 +58,10 @@ class DeviceCardDesktop extends StatelessWidget {
                   orgSelectorChangeNotifier.orgId, orgMemberId),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(
-                      child:
-                          CircularProgressIndicator()); // Show loading indicator
+                  return const Center(child: CircularProgressIndicator());
                 } else if (snapshot.hasError) {
-                  return const Text(
-                      'Error loading org member data'); // Show error message
+                  return const Text('Error loading org member data');
                 } else {
-                  // If no member data is available, show a basic device card layout
                   // Fetch the organization member data
                   Map<String, dynamic> orgMemberData =
                       snapshot.data?.data() as Map<String, dynamic>? ?? {};
@@ -186,26 +182,19 @@ class DeviceCardMobile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final String deviceId =
-        deviceData['deviceId']; // Retrieve the device ID from the passed data
-    final String deviceSerialNumber =
-        deviceData['deviceSerialNumber']; // Device serial number
-    final bool deviceDeleted =
-        deviceData['deviceDeleted'] ?? false; // Check if device is deleted
-    final String orgMemberId = deviceData[
-        'deviceCheckedOutBy']; // ID of the member who checked out the device
-    final bool isDeviceCheckedOut =
-        deviceData['isDeviceCheckedOut']; // Check-in/out button
+    final String deviceId = deviceData['deviceId'];
+    final String deviceSerialNumber = deviceData['deviceSerialNumber'];
+    final bool deviceDeleted = deviceData['deviceDeleted'] ?? false;
+    final String orgMemberId = deviceData['deviceCheckedOutBy'];
+    final bool isDeviceCheckedOut = deviceData['isDeviceCheckedOut'];
     final String deviceCheckedOutNote =
-        deviceData['deviceCheckedOutNote'] ?? ''; // Device note
+        deviceData['deviceCheckedOutNote'] ?? '';
 
     final Timestamp deviceCheckedOutAtTimestamp =
-        deviceData['deviceCheckedOutAt'] ??
-            Timestamp.now(); // Timestamp of check-out
-    final DateTime deviceCheckedOutAt =
-        deviceCheckedOutAtTimestamp.toDate(); // Convert to DateTime
-    final String deviceCheckedOutAtFormatted = DateFormat('yyyy-MM-dd kk:mm a')
-        .format(deviceCheckedOutAt); // Format the date
+        deviceData['deviceCheckedOutAt'] ?? Timestamp.now();
+    final DateTime deviceCheckedOutAt = deviceCheckedOutAtTimestamp.toDate();
+    final String deviceCheckedOutAtFormatted =
+        DateFormat('yyyy-MM-dd kk:mm a').format(deviceCheckedOutAt);
 
     // Skip rendering if the device has been marked as deleted
     if (deviceDeleted) {
@@ -220,13 +209,10 @@ class DeviceCardMobile extends StatelessWidget {
               orgSelectorChangeNotifier.orgId, orgMemberId),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(
-                  child: CircularProgressIndicator()); // Show loading indicator
+              return const Center(child: CircularProgressIndicator());
             } else if (snapshot.hasError) {
-              return const Text(
-                  'Error loading org member data'); // Show error message
+              return const Text('Error loading org member data');
             } else {
-              // If no member data is available, show a basic device card layout
               // Fetch the organization member data
               Map<String, dynamic> orgMemberData =
                   snapshot.data?.data() as Map<String, dynamic>? ?? {};

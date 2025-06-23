@@ -2,19 +2,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 /// A service class that provides various Firestore read operations
 class FirestoreReadService {
-  final FirebaseFirestore _db =
-      FirebaseFirestore.instance; // Firestore instance
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
 
   /// Stream that returns a DocumentSnapshot for an organization document
   Stream<DocumentSnapshot> getOrgDocument(String orgId) {
     try {
-      DocumentReference documentRef = _db
-          .collection('organizations')
-          .doc(orgId); // Reference to the organization document
-      return documentRef.snapshots(); // Return the document snapshot stream
+      DocumentReference documentRef =
+          _db.collection('organizations').doc(orgId);
+      return documentRef.snapshots();
     } catch (e) {
-      return Stream.error(
-          'Failed to get organization'); // Return an error stream in case of failure
+      return Stream.error('Failed to get organization');
     }
   }
 
@@ -35,14 +32,13 @@ class FirestoreReadService {
   /// Stream that returns a list of organization IDs that the user is a part of
   Stream<List<String>> getUserOrgsIds(String? uid) {
     if (uid == null) {
-      return Stream.value([]); // Return an empty list if the UID is null
+      return Stream.value([]);
     }
 
     return _db.collection('users').doc(uid).snapshots().map((snapshot) {
-      return List<String>.from(snapshot.data()?['userOrgIds'] ??
-          []); // Map the document data to a list of organization IDs
+      return List<String>.from(snapshot.data()?['userOrgIds'] ?? []);
     }).handleError((error) {
-      return Stream.value([]); // Return an empty list in case of error
+      return Stream.value([]);
     });
   }
 
@@ -56,10 +52,9 @@ class FirestoreReadService {
           .collection('devices')
           .where('deviceSerialNumber', isEqualTo: deviceSerialNumber)
           .get();
-      return querySnapshot
-          .docs.isNotEmpty; // Return true if the device exists, otherwise false
+      return querySnapshot.docs.isNotEmpty;
     } catch (e) {
-      return false; // Return false in case of error
+      return false;
     }
   }
 
@@ -73,10 +68,9 @@ class FirestoreReadService {
           .collection('devices')
           .where('deviceSerialNumber', isEqualTo: serial)
           .get();
-      return querySnapshot.docs.first
-          .data()['isDeviceCheckedOut']; // Return the check-out status
+      return querySnapshot.docs.first.data()['isDeviceCheckedOut'];
     } catch (e) {
-      return false; // Return false in case of error
+      return false;
     }
   }
 
@@ -94,10 +88,10 @@ class FirestoreReadService {
         if (querySnapshot.docs.isNotEmpty) {
           return querySnapshot.docs.first.data()['isDeviceCheckedOut'];
         }
-        return false; // Return false if no documents match
+        return false;
       });
     } catch (e) {
-      return Stream.value(false); // Return false in case of error
+      return Stream.value(false);
     }
   }
 
@@ -110,10 +104,9 @@ class FirestoreReadService {
           .doc(orgId)
           .collection('devices')
           .doc(deviceId);
-      return documentRef.snapshots(); // Return the document snapshot stream
+      return documentRef.snapshots();
     } catch (e) {
-      return Stream.error(
-          'Failed to get organization'); // Return an error stream in case of failure
+      return Stream.error('Failed to get organization');
     }
   }
 
@@ -127,16 +120,15 @@ class FirestoreReadService {
       return collectionRef
           .where('deviceCheckedOutBy', isEqualTo: orgMemberId)
           .snapshots()
-          .map((querySnapshot) =>
-              querySnapshot.docs) // Map the query result to a list of documents
+          .map((querySnapshot) => querySnapshot.docs)
           .handleError((error) {
-        return <DocumentSnapshot>[]; // Return an empty list in case of error
+        return <DocumentSnapshot>[];
       });
     } else {
       return collectionRef.snapshots().map((querySnapshot) {
-        return querySnapshot.docs; // Return a list of device documents
+        return querySnapshot.docs;
       }).handleError((error) {
-        return <DocumentSnapshot>[]; // Return an empty list in case of error
+        return <DocumentSnapshot>[];
       });
     }
   }
@@ -147,11 +139,10 @@ class FirestoreReadService {
       CollectionReference collectionRef =
           _db.collection('organizations').doc(orgId).collection('members');
       return collectionRef.snapshots().map((querySnapshot) {
-        return querySnapshot.docs; // Return a list of member documents
+        return querySnapshot.docs;
       });
     } catch (e) {
-      return Stream.value(
-          <DocumentSnapshot>[]); // Return an empty list in case of error
+      return Stream.value(<DocumentSnapshot>[]);
     }
   }
 
@@ -159,7 +150,7 @@ class FirestoreReadService {
   Stream<DocumentSnapshot?> getOrgMemberDocument(
       String orgId, String orgMemberId) {
     if (orgMemberId.isEmpty) {
-      return Stream.value(null); // Return null if the member ID is empty
+      return Stream.value(null);
     }
 
     try {
@@ -168,11 +159,9 @@ class FirestoreReadService {
           .doc(orgId)
           .collection('members')
           .doc(orgMemberId);
-      return documentRef
-          .snapshots(); // Return the member document snapshot stream
+      return documentRef.snapshots();
     } catch (e) {
-      return Stream.error(
-          'Failed to get org member'); // Return an error stream in case of failure
+      return Stream.error('Failed to get org member');
     }
   }
 
@@ -180,11 +169,9 @@ class FirestoreReadService {
   Stream<DocumentSnapshot> getGlobalUserDocument(String? uid) {
     try {
       DocumentReference documentRef = _db.collection('users').doc(uid);
-      return documentRef
-          .snapshots(); // Return the global user document snapshot stream
+      return documentRef.snapshots();
     } catch (e) {
-      return Stream.error(
-          'Failed to get user'); // Return an error stream in case of failure
+      return Stream.error('Failed to get user');
     }
   }
 
@@ -196,11 +183,9 @@ class FirestoreReadService {
           .doc(uid)
           .snapshots()
           .map((docSnapshot) {
-        return docSnapshot
-            .exists; // Return true if the user exists, otherwise false
+        return docSnapshot.exists;
       });
     } catch (e) {
-      // Return a stream that emits `false` in case of error
       return Stream.value(false);
     }
   }
