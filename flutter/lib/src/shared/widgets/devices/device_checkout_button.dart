@@ -104,7 +104,6 @@ class DeviceCheckoutButtonState extends State<DeviceCheckoutButton> {
         false,
         '',
       );
-    } catch (e) {
     } finally {
       setState(() => _isLoading = false);
     }

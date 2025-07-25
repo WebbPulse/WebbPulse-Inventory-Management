@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:intl/intl.dart';
@@ -14,6 +15,51 @@ import 'package:webbpulse_inventory_management/src/shared/widgets/org/org_widget
 
 import 'package:webbpulse_inventory_management/src/shared/widgets/styling/styling_widgets.dart';
 import 'package:webbpulse_inventory_management/src/shared/widgets/users/user_widgets.dart';
+
+/// A widget that displays a device serial number with a copy button
+class CopyableSerialNumber extends StatelessWidget {
+  const CopyableSerialNumber({
+    super.key,
+    required this.serialNumber,
+    this.style,
+  });
+
+  final String serialNumber;
+  final TextStyle? style;
+
+  Future<void> _copyToClipboard(BuildContext context) async {
+    await Clipboard.setData(ClipboardData(text: serialNumber));
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Serial number "$serialNumber" copied to clipboard'),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(serialNumber, style: style),
+        const SizedBox(width: 4),
+        IconButton(
+          icon: const Icon(Icons.copy, size: 16),
+          onPressed: () => _copyToClipboard(context),
+          tooltip: 'Copy serial number',
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(),
+          style: IconButton.styleFrom(
+            foregroundColor: Theme.of(context).colorScheme.secondary,
+          ),
+        ),
+      ],
+    );
+  }
+}
 
 class DeviceCardDesktop extends StatelessWidget {
   const DeviceCardDesktop({
@@ -79,9 +125,11 @@ class DeviceCardDesktop extends StatelessWidget {
                                 children: [
                                   Wrap(
                                     children: [
-                                      Text(deviceSerialNumber,
-                                          style: const TextStyle(
-                                              fontWeight: FontWeight.bold)),
+                                      CopyableSerialNumber(
+                                        serialNumber: deviceSerialNumber,
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.bold),
+                                      ),
                                     ],
                                   ),
                                   if (orgData['orgVerkadaIntegrationEnabled'] ==
@@ -227,9 +275,11 @@ class DeviceCardMobile extends StatelessWidget {
                         Icon(Icons.devices, color: theme.colorScheme.secondary),
                         Wrap(
                           children: [
-                            Text(deviceSerialNumber,
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold)),
+                            CopyableSerialNumber(
+                              serialNumber: deviceSerialNumber,
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold),
+                            ),
                           ],
                         ),
                         if (isDeviceCheckedOut) ...[
