@@ -65,7 +65,7 @@ def create_organization_callable(req: https_fn.CallableRequest) -> Any:
             org_id,
             org_member_display_name,
             org_member_email,
-            org_member_display_name,
+            org_member_display_name, #inviter_display_name,
         )
         update_user_roles(uid, "admin", org_id, False)
 

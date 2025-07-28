@@ -37,19 +37,21 @@ def create_global_user_profile(user, inviter_display_name):
         )
 
         email_login_link = generate_email_login_link(user.email)
-
-        # Send welcome email to user
-        message = Mail(
-            from_email="no-reply@webbpulse.com",
-            to_emails=user.email,
-        )
-        message.template_id = "d-e68eb082e7514f1bade6d7cca26a60f6"
-        message.dynamic_template_data = {
-            "inviterDisplayName": inviter_display_name,
-            "buttonUrl": email_login_link,
-        }
-        message.asm = Asm(group_id=26999, groups_to_display=[26999])
-        send_email(message)
+        try:
+            # Send welcome email to user
+            message = Mail(
+                from_email="no-reply@webbpulse.com",
+                to_emails=user.email,
+            )
+            message.template_id = "d-e68eb082e7514f1bade6d7cca26a60f6"
+            message.dynamic_template_data = {
+                "inviterDisplayName": inviter_display_name,
+                "buttonUrl": email_login_link,
+            }
+            message.asm = Asm(group_id=26999, groups_to_display=[26999])
+            send_email(message)
+        except Exception as e:
+            print(f"Error sending welcome email: {str(e)}")
 
     except Exception as e:
         # Handle any unexpected exceptions by raising an UNKNOWN error with details of the exception.

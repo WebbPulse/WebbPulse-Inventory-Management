@@ -55,19 +55,22 @@ def add_user_to_organization(
             org_name = org_data.get("orgName")
         else:
             org_name = "Organization"
+        try:
+            # Send welcome email to user
+            message = Mail(
+                from_email="no-reply@webbpulse.com",
+                to_emails=org_member_email,
+            )
+            message.template_id = "d-0d63e8080ff2402d9a34d3ebbd2d25ed"
+            message.dynamic_template_data = {
+                "inviterDisplayName": inviter_display_name,
+                "orgName": org_name,
+            }
+            message.asm = Asm(group_id=26999, groups_to_display=[26999])
+            send_email(message)
+        except Exception as e:
+            print(f"Error sending welcome email: {str(e)}")
 
-        # Send welcome email to user
-        message = Mail(
-            from_email="no-reply@webbpulse.com",
-            to_emails=org_member_email,
-        )
-        message.template_id = "d-0d63e8080ff2402d9a34d3ebbd2d25ed"
-        message.dynamic_template_data = {
-            "inviterDisplayName": inviter_display_name,
-            "orgName": org_name,
-        }
-        message.asm = Asm(group_id=26999, groups_to_display=[26999])
-        send_email(message)
 
     except Exception as e:
         # Handle any unexpected exceptions by raising an UNKNOWN error with details of the exception.
