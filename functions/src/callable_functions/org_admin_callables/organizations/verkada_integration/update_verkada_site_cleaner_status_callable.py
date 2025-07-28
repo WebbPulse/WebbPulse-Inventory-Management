@@ -12,6 +12,8 @@ from src.helper_functions.verkada_integration.cleaners.clean_verkada_user_groups
 from src.helper_functions.verkada_integration.cleaners.clean_verkada_device_sites import clean_verkada_device_sites
 from src.helper_functions.verkada_integration.cleaners.clean_verkada_device_names import clean_verkada_device_names
 from src.helper_functions.verkada_integration.syncers.sync_verkada_site_ids import sync_verkada_site_ids
+from src.helper_functions.verkada_integration.cleaners.clean_orphaned_sites import clean_orphaned_sites
+
 @https_fn.on_call(cors=POSTcorsrules, timeout_sec=540)
 def update_verkada_site_cleaner_status_callable(req: https_fn.CallableRequest,) -> any:
     """
@@ -43,6 +45,11 @@ def update_verkada_site_cleaner_status_callable(req: https_fn.CallableRequest,) 
         org_settings_ref.set({
             'orgVerkadaSiteCleanerEnabled': enabled
         }, merge=True)
+        try:
+            sync_verkada_site_ids(org_id, verkada_bot_user_info)
+        except Exception as e:
+            logger.error(f"Error syncing Verkada site ids for organization: {org_id}, error: {e}")
+        
         if enabled:
             #login to Verkada and run the cleaner
             current_verkada_settings = org_settings_ref.collection('sensitiveConfigs').document('verkadaIntegrationSettings').get().to_dict()
@@ -52,12 +59,21 @@ def update_verkada_site_cleaner_status_callable(req: https_fn.CallableRequest,) 
                     code=https_fn.FunctionsErrorCode.FAILED_PRECONDITION,
                     message='Verkada bot user information is not set. Please ensure the Verkada integration is properly configured.'
                 )
-            
-            clean_verkada_user_list(verkada_bot_user_info)
-            clean_verkada_user_groups(org_id, verkada_bot_user_info)
-            clean_verkada_device_names(org_id, verkada_bot_user_info)
-            clean_verkada_device_sites(org_id, verkada_bot_user_info)
-            sync_verkada_site_ids(org_id, verkada_bot_user_info)
+            try:
+                functions = [
+                    ("clean_verkada_user_list", lambda: clean_verkada_user_list(verkada_bot_user_info)),
+                    ("clean_verkada_user_groups", lambda: clean_verkada_user_groups(org_id, verkada_bot_user_info)),
+                    ("clean_verkada_device_names", lambda: clean_verkada_device_names(org_id, verkada_bot_user_info)),
+                    ("clean_verkada_device_sites", lambda: clean_verkada_device_sites(org_id, verkada_bot_user_info)),
+                    ("sync_verkada_site_ids", lambda: sync_verkada_site_ids(org_id, verkada_bot_user_info)),
+                    ("clean_orphaned_sites", lambda: clean_orphaned_sites(org_id, verkada_bot_user_info))
+                ]
+                
+                for func_name, func in functions:
+                    func()
+                    logger.info(f"Successfully {func_name} for organization {org_id}.")
+            except Exception as e:
+                logger.error(f"Error cleaning sites for organization: {org_id}, process: {func_name}, error: {e}")
 
         return {"status": "success", "message": f"Verkada Site Cleaner status for organization {org_id} updated to {enabled}."}
 

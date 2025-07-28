@@ -6,21 +6,48 @@ import requests
 
 def clean_verkada_device_sites(org_id, verkada_bot_user_info):
     logger.info("Moving Verkada devices...")
+    
+    # Check if verkada_bot_user_info is None
+    if verkada_bot_user_info is None:
+        raise ValueError("verkada_bot_user_info cannot be None")
+    
     verkada_org_id = verkada_bot_user_info.get('org_id')
     verkada_auth_headers = verkada_bot_user_info.get('auth_headers')
     
+    # Validate required fields
+    if not verkada_org_id:
+        raise ValueError("verkada_bot_user_info must contain 'org_id'")
+    if not verkada_auth_headers:
+        raise ValueError("verkada_bot_user_info must contain 'auth_headers'")
+    
     org_verkada_product_site_designations = {}
     try:
-        verkada_integation_settings_ref = db.collection('organizations').document(org_id).collection('sensitiveConfigs').document('verkadaIntegrationSettings').get()
-        if not verkada_integation_settings_ref.exists:
-            raise Exception("Verkada integration settings not found in Firestore.")
-        verkada_integation_settings = verkada_integation_settings_ref.to_dict()
-        org_verkada_product_site_designations = verkada_integation_settings.get('orgVerkadaProductSiteDesignations')
+        # First try to get from the main organization document
+        org_ref = db.collection('organizations').document(org_id).get()
+        if not org_ref.exists:
+            raise Exception("Organization document not found in Firestore.")
+        
+        org_data = org_ref.to_dict()
+        if org_data is None:
+            raise Exception("Organization document is empty or corrupted.")
+        
+        org_verkada_product_site_designations = org_data.get('orgVerkadaProductSiteDesignations', {})
+        
+        # Check if org_verkada_product_site_designations is None
+        if org_verkada_product_site_designations is None:
+            logger.warning("orgVerkadaProductSiteDesignations is None in main org doc, using empty dict")
+            org_verkada_product_site_designations = {}
+        
+            
     except Exception as e:
         logger.error(f"Error retrieving organization settings: {e}")
         raise
 
     verkada_org_short_name = verkada_bot_user_info.get('org_name')
+    
+    # Validate org_name
+    if not verkada_org_short_name:
+        raise ValueError("verkada_bot_user_info must contain 'org_name'")
 
     verkada_access_control_building_id = org_verkada_product_site_designations.get('Access Controller Building', '' )
     verkada_access_control_floor_id = org_verkada_product_site_designations.get('Access Controller Floor', '' )
@@ -39,6 +66,7 @@ def clean_verkada_device_sites(org_id, verkada_bot_user_info):
     verkada_new_alarm_site_id = org_verkada_product_site_designations.get('New Alarm Site', '' )
     verkada_speaker_site_id = org_verkada_product_site_designations.get('Speaker Site', '' )
     verkada_viewing_station_site_id = org_verkada_product_site_designations.get('Viewing Station Site', '' )
+    
     
     
     devices = []
@@ -68,7 +96,7 @@ def clean_verkada_device_sites(org_id, verkada_bot_user_info):
         except Exception as e:
             logger.error(f"Error moving {camera_id}: {e}")
     
-    def move_controller(device, verkada_access_control_site_id, verkada_access_control_building_id, verkada_access_control_floor_id, verada_access_level_id):
+    def move_controller(device, verkada_access_control_site_id):
         if not verkada_access_control_site_id:
             logger.error("No site ID provided for access controller.")
             return
@@ -286,50 +314,56 @@ def clean_verkada_device_sites(org_id, verkada_bot_user_info):
     
     
     def move_device(device):
-        device = device.to_dict()
-        device_type = device.get('deviceVerkadaDeviceType')
+        device_dict = device.to_dict()
+        
+        # Check if device.to_dict() returned None
+        if device_dict is None:
+            logger.error("Device document is empty or corrupted, skipping device")
+            return
+            
+        device_type = device_dict.get('deviceVerkadaDeviceType')
 
         if device_type == "Camera":
-            move_camera(device, verkada_camera_site_id)
+            move_camera(device_dict, verkada_camera_site_id)
         elif device_type == 'Access Controller' or device_type == 'Input Output Board':
-            move_controller(device, verkada_access_control_site_id, verkada_access_control_building_id, verkada_access_control_floor_id, verada_access_level_id)
+            move_controller(device_dict, verkada_access_control_site_id)
         elif device_type == 'Environmental Sensor':
-            move_env_sensor(device, verkada_env_sensor_site_id)
+            move_env_sensor(device_dict, verkada_env_sensor_site_id)
         elif device_type == 'Intercom':
-            move_intercom(device, verkada_intercom_site_id)
+            move_intercom(device_dict, verkada_intercom_site_id)
         elif device_type == 'Gateway':
-            move_gateway(device, verkada_gateway_site_id)
+            move_gateway(device_dict, verkada_gateway_site_id)
         elif device_type == 'Command Connector':
-            move_command_connector(device, verkada_command_connector_site_id)
+            move_command_connector(device_dict, verkada_command_connector_site_id)
         elif device_type == 'Viewing Station':
-            move_viewing_station(device, verkada_viewing_station_site_id)
+            move_viewing_station(device_dict, verkada_viewing_station_site_id)
         elif device_type == 'Desk Station':
-            move_desk_station(device, verkada_desk_station_site_id)
+            move_desk_station(device_dict, verkada_desk_station_site_id)
         elif device_type == 'Speaker':
-            move_speaker(device, verkada_classic_alarm_site_id)
+            move_speaker(device_dict, verkada_classic_alarm_site_id)
         elif device_type == 'Classic Alarm Hub Device':
-            move_classic_alarm_hub_device(device, verkada_classic_alarm_site_id)
+            move_classic_alarm_hub_device(device_dict, verkada_classic_alarm_site_id)
         elif device_type == 'Classic Alarm Keypad':
-            move_classic_alarm_keypad(device, verkada_classic_alarm_zone_id)
+            move_classic_alarm_keypad(device_dict, verkada_classic_alarm_zone_id)
         elif device_type == 'Classic Alarm Door Contact Sensor':
-            move_classic_alarm_sensor(device, verkada_classic_alarm_zone_id, "doorContactSensor")
+            move_classic_alarm_sensor(device_dict, verkada_classic_alarm_zone_id, "doorContactSensor")
         elif device_type == 'Classic Alarm Glass Break Sensor':
-            move_classic_alarm_sensor(device, verkada_classic_alarm_zone_id, "glassBreakSensor")
+            move_classic_alarm_sensor(device_dict, verkada_classic_alarm_zone_id, "glassBreakSensor")
         elif device_type == 'Classic Alarm Motion Sensor':
-            move_classic_alarm_sensor(device, verkada_classic_alarm_zone_id, "motionSensor")
+            move_classic_alarm_sensor(device_dict, verkada_classic_alarm_zone_id, "motionSensor")
         elif device_type == 'Classic Alarm Panic Button':
-            move_classic_alarm_sensor(device, verkada_classic_alarm_zone_id, "panicButton")
+            move_classic_alarm_sensor(device_dict, verkada_classic_alarm_zone_id, "panicButton")
         elif device_type == 'Classic Alarm Water Sensor':
-            move_classic_alarm_sensor(device, verkada_classic_alarm_zone_id, "waterSensor")
+            move_classic_alarm_sensor(device_dict, verkada_classic_alarm_zone_id, "waterSensor")
         elif device_type == 'Classic Alarm Wireless Relay':
-            move_classic_alarm_sensor(device, verkada_classic_alarm_zone_id, "wirelessRelay")
+            move_classic_alarm_sensor(device_dict, verkada_classic_alarm_zone_id, "wirelessRelay")
         elif device_type == 'Siren Strobe':
-            move_siren_strobe(device, verkada_new_alarm_site_id)
+            move_siren_strobe(device_dict, verkada_new_alarm_site_id)
         elif device_type == 'BP52 Panel':
             logger.warning('Encountered unhandled device type: BP52')
             pass
         elif device_type == 'Alarm Expander':
-            move_alarm_expander(device, verkada_new_alarm_site_id)
+            move_alarm_expander(device_dict, verkada_new_alarm_site_id)
             pass
             
         else:
